@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 using System.Linq;
 
 public class BoardManager : MonoBehaviour
@@ -307,10 +308,18 @@ public class BoardManager : MonoBehaviour
         form.AddField("entry.1929307381", "$" + cardIdx + "$");
         form.AddField("entry.790727074", "$" + targets + "$");
         messageId += 1;
-        byte[] rawdata = form.data;
-        WWW www = new WWW(BASE_URL, rawdata);
-        yield return www;
-        yield return new WaitForSeconds(1); 
+
+        using (UnityWebRequest www = UnityWebRequest.Post(BASE_URL, form))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(www.error);
+            }
+        }
+
+        yield return new WaitForSeconds(1);  
     }
 
     public IEnumerator ProcessMessages(List<MessageFromServer> messages)
