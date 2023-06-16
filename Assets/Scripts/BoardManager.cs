@@ -110,18 +110,6 @@ public class BoardManager : MonoBehaviour
     public int opponentHash;
 
     public GameController gameController = null;
-    public enum ConnectionState
-    {
-        searchHost,
-        waitHostReply,
-        becameHost,
-        sendAccept,
-        connected
-    }
-
-    public ConnectionState connectionState = ConnectionState.searchHost;
-    public int wantToConnect;
-    public List<int> failedConnections = new List<int>();
 
     public List<MessageFromServer> doneActions = new List<MessageFromServer>();
 
