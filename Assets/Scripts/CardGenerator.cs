@@ -69,9 +69,6 @@ public static class CardGenerator
         CardManager.CardStats stats = new CardManager.CardStats();
         card.imageObject.GetComponent<SpriteRenderer>().sprite = GetSpriteFromType(cardType);
 
-       // RectTransform rt = card.imageObject.GetComponent<RectTransform>();
-        //rt.sizeDelta = new Vector2(500, 500);
-
         static IEnumerator EmptyMethod(int index, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { yield return null; }
         static void EmptyMethod_(int index, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { }
         static void EmptySpell(List<int> targets, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { }
