@@ -154,7 +154,6 @@ public class GameController : MonoBehaviour
         string[] batches = www.downloadHandler.text.Split('$');
         int iterIndex = 0;
         int batchIndex = 0;
-        int batchIndexMax = 4;
         int curHash = 0;
         foreach (string s in batches)
         {

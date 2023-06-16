@@ -376,8 +376,13 @@ public class BoardManager : MonoBehaviour
             if (found)
             {
                 continue;
-            }
+            } 
+            
             HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
+            BoardManager.Slot fromSlot, toSlot;
+            CardManager newCard;
+            CardTypes spellType;
+
             switch (message.action)
             {
                 case MessageFromServer.Action.EndTurn:
@@ -399,7 +404,7 @@ public class BoardManager : MonoBehaviour
                         targetSlot = friendlySlots[target];
                     }
                     
-                    CardManager newCard = handManager.GenerateCard(type).GetComponent<CardManager>();
+                    newCard = handManager.GenerateCard(type).GetComponent<CardManager>();
                     PlayCard(newCard, targetSlot, destroy: false, record: false);
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
@@ -408,21 +413,17 @@ public class BoardManager : MonoBehaviour
                     break;
 
                 case MessageFromServer.Action.Move:
-                    int _from = message.targets[0] - 1;
-                    int _to = message.targets[1] - 1;
-                    BoardManager.Slot fromSlot = enemySlots[_from];
-                    BoardManager.Slot toSlot = enemySlots[_to];
+                    fromSlot = enemySlots[message.targets[0] - 1];
+                    toSlot = enemySlots[message.targets[1] - 1];
 
                     fromSlot.GetConnectedMinion().Move(toSlot);
                     break;
 
                case MessageFromServer.Action.Exchange:
-                    int __from = message.targets[0] - 1;
-                    int __to = message.targets[1] - 1;
-                    BoardManager.Slot _fromSlot = enemySlots[__from];
-                    BoardManager.Slot _toSlot = enemySlots[__to];
+                    fromSlot = enemySlots[message.targets[0] - 1];
+                    toSlot = enemySlots[message.targets[1] - 1];
 
-                    _fromSlot.GetConnectedMinion().Exchange(_toSlot);
+                    fromSlot.GetConnectedMinion().Exchange(toSlot);
                     break;
 
                 case MessageFromServer.Action.Attack:
@@ -449,14 +450,14 @@ public class BoardManager : MonoBehaviour
                     fromMinion.Attack(toMinion);
                     break;
                 case MessageFromServer.Action.CastSpell:
-                    CardTypes spellType = message.cardIndex;
-                    HandManager _handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                    CardManager _newCard = _handManager.GenerateCard(spellType).GetComponent<CardManager>();
-                    _newCard.GetCardStats().spell(message.targets, friendlySlots, enemySlots);
-                    _newCard.SetCardState(CardManager.CardState.opponentPlayed);
-                    _newCard.transform.position = new Vector3(0f, 10f, 0f);
-                    _newCard.destroyTimer = 5f;
-                    if ( _newCard.GetCardStats().damageToHost == -1 && _newCard.GetCardType() != CardTypes.Concede)
+                    spellType = message.cardIndex;
+                    newCard = handManager.GenerateCard(spellType).GetComponent<CardManager>();
+                    newCard.GetCardStats().spell(message.targets, friendlySlots, enemySlots);
+                    newCard.SetCardState(CardManager.CardState.opponentPlayed);
+                    newCard.transform.position = new Vector3(0f, 10f, 0f);
+                    newCard.destroyTimer = 5f;
+
+                    if (newCard.GetCardStats().damageToHost == -1 && newCard.GetCardType() != CardTypes.Concede)
                     {
                         handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
                     }
@@ -464,37 +465,33 @@ public class BoardManager : MonoBehaviour
 
                 case MessageFromServer.Action.CastOnPlayCard:
                     battlecryTrigger = true;
-                    CardTypes _spellType = message.cardIndex;
-                    HandManager __handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                    CardManager __newCard = __handManager.GenerateCard(_spellType).GetComponent<CardManager>();
-                    __newCard.GetCardStats().spell(message.targets, friendlySlots, enemySlots);
+                    spellType = message.cardIndex;
+                    newCard = handManager.GenerateCard(spellType).GetComponent<CardManager>();
+                    newCard.GetCardStats().spell(message.targets, friendlySlots, enemySlots);
 
-                    int _target = message.creatureTarget;
-                    Slot _targetSlot;
-                    if (_target > 0)
+                    if (message.creatureTarget > 0)
                     {
-                        _target -= 1;
-                        _targetSlot = enemySlots[_target];
+                        message.creatureTarget -= 1;
+                        fromSlot = enemySlots[message.creatureTarget];
                     }
                     else
                     {
-                        _target = (-1 * _target) - 1;
-                        _targetSlot = friendlySlots[_target];
+                        message.creatureTarget = (-1 * message.creatureTarget) - 1;
+                        fromSlot = friendlySlots[message.creatureTarget];
                     }
-                    PlayCard(__newCard, _targetSlot, destroy: false, record: false);
+                    PlayCard(newCard, fromSlot, destroy: false, record: false);
 
 
-                    __newCard.SetCardState(CardManager.CardState.opponentPlayed);
-                    __newCard.transform.position = new Vector3(0f, 10f, 0f);
-                    __newCard.destroyTimer = 5f;
+                    newCard.SetCardState(CardManager.CardState.opponentPlayed);
+                    newCard.transform.position = new Vector3(0f, 10f, 0f);
+                    newCard.destroyTimer = 5f;
 
                     battlecryTrigger = false;
                     handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
                     break;
 
                 case MessageFromServer.Action.NumberOfCards:
-                    HandManager _____handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                    _____handManager.SetNumberOfOpponentsCards(message.targets[0]);
+                    handManager.SetNumberOfOpponentsCards(message.targets[0]);
                     break;
             }
 
