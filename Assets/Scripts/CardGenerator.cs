@@ -59,6 +59,8 @@ public enum CardTypes
     Concede,
     StoneFree,
 };
+
+//Rewrite this entire piece of sheesh
 public static class CardGenerator
 {
     public static void CustomizeCard(CardManager card, CardTypes cardType)
