@@ -54,12 +54,7 @@ public class RuneDropdownManager : MonoBehaviour
        
         if (!noUpdate)
         {
-            Debug.Log("UPDATING " + index.ToString());
             collection.UpdateRunes();
-        }
-        else
-        {
-            Debug.Log("Cant update");
         }
         noUpdate = false;
         

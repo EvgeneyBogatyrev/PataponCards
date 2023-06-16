@@ -52,8 +52,6 @@ public class HandManager : MonoBehaviour
         }
 
         UpdateHandPositionOpponent();
-        Debug.Log(opponentHand.Count);
-        Debug.Log(number);
     }
 
     public int GetNumberOfOpponentsCards()

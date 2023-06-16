@@ -72,7 +72,6 @@ public class MessageFromServer
         {
             return Action.GameAccept;
         }
-        Debug.Log("Cringe error");
         return Action.EndTurn;
     }
 
@@ -142,9 +141,6 @@ public class GameController : MonoBehaviour
         UnityWebRequest www = UnityWebRequest.Get("https://script.google.com/macros/s/AKfycbwHlf0DxUjBKb3blzMbawD3Yn1FfPp9unN8Ho5LGb_DQoc1YcvwhhHaS9hM1FLhMYxk/exec");
         yield return www.SendWebRequest();
         Debug.Log("Finished obtaining!");
-    
-        
-        //Debug.Log(www.downloadHandler.text);
 
         messagesFromServer = new List<MessageFromServer>();
         MessageFromServer currentMessage = new MessageFromServer();
