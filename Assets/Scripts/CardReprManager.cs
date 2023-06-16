@@ -7,8 +7,8 @@ public class CardReprManager : MonoBehaviour
 {
     public GameObject nameObject;
     public CardTypes type;
-    public GameObject qtyObject;
-    public int qty;
+    public GameObject numberOfCopiesObject;
+    public int numberOfCopies;
 
     public CollectionControl collectionObject;
 
@@ -19,17 +19,17 @@ public class CardReprManager : MonoBehaviour
         nameObject.GetComponent<TextMeshPro>().text = name;
     }
 
-    public void SetQty()
+    public void SetVisualNumber()
     {
-        qtyObject.GetComponent<TextMeshPro>().text = qty.ToString();
+        numberOfCopiesObject.GetComponent<TextMeshPro>().text = numberOfCopies.ToString();
     }
 
     public void Update()
     {
         if (mouseOver && Input.GetMouseButtonDown(0))
         {
-            qty -= 1;
-            SetQty();
+            numberOfCopies -= 1;
+            SetVisualNumber();
             DeckManager.RemoveCard(type);
             collectionObject.ShowDeck();
         }

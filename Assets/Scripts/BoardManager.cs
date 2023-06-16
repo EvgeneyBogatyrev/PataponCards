@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using System.Linq;
 
 public class BoardManager : MonoBehaviour
@@ -149,6 +150,8 @@ public class BoardManager : MonoBehaviour
 
         lastDeadOpponent = CardTypes.Hatapon;
         lastDeadYou = CardTypes.Hatapon;
+
+        gameController = GameObject.Find("GameController").GetComponent<GameController>();
     }
 
     public void InitStaticObjects()
@@ -254,6 +257,16 @@ public class BoardManager : MonoBehaviour
         {
             yield return new WaitForSeconds(0.1f);
         }
+
+
+        gameController.RecordGameResult(!looser);
+        if (gameController.CheckGameEnd())
+        {
+            yield return new WaitForSeconds(3f);
+            SceneManager.LoadScene("MainMenu");
+        }
+
+
         foreach (Slot slot in friendlySlots)
         {
             MinionManager minion = slot.GetConnectedMinion();
@@ -324,11 +337,6 @@ public class BoardManager : MonoBehaviour
 
     public IEnumerator ProcessMessages(List<MessageFromServer> messages)
     {
-        if (gameController == null)
-        {
-            gameController = GameObject.Find("GameController").GetComponent<GameController>();
-        }
-
         messages = messages.OrderBy(x => x.index).ToList();
         List<MessageFromServer> processedMessages = new List<MessageFromServer>();
         for (int messageIndex = 0; messageIndex < messages.Count(); ++messageIndex)

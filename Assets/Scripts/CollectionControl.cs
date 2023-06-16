@@ -334,8 +334,8 @@ public class CollectionControl : MonoBehaviour
                 prevCard = cardReprObj;
 
                 cardReprObj.type = type;
-                cardReprObj.qty = 1;
-                cardReprObj.SetQty();
+                cardReprObj.numberOfCopies = 1;
+                cardReprObj.SetVisualNumber();
 
                 curPosY -= deckCardSpace;
 
@@ -344,8 +344,8 @@ public class CollectionControl : MonoBehaviour
             }
             else
             {
-                prevCard.qty += 1;
-                prevCard.SetQty();
+                prevCard.numberOfCopies += 1;
+                prevCard.SetVisualNumber();
             }
         }
     }

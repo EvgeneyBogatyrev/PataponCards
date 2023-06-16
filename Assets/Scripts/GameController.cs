@@ -9,12 +9,14 @@ using TMPro;
 
 public class InfoSaver
 {
+    // Saves info between scenes
     public static int myHash;
     public static int opponentHash;
 }
 
 public class MessageFromServer
 {
+    // Struct that holds info batch received from server
     public enum Action
     {
         GameSearch,
@@ -84,34 +86,35 @@ public class MessageFromServer
     public int additionalIndex = -1;
 }
 
+public class GameState
+{
+    public int friendlyWins = 0;
+    public int enemyWins = 0;
+
+}
+
 public class GameController : MonoBehaviour
 {
     public static bool playerTurn = true;
     private HandManager handManager;
     private BoardManager boardManager;
 
+    [SerializeField]
+    private GameObject scoreObject;
+
+    private string GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwHlf0DxUjBKb3blzMbawD3Yn1FfPp9unN8Ho5LGb_DQoc1YcvwhhHaS9hM1FLhMYxk/exec";
+    private GameState gameState = new GameState();
+
     public List<MessageFromServer> messagesFromServer;
 
-    public bool foundOpponent = false;
-
-    public GameObject inputField;
-
+    public float secondsBetweenServerUpdates = 5f;
+    public float secondsBetweenAnimations = 0.5f;
     public bool actionIsHappening = false;
 
     private void Start()
     {
         handManager = GameObject.Find("Hand").GetComponent<HandManager>();
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
-        handManager.SetCanPlayCard(true);
-
-        //if (InfoSaver.opponentHash > InfoSaver.myHash)
-        //{ 
-        playerTurn = false;
-        handManager.SetCanPlayCard(false);
-        CursorController.cursorState = CursorController.CursorStates.EnemyTurn;
-        //}
-
-        //StartCoroutine(ObtainData());
     }
 
     public void StartGame()
@@ -130,104 +133,78 @@ public class GameController : MonoBehaviour
     {
         while (true)
         {
-        //StartCoroutine(GetRequest("https://script.google.com/macros/s/AKfycbyUMTOZYCjzeFuTG8y7jCkRwaIUusMfo-kJC6sSekI3JAUXB4dHg-XvkvbPypOJKAdU/exec"));
-        //yield return webRequest.SendWebRequest();
-        if (playerTurn)
-        {
-            yield return new WaitForSeconds(5);
-            continue;
-        }
-        Debug.Log("Start obtaining....");
-        UnityWebRequest www = UnityWebRequest.Get("https://script.google.com/macros/s/AKfycbwHlf0DxUjBKb3blzMbawD3Yn1FfPp9unN8Ho5LGb_DQoc1YcvwhhHaS9hM1FLhMYxk/exec");
-        yield return www.SendWebRequest();
-        Debug.Log("Finished obtaining!");
-
-        messagesFromServer = new List<MessageFromServer>();
-        MessageFromServer currentMessage = new MessageFromServer();
-
-        //string path = "Assets/Resources/test3.txt";
-        //Write some text to the test.txt file
-        //StreamWriter writer = new StreamWriter(path, true);
-       // writer.WriteLine(www.downloadHandler.text);
-        //writer.Close();
-
-        string[] batches = www.downloadHandler.text.Split('$');
-        int iterIndex = 0;
-        int batchIndex = 0;
-        int curHash = 0;
-        foreach (string s in batches)
-        {
-            if (iterIndex == 0)
+            if (playerTurn)
             {
-                iterIndex = 1;
+                yield return new WaitForSeconds(secondsBetweenServerUpdates);
+                continue;
             }
-            else
+            Debug.Log("Start obtaining....");
+            UnityWebRequest www = UnityWebRequest.Get(GOOGLE_API_URL);
+            yield return www.SendWebRequest();
+            Debug.Log("Finished obtaining!");
+
+            messagesFromServer = new List<MessageFromServer>();
+            MessageFromServer currentMessage = new MessageFromServer();
+
+            string[] batches = www.downloadHandler.text.Split('$');
+            int iterIndex = 0;
+            int batchIndex = 0;
+            int curHash = 0;
+            foreach (string s in batches)
             {
-                iterIndex = 0;
-                if (batchIndex == 0)
+                if (iterIndex == 0)
                 {
-                    currentMessage = new MessageFromServer();
-                    string[] words = s.Split('@');
-                    curHash = Int32.Parse(words[0]);
-                    currentMessage.hash = curHash;
-                    currentMessage.index = Int32.Parse(words[1]);
+                    iterIndex = 1;
                 }
-                else if (batchIndex == 1)
+                else
                 {
-                    if (curHash == boardManager.opponentHash)
+                    iterIndex = 0;
+                    if (batchIndex == 0)
                     {
-                        currentMessage.action = currentMessage.GetAction(s);
+                        currentMessage = new MessageFromServer();
+                        string[] words = s.Split('@');
+                        curHash = Int32.Parse(words[0]);
+                        currentMessage.hash = curHash;
+                        currentMessage.index = Int32.Parse(words[1]);
                     }
-                }
-                else if (batchIndex == 2)
-                {
-                    if (curHash == boardManager.opponentHash && currentMessage.action != MessageFromServer.Action.EndTurn && currentMessage.action != MessageFromServer.Action.Attack && currentMessage.action != MessageFromServer.Action.Move && currentMessage.action != MessageFromServer.Action.Exchange && currentMessage.action != MessageFromServer.Action.NumberOfCards)
+                    else if (batchIndex == 1)
                     {
-                        currentMessage.cardIndex = (CardTypes)Int32.Parse(s);
-                    }
-                }
-                else if (batchIndex == 3)
-                {
-                    if (curHash == boardManager.opponentHash)
-                    {
-                        List<int> targets = new List<int>();
-                        if (s != "")
+                        if (curHash == boardManager.opponentHash)
                         {
-                            string[] numbers = s.Split(',');
-                            foreach (string num in numbers)
-                            {
-                                targets.Add(Int32.Parse(num));
-                            }
+                            currentMessage.action = currentMessage.GetAction(s);
                         }
-                        currentMessage.targets = targets;
-                        messagesFromServer.Add(currentMessage);
                     }
-                    batchIndex = -1;
+                    else if (batchIndex == 2)
+                    {
+                        if (curHash == boardManager.opponentHash && currentMessage.action != MessageFromServer.Action.EndTurn && currentMessage.action != MessageFromServer.Action.Attack && currentMessage.action != MessageFromServer.Action.Move && currentMessage.action != MessageFromServer.Action.Exchange && currentMessage.action != MessageFromServer.Action.NumberOfCards)
+                        {
+                            currentMessage.cardIndex = (CardTypes)Int32.Parse(s);
+                        }
+                    }
+                    else if (batchIndex == 3)
+                    {
+                        if (curHash == boardManager.opponentHash)
+                        {
+                            List<int> targets = new List<int>();
+                            if (s != "")
+                            {
+                                string[] numbers = s.Split(',');
+                                foreach (string num in numbers)
+                                {
+                                    targets.Add(Int32.Parse(num));
+                                }
+                            }
+                            currentMessage.targets = targets;
+                            messagesFromServer.Add(currentMessage);
+                        }
+                        batchIndex = -1;
+                    }
+                    batchIndex += 1;
                 }
-                batchIndex += 1;
             }
+            StartCoroutine(boardManager.ProcessMessages(messagesFromServer));
+            yield return new WaitForSeconds(secondsBetweenServerUpdates);
         }
-        StartCoroutine(boardManager.ProcessMessages(messagesFromServer));
-        yield return new WaitForSeconds(5);
-        }
-        //yield return ObtainData();
-    }
-
-    public void EndTurnButton()
-    {
-        if (playerTurn && CursorController.cursorState == CursorController.CursorStates.Free)
-        {
-            //StartCoroutine(ObtainData());
-            EndTurn(true);
-            
-            //StartTurn(false);
-            //boardManager.EndTurn();   now in EndTurn
-            
-            // Start coroutine to manage opponent's turn
-            //EndTurn(false); // Fix
-            //StartTurn(true); //Fix
-        }
-
     }
 
     public void StartTurn(bool friendly)
@@ -262,7 +239,7 @@ public class GameController : MonoBehaviour
                 {
                     StartCoroutine(thisStartTurnEvent(minion.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots));
                     do {
-                        yield return new WaitForSeconds(0.5f);
+                        yield return new WaitForSeconds(secondsBetweenAnimations);
                     } while(actionIsHappening);
                 }
             }
@@ -288,7 +265,7 @@ public class GameController : MonoBehaviour
                 {
                     StartCoroutine(thisStartTurnEvent(minion.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots));
                     do {
-                        yield return new WaitForSeconds(0.5f);
+                        yield return new WaitForSeconds(secondsBetweenAnimations);
                     } while(actionIsHappening);
                 }
             }
@@ -299,18 +276,6 @@ public class GameController : MonoBehaviour
             playerTurn = false;
         }
         yield return null;
-    }
-
-    public void Concede()
-    {
-        if (playerTurn && CursorController.cursorState == CursorController.CursorStates.Free)
-        {
-            CardManager concedeCard = handManager.GenerateCard(CardTypes.Concede).GetComponent<CardManager>();
-            concedeCard.GetCardStats().spell(new List<int>(), boardManager.enemySlots, boardManager.friendlySlots);
-            boardManager.CastSpell(concedeCard, new List<int>());
-            concedeCard.DestroyCard();
-            //EndTurn(true);
-        }
     }
 
     public void EndTurn(bool friendly)
@@ -344,14 +309,14 @@ public class GameController : MonoBehaviour
                 {
                     StartCoroutine(thisEndTurnEvent(minion.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots));
                     do {
-                        yield return new WaitForSeconds(0.5f);
+                        yield return new WaitForSeconds(secondsBetweenAnimations);
                     } while(actionIsHappening);
                 }
                 foreach (CardManager.EndTurnEvent addEndTurn in minion.GetCardStats().additionalEndTurnEvents)
                 {
                     StartCoroutine(addEndTurn(minion.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots));
                     do {
-                        yield return new WaitForSeconds(0.5f);
+                        yield return new WaitForSeconds(secondsBetweenAnimations);
                     } while(actionIsHappening);
                 }
             }
@@ -375,14 +340,14 @@ public class GameController : MonoBehaviour
                 {
                     StartCoroutine(thisEndTurnEvent(minion.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots));
                     do {
-                        yield return new WaitForSeconds(0.5f);
+                        yield return new WaitForSeconds(secondsBetweenAnimations);
                     } while(actionIsHappening);
                 }
                 foreach (CardManager.EndTurnEvent addEndTurn in minion.GetCardStats().additionalEndTurnEvents)
                 {
                     StartCoroutine(addEndTurn(minion.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots));
                     do {
-                        yield return new WaitForSeconds(0.5f);
+                        yield return new WaitForSeconds(secondsBetweenAnimations);
                     } while(actionIsHappening);
                 }
             }
@@ -392,5 +357,51 @@ public class GameController : MonoBehaviour
             StartTurn(false);
         }
         yield return null;
+    }
+
+    public void RecordGameResult(bool friendlyVictory)
+    {
+        if (friendlyVictory)
+        {
+            gameState.friendlyWins += 1;
+        }
+        else
+        {
+            gameState.enemyWins += 1;
+        }
+        scoreObject.GetComponent<TextMeshProUGUI>().text = gameState.friendlyWins.ToString() + ":" + gameState.enemyWins.ToString();;
+    }
+
+    public bool CheckGameEnd()
+    {
+        if (gameState.friendlyWins >= 2)
+        {
+            return true;
+        }
+        if (gameState.enemyWins >= 2)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    // Buttons
+    public void EndTurnButton()
+    {
+        if (playerTurn && CursorController.cursorState == CursorController.CursorStates.Free)
+        {
+            EndTurn(true);
+        }
+    }
+
+    public void Concede()
+    {
+        if (playerTurn && CursorController.cursorState == CursorController.CursorStates.Free)
+        {
+            CardManager concedeCard = handManager.GenerateCard(CardTypes.Concede).GetComponent<CardManager>();
+            concedeCard.GetCardStats().spell(new List<int>(), boardManager.enemySlots, boardManager.friendlySlots);
+            boardManager.CastSpell(concedeCard, new List<int>());
+            concedeCard.DestroyCard();
+        }
     }
 }
