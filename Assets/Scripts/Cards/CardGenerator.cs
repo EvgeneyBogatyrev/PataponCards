@@ -106,45 +106,7 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Yaripon:
-                const int yariponDamage = 3;
-
-                stats.power = 2;
-                stats.description = "At the end of your turn deal " + yariponDamage.ToString() + " damage to an enemy next to it.";
-                stats.name = "Yaripon";
-                stats.runes.Add(Runes.Spear);
-
-                static IEnumerator YariponEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    GameController gameController = GameObject.Find("GameController").GetComponent<GameController>(); 
-                    gameController.actionIsHappening = true;
-
-
-                    // Throw spear
-                    MinionManager connectedMinion = enemySlots[index].GetConnectedMinion();
-                    if (connectedMinion != null)
-                    {
-                        AnimationManager animationManager = GameObject.Find("GameController").GetComponent<AnimationManager>();
-                        SpearManager spear = animationManager.CreateObject(AnimationManager.Animations.Spear, friendlySlots[index].GetPosition()).GetComponent<SpearManager>();
-                        spear.SetSlotToGo(enemySlots[index]);
-                        if (enemySlots[index].GetFriendly())
-                        {
-                            spear.isEnemy = true;
-                        }
-
-                        while (!spear.reachDestination)
-                        {
-                            yield return new WaitForSeconds(0.1f);
-                        }
-
-                        spear.DestroySelf();
-
-                        
-                        connectedMinion.ReceiveDamage(yariponDamage);
-                    }
-                    gameController.actionIsHappening = false;
-                    yield return null;
-                }
-                stats.endTurnEvent = YariponEndTurn;
+                stats = YariponStats.GetStats();
                 break;
 
             case CardTypes.Yumipon:
