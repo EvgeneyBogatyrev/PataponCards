@@ -139,7 +139,7 @@ public static class CardGenerator
                         spear.DestroySelf();
 
                         
-                        connectedMinion.GetDamage(yariponDamage);
+                        connectedMinion.ReceiveDamage(yariponDamage);
                     }
                     gameController.actionIsHappening = false;
                     yield return null;
@@ -193,7 +193,7 @@ public static class CardGenerator
                             else if (!spear.exhausted)
                             {
                                 spear.DestroySelf();
-                                spear.GetSlotToGo().GetConnectedMinion().GetDamage(yumiponDamage);
+                                spear.GetSlotToGo().GetConnectedMinion().ReceiveDamage(yumiponDamage);
                                 spear.exhausted = true;
                             }
                         }
@@ -288,7 +288,7 @@ public static class CardGenerator
                     }
 
                     MinionManager targetMinion = targetSlot.GetConnectedMinion();
-                    targetMinion.GetDamage(fangDamage);
+                    targetMinion.ReceiveDamage(fangDamage);
 
                 }
 
@@ -328,7 +328,7 @@ public static class CardGenerator
                         host = friendlySlots[targets[0] - 1].GetConnectedMinion();
                     }
 
-                    host.ReceiveDamage(nutritionHealthCost);
+                    host.TakePower(nutritionHealthCost);
 
                     foreach (BoardManager.Slot slot in friendlySlots)
                     {
@@ -418,13 +418,13 @@ public static class CardGenerator
                         selectedSlot = friendlySlots[target];
                     }
 
-                    selectedSlot.GetConnectedMinion().GetDamage(mahoponTargetDamage);
+                    selectedSlot.GetConnectedMinion().ReceiveDamage(mahoponTargetDamage);
                     
                     foreach (BoardManager.Slot slot in enemySlots)
                     {
                         if (slot != selectedSlot && !slot.GetFree())
                         {
-                            slot.GetConnectedMinion().GetDamage(mahoponAoEDamage);
+                            slot.GetConnectedMinion().ReceiveDamage(mahoponAoEDamage);
                         }
                     }
 
@@ -432,7 +432,7 @@ public static class CardGenerator
                     {
                         if (slot != selectedSlot && !slot.GetFree())
                         {
-                            slot.GetConnectedMinion().GetDamage(mahoponAoEDamage);
+                            slot.GetConnectedMinion().ReceiveDamage(mahoponAoEDamage);
                         }
                     }
                 }
@@ -480,7 +480,7 @@ public static class CardGenerator
                         HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
                         handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
                     }
-                    friendlySlots[index].GetConnectedMinion().GetDamage(burusSelfDamage);
+                    friendlySlots[index].GetConnectedMinion().ReceiveDamage(burusSelfDamage);
                     yield return null;
                 }
 
@@ -522,7 +522,7 @@ public static class CardGenerator
                             selectedSlot = friendlySlots[targets[0] - 1];
                         }
 
-                        selectedSlot.GetConnectedMinion().GetDamage(2);
+                        selectedSlot.GetConnectedMinion().ReceiveDamage(2);
                     }
                     else
                     {
@@ -538,7 +538,7 @@ public static class CardGenerator
                                 selectedSlot = friendlySlots[target - 1];
                             }
 
-                            selectedSlot.GetConnectedMinion().GetDamage(1);
+                            selectedSlot.GetConnectedMinion().ReceiveDamage(1);
                         }
                     }
 
@@ -597,7 +597,7 @@ public static class CardGenerator
                         host = friendlySlots[targets[0] - 1].GetConnectedMinion();
                     }
 
-                    host.ReceiveDamage(giveFangHealthCost);
+                    host.TakePower(giveFangHealthCost);
                     if (!enemySlots[0].GetFriendly())
                     {
                         HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
@@ -701,7 +701,7 @@ public static class CardGenerator
                         host = friendlySlots[targets[0] - 1].GetConnectedMinion();
                     }
 
-                    host.ReceiveDamage(motiti1HealthCost);
+                    host.TakePower(motiti1HealthCost);
                     host.Heal(motiti1Heal);
                 }
                 stats.spell = MotitiOpt1Realization;
@@ -731,11 +731,11 @@ public static class CardGenerator
                     HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
                     BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
-                    host.ReceiveDamage(motiti2HealthCost);
+                    host.TakePower(motiti2HealthCost);
                     CardManager newCard = handManager.GenerateCard(CardTypes.MotitiAngry).GetComponent<CardManager>();
                     newCard.SetPower(host.GetPower());
                     BoardManager.Slot slot = host.GetSlot();
-                    host.ReceiveDamage(host.GetPower());
+                    host.TakePower(host.GetPower());
                     boardManager.PlayCard(newCard, slot, destroy: true, record: false);
 
                 }
@@ -887,7 +887,7 @@ public static class CardGenerator
                     MinionManager connectedMinion = friendlySlots[index].GetConnectedMinion();
                     if (connectedMinion != null)
                     {
-                       connectedMinion.GetDamage(alldemonuimDamage);
+                       connectedMinion.ReceiveDamage(alldemonuimDamage);
                     }
                     yield return null;
                 }
@@ -1253,7 +1253,7 @@ public static class CardGenerator
                     }
                     else
                     {
-                        selectedMinion.GetDamage(destroboDamage);
+                        selectedMinion.ReceiveDamage(destroboDamage);
                     }
                     
                 }
@@ -1356,7 +1356,7 @@ public static class CardGenerator
                         host = friendlySlots[targets[0] - 1].GetConnectedMinion();
                     }
 
-                    host.ReceiveDamage(TonKamponCronoRiggersHealthCost);
+                    host.TakePower(TonKamponCronoRiggersHealthCost);
                     if (!enemySlots[0].GetFriendly())
                     {
                         HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
@@ -1394,7 +1394,7 @@ public static class CardGenerator
                         host = friendlySlots[targets[0] - 1].GetConnectedMinion();
                     }
 
-                    host.ReceiveDamage(TonKamponAlldemoniumHealthCost);
+                    host.TakePower(TonKamponAlldemoniumHealthCost);
                     if (!enemySlots[0].GetFriendly())
                     {
                         HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
@@ -1473,8 +1473,8 @@ public static class CardGenerator
                         host = friendlySlots[targets[0] - 1].GetConnectedMinion();
                     }
 
-                    host.ReceiveDamage(IceWallHealthCost);
-                    host.GetDamage(IceWallSelfDamage);
+                    host.TakePower(IceWallHealthCost);
+                    host.ReceiveDamage(IceWallSelfDamage);
                 }
                 stats.spell = IceWall_optionRealization;
                 stats.numberOfTargets = 0;
@@ -1553,7 +1553,7 @@ public static class CardGenerator
                         {
                             break;
                         }
-                        strongestMinion.GetDamage(alossonDamage);
+                        strongestMinion.ReceiveDamage(alossonDamage);
                         if (strongestMinion.GetPower() <= 0)
                         {
                             break;
@@ -1590,7 +1590,7 @@ public static class CardGenerator
                     
                     if (connectedMinion != null)
                     {
-                       connectedMinion.GetDamage(pyokoDamage);
+                       connectedMinion.ReceiveDamage(pyokoDamage);
                     }
                     yield return null;
                 }
@@ -1620,7 +1620,7 @@ public static class CardGenerator
                     
                     if (connectedMinion != null)
                     {
-                       connectedMinion.GetDamage(baloonDamage);
+                       connectedMinion.ReceiveDamage(baloonDamage);
                     }
                     yield return null;
                 }
