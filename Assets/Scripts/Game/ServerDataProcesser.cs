@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Linq;
+using System;
 
 
 public class ServerDataProcesser : MonoBehaviour
@@ -10,9 +11,14 @@ public class ServerDataProcesser : MonoBehaviour
     public static ServerDataProcesser instance;
     
     private string BASE_URL = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSduAm0qxm9BoCbLBGjvCsHXgT303MOgX04oVumEYn-sNaPMEQ/formResponse";
+    private string GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwHlf0DxUjBKb3blzMbawD3Yn1FfPp9unN8Ho5LGb_DQoc1YcvwhhHaS9hM1FLhMYxk/exec";
+
+    private BoardManager boardManager;
 
     public int messageId = 0;
     public List<MessageFromServer> doneActions = new List<MessageFromServer>();
+    public List<MessageFromServer> messagesFromServer;
+    public float secondsBetweenServerUpdates = 5f;
     
     private void Awake() 
     { 
@@ -26,6 +32,11 @@ public class ServerDataProcesser : MonoBehaviour
         { 
             instance = this; 
         } 
+    }
+
+    private void Start() 
+    {
+        boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
     }
 
     public void PlayCard(CardManager card, BoardManager.Slot slot)
@@ -289,6 +300,84 @@ public class ServerDataProcesser : MonoBehaviour
             doneActions.Add(message);
             
             yield return new WaitForSeconds(2); 
+        }
+    }
+
+    public IEnumerator ObtainData()
+    {
+        while (true)
+        {
+            if (GameController.playerTurn)
+            {
+                yield return new WaitForSeconds(secondsBetweenServerUpdates);
+                continue;
+            }
+            Debug.Log("Start obtaining....");
+            UnityWebRequest www = UnityWebRequest.Get(GOOGLE_API_URL);
+            yield return www.SendWebRequest();
+            Debug.Log("Finished obtaining!");
+
+            messagesFromServer = new List<MessageFromServer>();
+            MessageFromServer currentMessage = new MessageFromServer();
+
+            string[] batches = www.downloadHandler.text.Split('$');
+            int iterIndex = 0;
+            int batchIndex = 0;
+            int curHash = 0;
+            foreach (string s in batches)
+            {
+                if (iterIndex == 0)
+                {
+                    iterIndex = 1;
+                }
+                else
+                {
+                    iterIndex = 0;
+                    if (batchIndex == 0)
+                    {
+                        currentMessage = new MessageFromServer();
+                        string[] words = s.Split('@');
+                        curHash = Int32.Parse(words[0]);
+                        currentMessage.hash = curHash;
+                        currentMessage.index = Int32.Parse(words[1]);
+                    }
+                    else if (batchIndex == 1)
+                    {
+                        if (curHash == boardManager.opponentHash)
+                        {
+                            currentMessage.action = currentMessage.GetAction(s);
+                        }
+                    }
+                    else if (batchIndex == 2)
+                    {
+                        if (curHash == boardManager.opponentHash && currentMessage.action != MessageFromServer.Action.EndTurn && currentMessage.action != MessageFromServer.Action.Attack && currentMessage.action != MessageFromServer.Action.Move && currentMessage.action != MessageFromServer.Action.Exchange && currentMessage.action != MessageFromServer.Action.NumberOfCards)
+                        {
+                            currentMessage.cardIndex = (CardTypes)Int32.Parse(s);
+                        }
+                    }
+                    else if (batchIndex == 3)
+                    {
+                        if (curHash == boardManager.opponentHash)
+                        {
+                            List<int> targets = new List<int>();
+                            if (s != "")
+                            {
+                                string[] numbers = s.Split(',');
+                                foreach (string num in numbers)
+                                {
+                                    targets.Add(Int32.Parse(num));
+                                }
+                            }
+                            currentMessage.targets = targets;
+                            messagesFromServer.Add(currentMessage);
+                        }
+                        batchIndex = -1;
+                    }
+                    batchIndex += 1;
+                }
+            }
+            StartCoroutine(ServerDataProcesser.instance.ProcessMessages(messagesFromServer));
+            yield return new WaitForSeconds(secondsBetweenServerUpdates);
         }
     }
 }
