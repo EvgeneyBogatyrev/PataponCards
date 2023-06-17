@@ -75,13 +75,7 @@ public static class CardGenerator
         static bool EmptyCheckSpellTarget(int target, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { return true; }
         //static bool EmptyCondition(List<int> targets, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { return true; }
 
-        stats.onPlayEvent = EmptyMethod_;
-        stats.endTurnEvent = EmptyMethod;
-        stats.startTurnEvent = EmptyMethod;
-        //card.endOpponentsTurnEvent = EmptyMethod;
-        stats.spell = EmptySpell;
-        stats.checkSpellTarget = EmptyCheckSpellTarget;
-        stats.checkSpellTargets = EmptyCheckSpellTargets;
+        
         //card.condition = EmptyCondition;
         //card.heroMode = EmptyMethod;
 
@@ -309,6 +303,13 @@ public static class CardGenerator
                 break;
         }
 
+        if (stats.onPlayEvent == null) stats.onPlayEvent = EmptyMethod_;
+        if (stats.endTurnEvent == null) stats.endTurnEvent = EmptyMethod;
+        if (stats.startTurnEvent == null) stats.startTurnEvent = EmptyMethod;
+        if (stats.spell == null) stats.spell = EmptySpell;
+        if (stats.checkSpellTarget == null) stats.checkSpellTarget = EmptyCheckSpellTarget;
+        if (stats.checkSpellTargets == null) stats.checkSpellTargets = EmptyCheckSpellTargets;
+
         card.SetCardStats(stats);
         card.SetPower(stats.power);
         card.SetDescription(stats.description);
@@ -415,172 +416,6 @@ public static class CardGenerator
             }    
         }
 
-    }
-
-    public static Sprite GetSpriteFromType(CardTypes _type)
-    {
-        switch (_type)
-        {
-            case CardTypes.Tatepon:
-                return Resources.Load<Sprite>("Images/tatepon");
-
-            case CardTypes.Yaripon:
-                return Resources.Load<Sprite>("Images/yaripon");
-
-            case CardTypes.Yumipon:
-                return Resources.Load<Sprite>("Images/yumipon");
-
-            case CardTypes.Kibapon:
-                return Resources.Load<Sprite>("Images/kibapon");
-
-            case CardTypes.Dekapon:
-                return Resources.Load<Sprite>("Images/Dekapon");
-
-            case CardTypes.DivineProtection:
-                return Resources.Load<Sprite>("Images/DivineProtection");
-
-            case CardTypes.Fang:
-                return Resources.Load<Sprite>("Images/Fang");
-
-            case CardTypes.GiveFang:
-                return Resources.Load<Sprite>("Images/Fang");
-
-            case CardTypes.Mahopon:
-                return Resources.Load<Sprite>("Images/mahopon");
-
-            case CardTypes.Nutrition:
-                return Resources.Load<Sprite>("Images/Meat");
-
-            case CardTypes.DeadlyDispute:
-                return Resources.Load<Sprite>("Images/pon_chaka_song");
-
-            case CardTypes.Pyokorider:
-                return Resources.Load<Sprite>("Images/pyokorider");
-            
-            case CardTypes.Megapon:
-                return Resources.Load<Sprite>("Images/Megapon");
-
-            case CardTypes.Kacheek:
-                return Resources.Load<Sprite>("Images/Kacheek");
-
-            case CardTypes.Motiti:
-                return Resources.Load<Sprite>("Images/Motiti");
-
-            case CardTypes.Motiti_option1:
-                return Resources.Load<Sprite>("Images/Motiti");
-
-            case CardTypes.Motiti_option2:
-                return Resources.Load<Sprite>("Images/MotitiAngry");
-
-            case CardTypes.MotitiAngry:
-                return Resources.Load<Sprite>("Images/MotitiAngry");
-
-            case CardTypes.Hatapon:
-                return Resources.Load<Sprite>("Images/Hatapon");
-
-            case CardTypes.Concede:
-                return Resources.Load<Sprite>("Images/Hatapon");
-
-            case CardTypes.Buzzcrave:
-                return Resources.Load<Sprite>("Images/Buzzcrave");
-
-            case CardTypes.Guardira:
-                return Resources.Load<Sprite>("Images/guardira");
-            
-            case CardTypes.FuckingIdiot:
-                return Resources.Load<Sprite>("Images/Buruch");
-
-             case CardTypes.Buruch:
-                return Resources.Load<Sprite>("Images/burus");
-
-            case CardTypes.Myamsar:
-                return Resources.Load<Sprite>("Images/myamsar");
-
-            case CardTypes.MyamsarHero:
-                return Resources.Load<Sprite>("Images/myamsar");
-
-            case CardTypes.Robopon:
-                return Resources.Load<Sprite>("Images/robopon");
-
-            case CardTypes.Toripon:
-                return Resources.Load<Sprite>("Images/Toripon");
-
-            case CardTypes.TargetDummy:
-                return Resources.Load<Sprite>("Images/target_dummy");
-
-            case CardTypes.Boulder:
-                return Resources.Load<Sprite>("Images/boulder");
-
-            case CardTypes.Bowmunk:
-                return Resources.Load<Sprite>("Images/bowmunk"); 
-
-            case CardTypes.Grenburr:
-                return Resources.Load<Sprite>("Images/grenburr"); 
-
-            case CardTypes.Alldemonium:
-                return Resources.Load<Sprite>("Images/alldemonium"); 
-
-            case CardTypes.CronoRiggers:
-                return Resources.Load<Sprite>("Images/crono_riggers"); 
-
-            case CardTypes.TonKampon_option2:
-                return Resources.Load<Sprite>("Images/alldemonium"); 
-
-            case CardTypes.TonKampon_option1:
-                return Resources.Load<Sprite>("Images/crono_riggers"); 
-
-            case CardTypes.TakeThatShield:
-                return Resources.Load<Sprite>("Images/500x500");
-             
-            case CardTypes.ProfessionalWIthStandards:
-                return Resources.Load<Sprite>("Images/500x500");
-
-            case CardTypes.SpeedBoost:
-                return Resources.Load<Sprite>("Images/500x500");
-
-            case CardTypes.Destrobo:
-                return Resources.Load<Sprite>("Images/500x500");
-
-            case CardTypes.TonKampon:
-                return Resources.Load<Sprite>("Images/500x500");
-
-            case CardTypes.Coppen:
-                return Resources.Load<Sprite>("Images/500x500");
-
-            case CardTypes.IceWall:
-                return Resources.Load<Sprite>("Images/500x500");
-
-            case CardTypes.Alosson:
-                return Resources.Load<Sprite>("Images/500x500");
-
-            case CardTypes.PyokoriderHero:
-                return Resources.Load<Sprite>("Images/500x500");
-
-            case CardTypes.Baloon:
-                return Resources.Load<Sprite>("Images/500x500");
-
-            case CardTypes.NovaNova:
-                return Resources.Load<Sprite>("Images/NovaNova");
-
-            case CardTypes.BanTatepon:
-                return Resources.Load<Sprite>("Images/banTatepon");
-
-            case CardTypes.TurnToStone:
-                return Resources.Load<Sprite>("Images/turnToStone");
-
-            case CardTypes.StoneFree:
-                return Resources.Load<Sprite>("Images/turnToStone");
-
-            default:
-                Debug.Log($"Unknown card type: {_type}. Can't find sprite.");
-                return null;
-        }
-    }
-
-    public static CardTypes GenerateRandomCard()
-    {
-        var namesCount = Enum.GetNames(typeof(CardTypes)).Length;
-        return (CardTypes) UnityEngine.Random.Range(1, namesCount);
     }
 }
 
