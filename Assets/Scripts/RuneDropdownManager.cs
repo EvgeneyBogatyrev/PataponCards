@@ -24,7 +24,6 @@ public class RuneDropdownManager : MonoBehaviour
         {
             dropdown.options.Add(new Dropdown.OptionData() { text = item });
         }
-        //StartCoroutine(CallFunc(dropdown));
 
         dropdown.onValueChanged.AddListener(delegate { DropdownItemSelected(dropdown); });
     }
