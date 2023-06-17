@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3ea74385a4801740b17b1ae86290fb4, type: 3}
+  m_Name: Spamton
+  m_EditorClassIdentifier: 
+  name: Spamton G. Spamton
+  description: NOW'S YOUR CHANCE TO BE A BIG SHOT!
+  icon: {fileID: 21300000, guid: 8dafb2f8b6188104ca4ecec62ba9f2e4, type: 3}
+  power: 4
+  canAttack: 1
+  canMove: 1
+  haste: 1
+  shield: 1
+  lifelink: 1
+  isSpell: 0
+  ability: {fileID: 0}
