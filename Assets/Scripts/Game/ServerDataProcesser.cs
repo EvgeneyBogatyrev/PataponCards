@@ -189,7 +189,7 @@ public class ServerDataProcesser : MonoBehaviour
             {
                 case MessageFromServer.Action.EndTurn:
                     gameController.EndTurn(false);
-                    gameController.StartTurn(true);
+                    //gameController.StartTurn(true);
                     break;
                 case MessageFromServer.Action.PlayCard:
                     CardTypes type = message.cardIndex;

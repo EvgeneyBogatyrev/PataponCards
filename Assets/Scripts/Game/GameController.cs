@@ -172,18 +172,22 @@ public class GameController : MonoBehaviour
         }
         else
         {
+            playerTurn = false;
+            handManager.SetCanPlayCard(false);
+            CursorController.cursorState = CursorController.CursorStates.EnemyTurn;
             gameState.Increment(friendly:false, turnsObject);
             boardManager.DealSuddenDeathDamage(friendly:false, gameState.GetSuddenDeathDamage(friendly:false));
         }
         StartCoroutine(ServerDataProcesser.instance.ObtainData());
     }
 
-    public void StartTurn(bool friendly)
+    public void StartTurn(bool friendly, bool hataponJustDied=false)
     {
-        StartCoroutine(IenumStartTurn(friendly));
+        //Debug.Log("In start turn" + friendly.ToString());
+        StartCoroutine(IenumStartTurn(friendly, hataponJustDied));
     }
 
-    IEnumerator IenumStartTurn(bool friendly)
+    IEnumerator IenumStartTurn(bool friendly, bool hataponJustDied=false)
     {
         if (!friendly)
         {
@@ -193,17 +197,13 @@ public class GameController : MonoBehaviour
         {
             CursorController.cursorState = CursorController.CursorStates.Free;
         }
-        GameController.playerTurn = !friendly;
-        handManager.SetCanPlayCard(!friendly);
+        GameController.playerTurn = friendly;
+        handManager.SetCanPlayCard(friendly);
 
         gameState.Increment(friendly, turnsObject);
         boardManager.DealSuddenDeathDamage(friendly, gameState.GetSuddenDeathDamage(friendly));
         if (friendly)
         {
-            playerTurn = true;
-            CursorController.cursorState = CursorController.CursorStates.Free;
-            handManager.SetCanPlayCard(true);
-
             List<MinionManager> order = new List<MinionManager>();
 
             foreach (BoardManager.Slot slot in boardManager.friendlySlots)
@@ -254,10 +254,9 @@ public class GameController : MonoBehaviour
                 }
             }
         }
-        if (!friendly)
+        if (!friendly && !hataponJustDied)
         {
             ServerDataProcesser.instance.EndTurn();
-            playerTurn = false;
         }
         yield return null;
     }
@@ -336,10 +335,7 @@ public class GameController : MonoBehaviour
                 }
             }
         }
-        if (friendly)
-        {
-            StartTurn(false);
-        }
+        StartTurn(!friendly);
         yield return null;
     }
 
@@ -364,7 +360,7 @@ public class GameController : MonoBehaviour
 
         gameState.Reset(turnsObject);
 
-        StartTurn(!friendlyVictory);
+        StartTurn(!friendlyVictory, hataponJustDied:true);
     }
 
     public void RecordGameResult(bool friendlyVictory)
