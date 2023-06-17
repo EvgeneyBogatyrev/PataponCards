@@ -22,6 +22,9 @@ public class CardManager : MonoBehaviour
     public delegate bool CheckSpellTargets(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public class CardStats
     {
+        public string name = "default-name";
+        public string description = "default-description";
+        public int power = 1;
         public bool isSpell = false;
         public bool canAttack = true;
         public bool canDealDamage = true;

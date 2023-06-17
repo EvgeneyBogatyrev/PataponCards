@@ -89,18 +89,18 @@ public static class CardGenerator
         switch (cardType)
         {
             case CardTypes.Hatapon:
-                card.SetPower(20);
-                card.SetDescription("Protect him at all cost!");
-                card.SetName("Hatapon");
+                stats.power = 20;
+                stats.description = "Protect him at all cost!";
+                stats.name = "Hatapon";
                 stats.canAttack = false;
                 stats.canDealDamage = false;
                 stats.hasHaste = true;
                 break;
 
             case CardTypes.Tatepon:
-                card.SetPower(4);
-                card.SetDescription("Your Hatapon is immune.");
-                card.SetName("Tatepon");
+                stats.power = 4;
+                stats.description = "Your Hatapon is immune.";
+                stats.name = "Tatepon";
                 stats.hasShield = true;
                 stats.runes.Add(Runes.Shield);
                 break;
@@ -108,9 +108,9 @@ public static class CardGenerator
             case CardTypes.Yaripon:
                 const int yariponDamage = 3;
 
-                card.SetPower(2);
-                card.SetDescription("At the end of your turn deal " + yariponDamage.ToString() + " damage to an enemy next to it.");
-                card.SetName("Yaripon");
+                stats.power = 2;
+                stats.description = "At the end of your turn deal " + yariponDamage.ToString() + " damage to an enemy next to it.";
+                stats.name = "Yaripon";
                 stats.runes.Add(Runes.Spear);
 
                 static IEnumerator YariponEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -150,9 +150,9 @@ public static class CardGenerator
             case CardTypes.Yumipon:
                 const int yumiponDamage = 1;
 
-                card.SetPower(2);
-                card.SetDescription("At the end of your turn deal " + yumiponDamage.ToString() + " damage to all enemys.");
-                card.SetName("Yumipon");
+                stats.power = 2;
+                stats.description = "At the end of your turn deal " + yumiponDamage.ToString() + " damage to all enemys.";
+                stats.name = "Yumipon";
                 stats.runes.Add(Runes.Bow);
 
                 static IEnumerator YumiponEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -208,9 +208,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Kibapon:
-                card.SetPower(4);
-                card.SetDescription("Haste.");
-                card.SetName("Kibapon");
+                stats.power = 4;
+                stats.description = "Haste.";
+                stats.name = "Kibapon";
                 stats.hasHaste = true;
                 //stats.hasShield = true;
                 stats.runes.Add(Runes.Spear);
@@ -218,9 +218,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Dekapon:
-                card.SetPower(7);
-                card.SetDescription("Can not move.");
-                card.SetName("Dekapon");
+                stats.power = 7;
+                stats.description = "Can not move.";
+                stats.name = "Dekapon";
                 stats.limitedVision = true;
                 stats.runes.Add(Runes.Shield);
                 break;
@@ -230,8 +230,8 @@ public static class CardGenerator
                 const int divineProtectionTateponCount = 3;
                 const int divineProtectionTateponPower = 2;
 
-                card.SetDescription("Summon " + divineProtectionTateponCount.ToString() + " Tatepons with " + divineProtectionTateponPower.ToString() + " power.");
-                card.SetName("Divine Protection");
+                stats.description = "Summon " + divineProtectionTateponCount.ToString() + " Tatepons with " + divineProtectionTateponPower.ToString() + " power.";
+                stats.name = "Divine Protection";
                 card.SetNameSize(4);
                 stats.runes.Add(Runes.Shield);
                 stats.runes.Add(Runes.Shield);
@@ -269,8 +269,8 @@ public static class CardGenerator
 
             case CardTypes.Fang: 
                 const int fangDamage = 3;
-                card.SetDescription("Deal " + fangDamage.ToString() + " damage to an enemy.");
-                card.SetName("Fang");
+                stats.description = "Deal " + fangDamage.ToString() + " damage to an enemy.";
+                stats.name = "Fang";
 
                 stats.isSpell = true;
                 static void FangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -311,8 +311,8 @@ public static class CardGenerator
                 const int nutritionHeal = 1;
                 const int nutritionHealthCost = 1;
                 
-                card.SetDescription("Restore " + nutritionHeal.ToString() + " power to all allies.");
-                card.SetName("Nutrition");
+                stats.description = "Restore " + nutritionHeal.ToString() + " power to all allies.";
+                stats.name = "Nutrition";
 
                 stats.isSpell = true;
                 
@@ -345,8 +345,8 @@ public static class CardGenerator
                 break;
 
             case CardTypes.DeadlyDispute:
-                card.SetDescription("Choose 2 creatures. They fight each other.");
-                card.SetName("Deadly Dispute");
+                stats.description = "Choose 2 creatures. They fight each other.";
+                stats.name = "Deadly Dispute";
                 stats.runes.Add(Runes.Spear);
                 stats.runes.Add(Runes.Spear);
                 stats.runes.Add(Runes.Spear);
@@ -396,9 +396,9 @@ public static class CardGenerator
                 stats.runes.Add(Runes.Bow);
                 stats.runes.Add(Runes.Bow);
 
-                card.SetPower(2);
-                card.SetDescription("Deal " + mahoponTargetDamage.ToString() + " damage to target creature and " + mahoponAoEDamage.ToString() + " damage to all other creatures.");
-                card.SetName("Mahopon");
+                stats.power = 2;
+                stats.description = "Deal " + mahoponTargetDamage.ToString() + " damage to target creature and " + mahoponAoEDamage.ToString() + " damage to all other creatures.";
+                stats.name = "Mahopon";
 
                 stats.hasOnPlay = true;
 
@@ -445,9 +445,9 @@ public static class CardGenerator
             case CardTypes.Pyokorider:
                 const int pyokoriderStartTurnPower = 2;
 
-                card.SetPower(5);
-                card.SetDescription("Haste.\nAt the start of your turn set this creature's power to " + pyokoriderStartTurnPower.ToString());
-                card.SetName("Pyokorider");
+                stats.power = 5;
+                stats.description = "Haste.\nAt the start of your turn set this creature's power to " + pyokoriderStartTurnPower.ToString();
+                stats.name = "Pyokorider";
                 stats.runes.Add(Runes.Spear);
                 stats.runes.Add(Runes.Spear);
 
@@ -464,9 +464,9 @@ public static class CardGenerator
 
             case CardTypes.FuckingIdiot:
                 const int burusSelfDamage = 1;
-                card.SetPower(2);
-                card.SetDescription("At the end of your turn draw a card and deal " + burusSelfDamage.ToString() + " damage to itself.");
-                card.SetName("Fucking Idiot");
+                stats.power = 2;
+                stats.description = "At the end of your turn draw a card and deal " + burusSelfDamage.ToString() + " damage to itself.";
+                stats.name = "Fucking Idiot";
 
                 static IEnumerator FuckingIdiotEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
                 {
@@ -489,9 +489,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Megapon:
-                card.SetPower(2);
-                card.SetDescription("Deal two damage split between 1 or 2 creatures.\nDraw a card.");
-                card.SetName("Megapon");
+                stats.power = 2;
+                stats.description = "Deal two damage split between 1 or 2 creatures.\nDraw a card.";
+                stats.name = "Megapon";
                 stats.runes.Add(Runes.Bow);
                 stats.runes.Add(Runes.Bow);
 
@@ -557,9 +557,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Buzzcrave:
-                card.SetPower(4);
-                card.SetDescription("Haste.\nCan attack any enemy unit on the board.");
-                card.SetName("Buzzcrave");
+                stats.power = 4;
+                stats.description = "Haste.\nCan attack any enemy unit on the board.";
+                stats.name = "Buzzcrave";
                 stats.megaVision = true;
                 stats.hasHaste = true;
                 stats.runes.Add(Runes.Spear);
@@ -569,9 +569,9 @@ public static class CardGenerator
             case CardTypes.Guardira:
                 const int guardiraPower = 1;
                 
-                card.SetPower(9);
-                card.SetDescription("Greatshield.\nAlways deals " + guardiraPower.ToString() + " damage regardless of its power.");
-                card.SetName("Guardira");
+                stats.power = 9;
+                stats.description = "Greatshield.\nAlways deals " + guardiraPower.ToString() + " damage regardless of its power.";
+                stats.name = "Guardira";
                 stats.hasGreatshield = true;
                 stats.fixedPower = guardiraPower;
                 stats.runes.Add(Runes.Shield);
@@ -581,8 +581,8 @@ public static class CardGenerator
             case CardTypes.GiveFang:
                 const int giveFangHealthCost = 1;
                 
-                card.SetDescription("Add Fang to your hand.");
-                card.SetName("Bone Weapon");
+                stats.description = "Add Fang to your hand.";
+                stats.name = "Bone Weapon";
 
                 stats.isSpell = true;
                 static void GiveFangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -616,9 +616,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Kacheek:
-                card.SetPower(5);
-                card.SetDescription("-1: Add Fang to your hand.\n-1: Give your creatures +1 power.");
-                card.SetName("Kacheek");
+                stats.power = 5;
+                stats.description = "-1: Add Fang to your hand.\n-1: Give your creatures +1 power.";
+                stats.name = "Kacheek";
 
                 stats.isStatic = true;
                 stats.connectedCards = new List<CardTypes>();
@@ -629,9 +629,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Myamsar:
-                card.SetPower(2);
-                card.SetDescription("At the end of your turn summon a copy of this minion with 1 less power.");
-                card.SetName("Myamsar");
+                stats.power = 2;
+                stats.description = "At the end of your turn summon a copy of this minion with 1 less power.";
+                stats.name = "Myamsar";
                 stats.runes.Add(Runes.Spear);
                 stats.runes.Add(Runes.Spear);
 
@@ -671,9 +671,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Motiti:
-                card.SetPower(3);
-                card.SetDescription("+0: Add +2 power.\n+0: Transform into Angry Motiti with Haste.");
-                card.SetName("Motiti");
+                stats.power = 3;
+                stats.description = "+0: Add +2 power.\n+0: Transform into Angry Motiti with Haste.";
+                stats.name = "Motiti";
 
                 stats.isStatic = true;
                 stats.connectedCards = new List<CardTypes>();
@@ -685,8 +685,8 @@ public static class CardGenerator
                 const int motiti1HealthCost = 0;
                 const int motiti1Heal = 2;
 
-                card.SetDescription("Give Motiti +" + motiti1Heal.ToString() + " power.");
-                card.SetName("Accumulate power");
+                stats.description = "Give Motiti +" + motiti1Heal.ToString() + " power.";
+                stats.name = "Accumulate power";
 
                 stats.isSpell = true;
                 static void MotitiOpt1Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -712,8 +712,8 @@ public static class CardGenerator
             case CardTypes.Motiti_option2:
                 const int motiti2HealthCost = 0;
 
-                card.SetDescription("Transform Motiti into Angry Motiti with Haste.");
-                card.SetName("Motiti Counteratack");
+                stats.description = "Transform Motiti into Angry Motiti with Haste.";
+                stats.name = "Motiti Counteratack";
 
                 stats.isSpell = true;
                 static void MotitiOpt2Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -745,17 +745,17 @@ public static class CardGenerator
                 break;
 
             case CardTypes.MotitiAngry:
-                card.SetPower(3);
-                card.SetDescription("Haste.");
-                card.SetName("Angry Motiti");
+                stats.power = 3;
+                stats.description = "Haste.";
+                stats.name = "Angry Motiti";
 
                 stats.hasHaste = true;
                 break;
 
             case CardTypes.Robopon:
-                card.SetPower(3);
-                card.SetDescription("At the end and the start of your turn gain +1 power.");
-                card.SetName("Robopon");
+                stats.power = 3;
+                stats.description = "At the end and the start of your turn gain +1 power.";
+                stats.name = "Robopon";
                 stats.runes.Add(Runes.Shield);
 
 
@@ -770,9 +770,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Toripon:
-                card.SetPower(3);
-                card.SetDescription("Cannot be a target of an attack.");
-                card.SetName("Toripon");
+                stats.power = 3;
+                stats.description = "Cannot be a target of an attack.";
+                stats.name = "Toripon";
                 stats.runes.Add(Runes.Spear);
                 stats.runes.Add(Runes.Spear);
                 stats.runes.Add(Runes.Spear);
@@ -781,9 +781,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.TargetDummy:
-                card.SetPower(3);
-                card.SetDescription("Greatshield.");
-                card.SetName("Target dummy");
+                stats.power = 3;
+                stats.description = "Greatshield.";
+                stats.name = "Target dummy";
                 stats.hasGreatshield = true;
                 stats.runes.Add(Runes.Shield);
                 stats.runes.Add(Runes.Shield);
@@ -791,9 +791,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Boulder:
-                card.SetPower(3);
-                card.SetDescription("Greatshield.\nCan't attack, move and deal damage.");
-                card.SetName("The rock");
+                stats.power = 3;
+                stats.description = "Greatshield.\nCan't attack, move and deal damage.";
+                stats.name = "The rock";
                 stats.canAttack = false;
                 stats.canDealDamage = false;
                 stats.limitedVision = true;
@@ -802,9 +802,9 @@ public static class CardGenerator
 
             case CardTypes.Bowmunk:
                 const int bowmunkHealing = 2;
-                card.SetPower(2);
-                card.SetDescription("Summon the rock with Greatshield. At the end of your turn heal your Hatapon by " + bowmunkHealing.ToString() + ".");
-                card.SetName("Bowmunk");
+                stats.power = 2;
+                stats.description = "Summon the rock with Greatshield. At the end of your turn heal your Hatapon by " + bowmunkHealing.ToString() + ".";
+                stats.name = "Bowmunk";
                 stats.runes.Add(Runes.Shield);
                 stats.runes.Add(Runes.Shield);
 
@@ -863,9 +863,9 @@ public static class CardGenerator
             case CardTypes.Grenburr:
                 const int grenburrPower = 6;
                 
-                card.SetPower(3);
-                card.SetDescription("Always deals " + grenburrPower.ToString() + " damage regardless of its power.");
-                card.SetName("Grenburr");
+                stats.power = 3;
+                stats.description = "Always deals " + grenburrPower.ToString() + " damage regardless of its power.";
+                stats.name = "Grenburr";
                 stats.fixedPower = grenburrPower;
                 stats.runes.Add(Runes.Shield);
                 break;
@@ -874,8 +874,8 @@ public static class CardGenerator
                 const int alldemonuimGain = 4;
                 const int alldemonuimDamage = 2;
                 card.SetNameSize(4);
-                card.SetDescription("Target creature under your controll gains " + alldemonuimGain.ToString() + " power, but recieves " + alldemonuimDamage.ToString() + " at the end of your turn.");
-                card.SetName("Alldemonium Shield");
+                stats.description = "Target creature under your controll gains " + alldemonuimGain.ToString() + " power, but recieves " + alldemonuimDamage.ToString() + " at the end of your turn.";
+                stats.name = "Alldemonium Shield";
                 stats.runes.Add(Runes.Shield);
                 stats.runes.Add(Runes.Shield);
                 stats.runes.Add(Runes.Shield);
@@ -947,8 +947,8 @@ public static class CardGenerator
 
             case CardTypes.CronoRiggers: 
                 const int cronoRiggersDamageReduction = 1;
-                card.SetDescription("Target creature under your controll gains: \"Receive " + cronoRiggersDamageReduction.ToString() + " less damage from any source\".");
-                card.SetName("Crono Riggers");
+                stats.description = "Target creature under your controll gains: \"Receive " + cronoRiggersDamageReduction.ToString() + " less damage from any source\".";
+                stats.name = "Crono Riggers";
                 stats.runes.Add(Runes.Shield);
                 stats.runes.Add(Runes.Shield);
                 stats.runes.Add(Runes.Shield);
@@ -990,8 +990,8 @@ public static class CardGenerator
 
             case CardTypes.TakeThatShield: 
                 const int takeThatShieldGain = 3;
-                card.SetDescription("Target non-Hatapon creature under your control gains +" + takeThatShieldGain.ToString() + " power and Greatshield.");
-                card.SetName("Take That Shield");
+                stats.description = "Target non-Hatapon creature under your control gains +" + takeThatShieldGain.ToString() + " power and Greatshield.";
+                stats.name = "Take That Shield";
                 card.SetNameSize(4);
                 stats.runes.Add(Runes.Shield);
                 stats.runes.Add(Runes.Shield);
@@ -1053,9 +1053,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.ProfessionalWIthStandards:
-                card.SetPower(2);
-                card.SetDescription("When it dies, you draw a card.");
-                card.SetName("Professional With Standards");
+                stats.power = 2;
+                stats.description = "When it dies, you draw a card.";
+                stats.name = "Professional With Standards";
                 card.SetNameSize(3);
 
                 static void ProfessionalWIthStandardsDeathrattle(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots, CardManager.CardStats thisStats)
@@ -1078,8 +1078,8 @@ public static class CardGenerator
                 break;
 
             case CardTypes.SpeedBoost: 
-                card.SetDescription("Target non-Hatapon creature under your control gains can attack again this turn.");
-                card.SetName("Speed Boost");
+                stats.description = "Target non-Hatapon creature under your control gains can attack again this turn.";
+                stats.name = "Speed Boost";
                 stats.runes.Add(Runes.Spear);
                 stats.runes.Add(Runes.Spear);
 
@@ -1136,9 +1136,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.MyamsarHero:
-                card.SetPower(3);
-                card.SetDescription("When it enters the battlefield, enemy non-Hatapon minion in front of it loses all abilities, can't attack and move until this is alive.");
-                card.SetName("Myamsar, hero");
+                stats.power = 3;
+                stats.description = "When it enters the battlefield, enemy non-Hatapon minion in front of it loses all abilities, can't attack and move until this is alive.";
+                stats.name = "Myamsar, hero";
                 card.SetDescriptionSize(3);
                 stats.runes.Add(Runes.Shield);
                 stats.runes.Add(Runes.Shield);
@@ -1222,9 +1222,9 @@ public static class CardGenerator
 
             case CardTypes.Destrobo:
                 const int destroboDamage = 1;
-                card.SetPower(2);
-                card.SetDescription("Choose a creature. If it's an artifact or it can't attack, destroy it. Otherwise, deal " + destroboDamage.ToString() +  " damage.");
-                card.SetName("Destrobo");
+                stats.power = 2;
+                stats.description = "Choose a creature. If it's an artifact or it can't attack, destroy it. Otherwise, deal " + destroboDamage.ToString() +  " damage.";
+                stats.name = "Destrobo";
                 stats.runes.Add(Runes.Shield);
 
                 stats.hasOnPlay = true;
@@ -1263,9 +1263,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Buruch:
-                card.SetPower(9);
-                card.SetDescription("Destroy 2 creatures under your control.");
-                card.SetName("Buruch");
+                stats.power = 9;
+                stats.description = "Destroy 2 creatures under your control.";
+                stats.name = "Buruch";
                 stats.runes.Add(Runes.Shield);
                 stats.runes.Add(Runes.Shield);
 
@@ -1323,9 +1323,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.TonKampon:
-                card.SetPower(6);
-                card.SetDescription("-1: Add Crono Riggers to your hand.\n-2: Add Alldemonium to your hand.");
-                card.SetName("Ton Kampon");
+                stats.power = 6;
+                stats.description = "-1: Add Crono Riggers to your hand.\n-2: Add Alldemonium to your hand.";
+                stats.name = "Ton Kampon";
                 stats.runes.Add(Runes.Shield);
                 stats.runes.Add(Runes.Shield);
                 stats.runes.Add(Runes.Shield);
@@ -1340,8 +1340,8 @@ public static class CardGenerator
             case CardTypes.TonKampon_option1:
                 const int TonKamponCronoRiggersHealthCost = 1;
                 
-                card.SetDescription("Add Crono Riggers to your hand.");
-                card.SetName("Divine Weapon");
+                stats.description = "Add Crono Riggers to your hand.";
+                stats.name = "Divine Weapon";
 
                 stats.isSpell = true;
                 static void TonKampon_option1Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -1378,8 +1378,8 @@ public static class CardGenerator
             case CardTypes.TonKampon_option2:
                 const int TonKamponAlldemoniumHealthCost = 2;
                 
-                card.SetDescription("Add Alldemonium to your hand.");
-                card.SetName("Demon Weapon");
+                stats.description = "Add Alldemonium to your hand.";
+                stats.name = "Demon Weapon";
 
                 stats.isSpell = true;
                 static void TonKampon_option2Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -1412,9 +1412,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Coppen:
-                card.SetPower(3);
-                card.SetDescription("Summon an Ice Wall for your opponent.");
-                card.SetName("Coppen");
+                stats.power = 3;
+                stats.description = "Summon an Ice Wall for your opponent.";
+                stats.name = "Coppen";
                 stats.runes.Add(Runes.Bow);
 
 
@@ -1443,9 +1443,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.IceWall:
-                card.SetPower(3);
-                card.SetDescription("0: Deal 1 damage to this.");
-                card.SetName("Ice Wall");
+                stats.power = 3;
+                stats.description = "0: Deal 1 damage to this.";
+                stats.name = "Ice Wall";
 
                 stats.isStatic = true;
                 stats.connectedCards = new List<CardTypes>();
@@ -1457,8 +1457,8 @@ public static class CardGenerator
                 const int IceWallHealthCost = 0;
                 const int IceWallSelfDamage = 1;
                 
-                card.SetDescription("Deal 1 damage to this.");
-                card.SetName("Melt Down");
+                stats.description = "Deal 1 damage to this.";
+                stats.name = "Melt Down";
 
                 stats.isSpell = true;
                 static void IceWall_optionRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -1482,8 +1482,8 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Concede: 
-                card.SetDescription("You win this round");
-                card.SetName("Opponent concedes");
+                stats.description = "You win this round";
+                stats.name = "Opponent concedes";
 
                 stats.isSpell = true;
                 static void ConcedeRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -1510,9 +1510,9 @@ public static class CardGenerator
             case CardTypes.Alosson:
                 const int alossonDamage = 2;
                 const int alossonMax = 5;
-                card.SetPower(4);
-                card.SetDescription("Deal " + alossonDamage.ToString() + " damage to the unit with highest power. If it survives, repeat the process (Up to " + alossonMax.ToString() + ")");
-                card.SetName("Alosson");
+                stats.power = 4;
+                stats.description = "Deal " + alossonDamage.ToString() + " damage to the unit with highest power. If it survives, repeat the process (Up to " + alossonMax.ToString() + ")";
+                stats.name = "Alosson";
                 stats.runes.Add(Runes.Bow);
                 stats.runes.Add(Runes.Bow);
                 stats.runes.Add(Runes.Bow);
@@ -1568,9 +1568,9 @@ public static class CardGenerator
             case CardTypes.PyokoriderHero:
                 const int pyokoDamage = 5;
 
-                card.SetPower(2);
-                card.SetDescription("At the end of your turn deal " + pyokoDamage.ToString() + " damage to the most-right enemy.");
-                card.SetName("Pyokorider, hero");
+                stats.power = 2;
+                stats.description = "At the end of your turn deal " + pyokoDamage.ToString() + " damage to the most-right enemy.";
+                stats.name = "Pyokorider, hero";
                 card.SetNameSize(4);
                 stats.runes.Add(Runes.Spear);
                 stats.runes.Add(Runes.Spear);
@@ -1599,9 +1599,9 @@ public static class CardGenerator
 
             case CardTypes.Baloon:
                 const int baloonDamage = 1;
-                card.SetPower(2);
-                card.SetDescription("Cannot be a target of an attack. At the end of your turn deal " + baloonDamage.ToString() + " damage to the enemy Hatapon.");
-                card.SetName("Helicopter");
+                stats.power = 2;
+                stats.description = "Cannot be a target of an attack. At the end of your turn deal " + baloonDamage.ToString() + " damage to the enemy Hatapon.";
+                stats.name = "Helicopter";
                 stats.flying = true;
                 stats.runes.Add(Runes.Spear);
                 stats.runes.Add(Runes.Spear);
@@ -1630,8 +1630,8 @@ public static class CardGenerator
 
             case CardTypes.NovaNova:
             
-                card.SetName("Nova Nova");
-                card.SetDescription("Destroy all units.");
+                stats.name = "Nova Nova";
+                stats.description = "Destroy all units.";
                 stats.runes.Add(Runes.Bow);
                 stats.runes.Add(Runes.Bow);
                 stats.runes.Add(Runes.Bow);
@@ -1667,9 +1667,9 @@ public static class CardGenerator
             case CardTypes.BanTatepon:
                 const int banTateponThreshold = 8;
                 const int banTateponPower = 2;
-                card.SetPower(5);
-                card.SetDescription("On play: If you control a minion with power " + banTateponThreshold.ToString() + " or greater, fill your board with Tatepons with " + banTateponPower +  " power, Greatshield and Haste, and draw a card.");
-                card.SetName("Ban Tatepon");
+                stats.power = 5;
+                stats.description = "On play: If you control a minion with power " + banTateponThreshold.ToString() + " or greater, fill your board with Tatepons with " + banTateponPower +  " power, Greatshield and Haste, and draw a card.";
+                stats.name = "Ban Tatepon";
                 card.SetDescriptionSize(3);
                 stats.runes.Add(Runes.Shield);
                 stats.runes.Add(Runes.Shield);
@@ -1734,9 +1734,9 @@ public static class CardGenerator
                 break;
 
             case CardTypes.StoneFree:
-                card.SetPower(1);
-                card.SetDescription("Greatshield.\nCan't attack and move.");
-                card.SetName("Petrified Patapon");
+                stats.power = 1;
+                stats.description = "Greatshield.\nCan't attack and move.";
+                stats.name = "Petrified Patapon";
                 stats.canAttack = false;
                 stats.canDealDamage = false;
                 stats.limitedVision = true;
@@ -1745,8 +1745,8 @@ public static class CardGenerator
 
             case CardTypes.TurnToStone:
             
-                card.SetName("Turn to stone");
-                card.SetDescription("Summon the last friendly unit died this round. It has Greatshield, can't attack and deal damage.");
+                stats.name = "Turn to stone";
+                stats.description = "Summon the last friendly unit died this round. It has Greatshield, can't attack and deal damage.";
                 stats.runes.Add(Runes.Shield);
                 stats.runes.Add(Runes.Shield);
                 //stats.runes.Add(Runes.Bow);
@@ -1815,6 +1815,9 @@ public static class CardGenerator
         }
 
         card.SetCardStats(stats);
+        card.SetPower(stats.power);
+        card.SetDescription(stats.description);
+        card.SetName(stats.name);
         if (stats.isSpell)
         {
             card.powerObject.SetActive(false);
