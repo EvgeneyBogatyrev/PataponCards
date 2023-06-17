@@ -91,7 +91,7 @@ public class GameState
     public int enemyWins = 0;
     public int friendlyTurnNumber = 0;
     public int enemyTurnNumber = 0;
-    public int suddenDeathTurns = 2;
+    public int suddenDeathTurns = 10;
     public int friendlySuddenDeathDamage = 0;
     public int enemySuddenDeathDamage = 0;
 
@@ -102,7 +102,7 @@ public class GameState
         friendlySuddenDeathDamage = 0;
         enemySuddenDeathDamage = 0;
 
-        turnsObject.GetComponent<TextMeshProUGUI>().text = "Turn: " + friendlyTurnNumber.ToString() + "\nNext Hatapon Damage: " + friendlySuddenDeathDamage.ToString() + "\nNext Opponent Damage: " + enemySuddenDeathDamage.ToString();
+        turnsObject.GetComponent<TextMeshProUGUI>().text = "Turn: " + friendlyTurnNumber.ToString();
     }
 
     public void Increment(bool friendly, GameObject turnsObject)
@@ -124,7 +124,7 @@ public class GameState
             }
         }
 
-        turnsObject.GetComponent<TextMeshProUGUI>().text = "Turn: " + friendlyTurnNumber.ToString() + "\nNext Hatapon Damage: " + friendlySuddenDeathDamage.ToString() + "\nNext Opponent Damage: " + enemySuddenDeathDamage.ToString();
+        turnsObject.GetComponent<TextMeshProUGUI>().text = "Turn: " + friendlyTurnNumber.ToString();
     }
 
     public int GetSuddenDeathDamage(bool friendly)
@@ -428,14 +428,19 @@ public class GameController : MonoBehaviour
         yield return null;
     }
 
-    public void EndRound(bool friendly)
+    public bool EndRound(bool friendly)
     {
+        RecordGameResult(friendly);
         StartCoroutine(OnEndRound(friendly));
+        if (CheckGameEnd())
+        {
+            return true;
+        }
+        return false;
     }
 
     public IEnumerator OnEndRound(bool friendlyVictory)
     {
-        RecordGameResult(friendlyVictory);
         if (CheckGameEnd())
         {
             yield return new WaitForSeconds(3f);

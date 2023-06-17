@@ -1692,10 +1692,6 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Turn X
 
-    Next Hatapon Damage: Y
-
-    Next Opponent Damage: Z
-
 '
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1790,8 +1786,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 317.71, y: 151.34802}
-  m_SizeDelta: {x: 164.58, y: 52.7269}
+  m_AnchoredPosition: {x: 331.10367, y: 151.34802}
+  m_SizeDelta: {x: 137.7926, y: 52.7269}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1933612652
 GameObject:

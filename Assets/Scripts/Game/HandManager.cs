@@ -17,6 +17,9 @@ public class HandManager : MonoBehaviour
     private List<CardManager> opponentHand = new List<CardManager>();
     private bool canPlayCard = false;
     private BoardManager boardManager;
+
+    private int hataponHealth = 20;
+    private int hataponHealthDecrease = 5;
     void Start()
     {
         DeckManager.CopyDeck();
@@ -99,11 +102,15 @@ public class HandManager : MonoBehaviour
     {
         BoardManager.Slot slot1 = boardManager.friendlySlots[3];
         CardManager card1 = GenerateCard(CardTypes.Hatapon).GetComponent<CardManager>();
+        card1.SetPower(hataponHealth);
         boardManager.PlayCard(card1, slot1, record: false);
 
         BoardManager.Slot slot2 = boardManager.enemySlots[3];
         CardManager card2 = GenerateCard(CardTypes.Hatapon).GetComponent<CardManager>();
+        card2.SetPower(hataponHealth);
         boardManager.PlayCard(card2, slot2, record: false);
+
+        hataponHealth -= hataponHealthDecrease;
     }
 
     public void DrawCard()

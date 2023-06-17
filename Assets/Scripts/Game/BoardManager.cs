@@ -220,38 +220,43 @@ public class BoardManager : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
         }
 
-        gameController.EndRound(!looser);
-
-        foreach (Slot slot in friendlySlots)
+        if (gameController.EndRound(!looser))
         {
-            MinionManager minion = slot.GetConnectedMinion();
-            if (minion != null)
+            yield return null;
+        }
+        else
+        {
+            foreach (Slot slot in friendlySlots)
             {
-                minion.DestroySelf();
+                MinionManager minion = slot.GetConnectedMinion();
+                if (minion != null)
+                {
+                    minion.DestroySelf();
+                }
             }
-        }
 
-        foreach (Slot slot in enemySlots)
-        {
-            MinionManager minion = slot.GetConnectedMinion();
-            if (minion != null)
+            foreach (Slot slot in enemySlots)
             {
-                minion.DestroySelf();
+                MinionManager minion = slot.GetConnectedMinion();
+                if (minion != null)
+                {
+                    minion.DestroySelf();
+                }
             }
+
+            HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
+            for (int i = 0; i < 3; ++i)
+            {
+                handManager.DrawCard();
+            }
+            handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 3);
+
+            handManager.PlayHatapons();
+
+            lastDeadOpponent = CardTypes.Hatapon;
+            lastDeadYou = CardTypes.Hatapon;
+            yield return null;
         }
-
-        HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-        for (int i = 0; i < 3; ++i)
-        {
-            handManager.DrawCard();
-        }
-        handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 3);
-
-        handManager.PlayHatapons();
-
-        lastDeadOpponent = CardTypes.Hatapon;
-        lastDeadYou = CardTypes.Hatapon;
-        yield return null;
     }
 }
 
