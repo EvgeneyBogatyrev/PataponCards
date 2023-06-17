@@ -72,7 +72,6 @@ public class CollectionControl : MonoBehaviour
         bowDevotion = 0;
         foreach (var (rune, runeObject) in Enumerable.Zip(DeckManager.runes, runeObjects, (rune, runeObject) => (rune, runeObject)))
         {
-            Debug.Log("Setting " + rune.ToString());
             runeObject.GetComponent<RuneDropdownManager>().SetRune(rune);
             if (rune == Runes.Spear)
             {
@@ -87,8 +86,6 @@ public class CollectionControl : MonoBehaviour
                 bowDevotion += 1;
             }
         }
-
-        Debug.Log(spearDevotion.ToString() + shieldDevotion.ToString() + bowDevotion.ToString());
 
         ShowDeck();
     }
@@ -116,11 +113,6 @@ public class CollectionControl : MonoBehaviour
                 bowDevotion += 1;
             }
         }
-
-        Debug.Log("List:");
-        Debug.Log("Spear:" + spearDevotion.ToString());
-        Debug.Log("Shield:" + shieldDevotion.ToString());
-        Debug.Log("Bow:" + bowDevotion.ToString());
 
         List<int> indices = new List<int>();
 
@@ -159,10 +151,6 @@ public class CollectionControl : MonoBehaviour
                     break;
                 }
             }
-
-            //Debug.Log(tmpSpear);
-            //Debug.Log(tmpShield);
-            //Debug.Log(tmpBow);
 
             if (bad)
             {
@@ -211,8 +199,6 @@ public class CollectionControl : MonoBehaviour
                 runeString += "?? ";
             }
         }
-        Debug.Log(runeString);
-
 
         SaveSystem.SaveRunes(DeckManager.runes);
         ShowDeck();
@@ -348,8 +334,8 @@ public class CollectionControl : MonoBehaviour
                 prevCard = cardReprObj;
 
                 cardReprObj.type = type;
-                cardReprObj.qty = 1;
-                cardReprObj.SetQty();
+                cardReprObj.numberOfCopies = 1;
+                cardReprObj.SetVisualNumber();
 
                 curPosY -= deckCardSpace;
 
@@ -358,8 +344,8 @@ public class CollectionControl : MonoBehaviour
             }
             else
             {
-                prevCard.qty += 1;
-                prevCard.SetQty();
+                prevCard.numberOfCopies += 1;
+                prevCard.SetVisualNumber();
             }
         }
     }
