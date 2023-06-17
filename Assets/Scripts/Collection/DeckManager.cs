@@ -12,20 +12,6 @@ public class DeckManager : MonoBehaviour
     public const int minDeckSize = 20;
     public const int maxCopy = 3;
 
-    public static void FillDeck()
-    {
-        deck = new List<CardTypes>();
-
-        for (int i = 0; i < 8; ++i)
-        {
-            deck.Add(CardTypes.Megapon);
-            deck.Add(CardTypes.FuckingIdiot);
-            deck.Add(CardTypes.DeadlyDispute);
-        }
-
-        SortDeck();
-    }
-
     public static void CopyDeck()
     {
         playDeck = deck;

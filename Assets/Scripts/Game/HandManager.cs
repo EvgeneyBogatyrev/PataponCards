@@ -52,8 +52,6 @@ public class HandManager : MonoBehaviour
         }
 
         UpdateHandPositionOpponent();
-        Debug.Log(opponentHand.Count);
-        Debug.Log(number);
     }
 
     public int GetNumberOfOpponentsCards()
@@ -94,7 +92,7 @@ public class HandManager : MonoBehaviour
         PlayHatapons();
         GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
         gameController.StartGame();
-        boardManager.SendCardNumber(hand.Count);
+        ServerDataProcesser.instance.SendCardNumber(hand.Count);
     }
 
     public void PlayHatapons()

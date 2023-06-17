@@ -24,7 +24,6 @@ public class RuneDropdownManager : MonoBehaviour
         {
             dropdown.options.Add(new Dropdown.OptionData() { text = item });
         }
-        //StartCoroutine(CallFunc(dropdown));
 
         dropdown.onValueChanged.AddListener(delegate { DropdownItemSelected(dropdown); });
     }
@@ -54,12 +53,7 @@ public class RuneDropdownManager : MonoBehaviour
        
         if (!noUpdate)
         {
-            Debug.Log("UPDATING " + index.ToString());
             collection.UpdateRunes();
-        }
-        else
-        {
-            Debug.Log("Cant update");
         }
         noUpdate = false;
         

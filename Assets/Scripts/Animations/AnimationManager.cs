@@ -11,14 +11,14 @@ public class AnimationManager : MonoBehaviour
 
     public GameObject spearPrefab;
 
-    public GameObject CreateObject(Animations type, Vector3 where)
+    public GameObject CreateObject(Animations type, Vector3 position)
     {
         GameObject gameObject = null;
         switch (type)
         {
             case Animations.Spear:
                 gameObject = Instantiate(spearPrefab);
-                gameObject.transform.position = where;
+                gameObject.transform.position = position;
                 break;
 
             default:
