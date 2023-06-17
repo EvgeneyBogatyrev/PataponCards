@@ -359,7 +359,7 @@ public class MinionManager : MonoBehaviour
     {
         if (record)
         {
-            boardManager.Move(connectedSlot.GetIndex() + 1, slotToMove.GetIndex() + 1);
+            ServerDataProcesser.instance.Move(connectedSlot.GetIndex() + 1, slotToMove.GetIndex() + 1);
         }
 
         connectedSlot.SetFree(true);
@@ -373,7 +373,7 @@ public class MinionManager : MonoBehaviour
     {
         if (record)
         {
-            boardManager.Exchange(connectedSlot.GetIndex() + 1, slotToMove.GetIndex() + 1);
+            ServerDataProcesser.instance.Exchange(connectedSlot.GetIndex() + 1, slotToMove.GetIndex() + 1);
         }
 
         MinionManager other = slotToMove.GetConnectedMinion();
@@ -393,7 +393,7 @@ public class MinionManager : MonoBehaviour
         {
             int myIndex = GetIndex() + 1;
             int enemyIndex = -enemy.GetIndex() - 1;
-            boardManager.Attack(myIndex, enemyIndex);
+            ServerDataProcesser.instance.Attack(myIndex, enemyIndex);
         }
         attacking = true;
         attackPosition = enemy.GetSlot().GetPosition();

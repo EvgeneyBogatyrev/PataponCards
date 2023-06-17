@@ -161,15 +161,9 @@ MonoBehaviour:
   enemySlotsPosition: 4
   leftSlotOffset: 12
   minionRotation: 0
-  BASE_URL: https://docs.google.com/forms/u/0/d/e/1FAIpQLSduAm0qxm9BoCbLBGjvCsHXgT303MOgX04oVumEYn-sNaPMEQ/formResponse
-  messageId: 0
-  lastIdFromOpponent: -1
   randomHash: 0
   opponentHash: 0
   gameController: {fileID: 0}
-  connectionState: 0
-  wantToConnect: 0
-  failedConnections: 
   battlecryTrigger: 0
   lastDeadYou: 43
   lastDeadOpponent: 43
@@ -763,6 +757,7 @@ GameObject:
   - component: {fileID: 1101498037}
   - component: {fileID: 1101498036}
   - component: {fileID: 1101498038}
+  - component: {fileID: 1101498039}
   m_Layer: 0
   m_Name: GameController
   m_TagString: Untagged
@@ -815,6 +810,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spearPrefab: {fileID: 4274472123739717661, guid: 68826ed8be5250d439acc86c2f65f9ff, type: 3}
+--- !u!114 &1101498039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1101498035}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09daf9672fc35bc45854bde68232b09a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  messageId: 0
 --- !u!1 &1121363540
 GameObject:
   m_ObjectHideFlags: 0

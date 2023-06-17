@@ -297,7 +297,7 @@ public class CardManager : MonoBehaviour
                     {
                         handManager.RemoveCard(GetIndexIHand());
                         handManager.SetCanPlayCard(false);
-                        boardManager.CastSpell(this, spellTargets);
+                        ServerDataProcesser.instance.CastSpell(this, spellTargets);
                         cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots);
                         spellTargets = new List<int>();
                         foreach (BoardManager.Slot slot in boardManager.friendlySlots)
@@ -349,7 +349,7 @@ public class CardManager : MonoBehaviour
                     if (cardStats.checkSpellTargets(spellTargets, boardManager.enemySlots, boardManager.friendlySlots))
                     {
                         boardManager.battlecryTrigger = true;
-                        boardManager.CastSpell(this, spellTargets);
+                        ServerDataProcesser.instance.CastSpell(this, spellTargets);
                         cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots);
                         if (cardStats.dummyTarget)
                         {
@@ -502,7 +502,7 @@ public class CardManager : MonoBehaviour
                     if (cardStats.damageToHost <= hostMinion.GetPower()) 
                     {
                         cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots);
-                        boardManager.CastSpell(this, spellTargets);
+                        ServerDataProcesser.instance.CastSpell(this, spellTargets);
                         spellTargets = new List<int>();
                         hostMinion.ReturnToNormalAfterOptions();
                         hostMinion.SetCanAttack(false);

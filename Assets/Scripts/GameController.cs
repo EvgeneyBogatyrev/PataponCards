@@ -202,7 +202,7 @@ public class GameController : MonoBehaviour
                     batchIndex += 1;
                 }
             }
-            StartCoroutine(boardManager.ProcessMessages(messagesFromServer));
+            StartCoroutine(ServerDataProcesser.instance.ProcessMessages(messagesFromServer));
             yield return new WaitForSeconds(secondsBetweenServerUpdates);
         }
     }
@@ -272,7 +272,7 @@ public class GameController : MonoBehaviour
         }
         if (!friendly)
         {
-            boardManager.EndTurn();
+            ServerDataProcesser.instance.EndTurn();
             playerTurn = false;
         }
         yield return null;
@@ -400,7 +400,7 @@ public class GameController : MonoBehaviour
         {
             CardManager concedeCard = handManager.GenerateCard(CardTypes.Concede).GetComponent<CardManager>();
             concedeCard.GetCardStats().spell(new List<int>(), boardManager.enemySlots, boardManager.friendlySlots);
-            boardManager.CastSpell(concedeCard, new List<int>());
+            ServerDataProcesser.instance.CastSpell(concedeCard, new List<int>());
             concedeCard.DestroyCard();
         }
     }
