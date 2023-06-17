@@ -42,7 +42,7 @@ public class MinionManager : MonoBehaviour
         connectedSlot = slot;
         friendly = slot.GetFriendly();
         connectedSlot.SetFree(false);
-        imageObject.GetComponent<SpriteRenderer>().sprite = CardGenerator.GetSpriteFromType(GetCardType());
+        imageObject.GetComponent<SpriteRenderer>().sprite = playedCard.GetComponentInChildren<SpriteRenderer>().sprite;
         state = MinionState.Free;
         summoningSickness = true;
         if (cardStats.hasHaste || cardStats.isStatic)

@@ -12,6 +12,7 @@ public static class YariponStats
         stats.power = 2;
         stats.description = "At the end of your turn deal " + yariponDamage.ToString() + " damage to an enemy next to it.";
         stats.name = "Yaripon";
+        stats.imagePath = "yaripon";
         
         stats.runes.Add(Runes.Spear);
 

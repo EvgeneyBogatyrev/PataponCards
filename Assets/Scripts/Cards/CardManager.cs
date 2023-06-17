@@ -57,6 +57,13 @@ public class CardManager : MonoBehaviour
         public int damageToHost = -1;
         public List<Runes> runes = new List<Runes>();
 
+        public string imagePath = "500x500";
+
+        public Sprite GetSprite()
+        {
+            return Resources.Load<Sprite>("Images/" + this.imagePath);
+        }
+
         public CardStats CopyStats()
         {
             CardStats newStats = new CardStats();

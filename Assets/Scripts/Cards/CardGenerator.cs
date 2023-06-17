@@ -67,7 +67,6 @@ public static class CardGenerator
     {
         card.SetCardType(cardType);
         CardManager.CardStats stats = new CardManager.CardStats();
-        card.imageObject.GetComponent<SpriteRenderer>().sprite = GetSpriteFromType(cardType);
 
         static IEnumerator EmptyMethod(int index, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { yield return null; }
         static void EmptyMethod_(int index, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { }
@@ -89,12 +88,7 @@ public static class CardGenerator
         switch (cardType)
         {
             case CardTypes.Hatapon:
-                stats.power = 20;
-                stats.description = "Protect him at all cost!";
-                stats.name = "Hatapon";
-                stats.canAttack = false;
-                stats.canDealDamage = false;
-                stats.hasHaste = true;
+                stats = HataponStats.GetStats();
                 break;
 
             case CardTypes.Tatepon:
@@ -1780,6 +1774,8 @@ public static class CardGenerator
         card.SetPower(stats.power);
         card.SetDescription(stats.description);
         card.SetName(stats.name);
+        card.imageObject.GetComponent<SpriteRenderer>().sprite = stats.GetSprite();
+
         if (stats.isSpell)
         {
             card.powerObject.SetActive(false);
