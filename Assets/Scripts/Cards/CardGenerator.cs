@@ -92,11 +92,7 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Tatepon:
-                stats.power = 4;
-                stats.description = "Your Hatapon is immune.";
-                stats.name = "Tatepon";
-                stats.hasShield = true;
-                stats.runes.Add(Runes.Shield);
+                stats = TateponStats.GetStats();
                 break;
 
             case CardTypes.Yaripon:
@@ -104,726 +100,115 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Yumipon:
-                const int yumiponDamage = 1;
-
-                stats.power = 2;
-                stats.description = "At the end of your turn deal " + yumiponDamage.ToString() + " damage to all enemys.";
-                stats.name = "Yumipon";
-                stats.runes.Add(Runes.Bow);
-
-                static IEnumerator YumiponEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    GameController gameController = GameObject.Find("GameController").GetComponent<GameController>(); 
-                    gameController.actionIsHappening = true;
-                    
-                    AnimationManager animationManager = GameObject.Find("GameController").GetComponent<AnimationManager>();
-                    List<SpearManager> spearArray = new List<SpearManager>();
-                    
-                    foreach (BoardManager.Slot slot in enemySlots)
-                    {
-                        if (!slot.GetFree())
-                        {
-                            //slot.GetConnectedMinion().GetDamage(yumiponDamage);
-                            SpearManager spear = animationManager.CreateObject(AnimationManager.Animations.Spear, friendlySlots[index].GetPosition()).GetComponent<SpearManager>();
-                            spear.SetSlotToGo(slot);
-                            spearArray.Add(spear);
-                            if (enemySlots[index].GetFriendly())
-                            {
-                                spear.isEnemy = true;
-                            }
-                        }
-                    }
-
-                    bool arrowsExists = true;
-
-                    while (arrowsExists)
-                    {
-                        arrowsExists = false;
-
-                        foreach (SpearManager spear in spearArray)
-                        {
-                            if (!spear.reachDestination)
-                            {
-                                arrowsExists = true;
-                            }
-                            else if (!spear.exhausted)
-                            {
-                                spear.DestroySelf();
-                                spear.GetSlotToGo().GetConnectedMinion().ReceiveDamage(yumiponDamage);
-                                spear.exhausted = true;
-                            }
-                        }
-                        yield return new WaitForSeconds(0.1f);
-                    }
-                        
-
-                    gameController.actionIsHappening = false;
-                    yield return null;
-                }
-                stats.endTurnEvent = YumiponEndTurn;
+                stats = YumiponStats.GetStats();
                 break;
 
             case CardTypes.Kibapon:
-                stats.power = 4;
-                stats.description = "Haste.";
-                stats.name = "Kibapon";
-                stats.hasHaste = true;
-                //stats.hasShield = true;
-                stats.runes.Add(Runes.Spear);
-                stats.runes.Add(Runes.Spear);
+                stats = KibaponStats.GetStats();
                 break;
 
             case CardTypes.Dekapon:
-                stats.power = 7;
-                stats.description = "Can not move.";
-                stats.name = "Dekapon";
-                stats.limitedVision = true;
-                stats.runes.Add(Runes.Shield);
+                stats = DekaponStats.GetStats();
                 break;
 
 
             case CardTypes.DivineProtection:
-                const int divineProtectionTateponCount = 3;
-                const int divineProtectionTateponPower = 2;
-
-                stats.description = "Summon " + divineProtectionTateponCount.ToString() + " Tatepons with " + divineProtectionTateponPower.ToString() + " power.";
-                stats.name = "Divine Protection";
+                stats = DivProtStats.GetStats();
                 card.SetNameSize(4);
-                stats.runes.Add(Runes.Shield);
-                stats.runes.Add(Runes.Shield);
-
-                stats.isSpell = true;
-                static void DivineProtectionRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
-                    BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
-
-                    CardManager tateponCard = handManager.GenerateCard(CardTypes.Tatepon).GetComponent<CardManager>();
-                    tateponCard.SetPower(divineProtectionTateponPower);
-                    
-                    int count = 0;
-                    foreach (BoardManager.Slot slot in friendlySlots)
-                    {
-                        if (count >= divineProtectionTateponCount)
-                        {
-                            break;
-                        }
-                        if (slot.GetFree())
-                        {
-                            boardManager.PlayCard(tateponCard, slot, destroy:false, record:false);
-                            count += 1;
-                        }
-                    }
-
-                    tateponCard.DestroyCard();
-                }
-
-                stats.spell = DivineProtectionRealization;
-                stats.numberOfTargets = 0;
-
                 break;
 
             case CardTypes.Fang: 
-                const int fangDamage = 3;
-                stats.description = "Deal " + fangDamage.ToString() + " damage to an enemy.";
-                stats.name = "Fang";
-
-                stats.isSpell = true;
-                static void FangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    BoardManager.Slot targetSlot;
-
-                    int target = targets[0];
-                    if (target > 0)
-                    {
-                        targetSlot = friendlySlots[target - 1];
-                    }
-                    else
-                    {
-                        targetSlot = enemySlots[-target - 1];
-                    }
-
-                    MinionManager targetMinion = targetSlot.GetConnectedMinion();
-                    targetMinion.ReceiveDamage(fangDamage);
-
-                }
-
-                static bool FangCheckTarget(int target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    if (target > 0)
-                    {
-                        return false;
-                    }
-                    return true;
-                }
-
-                stats.spell = FangRealization;
-                stats.checkSpellTarget = FangCheckTarget;
-                stats.numberOfTargets = 1;
+                stats = FangStats.GetStats();
 
                 break;
 
             case CardTypes.Nutrition:
-                const int nutritionHeal = 1;
-                const int nutritionHealthCost = 1;
-                
-                stats.description = "Restore " + nutritionHeal.ToString() + " power to all allies.";
-                stats.name = "Nutrition";
-
-                stats.isSpell = true;
-                
-                static void NutritionRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    MinionManager host;
-                    if (targets[0] < 0)
-                    {
-                        host = enemySlots[targets[0] * (-1) - 1].GetConnectedMinion();
-                    }
-                    else
-                    {
-                        host = friendlySlots[targets[0] - 1].GetConnectedMinion();
-                    }
-
-                    host.TakePower(nutritionHealthCost);
-
-                    foreach (BoardManager.Slot slot in friendlySlots)
-                    {
-                        MinionManager minion = slot.GetConnectedMinion();
-                        if (minion != null && minion != host)
-                        {
-                            minion.Heal(nutritionHeal);
-                        }
-                    }
-                }
-                stats.spell = NutritionRealization;
-                stats.numberOfTargets = 0;
-                stats.damageToHost = nutritionHealthCost;
+                stats = NutritionStats.GetStats();
                 break;
 
             case CardTypes.DeadlyDispute:
-                stats.description = "Choose 2 creatures. They fight each other.";
-                stats.name = "Deadly Dispute";
-                stats.runes.Add(Runes.Spear);
-                stats.runes.Add(Runes.Spear);
-                stats.runes.Add(Runes.Spear);
-
-                stats.isSpell = true;
-                static void DeadlyDisputeRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    List<MinionManager> minions = new List<MinionManager>();
-
-                    for (int i = 0; i < 2; ++i)
-                    {
-                        int target = targets[i];
-                        if (target < 0)
-                        {
-                            target *= -1;
-                            target -= 1;
-                            minions.Add(enemySlots[target].GetConnectedMinion());
-                        }
-                        else
-                        {
-                            target -= 1;
-                            minions.Add(friendlySlots[target].GetConnectedMinion());
-                        }
-                    }
-
-                    minions[0].Attack(minions[1]);
-                }
-
-                static bool DeadlyDisputeCheckTargets(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    if (targets[0] == targets[1])
-                    {
-                        return false;
-                    }
-                    return true;
-                }
-
-                stats.spell = DeadlyDisputeRealization;
-                stats.checkSpellTargets = DeadlyDisputeCheckTargets;
-                stats.numberOfTargets = 2;
+                stats = DeadDispStats.GetStats();
                 break;
 
             case CardTypes.Mahopon:
-                const int mahoponTargetDamage = 3;
-                const int mahoponAoEDamage = 2;
-                stats.runes.Add(Runes.Bow);
-                stats.runes.Add(Runes.Bow);
-                stats.runes.Add(Runes.Bow);
-
-                stats.power = 2;
-                stats.description = "Deal " + mahoponTargetDamage.ToString() + " damage to target creature and " + mahoponAoEDamage.ToString() + " damage to all other creatures.";
-                stats.name = "Mahopon";
-
-                stats.hasOnPlay = true;
-
-                static void MahoponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    BoardManager.Slot selectedSlot;
-                    int target = targets[0];
-                    if (target < 0)
-                    {
-                        target *= -1;
-                        target -= 1;
-                        selectedSlot = enemySlots[target];
-                    }
-                    else
-                    {
-                        target -= 1;
-                        selectedSlot = friendlySlots[target];
-                    }
-
-                    selectedSlot.GetConnectedMinion().ReceiveDamage(mahoponTargetDamage);
-                    
-                    foreach (BoardManager.Slot slot in enemySlots)
-                    {
-                        if (slot != selectedSlot && !slot.GetFree())
-                        {
-                            slot.GetConnectedMinion().ReceiveDamage(mahoponAoEDamage);
-                        }
-                    }
-
-                    foreach (BoardManager.Slot slot in friendlySlots)
-                    {
-                        if (slot != selectedSlot && !slot.GetFree())
-                        {
-                            slot.GetConnectedMinion().ReceiveDamage(mahoponAoEDamage);
-                        }
-                    }
-                }
-
-                stats.spell = MahoponRealization;
-                stats.numberOfTargets = 1;
-
+                stats = MahoponStats.GetStats();
                 break;
 
             case CardTypes.Pyokorider:
-                const int pyokoriderStartTurnPower = 2;
-
-                stats.power = 5;
-                stats.description = "Haste.\nAt the start of your turn set this creature's power to " + pyokoriderStartTurnPower.ToString();
-                stats.name = "Pyokorider";
-                stats.runes.Add(Runes.Spear);
-                stats.runes.Add(Runes.Spear);
-
-                static IEnumerator PyokoriderStartTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    friendlySlots[index].GetConnectedMinion().SetPower(pyokoriderStartTurnPower);
-                    yield return null;
-                }
-
-                stats.startTurnEvent = PyokoriderStartTurn;
-                stats.hasHaste = true;
+                stats = PyokoriderStats.GetStats();
 
                 break;
 
             case CardTypes.FuckingIdiot:
-                const int burusSelfDamage = 1;
-                stats.power = 2;
-                stats.description = "At the end of your turn draw a card and deal " + burusSelfDamage.ToString() + " damage to itself.";
-                stats.name = "Fucking Idiot";
-
-                static IEnumerator FuckingIdiotEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    if (!enemySlots[0].GetFriendly())
-                    {
-                        HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                        handManager.DrawCard();
-                    }
-                    else
-                    {
-                        HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                        handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
-                    }
-                    friendlySlots[index].GetConnectedMinion().ReceiveDamage(burusSelfDamage);
-                    yield return null;
-                }
-
-                stats.endTurnEvent = FuckingIdiotEndTurn;
+                stats = IdiotStats.GetStats();
 
                 break;
 
             case CardTypes.Megapon:
-                stats.power = 2;
-                stats.description = "Deal two damage split between 1 or 2 creatures.\nDraw a card.";
-                stats.name = "Megapon";
-                stats.runes.Add(Runes.Bow);
-                stats.runes.Add(Runes.Bow);
-
-
-                stats.hasBattlecry = true;
-                stats.hasOnPlay = true;
-
-                static void MegaponBattlecry(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    if (index > 0)
-                    {
-                        HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                        handManager.DrawCard();
-                    }
-                }
-
-                static void MegaponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    if (targets[0] == targets[1])
-                    {
-                        BoardManager.Slot selectedSlot;
-                        if (targets[0] < 0)
-                        {
-                            selectedSlot = enemySlots[targets[0] * (-1) - 1];
-                        }
-                        else
-                        {
-                            selectedSlot = friendlySlots[targets[0] - 1];
-                        }
-
-                        selectedSlot.GetConnectedMinion().ReceiveDamage(2);
-                    }
-                    else
-                    {
-                        foreach (int target in targets)
-                        {
-                            BoardManager.Slot selectedSlot;
-                            if (target < 0)
-                            {
-                                selectedSlot = enemySlots[target * (-1) - 1];
-                            }
-                            else
-                            {
-                                selectedSlot = friendlySlots[target - 1];
-                            }
-
-                            selectedSlot.GetConnectedMinion().ReceiveDamage(1);
-                        }
-                    }
-
-                    if (enemySlots[1].GetFriendly())
-                    {
-                        HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                        handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
-                    }
-                }
-
-                stats.spell = MegaponRealization;
-                stats.numberOfTargets = 2;
-
-                stats.onPlayEvent = MegaponBattlecry;
+                stats = MegaponStats.GetStats();
 
                 break;
 
             case CardTypes.Buzzcrave:
-                stats.power = 4;
-                stats.description = "Haste.\nCan attack any enemy unit on the board.";
-                stats.name = "Buzzcrave";
-                stats.megaVision = true;
-                stats.hasHaste = true;
-                stats.runes.Add(Runes.Spear);
-                stats.runes.Add(Runes.Spear);
+                stats = BuzzcraveStats.GetStats();
                 break;
 
             case CardTypes.Guardira:
-                const int guardiraPower = 1;
-                
-                stats.power = 9;
-                stats.description = "Greatshield.\nAlways deals " + guardiraPower.ToString() + " damage regardless of its power.";
-                stats.name = "Guardira";
-                stats.hasGreatshield = true;
-                stats.fixedPower = guardiraPower;
-                stats.runes.Add(Runes.Shield);
-                stats.runes.Add(Runes.Shield);
+                stats = GuardiraStats.GetStats();
                 break;
 
             case CardTypes.GiveFang:
-                const int giveFangHealthCost = 1;
-                
-                stats.description = "Add Fang to your hand.";
-                stats.name = "Bone Weapon";
-
-                stats.isSpell = true;
-                static void GiveFangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    MinionManager host;
-                    if (targets[0] < 0)
-                    {
-                        host = enemySlots[targets[0] * (-1) - 1].GetConnectedMinion();
-                    }
-                    else
-                    {
-                        host = friendlySlots[targets[0] - 1].GetConnectedMinion();
-                    }
-
-                    host.TakePower(giveFangHealthCost);
-                    if (!enemySlots[0].GetFriendly())
-                    {
-                        HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                        handManager.AddCardToHand(CardTypes.Fang);
-                    }
-                    else
-                    {
-                        HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                        handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
-                    }
-                    
-                }
-                stats.spell = GiveFangRealization;
-                stats.numberOfTargets = 0;
-                stats.damageToHost = giveFangHealthCost;
+                stats = GiveFangStats.GetStats();
                 break;
 
             case CardTypes.Kacheek:
-                stats.power = 5;
-                stats.description = "-1: Add Fang to your hand.\n-1: Give your creatures +1 power.";
-                stats.name = "Kacheek";
-
-                stats.isStatic = true;
-                stats.connectedCards = new List<CardTypes>();
-                stats.connectedCards.Add(CardTypes.GiveFang);
-                stats.connectedCards.Add(CardTypes.Nutrition);
-                stats.runes.Add(Runes.Spear);
-                stats.runes.Add(Runes.Spear);
+                stats = KacheekStats.GetStats();
                 break;
 
             case CardTypes.Myamsar:
-                stats.power = 2;
-                stats.description = "At the end of your turn summon a copy of this minion with 1 less power.";
-                stats.name = "Myamsar";
-                stats.runes.Add(Runes.Spear);
-                stats.runes.Add(Runes.Spear);
-
-                static IEnumerator MyamsarEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    MinionManager thisOne = friendlySlots[index].GetConnectedMinion();
-
-                    BoardManager.Slot targetSlot = null;
-                    foreach (BoardManager.Slot slot in friendlySlots)
-                    {
-                        if (slot.GetFree())
-                        {
-                            targetSlot = slot;
-                            break;
-                        }
-                    }
-
-                    if (targetSlot == null)
-                    {
-                        yield return null;
-                    }
-
-                    HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                    BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
-
-                    int newPower = thisOne.GetPower() - 1;
-                    if (newPower > 0)
-                    {
-                        CardManager newCard = handManager.GenerateCard(CardTypes.Myamsar).GetComponent<CardManager>();
-                        newCard.SetPower(newPower);
-                        boardManager.PlayCard(newCard, targetSlot, destroy: true, record: false);
-                    }
-                    yield return null;
-                }
-                stats.endTurnEvent = MyamsarEndTurn;
+                stats = MyamsarStats.GetStats();
 
                 break;
 
             case CardTypes.Motiti:
-                stats.power = 3;
-                stats.description = "+0: Add +2 power.\n+0: Transform into Angry Motiti with Haste.";
-                stats.name = "Motiti";
-
-                stats.isStatic = true;
-                stats.connectedCards = new List<CardTypes>();
-                stats.connectedCards.Add(CardTypes.Motiti_option1);
-                stats.connectedCards.Add(CardTypes.Motiti_option2);
+                stats = MochichiStats.GetStats();
                 break;
 
             case CardTypes.Motiti_option1:
-                const int motiti1HealthCost = 0;
-                const int motiti1Heal = 2;
-
-                stats.description = "Give Motiti +" + motiti1Heal.ToString() + " power.";
-                stats.name = "Accumulate power";
-
-                stats.isSpell = true;
-                static void MotitiOpt1Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    MinionManager host;
-                    if (targets[0] < 0)
-                    {
-                        host = enemySlots[targets[0] * (-1) - 1].GetConnectedMinion();
-                    }
-                    else
-                    {
-                        host = friendlySlots[targets[0] - 1].GetConnectedMinion();
-                    }
-
-                    host.TakePower(motiti1HealthCost);
-                    host.Heal(motiti1Heal);
-                }
-                stats.spell = MotitiOpt1Realization;
-                stats.numberOfTargets = 0;
-                stats.damageToHost = motiti1HealthCost;
+                stats = MochiAccumStats.GetStats();
                 break;
 
             case CardTypes.Motiti_option2:
-                const int motiti2HealthCost = 0;
-
-                stats.description = "Transform Motiti into Angry Motiti with Haste.";
-                stats.name = "Motiti Counteratack";
-
-                stats.isSpell = true;
-                static void MotitiOpt2Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    MinionManager host;
-                    if (targets[0] < 0)
-                    {
-                        host = enemySlots[targets[0] * (-1) - 1].GetConnectedMinion();
-                    }
-                    else
-                    {
-                        host = friendlySlots[targets[0] - 1].GetConnectedMinion();
-                    }
-
-                    HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                    BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
-
-                    host.TakePower(motiti2HealthCost);
-                    CardManager newCard = handManager.GenerateCard(CardTypes.MotitiAngry).GetComponent<CardManager>();
-                    newCard.SetPower(host.GetPower());
-                    BoardManager.Slot slot = host.GetSlot();
-                    host.TakePower(host.GetPower());
-                    boardManager.PlayCard(newCard, slot, destroy: true, record: false);
-
-                }
-                stats.spell = MotitiOpt2Realization;
-                stats.numberOfTargets = 0;
-                stats.damageToHost = motiti2HealthCost;
+                stats = MochiciCounterStats.GetStats();
                 break;
 
             case CardTypes.MotitiAngry:
-                stats.power = 3;
-                stats.description = "Haste.";
-                stats.name = "Angry Motiti";
-
-                stats.hasHaste = true;
+                stats = MochichiAngryStats.GetStats();
                 break;
 
             case CardTypes.Robopon:
-                stats.power = 3;
-                stats.description = "At the end and the start of your turn gain +1 power.";
-                stats.name = "Robopon";
-                stats.runes.Add(Runes.Shield);
-
-
-                static IEnumerator RoboponEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    friendlySlots[index].GetConnectedMinion().Heal(1);
-                    yield return null;
-                }
-
-                stats.endTurnEvent = RoboponEndTurn;
-                stats.startTurnEvent = RoboponEndTurn;
+                stats = RoboponStats.GetStats();
                 break;
 
             case CardTypes.Toripon:
-                stats.power = 3;
-                stats.description = "Cannot be a target of an attack.";
-                stats.name = "Toripon";
-                stats.runes.Add(Runes.Spear);
-                stats.runes.Add(Runes.Spear);
-                stats.runes.Add(Runes.Spear);
-
-                stats.flying = true;
+                stats = ToriponStats.GetStats();
                 break;
 
             case CardTypes.TargetDummy:
-                stats.power = 3;
-                stats.description = "Greatshield.";
-                stats.name = "Target dummy";
-                stats.hasGreatshield = true;
-                stats.runes.Add(Runes.Shield);
-                stats.runes.Add(Runes.Shield);
+                stats = TargetDummyStats.GetStats();
 
                 break;
 
             case CardTypes.Boulder:
-                stats.power = 3;
-                stats.description = "Greatshield.\nCan't attack, move and deal damage.";
-                stats.name = "The rock";
-                stats.canAttack = false;
-                stats.canDealDamage = false;
-                stats.limitedVision = true;
-                stats.hasGreatshield = true;
+                stats = BoulderStats.GetStats();
                 break;
 
             case CardTypes.Bowmunk:
-                const int bowmunkHealing = 2;
-                stats.power = 2;
-                stats.description = "Summon the rock with Greatshield. At the end of your turn heal your Hatapon by " + bowmunkHealing.ToString() + ".";
-                stats.name = "Bowmunk";
-                stats.runes.Add(Runes.Shield);
-                stats.runes.Add(Runes.Shield);
-
-
-                static IEnumerator BowmunkEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    foreach (BoardManager.Slot slot in friendlySlots)
-                    {
-                        MinionManager connectedMinion = slot.GetConnectedMinion();
-                        if (connectedMinion != null)
-                        {
-                            if (connectedMinion.GetCardType() == CardTypes.Hatapon)
-                            {
-                                connectedMinion.Heal(bowmunkHealing);
-                            }
-                        }
-                    }
-                    yield return null;
-                }
-                stats.endTurnEvent = BowmunkEndTurn;
-
-
-                stats.hasOnPlay = true;
-
-                static void BowmunkRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-                {
-                    BoardManager.Slot thisOne = friendlySlots[targets[0]];
-
-                    BoardManager.Slot targetSlot = null;
-                    foreach (BoardManager.Slot slot in friendlySlots)
-                    {
-                        if (slot.GetFree() && slot != thisOne)
-                        {
-                            targetSlot = slot;
-                            break;
-                        }
-                    }
-
-                    if (targetSlot != null)
-                    {
-                        HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
-                        BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
-
-                        CardManager boulderCard = handManager.GenerateCard(CardTypes.Boulder).GetComponent<CardManager>();
-                        boardManager.PlayCard(boulderCard, targetSlot, destroy:false, record:false);
-                        
-                        boulderCard.DestroyCard();
-                    }
-                }
-
-                stats.spell = BowmunkRealization;
-                stats.numberOfTargets = 1;
-                stats.dummyTarget = true;
+                stats = BowmunkStats.GetStats();
                 break;
 
             case CardTypes.Grenburr:
-                const int grenburrPower = 6;
-                
-                stats.power = 3;
-                stats.description = "Always deals " + grenburrPower.ToString() + " damage regardless of its power.";
-                stats.name = "Grenburr";
-                stats.fixedPower = grenburrPower;
-                stats.runes.Add(Runes.Shield);
+                stats = GrenburrStats.GetStats();
                 break;
 
             case CardTypes.Alldemonium: 
