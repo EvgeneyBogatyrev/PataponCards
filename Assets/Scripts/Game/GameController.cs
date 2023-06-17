@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
-using System.IO;
+using UnityEngine.SceneManagement;
 using System;
 using TMPro;
 
@@ -89,7 +89,55 @@ public class GameState
 {
     public int friendlyWins = 0;
     public int enemyWins = 0;
+    public int friendlyTurnNumber = 0;
+    public int enemyTurnNumber = 0;
+    public int suddenDeathTurns = 2;
+    public int friendlySuddenDeathDamage = 0;
+    public int enemySuddenDeathDamage = 0;
 
+    public void Reset(GameObject turnsObject) 
+    {
+        friendlyTurnNumber = 0;
+        enemyTurnNumber = 0;
+        friendlySuddenDeathDamage = 0;
+        enemySuddenDeathDamage = 0;
+
+        turnsObject.GetComponent<TextMeshProUGUI>().text = "Turn: " + friendlyTurnNumber.ToString() + "\nNext Hatapon Damage: " + friendlySuddenDeathDamage.ToString() + "\nNext Opponent Damage: " + enemySuddenDeathDamage.ToString();
+    }
+
+    public void Increment(bool friendly, GameObject turnsObject)
+    {
+        if (friendly)
+        {
+            friendlyTurnNumber += 1;
+            if (friendlyTurnNumber >= suddenDeathTurns)
+            {
+                friendlySuddenDeathDamage += 1;
+            }
+        }
+        else
+        {
+            enemyTurnNumber += 1;
+            if (enemyTurnNumber >= suddenDeathTurns)
+            {
+                enemySuddenDeathDamage += 1;
+            }
+        }
+
+        turnsObject.GetComponent<TextMeshProUGUI>().text = "Turn: " + friendlyTurnNumber.ToString() + "\nNext Hatapon Damage: " + friendlySuddenDeathDamage.ToString() + "\nNext Opponent Damage: " + enemySuddenDeathDamage.ToString();
+    }
+
+    public int GetSuddenDeathDamage(bool friendly)
+    {
+        if (friendly)
+        {
+            return friendlySuddenDeathDamage;
+        }
+        else
+        {
+            return enemySuddenDeathDamage;
+        }
+    }
 }
 
 public class GameController : MonoBehaviour
@@ -100,6 +148,8 @@ public class GameController : MonoBehaviour
 
     [SerializeField]
     private GameObject scoreObject;
+    [SerializeField]
+    private GameObject turnsObject;
 
     private string GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwHlf0DxUjBKb3blzMbawD3Yn1FfPp9unN8Ho5LGb_DQoc1YcvwhhHaS9hM1FLhMYxk/exec";
     private GameState gameState = new GameState();
@@ -123,6 +173,13 @@ public class GameController : MonoBehaviour
             playerTurn = true;
             handManager.SetCanPlayCard(true);
             CursorController.cursorState = CursorController.CursorStates.Free;
+            gameState.Increment(friendly:true, turnsObject);
+            boardManager.DealSuddenDeathDamage(friendly:true, gameState.GetSuddenDeathDamage(friendly:true));
+        }
+        else
+        {
+            gameState.Increment(friendly:false, turnsObject);
+            boardManager.DealSuddenDeathDamage(friendly:false, gameState.GetSuddenDeathDamage(friendly:false));
         }
         StartCoroutine(ObtainData());
     }
@@ -213,6 +270,19 @@ public class GameController : MonoBehaviour
 
     IEnumerator IenumStartTurn(bool friendly)
     {
+        if (!friendly)
+        {
+            CursorController.cursorState = CursorController.CursorStates.EnemyTurn;
+        }
+        else
+        {
+            CursorController.cursorState = CursorController.CursorStates.Free;
+        }
+        GameController.playerTurn = !friendly;
+        handManager.SetCanPlayCard(!friendly);
+
+        gameState.Increment(friendly, turnsObject);
+        boardManager.DealSuddenDeathDamage(friendly, gameState.GetSuddenDeathDamage(friendly));
         if (friendly)
         {
             playerTurn = true;
@@ -358,6 +428,25 @@ public class GameController : MonoBehaviour
         yield return null;
     }
 
+    public void EndRound(bool friendly)
+    {
+        StartCoroutine(OnEndRound(friendly));
+    }
+
+    public IEnumerator OnEndRound(bool friendlyVictory)
+    {
+        RecordGameResult(friendlyVictory);
+        if (CheckGameEnd())
+        {
+            yield return new WaitForSeconds(3f);
+            SceneManager.LoadScene("MainMenu");
+        }
+
+        gameState.Reset(turnsObject);
+
+        StartTurn(!friendlyVictory);
+    }
+
     public void RecordGameResult(bool friendlyVictory)
     {
         if (friendlyVictory)
@@ -368,7 +457,7 @@ public class GameController : MonoBehaviour
         {
             gameState.enemyWins += 1;
         }
-        scoreObject.GetComponent<TextMeshProUGUI>().text = gameState.friendlyWins.ToString() + ":" + gameState.enemyWins.ToString();;
+        scoreObject.GetComponent<TextMeshProUGUI>().text = gameState.friendlyWins.ToString() + ":" + gameState.enemyWins.ToString();
     }
 
     public bool CheckGameEnd()

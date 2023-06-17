@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
 using System.Linq;
 
 public class BoardManager : MonoBehaviour
@@ -174,11 +172,41 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public void CastSpell(CardManager card, List<int> targets)
+    
+    public void DealSuddenDeathDamage(bool friendly, int amount)
     {
-        ServerDataProcesser.instance.CastSpell(card, targets);
-    }
+        if (amount == 0)
+        {
+            return;
+        }
+        MinionManager hatapon = null;
+        List<Slot> searchSlots;
+        if (friendly)
+        {
+            searchSlots = friendlySlots;
+        }
+        else
+        {
+            searchSlots = enemySlots;
+        }
 
+        foreach (Slot slot in searchSlots)
+        {
+            MinionManager curMinion = slot.GetConnectedMinion();
+            if (curMinion != null && curMinion.GetCardType() == CardTypes.Hatapon)
+            {
+                hatapon = curMinion;
+                break;
+            }
+        }
+
+        if (hatapon == null)
+        {
+            Debug.Log("Can't find Hatapon in DealSuddenDeathDamage");
+        }
+
+        hatapon.TakePower(amount);
+    }
 
     public void CallEndRound(bool looser)
     {
@@ -192,14 +220,7 @@ public class BoardManager : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
         }
 
-
-        gameController.RecordGameResult(!looser);
-        if (gameController.CheckGameEnd())
-        {
-            yield return new WaitForSeconds(3f);
-            SceneManager.LoadScene("MainMenu");
-        }
-
+        gameController.EndRound(!looser);
 
         foreach (Slot slot in friendlySlots)
         {
@@ -227,20 +248,6 @@ public class BoardManager : MonoBehaviour
         handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 3);
 
         handManager.PlayHatapons();
-
-
-        if (!looser)
-        {
-            GameController.playerTurn = false;
-            handManager.SetCanPlayCard(false);
-            CursorController.cursorState = CursorController.CursorStates.EnemyTurn;
-        }
-        else
-        {
-            GameController.playerTurn = true;
-            handManager.SetCanPlayCard(true);
-            CursorController.cursorState = CursorController.CursorStates.Free;
-        }
 
         lastDeadOpponent = CardTypes.Hatapon;
         lastDeadYou = CardTypes.Hatapon;

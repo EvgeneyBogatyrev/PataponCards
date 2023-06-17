@@ -101,13 +101,13 @@ public class MinionManager : MonoBehaviour
         return power;
     }
 
-    public void ReceiveDamage(int damage)
+    public void TakePower(int damage)
     {
         SetPower(power - damage);
         CheckPower();
     }
 
-    public void GetDamage(int damage)
+    public void ReceiveDamage(int damage)
     {
         if (cardType == CardTypes.Hatapon)
         {
@@ -121,7 +121,7 @@ public class MinionManager : MonoBehaviour
         {
             actualDamage = 0;
         }
-        ReceiveDamage(actualDamage);
+        TakePower(actualDamage);
     }
 
     public void Heal(int amount)
@@ -419,11 +419,11 @@ public class MinionManager : MonoBehaviour
                 {
                     if (cardStats.fixedPower == -1)
                     {
-                        enemy.GetDamage(power);
+                        enemy.ReceiveDamage(power);
                     }
                     else
                     {
-                        enemy.GetDamage(cardStats.fixedPower);
+                        enemy.ReceiveDamage(cardStats.fixedPower);
                     }
                 }
             }
@@ -431,11 +431,11 @@ public class MinionManager : MonoBehaviour
             {
                 if (cardStats.fixedPower == -1)
                 {
-                    enemy.GetDamage(power);
+                    enemy.ReceiveDamage(power);
                 }
                 else
                 {
-                    enemy.GetDamage(cardStats.fixedPower);
+                    enemy.ReceiveDamage(cardStats.fixedPower);
                 }
             }
         }
@@ -448,11 +448,11 @@ public class MinionManager : MonoBehaviour
                 {
                     if (enemy.cardStats.fixedPower == -1)
                     {
-                        GetDamage(enemyPower);
+                        ReceiveDamage(enemyPower);
                     }
                     else
                     {
-                        GetDamage(enemy.cardStats.fixedPower);
+                        ReceiveDamage(enemy.cardStats.fixedPower);
                     }
                 }
             }
@@ -460,11 +460,11 @@ public class MinionManager : MonoBehaviour
             {
                 if (enemy.cardStats.fixedPower == -1)
                 {
-                    GetDamage(enemyPower);
+                    ReceiveDamage(enemyPower);
                 }
                 else
                 {
-                    GetDamage(enemy.cardStats.fixedPower);
+                    ReceiveDamage(enemy.cardStats.fixedPower);
                 }
             }
         }
