@@ -293,7 +293,24 @@ public class ServerDataProcesser : MonoBehaviour
                     break;
 
                 case MessageFromServer.Action.NumberOfCards:
-                    handManager.SetNumberOfOpponentsCards(message.targets[0]);
+                    
+                    if (message.targets[0] != handManager.GetNumberOfOpponentsCards())
+                    {
+                        int difference = message.targets[0] - handManager.GetNumberOfOpponentsCards();
+                        if (difference > 0)
+                        {
+                            for (int i = 0; i < difference; ++i)
+                            {
+                                handManager.DrawCardOpponent();
+                            }
+                        }
+                        else
+                        {
+                            handManager.SetNumberOfOpponentsCards(message.targets[0]);
+                        }
+                    }
+                    
+                    
                     break;
             }
 

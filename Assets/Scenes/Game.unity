@@ -957,6 +957,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scoreObject: {fileID: 1309111140}
   turnsObject: {fileID: 1884063494}
+  deckSizeObject: {fileID: 838020165}
   secondsBetweenAnimations: 0.5
   actionIsHappening: 0
 --- !u!4 &1101498037

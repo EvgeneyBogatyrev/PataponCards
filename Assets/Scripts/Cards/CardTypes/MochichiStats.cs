@@ -98,7 +98,7 @@ public static class MochiciCounterStats
         stats.numberOfTargets = 0;
         stats.damageToHost = motiti2HealthCost;
 
-        stats.imagePath = "";
+        stats.imagePath = "MotitiAngry";
         return stats;
     }
 }
@@ -115,7 +115,7 @@ public static class MochichiAngryStats
 
         stats.hasHaste = true;
 
-        stats.imagePath = "";
+        stats.imagePath = "MotitiAngry";
         return stats;
     }
 }

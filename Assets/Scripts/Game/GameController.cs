@@ -93,6 +93,15 @@ public class GameState
     public int friendlySuddenDeathDamage = 0;
     public int enemySuddenDeathDamage = 0;
 
+    public bool StartOfTheGame()
+    {
+        if (friendlyWins + enemyWins == 0)
+        {
+            return true;
+        }
+        return false;
+    }
+
     public void Reset(GameObject turnsObject) 
     {
         friendlyTurnNumber = 0;
@@ -148,6 +157,8 @@ public class GameController : MonoBehaviour
     private GameObject scoreObject;
     [SerializeField]
     private GameObject turnsObject;
+    [SerializeField]
+    private GameObject deckSizeObject;
 
     private GameState gameState = new GameState();
 
@@ -178,12 +189,15 @@ public class GameController : MonoBehaviour
             gameState.Increment(friendly:false, turnsObject);
             boardManager.DealSuddenDeathDamage(friendly:false, gameState.GetSuddenDeathDamage(friendly:false));
         }
+        if (gameState.StartOfTheGame())
+        {
+            DeckManager.ResetOpponentsDeck();
+        }
         StartCoroutine(ServerDataProcesser.instance.ObtainData());
     }
 
     public void StartTurn(bool friendly, bool hataponJustDied=false)
     {
-        //Debug.Log("In start turn" + friendly.ToString());
         StartCoroutine(IenumStartTurn(friendly, hataponJustDied));
     }
 
@@ -339,28 +353,35 @@ public class GameController : MonoBehaviour
         yield return null;
     }
 
-    public bool EndRound(bool friendly)
+    public void EndRound(bool friendly)
     {
-        RecordGameResult(friendly);
         StartCoroutine(OnEndRound(friendly));
-        if (CheckGameEnd())
-        {
-            return true;
-        }
-        return false;
     }
 
     public IEnumerator OnEndRound(bool friendlyVictory)
     {
+        RecordGameResult(friendlyVictory);
+        while (boardManager.battlecryTrigger)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+
         if (CheckGameEnd())
         {
             yield return new WaitForSeconds(3f);
             SceneManager.LoadScene("MainMenu");
+            yield return null;
         }
+        else
+        {
+            boardManager.ClearBoard();
+            handManager.StartRoundActions();
+            
+            gameState.Reset(turnsObject);
 
-        gameState.Reset(turnsObject);
-
-        StartTurn(!friendlyVictory, hataponJustDied:true);
+            StartTurn(!friendlyVictory, hataponJustDied:true);
+            yield return null;
+        }
     }
 
     public void RecordGameResult(bool friendlyVictory)
@@ -387,6 +408,39 @@ public class GameController : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    public bool ProcessCardDraw(bool friendly)
+    {
+        bool couldDraw;
+        if (!friendly)
+        {
+            DeckManager.opponentDeckSize -= 1;
+            if (DeckManager.opponentDeckSize > 0)
+            {
+                couldDraw = true;
+            }
+            else 
+            {
+                couldDraw = false;
+                DeckManager.opponentDeckSize = 0;
+            }
+        }
+        else
+        {
+            if (DeckManager.GetDeckSize() > 0)
+            {
+                couldDraw = true;
+            }
+            else
+            {
+                couldDraw = false;
+            }
+        }
+
+        deckSizeObject.GetComponent<TextMeshProUGUI>().text = "Decks: " + DeckManager.GetDeckSize().ToString() + ":" + DeckManager.opponentDeckSize.ToString();
+
+        return couldDraw;
     }
 
     // Buttons

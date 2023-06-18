@@ -23,7 +23,7 @@ public static class IdiotStats
             else
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
+                handManager.DrawCardOpponent();
             }
             friendlySlots[index].GetConnectedMinion().ReceiveDamage(burusSelfDamage);
             yield return null;

@@ -64,7 +64,8 @@ public static class MegaponStats
             if (enemySlots[1].GetFriendly())
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
+                //handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
+                handManager.DrawCardOpponent();
             }
         }
 

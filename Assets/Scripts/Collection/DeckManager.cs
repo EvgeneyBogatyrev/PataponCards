@@ -12,9 +12,16 @@ public class DeckManager : MonoBehaviour
     public const int minDeckSize = 20;
     public const int maxCopy = 3;
 
+    public static int opponentDeckSize = 20;
+
     public static void CopyDeck()
     {
         playDeck = deck;
+    }
+
+    public static void ResetOpponentsDeck(int cardNum = 20)
+    {
+        opponentDeckSize = cardNum;
     }
 
     public static CardTypes GetRandomCard(bool remove=true)

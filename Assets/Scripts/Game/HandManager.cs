@@ -30,7 +30,7 @@ public class HandManager : MonoBehaviour
         }
 
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
-        SetNumberOfOpponentsCards(7);
+        SetNumberOfOpponentsCards(0);
     }
 
     public void SetNumberOfOpponentsCards(int number)
@@ -115,10 +115,21 @@ public class HandManager : MonoBehaviour
 
     public void DrawCard()
     {
+        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
         CardTypes cardType = DeckManager.GetRandomCard(remove:true);
         if (cardType != CardTypes.Hatapon)
         {
             AddCardToHand(cardType);
+        }
+        gameController.ProcessCardDraw(friendly:true);
+    }
+
+    public void DrawCardOpponent()
+    {
+        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+        if (gameController.ProcessCardDraw(friendly:false))
+        {
+            SetNumberOfOpponentsCards(GetNumberOfOpponentsCards() + 1);
         }
     }
 
@@ -182,5 +193,16 @@ public class HandManager : MonoBehaviour
     public void SetCanPlayCard(bool _can)
     {
         canPlayCard = _can;
+    }
+
+    public void StartRoundActions(int cardIncrement = 3)
+    {
+        for (int i = 0; i < cardIncrement; ++i)
+        {
+            DrawCard();
+            DrawCardOpponent();
+        }
+
+        PlayHatapons();
     }
 }

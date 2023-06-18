@@ -208,55 +208,27 @@ public class BoardManager : MonoBehaviour
         hatapon.TakePower(amount);
     }
 
-    public void CallEndRound(bool looser)
+    public void ClearBoard()
     {
-        StartCoroutine(EndRound(looser));
-    }
-
-    IEnumerator EndRound(bool looser)
-    {
-        while (battlecryTrigger)
+        foreach (Slot slot in friendlySlots)
         {
-            yield return new WaitForSeconds(0.1f);
+            MinionManager minion = slot.GetConnectedMinion();
+            if (minion != null)
+            {
+                minion.DestroySelf();
+            }
         }
 
-        if (gameController.EndRound(!looser))
+        foreach (Slot slot in enemySlots)
         {
-            yield return null;
+            MinionManager minion = slot.GetConnectedMinion();
+            if (minion != null)
+            {
+                minion.DestroySelf();
+            }
         }
-        else
-        {
-            foreach (Slot slot in friendlySlots)
-            {
-                MinionManager minion = slot.GetConnectedMinion();
-                if (minion != null)
-                {
-                    minion.DestroySelf();
-                }
-            }
-
-            foreach (Slot slot in enemySlots)
-            {
-                MinionManager minion = slot.GetConnectedMinion();
-                if (minion != null)
-                {
-                    minion.DestroySelf();
-                }
-            }
-
-            HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-            for (int i = 0; i < 3; ++i)
-            {
-                handManager.DrawCard();
-            }
-            handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 3);
-
-            handManager.PlayHatapons();
-
-            lastDeadOpponent = CardTypes.Hatapon;
-            lastDeadYou = CardTypes.Hatapon;
-            yield return null;
-        }
+        lastDeadOpponent = CardTypes.Hatapon;
+        lastDeadYou = CardTypes.Hatapon;
     }
 }
 

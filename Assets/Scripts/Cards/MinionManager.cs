@@ -62,12 +62,14 @@ public class MinionManager : MonoBehaviour
     }
 
     private BoardManager boardManager;
+    private GameController gameController;
     private HandManager handManager;
 
     private void Start()
     {
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
         handManager = GameObject.Find("Hand").GetComponent<HandManager>();
+        gameController = GameObject.Find("GameController").GetComponent<GameController>();
     }
 
     public void SetCardType(CardTypes type)
@@ -480,14 +482,7 @@ public class MinionManager : MonoBehaviour
             DestroySelf();
             if (GetCardType() == CardTypes.Hatapon)
             {
-                if (friendly)
-                {
-                    boardManager.CallEndRound(true);
-                }
-                else
-                { 
-                    boardManager.CallEndRound(false);
-                }
+                gameController.EndRound(!friendly);
             }
             if (cardStats.hasDeathrattle)
             {
@@ -508,14 +503,7 @@ public class MinionManager : MonoBehaviour
         DestroySelf();
         if (GetCardType() == CardTypes.Hatapon)
         {
-            if (friendly)
-            {
-                boardManager.CallEndRound(true);
-            }
-            else
-            { 
-                boardManager.CallEndRound(false);
-            }
+            gameController.EndRound(!friendly);
         }
         if (cardStats.hasDeathrattle)
         {
