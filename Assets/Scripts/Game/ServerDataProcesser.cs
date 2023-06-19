@@ -322,12 +322,16 @@ public class ServerDataProcesser : MonoBehaviour
 
     public IEnumerator ObtainData()
     {
+        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
         while (true)
         {
-            if (GameController.playerTurn)
+            if (!gameController.NeedToSync())
             {
-                yield return new WaitForSeconds(secondsBetweenServerUpdates);
-                continue;
+                if (GameController.playerTurn)
+                {
+                    yield return new WaitForSeconds(secondsBetweenServerUpdates);
+                    continue;
+                }
             }
             Debug.Log("Start obtaining....");
             UnityWebRequest www = UnityWebRequest.Get(GOOGLE_API_URL);

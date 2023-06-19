@@ -133,6 +133,7 @@ public class CardManager : MonoBehaviour
     {
         display, // Just like an image. Use to show in collection
         inHand,
+        Drawing,
         selected,
         selectingTargets, // For spells with more than one target
         asOption,
@@ -179,6 +180,8 @@ public class CardManager : MonoBehaviour
     private BoardManager boardManager;
     private HandManager handManager;
 
+    private Vector3 drawEndPosition;
+
     private void Start()
     {
         Scene scene = SceneManager.GetActiveScene();
@@ -186,6 +189,7 @@ public class CardManager : MonoBehaviour
         {
             boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
             handManager = GameObject.Find("Hand").GetComponent<HandManager>();
+            drawEndPosition = GameObject.Find("DrawnCardDisplay").transform.position;
         }
     }
 
@@ -198,7 +202,7 @@ public class CardManager : MonoBehaviour
                                     CursorController.cursorState == CursorController.CursorStates.EnemyTurn))
                 {
                     transform.localScale = new Vector3(selectedScale, selectedScale, 1f);
-                    transform.position = new Vector3(positionInHand.x, selectedY, selectedZ);
+                    transform.position = Vector3.Lerp(transform.position, new Vector3(positionInHand.x, selectedY, selectedZ), 20f * Time.deltaTime);
                     transform.rotation = Quaternion.Euler(0, 0, 0);
 
                     if (Input.GetMouseButtonDown(0) && handManager.CanPlayCard())
@@ -221,6 +225,18 @@ public class CardManager : MonoBehaviour
                     transform.position = positionInHand;
                     transform.rotation = Quaternion.Euler(0, 0, curRotation);
                 }
+                break;
+
+            case CardState.Drawing:
+                
+                transform.localScale = new Vector3(1.35f * normalScale, 1.35f * normalScale, 1f);
+                transform.position = Vector3.Lerp(transform.position, drawEndPosition, Time.deltaTime * 5.0f);
+
+                if ((transform.position - drawEndPosition).magnitude < 0.05f)
+                {
+                    cardState = CardState.inHand;
+                }
+                
                 break;
 
             case CardState.selected:
@@ -596,6 +612,7 @@ public class CardManager : MonoBehaviour
     {
         cardType = type;
     }
+
     public CardTypes GetCardType()
     {
         return cardType;
@@ -605,6 +622,11 @@ public class CardManager : MonoBehaviour
     {
         this.cardState = state;
     }
+    public CardState GetCardState()
+    {
+        return cardState;
+    }
+
     public void SetCardStats(CardStats stats)
     {
         cardStats = stats;

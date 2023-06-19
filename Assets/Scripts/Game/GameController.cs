@@ -149,7 +149,7 @@ public class GameState
 
 public class GameController : MonoBehaviour
 {
-    public static bool playerTurn = true;
+    public static bool playerTurn = false;
     private HandManager handManager;
     private BoardManager boardManager;
 
@@ -160,6 +160,12 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private GameObject deckSizeObject;
 
+    [SerializeField]
+    private GameObject endTurnButtonObject;
+
+    [SerializeField]
+    private GameObject concedeObject;
+
     private GameState gameState = new GameState();
 
     public float secondsBetweenAnimations = 0.5f;
@@ -167,12 +173,16 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
+        endTurnButtonObject.SetActive(false);
+        concedeObject.SetActive(false);
         handManager = GameObject.Find("Hand").GetComponent<HandManager>();
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
     }
 
     public void StartGame()
     {
+        endTurnButtonObject.SetActive(true);
+        concedeObject.SetActive(true);
         if (InfoSaver.opponentHash <= InfoSaver.myHash)
         {
             playerTurn = true;
@@ -382,6 +392,15 @@ public class GameController : MonoBehaviour
             StartTurn(!friendlyVictory, hataponJustDied:true);
             yield return null;
         }
+    }
+
+    public bool NeedToSync()
+    {
+        if (gameState.friendlyTurnNumber + gameState.enemyTurnNumber == 1)
+        {
+            return true;
+        }
+        return false;
     }
 
     public void RecordGameResult(bool friendlyVictory)

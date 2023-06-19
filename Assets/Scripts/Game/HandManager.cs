@@ -20,6 +20,10 @@ public class HandManager : MonoBehaviour
 
     private int hataponHealth = 20;
     private int hataponHealthDecrease = 5;
+    private Vector3 drawStartPosition;
+
+    private bool CardIsDrawing = false;
+
     void Start()
     {
         DeckManager.CopyDeck();
@@ -31,6 +35,8 @@ public class HandManager : MonoBehaviour
 
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
         SetNumberOfOpponentsCards(0);
+
+        drawStartPosition = GameObject.Find("DrawFromDeck").transform.position;
     }
 
     public void SetNumberOfOpponentsCards(int number)
@@ -65,6 +71,10 @@ public class HandManager : MonoBehaviour
 
     public void Mulligan()
     {
+        if (CardIsDrawing)
+        {
+            return;
+        }
         cardMulligan -= 1;
         
         foreach (CardManager card in hand)
@@ -88,6 +98,10 @@ public class HandManager : MonoBehaviour
 
     public void KeepHandButton()
     {
+        if (CardIsDrawing)
+        {
+            return;
+        }
         keepHandButtonObject.SetActive(false);
         mulliganButtonObject.SetActive(false);
 
@@ -135,12 +149,30 @@ public class HandManager : MonoBehaviour
 
     public void AddCardToHand(CardTypes card)
     {
+        StartCoroutine(AddCardToHandAsync(card));
+    }
+
+    public IEnumerator AddCardToHandAsync(CardTypes card)
+    {
+        while (CardIsDrawing)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+        CardIsDrawing = true;
         if (hand.Count < 7)
         {
             CardManager newCard = GenerateCard(card).GetComponent<CardManager>();
             hand.Add(newCard);
             UpdateHandPosition();
+
+            newCard.transform.position = drawStartPosition;
+            newCard.SetCardState(CardManager.CardState.Drawing);
+
+            yield return new WaitForSeconds(1f);
         }
+        CardIsDrawing = false;
+
+        yield return null;
     }
 
     public GameObject GenerateCard(CardTypes cardType)
