@@ -181,6 +181,7 @@ public class CardManager : MonoBehaviour
     private HandManager handManager;
 
     private Vector3 drawEndPosition;
+    private Vector3 playEndPosition;
 
     private void Start()
     {
@@ -190,6 +191,7 @@ public class CardManager : MonoBehaviour
             boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
             handManager = GameObject.Find("Hand").GetComponent<HandManager>();
             drawEndPosition = GameObject.Find("DrawnCardDisplay").transform.position;
+            playEndPosition = GameObject.Find("PlayedCardPosition").transform.position;
         }
     }
 
@@ -542,16 +544,8 @@ public class CardManager : MonoBehaviour
 
             case CardState.opponentPlayed:
 
-                float y = transform.position.y;
-                y += (0.5f - y) * 2f * Time.deltaTime;
-
-                if (y < 0.5f)
-                {
-                    y = 0.5f;
-                }
-
-                transform.position = new Vector3(0f, y, -3f);
-                transform.localScale = new Vector3(1f, 1f, 1f);
+                transform.position = Vector3.Lerp(transform.position, playEndPosition, 7.5f * Time.deltaTime);
+                transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
 
                 destroyTimer -= 1f * Time.deltaTime;
 
@@ -559,13 +553,6 @@ public class CardManager : MonoBehaviour
                 {
                     DestroyCard();
                 }
-                
-                
-                //var trans = 0.5f;
-                //var col = gameObject.GetComponent<MeshRenderer>().material.color;
-                //col.a = trans;
-                
-                //var col = gameObject.GetComponent<Renderer>().material.GetColor("_TintColor");
 
                 break;
 

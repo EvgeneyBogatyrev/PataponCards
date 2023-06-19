@@ -434,15 +434,15 @@ public class GameController : MonoBehaviour
         bool couldDraw;
         if (!friendly)
         {
-            DeckManager.opponentDeckSize -= 1;
             if (DeckManager.opponentDeckSize > 0)
             {
+                DeckManager.opponentDeckSize -= 1;
                 couldDraw = true;
             }
             else 
             {
                 couldDraw = false;
-                DeckManager.opponentDeckSize = 0;
+                //DeckManager.opponentDeckSize = 0;
             }
         }
         else

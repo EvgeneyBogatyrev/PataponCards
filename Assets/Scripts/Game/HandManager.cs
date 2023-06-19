@@ -26,6 +26,8 @@ public class HandManager : MonoBehaviour
 
     void Start()
     {
+        boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
+        drawStartPosition = GameObject.Find("DrawFromDeck").transform.position;
         DeckManager.CopyDeck();
 
         for (int i = 0; i < 7; ++i)
@@ -33,10 +35,8 @@ public class HandManager : MonoBehaviour
             DrawCard();
         }
 
-        boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
         SetNumberOfOpponentsCards(0);
-
-        drawStartPosition = GameObject.Find("DrawFromDeck").transform.position;
+        
     }
 
     public void SetNumberOfOpponentsCards(int number)
@@ -66,6 +66,19 @@ public class HandManager : MonoBehaviour
     public int GetNumberOfOpponentsCards()
     {
         return opponentHand.Count;
+    }
+
+    public static void DestroyDisplayedCards()
+    {
+        CardManager[] cards = (CardManager[]) GameObject.FindObjectsOfType (typeof(CardManager));
+
+        foreach (CardManager card in cards)
+        {
+            if (card.GetCardState() == CardManager.CardState.opponentPlayed)
+            {
+                card.DestroyCard();
+            }
+        }
     }
 
 

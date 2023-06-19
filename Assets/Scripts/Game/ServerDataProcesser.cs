@@ -208,9 +208,13 @@ public class ServerDataProcesser : MonoBehaviour
                     
                     newCard = handManager.GenerateCard(type).GetComponent<CardManager>();
                     boardManager.PlayCard(newCard, targetSlot, destroy: false, record: false);
+                    HandManager.DestroyDisplayedCards();
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);
+
+
+
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
-                    newCard.destroyTimer = 5f;
+                    newCard.destroyTimer = 3f;
                     handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
                     break;
 
@@ -255,9 +259,10 @@ public class ServerDataProcesser : MonoBehaviour
                     spellType = message.cardIndex;
                     newCard = handManager.GenerateCard(spellType).GetComponent<CardManager>();
                     newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots);
+                    HandManager.DestroyDisplayedCards();
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
-                    newCard.destroyTimer = 5f;
+                    newCard.destroyTimer = 3f;
 
                     if (newCard.GetCardStats().damageToHost == -1 && newCard.GetCardType() != CardTypes.Concede)
                     {
@@ -283,10 +288,10 @@ public class ServerDataProcesser : MonoBehaviour
                     }
                     boardManager.PlayCard(newCard, fromSlot, destroy: false, record: false);
 
-
+                    HandManager.DestroyDisplayedCards();
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
-                    newCard.destroyTimer = 5f;
+                    newCard.destroyTimer = 3f;
 
                     boardManager.battlecryTrigger = false;
                     handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
@@ -316,7 +321,16 @@ public class ServerDataProcesser : MonoBehaviour
 
             doneActions.Add(message);
             
-            yield return new WaitForSeconds(2); 
+            if (message.action == MessageFromServer.Action.PlayCard ||
+                    message.action == MessageFromServer.Action.CastSpell ||
+                        message.action == MessageFromServer.Action.CastOnPlayCard)
+            {
+                yield return new WaitForSeconds(2f); 
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.5f); 
+            }
         }
     }
 
