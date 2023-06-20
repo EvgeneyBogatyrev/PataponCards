@@ -35,6 +35,7 @@ public class CollectionControl : MonoBehaviour
 
     public List<CardTypes> GetForbiddenCards()
     {
+        // Cards that are not collectable and should not be displayed
         List<CardTypes> reservedList = new List<CardTypes>();
 
         reservedList.Add(CardTypes.Hatapon);

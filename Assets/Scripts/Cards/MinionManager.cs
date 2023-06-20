@@ -33,6 +33,7 @@ public class MinionManager : MonoBehaviour
     private MinionState state;
     private bool summoningSickness = true;
     private List<CardManager> connectedCardObjects;
+    private Arrow arrow = null;
 
     public void CustomizeMinion(CardManager playedCard, BoardManager.Slot slot)
     {
@@ -239,12 +240,19 @@ public class MinionManager : MonoBehaviour
                 break;
 
             case MinionState.Selected:
+                if (arrow == null)
+                {
+                    arrow = new Arrow(transform.position);
+                }
+                arrow.UpdatePosition();
                 desiredPosition = new Vector3(connectedSlot.GetPosition().x, connectedSlot.GetPosition().y, connectedSlot.GetPosition().z - 0.2f);
                 desiredScale = selectedScale;
                 if (Input.GetMouseButtonDown(1))
                 {
                     state = MinionState.Free;
                     CursorController.cursorState = CursorController.CursorStates.Free;
+                    arrow.DestroyArrow();
+                    arrow = null;
                 }
 
                 if (Input.GetMouseButtonDown(0))
@@ -264,6 +272,8 @@ public class MinionManager : MonoBehaviour
                                     Exchange(target.GetSlot(), record: true);
                                     state = MinionState.Free;
                                     CursorController.cursorState = CursorController.CursorStates.Free;
+                                    arrow.DestroyArrow();
+                                    arrow = null;
                                 }
                             }
                             else
@@ -283,6 +293,8 @@ public class MinionManager : MonoBehaviour
                                 {
                                     state = MinionState.Free;
                                     CursorController.cursorState = CursorController.CursorStates.Free;
+                                    arrow.DestroyArrow();
+                                    arrow = null;
                                 }
                                 else
                                 {
@@ -290,6 +302,8 @@ public class MinionManager : MonoBehaviour
                                     summoningSickness = true;
                                     state = MinionState.Free;
                                     CursorController.cursorState = CursorController.CursorStates.Free;
+                                    arrow.DestroyArrow();
+                                    arrow = null;
                                 }
                             }
 
@@ -310,6 +324,8 @@ public class MinionManager : MonoBehaviour
                             {
                                 state = MinionState.Free;
                                 CursorController.cursorState = CursorController.CursorStates.Free;
+                                arrow.DestroyArrow();
+                                arrow = null;
                             }
                             else
                             {
@@ -317,6 +333,8 @@ public class MinionManager : MonoBehaviour
                                 summoningSickness = true;
                                 state = MinionState.Free;
                                 CursorController.cursorState = CursorController.CursorStates.Free;
+                                arrow.DestroyArrow();
+                                arrow = null;
                             }
                         }
                     }

@@ -173,7 +173,7 @@ public class CardManager : MonoBehaviour
     private Vector3 positionInHand;
     private int indexInHand = 0;
     private bool mouseOver = false;
-    private List<int> spellTargets;
+    public List<int> spellTargets;
     private BoardManager.Slot slotToPlay;
     private float curRotation;
     
@@ -182,6 +182,9 @@ public class CardManager : MonoBehaviour
 
     private Vector3 drawEndPosition;
     private Vector3 playEndPosition;
+
+    public List<Arrow> arrowList = null;
+    private Arrow curArrow = null;
 
     private void Start()
     {
@@ -373,7 +376,7 @@ public class CardManager : MonoBehaviour
                 break;
 
             case CardState.selectingTargets:
-                
+
                 if (cardStats.isSpell)
                 {
                     transform.localScale = new Vector3(selectedScale, selectedScale, 1f);
@@ -385,6 +388,14 @@ public class CardManager : MonoBehaviour
                     transform.position = new Vector3(slotToPlay.GetPosition().x, slotToPlay.GetPosition().y, selectedZ);
                     transform.rotation = Quaternion.identity;
                 }
+
+                if (arrowList == null)
+                {
+                    arrowList = new List<Arrow>();
+                    curArrow = new Arrow(transform.position);
+                    arrowList.Add(curArrow);
+                }
+                curArrow.UpdatePosition();
 
                 if (spellTargets.Count >= cardStats.numberOfTargets)
                 {
@@ -440,6 +451,16 @@ public class CardManager : MonoBehaviour
                         CursorController.cursorState = CursorController.CursorStates.Free;
                         ReturnToHand();
                     }
+
+                    if (arrowList != null)
+                    {
+                        foreach (Arrow arrow in arrowList)
+                        {
+                            arrow.DestroyArrow();
+                        }
+                        curArrow = null;
+                        arrowList = null;
+                    }
                 }
 
 
@@ -461,6 +482,8 @@ public class CardManager : MonoBehaviour
                             if (cardStats.checkSpellTarget(index, boardManager.enemySlots, boardManager.friendlySlots))
                             {
                                 spellTargets.Add(index);
+                                curArrow = new Arrow(transform.position);
+                                arrowList.Add(curArrow);
                             }
                             else
                             {
@@ -557,6 +580,30 @@ public class CardManager : MonoBehaviour
 
             case CardState.opponentPlayed:
 
+                if (arrowList == null)
+                {
+                    arrowList = new List<Arrow>();
+                    foreach (int target in spellTargets)
+                    {
+                        BoardManager.Slot targetSlot;
+                        if (target < 0)
+                        {
+                            targetSlot = boardManager.friendlySlots[-target - 1];
+                        }
+                        else
+                        {
+                            targetSlot = boardManager.enemySlots[target - 1];
+                        }
+
+                        arrowList.Add(new Arrow(transform.position, targetSlot.GetPosition()));
+                    }
+                }
+
+                foreach (Arrow arrow in arrowList)
+                {
+                    arrow.UpdatePosition(transform.position);
+                }
+
                 transform.position = Vector3.Lerp(transform.position, playEndPosition, 3.5f * Time.deltaTime);
                 Vector3 targetLocalScale = new Vector3(0.8f, 0.8f, 0.8f);
 
@@ -566,6 +613,15 @@ public class CardManager : MonoBehaviour
 
                 if (destroyTimer < 0f || (mouseOver && Input.GetMouseButtonDown(0)))
                 {
+                    if (arrowList != null)
+                    {
+                        foreach (Arrow arrow in arrowList)
+                        {
+                            arrow.DestroyArrow();
+                        }
+                        curArrow = null;
+                        arrowList = null;
+                    }
                     DestroyCard();
                 }
 
@@ -597,6 +653,16 @@ public class CardManager : MonoBehaviour
         }
 
         spellTargets = new List<int>();
+        
+        if (arrowList != null)
+        {
+            foreach (Arrow arrow in arrowList)
+            {
+                arrow.DestroyArrow();
+            }
+            curArrow = null;
+            arrowList = null;
+        }
 
     }
 
