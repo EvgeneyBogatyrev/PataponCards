@@ -192,6 +192,7 @@ public class ServerDataProcesser : MonoBehaviour
                     //gameController.StartTurn(true);
                     break;
                 case MessageFromServer.Action.PlayCard:
+                    handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
                     CardTypes type = message.cardIndex;
                     int target = message.targets[0];
                     BoardManager.Slot targetSlot;
@@ -215,7 +216,6 @@ public class ServerDataProcesser : MonoBehaviour
 
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
                     newCard.destroyTimer = 3f;
-                    handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
                     break;
 
                 case MessageFromServer.Action.Move:
@@ -258,19 +258,22 @@ public class ServerDataProcesser : MonoBehaviour
                 case MessageFromServer.Action.CastSpell:
                     spellType = message.cardIndex;
                     newCard = handManager.GenerateCard(spellType).GetComponent<CardManager>();
+                    
+                    if (newCard.GetCardStats().damageToHost == -1 && newCard.GetCardType() != CardTypes.Concede)
+                    {
+                        handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
+                    }
+                    
+                    
                     newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots);
                     HandManager.DestroyDisplayedCards();
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
                     newCard.destroyTimer = 3f;
-
-                    if (newCard.GetCardStats().damageToHost == -1 && newCard.GetCardType() != CardTypes.Concede)
-                    {
-                        handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
-                    }
                     break;
 
                 case MessageFromServer.Action.CastOnPlayCard:
+                    handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
                     boardManager.battlecryTrigger = true;
                     spellType = message.cardIndex;
                     newCard = handManager.GenerateCard(spellType).GetComponent<CardManager>();
@@ -294,7 +297,7 @@ public class ServerDataProcesser : MonoBehaviour
                     newCard.destroyTimer = 3f;
 
                     boardManager.battlecryTrigger = false;
-                    handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
+                    
                     break;
 
                 case MessageFromServer.Action.NumberOfCards:

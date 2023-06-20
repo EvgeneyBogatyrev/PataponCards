@@ -42,10 +42,6 @@ public class HandManager : MonoBehaviour
     public void SetNumberOfOpponentsCards(int number)
     {
         // TODO: Check if deck is empty
-        if (number > 7)
-        {
-            number = 7;
-        }
         foreach (CardManager card in opponentHand)
         {
             card.DestroyCard();
@@ -142,6 +138,10 @@ public class HandManager : MonoBehaviour
 
     public void DrawCard()
     {
+        if (hand.Count >= 7)
+        {
+            return;
+        }
         GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
         CardTypes cardType = DeckManager.GetRandomCard(remove:true);
         if (cardType != CardTypes.Hatapon)
@@ -153,6 +153,10 @@ public class HandManager : MonoBehaviour
 
     public void DrawCardOpponent()
     {
+        if (GetNumberOfOpponentsCards() >= 7)
+        {
+            return;
+        }
         GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
         if (gameController.ProcessCardDraw(friendly:false))
         {
