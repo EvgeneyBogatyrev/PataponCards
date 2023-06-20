@@ -24,6 +24,10 @@ public class HandManager : MonoBehaviour
 
     private bool CardIsDrawing = false;
 
+    public static float cardDestroyTimer = 4.5f;
+
+    public static bool mulliganing = true;
+
     void Start()
     {
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
@@ -111,6 +115,7 @@ public class HandManager : MonoBehaviour
         {
             return;
         }
+        HandManager.mulliganing = false;
         keepHandButtonObject.SetActive(false);
         mulliganButtonObject.SetActive(false);
 
@@ -185,7 +190,14 @@ public class HandManager : MonoBehaviour
             newCard.transform.position = drawStartPosition;
             newCard.SetCardState(CardManager.CardState.Drawing);
 
-            yield return new WaitForSeconds(1f);
+            if (!HandManager.mulliganing)
+            {
+                yield return new WaitForSeconds(1f);
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.3f);
+            }
         }
         CardIsDrawing = false;
 

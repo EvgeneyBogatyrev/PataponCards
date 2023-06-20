@@ -204,7 +204,7 @@ public class CardManager : MonoBehaviour
                                     CursorController.cursorState == CursorController.CursorStates.EnemyTurn))
                 {
                     transform.localScale = new Vector3(selectedScale, selectedScale, 1f);
-                    transform.position = Vector3.Lerp(transform.position, new Vector3(positionInHand.x, selectedY, selectedZ), 20f * Time.deltaTime);
+                    transform.position = Vector3.Lerp(transform.position, new Vector3(positionInHand.x, selectedY, selectedZ), 30f * Time.deltaTime);
                     transform.rotation = Quaternion.Euler(0, 0, 0);
 
                     if (Input.GetMouseButtonDown(0) && handManager.CanPlayCard())
@@ -224,17 +224,29 @@ public class CardManager : MonoBehaviour
                 else
                 {
                     transform.localScale = new Vector3(normalScale, normalScale, 1f);
-                    transform.position = positionInHand;
+                    transform.position = Vector3.Lerp(transform.position, new Vector3(positionInHand.x, positionInHand.y, positionInHand.z), 10f * Time.deltaTime);
                     transform.rotation = Quaternion.Euler(0, 0, curRotation);
                 }
                 break;
 
             case CardState.Drawing:
                 
-                transform.localScale = new Vector3(1.35f * normalScale, 1.35f * normalScale, 1f);
-                transform.position = Vector3.Lerp(transform.position, drawEndPosition, Time.deltaTime * 5.0f);
+                float spd, dst;
+                if (HandManager.mulliganing)
+                {
+                    spd = 20f;
+                    dst = 0.25f;   
+                }
+                else
+                {
+                    spd = 5f;
+                    dst = 0.05f; 
+                }
 
-                if ((transform.position - drawEndPosition).magnitude < 0.05f)
+                transform.localScale = new Vector3(1.35f * normalScale, 1.35f * normalScale, 1f);
+                transform.position = Vector3.Lerp(transform.position, drawEndPosition, Time.deltaTime * spd);
+
+                if ((transform.position - drawEndPosition).magnitude < dst)
                 {
                     cardState = CardState.inHand;
                 }
@@ -371,6 +383,7 @@ public class CardManager : MonoBehaviour
                 {
                     transform.localScale = new Vector3(normalScale, normalScale, 1f);
                     transform.position = new Vector3(slotToPlay.GetPosition().x, slotToPlay.GetPosition().y, selectedZ);
+                    transform.rotation = Quaternion.identity;
                 }
 
                 if (spellTargets.Count >= cardStats.numberOfTargets)
@@ -544,8 +557,10 @@ public class CardManager : MonoBehaviour
 
             case CardState.opponentPlayed:
 
-                transform.position = Vector3.Lerp(transform.position, playEndPosition, 7.5f * Time.deltaTime);
-                transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+                transform.position = Vector3.Lerp(transform.position, playEndPosition, 3.5f * Time.deltaTime);
+                Vector3 targetLocalScale = new Vector3(0.8f, 0.8f, 0.8f);
+
+                transform.localScale = Vector3.Lerp(transform.localScale, targetLocalScale, 3.5f * Time.deltaTime);
 
                 destroyTimer -= 1f * Time.deltaTime;
 

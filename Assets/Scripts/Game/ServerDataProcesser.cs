@@ -215,7 +215,7 @@ public class ServerDataProcesser : MonoBehaviour
 
 
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
-                    newCard.destroyTimer = 3f;
+                    newCard.destroyTimer = HandManager.cardDestroyTimer;
                     break;
 
                 case MessageFromServer.Action.Move:
@@ -269,7 +269,13 @@ public class ServerDataProcesser : MonoBehaviour
                     HandManager.DestroyDisplayedCards();
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
-                    newCard.destroyTimer = 3f;
+                    newCard.destroyTimer = HandManager.cardDestroyTimer;
+
+                    if (newCard.GetCardStats().damageToHost != -1)
+                    {
+                        newCard.transform.position = boardManager.enemySlots[message.targets[0] - 1].GetPosition();
+                        newCard.transform.localScale = new Vector3(0.2f, 0.2f, 1f);
+                    }
                     break;
 
                 case MessageFromServer.Action.CastOnPlayCard:
@@ -294,7 +300,7 @@ public class ServerDataProcesser : MonoBehaviour
                     HandManager.DestroyDisplayedCards();
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
-                    newCard.destroyTimer = 3f;
+                    newCard.destroyTimer = HandManager.cardDestroyTimer;
 
                     boardManager.battlecryTrigger = false;
                     
