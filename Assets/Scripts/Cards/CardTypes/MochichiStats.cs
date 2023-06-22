@@ -90,7 +90,8 @@ public static class MochiciCounterStats
             CardManager newCard = handManager.GenerateCard(CardTypes.MotitiAngry).GetComponent<CardManager>();
             newCard.SetPower(host.GetPower());
             BoardManager.Slot slot = host.GetSlot();
-            host.TakePower(host.GetPower());
+            //host.TakePower(host.GetPower());
+            host.DestroySelf();
             boardManager.PlayCard(newCard, slot, destroy: true, record: false);
 
         }
