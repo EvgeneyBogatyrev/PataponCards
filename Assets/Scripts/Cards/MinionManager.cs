@@ -14,6 +14,7 @@ public class MinionManager : MonoBehaviour
 
     public GameObject imageObject;
     public GameObject powerObject;
+    public GameObject damageObject;
     public GameObject powerSquare;
     public GameObject heartObject;
     public float normalScale;
@@ -75,6 +76,8 @@ public class MinionManager : MonoBehaviour
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
         handManager = GameObject.Find("Hand").GetComponent<HandManager>();
         gameController = GameObject.Find("GameController").GetComponent<GameController>();
+
+        damageObject.SetActive(false);
     }
 
     public void SetCardType(CardTypes type)
@@ -110,8 +113,35 @@ public class MinionManager : MonoBehaviour
 
     public void TakePower(int damage)
     {
+        damageObject.SetActive(true);
+        damageObject.GetComponent<TextMeshPro>().text = "-" + damage.ToString();
+        StartCoroutine(HideDamage());
         SetPower(power - damage);
         CheckPower();
+    }
+
+    public IEnumerator HideDamage()
+    {
+        StartCoroutine(ScaleDamage());
+        yield return new WaitForSeconds(1.5f);
+        damageObject.SetActive(false);
+        yield return null;
+    }
+
+    public IEnumerator ScaleDamage()
+    {   
+        float basePosition = damageObject.transform.position.y;
+        float module = 0.35f;
+        while (damageObject.activeSelf)
+        {
+            float noise = Random.Range(-module, module);
+            module -= 2f * Time.deltaTime;
+            module = Mathf.Max(0, module);
+            damageObject.transform.position = new Vector3(damageObject.transform.position.x, basePosition + noise, damageObject.transform.position.z);
+            yield return new WaitForSeconds(0.01f);
+        }
+        damageObject.transform.position = new Vector3(damageObject.transform.position.x, basePosition, damageObject.transform.position.z);
+        yield return null;
     }
 
     public void ReceiveDamage(int damage)
