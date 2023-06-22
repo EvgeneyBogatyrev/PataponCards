@@ -34,6 +34,10 @@ public class MinionManager : MonoBehaviour
     private bool summoningSickness = true;
     private List<CardManager> connectedCardObjects;
     private Arrow arrow = null;
+    public float fadeSpeed = 10f;
+    public float shrinkSpeed = 3f;
+    public bool fading = false;
+    public bool dying = false;
 
     public void CustomizeMinion(CardManager playedCard, BoardManager.Slot slot)
     {
@@ -372,7 +376,10 @@ public class MinionManager : MonoBehaviour
         {
             transform.position += (desiredPosition - transform.position) * Time.deltaTime * 6f;
         }
-        transform.localScale = new Vector3(transform.localScale.x + (desiredScale - transform.localScale.x) * Time.deltaTime * 15f, transform.localScale.y + (desiredScale - transform.localScale.y) * Time.deltaTime * 15f, 1f);
+        if (!dying)
+        {
+            transform.localScale = new Vector3(transform.localScale.x + (desiredScale - transform.localScale.x) * Time.deltaTime * 15f, transform.localScale.y + (desiredScale - transform.localScale.y) * Time.deltaTime * 15f, 1f);
+        }
     }
 
     public void Move(BoardManager.Slot slotToMove, bool record=false)
@@ -497,23 +504,71 @@ public class MinionManager : MonoBehaviour
     {
         if (power <= 0)
         {
-            DestroySelf();
-            if (GetCardType() == CardTypes.Hatapon)
+            StartCoroutine(Die());
+        }
+    }
+
+    private IEnumerator Die()
+    {
+        dying = true;
+        StartCoroutine(FadeAway());
+        while (fading)
+        {
+            yield return new WaitForSeconds(0.01f);
+        }
+        DestroySelf();
+        if (GetCardType() == CardTypes.Hatapon)
+        {
+            gameController.EndRound(!friendly);
+        }
+        if (cardStats.hasDeathrattle)
+        {
+            if (friendly)
             {
-                gameController.EndRound(!friendly);
+                cardStats.onDeathEvent(connectedSlot.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots, cardStats);
             }
-            if (cardStats.hasDeathrattle)
+            else
             {
-                if (friendly)
-                {
-                    cardStats.onDeathEvent(connectedSlot.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots, cardStats);
-                }
-                else
-                {
-                    cardStats.onDeathEvent(-connectedSlot.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots, cardStats);
-                }
+                cardStats.onDeathEvent(-connectedSlot.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots, cardStats);
             }
         }
+        yield return null;
+    }
+
+    public IEnumerator FadeAway()
+    {
+        fading = true;
+
+        float alpha = 1f;
+        float scale = transform.localScale.x;
+        float baseXPosition = transform.position.x;
+        float baseYPosition = transform.position.y;
+        while (alpha > 0.7f)
+        {
+            foreach (Transform child in transform)
+            {
+                if (child.name == "Image")
+                {
+                    Color spriteColor = child.GetComponent<SpriteRenderer>().color;
+                    child.GetComponent<SpriteRenderer>().color = new Color(spriteColor.r, spriteColor.g, spriteColor.b, alpha);
+                }
+                
+            } 
+            float noise_x = Random.Range(-0.2f, 0.2f);
+            float noise_y = Random.Range(-0.2f, 0.2f);
+            transform.position = new Vector3(baseXPosition + noise_x, baseYPosition + noise_y, transform.position.z);
+            transform.localScale = new Vector3(scale, scale, 1f);
+            //Color objectColor = child.GetComponent<MeshRenderer>().material.color;
+            //child.GetComponent<MeshRenderer>().material.color = new Color(objectColor.r, objectColor.g, objectColor.b, alpha);
+                
+            
+            alpha -= fadeSpeed * Time.deltaTime;
+            scale -= shrinkSpeed * Time.deltaTime;
+            yield return new WaitForSeconds(0.003f);
+        }
+
+        fading = false;
+        yield return null;
     }
 
     public void DestroyMinion()
