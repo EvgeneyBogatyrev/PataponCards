@@ -232,7 +232,20 @@ public class ServerDataProcesser : MonoBehaviour
 
                 case MessageFromServer.Action.Move:
                     fromSlot = boardManager.enemySlots[message.targets[0] - 1];
-                    toSlot = boardManager.enemySlots[message.targets[1] - 1];
+                    
+                    if (message.targets[1] > 0)
+                    {
+                        toSlot = boardManager.enemySlots[message.targets[1] - 1];
+                    }
+                    else
+                    {
+                        toSlot = boardManager.friendlySlots[-message.targets[1] - 1];
+                        MinionManager connectedMinion = toSlot.GetConnectedMinion();
+                        if (connectedMinion != null)
+                        {
+                            connectedMinion.DestroyMinion();
+                        }
+                    }
 
                     fromSlot.GetConnectedMinion().Move(toSlot);
                     break;

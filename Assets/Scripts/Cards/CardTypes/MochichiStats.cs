@@ -91,7 +91,7 @@ public static class MochiciCounterStats
             newCard.SetPower(host.GetPower());
             BoardManager.Slot slot = host.GetSlot();
             //host.TakePower(host.GetPower());
-            host.DestroySelf();
+            host.DestroySelf(unattach:true);
             boardManager.PlayCard(newCard, slot, destroy: true, record: false);
 
         }

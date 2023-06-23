@@ -44,6 +44,7 @@ public enum CardTypes
     NovaNova,
     BanTatepon,
     TurnToStone,
+    Moribu,
     //------------------------
     Motiti_option1,
     Motiti_option2,
@@ -297,6 +298,10 @@ public static class CardGenerator
 
             case CardTypes.TurnToStone:
                 stats = TurnToStoneStats.GetStats();
+                break;
+
+            case CardTypes.Moribu:
+                stats = MoribuStats.GetStats();
                 break;
 
             default:

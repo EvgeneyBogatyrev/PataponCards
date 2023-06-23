@@ -299,7 +299,17 @@ public class MinionManager : MonoBehaviour
                         {
                             MinionManager target = hit.collider.GetComponent<MinionManager>();
 
-                            if (target != this && target.friendly && (Mathf.Abs(target.GetIndex() - GetIndex()) == 1) && !cardStats.limitedVision)
+                            if (GetCardType() == CardTypes.Moribu && !target.GetFriendly() && Mathf.Abs(target.GetIndex() - GetIndex()) == 2)
+                            {
+                                BoardManager.Slot nextSlot = target.GetSlot();
+                                target.DestroyMinion();
+                                Move(nextSlot, record: true);
+                                summoningSickness = true;
+                                state = MinionState.Free;
+                                CursorController.cursorState = CursorController.CursorStates.Free;
+                                arrow.DestroyArrow();
+                                arrow = null;
+                            } else if (target != this && target.friendly && (Mathf.Abs(target.GetIndex() - GetIndex()) == 1) && !cardStats.limitedVision)
                             {
                                 if (!target.cardStats.limitedVision && !target.summoningSickness && !target.cardStats.isStatic)
                                 {
@@ -354,14 +364,41 @@ public class MinionManager : MonoBehaviour
                                     break;
                                 }
                             }
-                            if (slotToGo == null || !slotToGo.GetFree() || Mathf.Abs(slotToGo.GetIndex() - GetIndex()) > 1 || cardStats.limitedVision)
+
+                            if (slotToGo == null)
+                            {
+                                foreach (BoardManager.Slot slot in boardManager.enemySlots)
+                                { 
+                                    if (slot.GetSlotObject() == hit.collider.gameObject)
+                                    {
+                                        slotToGo = slot;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (GetCardType() == CardTypes.Moribu && !slotToGo.GetFriendly() && Mathf.Abs(slotToGo.GetIndex() - GetIndex()) == 2)
+                            {
+                                MinionManager connectedMinion = slotToGo.GetConnectedMinion();
+                                if (connectedMinion != null)
+                                {
+                                    connectedMinion.DestroyMinion();
+                                }
+                                Move(slotToGo, record: true);
+                                summoningSickness = true;
+                                state = MinionState.Free;
+                                CursorController.cursorState = CursorController.CursorStates.Free;
+                                arrow.DestroyArrow();
+                                arrow = null;
+                            }
+                            else if (slotToGo == null || !slotToGo.GetFree() || Mathf.Abs(slotToGo.GetIndex() - GetIndex()) > 1 || cardStats.limitedVision)
                             {
                                 state = MinionState.Free;
                                 CursorController.cursorState = CursorController.CursorStates.Free;
                                 arrow.DestroyArrow();
                                 arrow = null;
                             }
-                            else
+                            else if (slotToGo.GetFriendly())
                             {
                                 Move(slotToGo, record: true);
                                 summoningSickness = true;
@@ -416,13 +453,19 @@ public class MinionManager : MonoBehaviour
     {
         if (record)
         {
-            ServerDataProcesser.instance.Move(connectedSlot.GetIndex() + 1, slotToMove.GetIndex() + 1);
+            int sign = 1;
+            if (!slotToMove.GetFriendly())
+            {
+                sign = -1;
+            }
+            ServerDataProcesser.instance.Move(connectedSlot.GetIndex() + 1, sign * (slotToMove.GetIndex() + 1));
         }
 
         connectedSlot.SetFree(true);
         connectedSlot.SetConnectedMinion(null);
         slotToMove.SetConnectedMinion(this);
         slotToMove.SetFree(false);
+        friendly = slotToMove.GetFriendly();        
         connectedSlot = slotToMove;
     }
 
@@ -540,6 +583,8 @@ public class MinionManager : MonoBehaviour
 
     private IEnumerator Die()
     {
+        connectedSlot.SetFree(true);
+        connectedSlot.SetConnectedMinion(null);
         dying = true;
         StartCoroutine(FadeAway());
         while (fading)
@@ -603,28 +648,16 @@ public class MinionManager : MonoBehaviour
 
     public void DestroyMinion()
     {
-        DestroySelf();
-        if (GetCardType() == CardTypes.Hatapon)
-        {
-            gameController.EndRound(!friendly);
-        }
-        if (cardStats.hasDeathrattle)
-        {
-            if (friendly)
-            {
-                cardStats.onDeathEvent(connectedSlot.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots, cardStats);
-            }
-            else
-            {
-                cardStats.onDeathEvent(-connectedSlot.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots, cardStats);
-            }
-        }
+        StartCoroutine(Die());
     }
 
-    public void DestroySelf()
+    public void DestroySelf(bool unattach=false)
     {
-        connectedSlot.SetFree(true);
-        connectedSlot.SetConnectedMinion(null);
+        if (unattach)
+        {
+            connectedSlot.SetFree(true);
+            connectedSlot.SetConnectedMinion(null);
+        }
         Destroy(gameObject);
 
         if (friendly)

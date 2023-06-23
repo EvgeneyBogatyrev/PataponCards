@@ -215,7 +215,7 @@ public class BoardManager : MonoBehaviour
             MinionManager minion = slot.GetConnectedMinion();
             if (minion != null)
             {
-                minion.DestroySelf();
+                minion.DestroySelf(unattach:true);
             }
         }
 
@@ -224,7 +224,7 @@ public class BoardManager : MonoBehaviour
             MinionManager minion = slot.GetConnectedMinion();
             if (minion != null)
             {
-                minion.DestroySelf();
+                minion.DestroySelf(unattach:true);
             }
         }
         lastDeadOpponent = CardTypes.Hatapon;
