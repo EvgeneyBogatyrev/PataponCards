@@ -131,6 +131,7 @@ public class HandManager : MonoBehaviour
             return;
         }
         HandManager.mulliganing = false;
+        UpdateHandPosition();
         keepHandButtonObject.SetActive(false);
         mulliganButtonObject.SetActive(false);
 
@@ -237,16 +238,34 @@ public class HandManager : MonoBehaviour
 
     private void UpdateHandPosition()
     {
-        Vector3 center = new Vector3(0f, -3.2f, -0.75f);
-        int numberOfCards = hand.Count;
-        float startPoint = center.x - ((numberOfCards - 1) * cardSpace / 2f);
-        float startRot = 5f * ((float)(numberOfCards - 1) / 2);
-        for (int i = 0; i < numberOfCards; ++i)
+        if (!mulliganing)
         {
-            hand[i].SetPositionInHand(new Vector3(startPoint + cardSpace * i, center.y, center.z - (float)i / 5f));
-            hand[i].SetRotation(startRot);
-            hand[i].SetIndexInHand(i);
-            startRot -= 5f;
+            Vector3 center = new Vector3(0f, -3.2f, -0.75f);
+            int numberOfCards = hand.Count;
+            float startPoint = center.x - ((numberOfCards - 1) * cardSpace / 2f);
+            float startRot = 5f * ((float)(numberOfCards - 1) / 2);
+            for (int i = 0; i < numberOfCards; ++i)
+            {
+                hand[i].SetPositionInHand(new Vector3(startPoint + cardSpace * i, center.y, center.z - (float)i / 5f));
+                hand[i].SetRotation(startRot);
+                hand[i].SetIndexInHand(i);
+                startRot -= 5f;
+            }
+        }
+        else
+        {
+            float _cardSpace = 26f / (hand.Count + 1);
+            Vector3 center = new Vector3(0f, 1f, -0.75f);
+            int numberOfCards = hand.Count;
+            float startPoint = center.x - ((numberOfCards - 1) * _cardSpace / 2f);
+            //float startRot = 5f * ((float)(numberOfCards - 1) / 2);
+            for (int i = 0; i < numberOfCards; ++i)
+            {
+                hand[i].SetPositionInHand(new Vector3(startPoint + _cardSpace * i, center.y, center.z - (float)i / 5f));
+                //hand[i].SetRotation(startRot);
+                hand[i].SetIndexInHand(i);
+                //startRot -= 5f;
+            }
         }
     }
 

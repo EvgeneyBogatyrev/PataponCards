@@ -306,6 +306,7 @@ public class GameController : MonoBehaviour
                 {
                     order.Add(minion);
                     minion.SetState(MinionManager.MinionState.Free);
+                    minion.OnCanAttack(false);
                 }
             }
 

@@ -57,7 +57,8 @@ public static class GiveFangStats
             else
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
+                handManager.DrawCardOpponent();
+                //handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
             }
 
         }

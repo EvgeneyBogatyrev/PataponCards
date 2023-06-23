@@ -17,8 +17,11 @@ public class MinionManager : MonoBehaviour
     public GameObject damageObject;
     public GameObject powerSquare;
     public GameObject heartObject;
+    public GameObject normalBackObject;
+    public GameObject outlineBackObject;
     public float normalScale;
     public float selectedScale;
+    public Renderer myRenderer;
 
     private bool attacking = false;
     private Vector3 attackPosition;
@@ -50,10 +53,11 @@ public class MinionManager : MonoBehaviour
         connectedSlot.SetFree(false);
         imageObject.GetComponent<SpriteRenderer>().sprite = playedCard.GetComponentInChildren<SpriteRenderer>().sprite;
         state = MinionState.Free;
-        summoningSickness = true;
+        OnCanAttack(false);
+        
         if (cardStats.hasHaste || cardStats.isStatic)
         {
-            summoningSickness = false;
+            OnCanAttack(true);
         }
         slot.SetConnectedMinion(this);
 
@@ -78,7 +82,25 @@ public class MinionManager : MonoBehaviour
         gameController = GameObject.Find("GameController").GetComponent<GameController>();
 
         damageObject.SetActive(false);
+        //outlineBackObject.SetActive(false);
+        //normalBackObject.SetActive(false);
     }
+
+    public void OnCanAttack(bool can=true)
+    {
+        if (friendly)
+        {
+            summoningSickness = !can;
+            outlineBackObject.SetActive(can);
+            normalBackObject.SetActive(!can);
+        }
+        else
+        {
+            outlineBackObject.SetActive(false);
+            normalBackObject.SetActive(false);
+        }
+    }
+
 
     public void SetCardType(CardTypes type)
     {
@@ -328,7 +350,7 @@ public class MinionManager : MonoBehaviour
                                 BoardManager.Slot nextSlot = target.GetSlot();
                                 target.DestroyMinion();
                                 Move(nextSlot, record: true);
-                                summoningSickness = true;
+                                OnCanAttack(false);
                                 state = MinionState.Free;
                                 CursorController.cursorState = CursorController.CursorStates.Free;
                                 arrow.DestroyArrow();
@@ -367,7 +389,7 @@ public class MinionManager : MonoBehaviour
                                 else
                                 {
                                     Attack(target, record: true);
-                                    summoningSickness = true;
+                                    OnCanAttack(false);
                                     state = MinionState.Free;
                                     CursorController.cursorState = CursorController.CursorStates.Free;
                                     arrow.DestroyArrow();
@@ -409,7 +431,7 @@ public class MinionManager : MonoBehaviour
                                     connectedMinion.DestroyMinion();
                                 }
                                 Move(slotToGo, record: true);
-                                summoningSickness = true;
+                                OnCanAttack(false);
                                 state = MinionState.Free;
                                 CursorController.cursorState = CursorController.CursorStates.Free;
                                 arrow.DestroyArrow();
@@ -425,7 +447,7 @@ public class MinionManager : MonoBehaviour
                             else if (slotToGo.GetFriendly())
                             {
                                 Move(slotToGo, record: true);
-                                summoningSickness = true;
+                                OnCanAttack(false);
                                 state = MinionState.Free;
                                 CursorController.cursorState = CursorController.CursorStates.Free;
                                 arrow.DestroyArrow();
@@ -507,8 +529,8 @@ public class MinionManager : MonoBehaviour
         other.connectedSlot = connectedSlot;
         connectedSlot = slotToMove;
 
-        this.summoningSickness = true;
-        other.summoningSickness = true;
+        this.OnCanAttack(false);
+        other.OnCanAttack(false);
     }
 
     public void Attack(MinionManager enemy, bool record = false)
@@ -720,7 +742,7 @@ public class MinionManager : MonoBehaviour
     }
     public void SetCanAttack(bool _can)
     {
-        summoningSickness = !_can;
+        OnCanAttack(_can);
     }
     public int GetIndex()
     {

@@ -58,7 +58,7 @@ public static class TonKampon_option2Stats
             else
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
+                handManager.DrawCardOpponent();
             }
         }
         stats.spell = TonKampon_option2Realization;
@@ -105,7 +105,8 @@ public static class TonKampon_option1Stats
                 //Debug.Log("Here");
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
                 //Debug.Log(handManager.GetNumberOfOpponentsCards());
-                handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
+                handManager.DrawCardOpponent();
+                //handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
             }
         }
         stats.spell = TonKampon_option1Realization;

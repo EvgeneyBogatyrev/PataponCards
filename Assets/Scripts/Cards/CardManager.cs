@@ -203,7 +203,7 @@ public class CardManager : MonoBehaviour
         switch (cardState) 
         {
             case CardState.inHand:
-                if (mouseOver && (CursorController.cursorState == CursorController.CursorStates.Free ||
+                if (!HandManager.mulliganing && mouseOver && (CursorController.cursorState == CursorController.CursorStates.Free ||
                                     CursorController.cursorState == CursorController.CursorStates.EnemyTurn))
                 {
                     transform.localScale = new Vector3(selectedScale, selectedScale, 1f);
