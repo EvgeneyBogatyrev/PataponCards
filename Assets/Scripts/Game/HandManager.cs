@@ -43,24 +43,39 @@ public class HandManager : MonoBehaviour
         
     }
 
-    public void SetNumberOfOpponentsCards(int number)
+    public CardManager SetNumberOfOpponentsCards(int number, bool returnCard=false)
     {
-        // TODO: Check if deck is empty
-        foreach (CardManager card in opponentHand)
+        CardManager returnedCard = null;
+        CardManager[] copyHand = new CardManager[opponentHand.Count];
+        opponentHand.CopyTo(copyHand);
+        for (int i = 0; i < copyHand.Length; ++i)
         {
-            card.DestroyCard();
-            Destroy(card.gameObject);
+            if (i >= number)
+            {
+                opponentHand.Remove(copyHand[i]);
+            }
+            if (i == opponentHand.Count - 1 && returnCard)
+            {
+                returnCard = copyHand[i];
+                break;
+            }
+            if (i >= number) 
+            {
+                copyHand[i].DestroyCard();
+                Destroy(copyHand[i].gameObject);
+            }
         }
 
-        opponentHand = new List<CardManager>();
-        for (int i = 0; i < number; ++i) 
+        //opponentHand = new List<CardManager>();
+        for (int i = opponentHand.Count; i < number; ++i) 
         {
-            CardManager newCard = GenerateCard(CardTypes.Hatapon).GetComponent<CardManager>();
+            CardManager newCard = GenerateCard(CardTypes.Fang).GetComponent<CardManager>();
             opponentHand.Add(newCard);
             newCard.SetCardState(CardManager.CardState.opponentHolding);
         }
 
         UpdateHandPositionOpponent();
+        return returnedCard;
     }
 
     public int GetNumberOfOpponentsCards()
@@ -204,9 +219,18 @@ public class HandManager : MonoBehaviour
         yield return null;
     }
 
-    public GameObject GenerateCard(CardTypes cardType)
+    public GameObject GenerateCard(CardTypes cardType, CardManager origin=null)
     {
-        GameObject newCard = Instantiate(cardPrefab);
+
+        GameObject newCard;
+        if (origin == null) 
+        {
+            newCard = Instantiate(cardPrefab);
+        }
+        else
+        {
+            newCard = origin.gameObject;
+        }
         CardGenerator.CustomizeCard(newCard.GetComponent<CardManager>(), cardType);
         return newCard;
     }

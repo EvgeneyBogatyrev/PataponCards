@@ -204,7 +204,7 @@ public class ServerDataProcesser : MonoBehaviour
                             newCard.arrowList = null;
                         }
                     }
-                    handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
+                    newCard = handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1, returnCard:true);
                     CardTypes type = message.cardIndex;
                     int target = message.targets[0];
                     BoardManager.Slot targetSlot;
@@ -219,12 +219,10 @@ public class ServerDataProcesser : MonoBehaviour
                         targetSlot = boardManager.friendlySlots[target];
                     }
                     
-                    newCard = handManager.GenerateCard(type).GetComponent<CardManager>();
+                    newCard = handManager.GenerateCard(type, newCard).GetComponent<CardManager>();
                     boardManager.PlayCard(newCard, targetSlot, destroy: false, record: false);
                     HandManager.DestroyDisplayedCards();
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);
-
-
 
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
                     newCard.destroyTimer = HandManager.cardDestroyTimer;

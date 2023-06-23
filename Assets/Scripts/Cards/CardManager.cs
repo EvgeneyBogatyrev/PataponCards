@@ -629,7 +629,7 @@ public class CardManager : MonoBehaviour
 
             case CardState.opponentHolding:
                 transform.localScale = new Vector3(normalScale, normalScale, 1f);
-                transform.position = positionInHand;
+                transform.position = Vector3.Lerp(transform.position, positionInHand, 15f * Time.deltaTime);
                 transform.rotation = Quaternion.Euler(180f, 0, curRotation);
                 
                 break;
