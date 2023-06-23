@@ -384,7 +384,8 @@ public class ServerDataProcesser : MonoBehaviour
             }
 
             doneActions.Add(message);
-            
+            yield return new WaitForSeconds(2f); 
+            /*
             if (message.action == MessageFromServer.Action.PlayCard ||
                     message.action == MessageFromServer.Action.CastSpell ||
                         message.action == MessageFromServer.Action.CastOnPlayCard)
@@ -395,6 +396,7 @@ public class ServerDataProcesser : MonoBehaviour
             {
                 yield return new WaitForSeconds(0.5f); 
             }
+            */
         }
     }
 

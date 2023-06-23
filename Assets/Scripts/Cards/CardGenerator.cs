@@ -45,6 +45,7 @@ public enum CardTypes
     BanTatepon,
     TurnToStone,
     Moribu,
+    Wondabarappa,
     //------------------------
     Motiti_option1,
     Motiti_option2,
@@ -170,10 +171,12 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Motiti_option1:
+                card.SetNameSize(4);
                 stats = MochiAccumStats.GetStats();
                 break;
 
             case CardTypes.Motiti_option2:
+                card.SetNameSize(4);
                 stats = MochiciCounterStats.GetStats();
                 break;
 
@@ -191,7 +194,6 @@ public static class CardGenerator
 
             case CardTypes.TargetDummy:
                 stats = TargetDummyStats.GetStats();
-
                 break;
 
             case CardTypes.Boulder:
@@ -267,6 +269,7 @@ public static class CardGenerator
                 break;
 
             case CardTypes.Concede: 
+                card.SetNameSize(4);
                 stats = ConcedeStats.GetStats();
                 break;
 
@@ -302,6 +305,10 @@ public static class CardGenerator
 
             case CardTypes.Moribu:
                 stats = MoribuStats.GetStats();
+                break;
+
+            case CardTypes.Wondabarappa:
+                stats = WondabarappaStats.GetStats();
                 break;
 
             default:

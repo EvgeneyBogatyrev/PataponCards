@@ -113,34 +113,49 @@ public class MinionManager : MonoBehaviour
 
     public void TakePower(int damage)
     {
+        if (damage <= 0)
+        {
+            return;
+        }
         damageObject.SetActive(true);
         damageObject.GetComponent<TextMeshPro>().text = "-" + damage.ToString();
-        StartCoroutine(HideDamage());
+        //damageObject.GetComponent<TextMeshPro>().overrideColorTags = true;
+        damageObject.GetComponent<TextMeshPro>().color = new Color(255f, 0f, 0f, 1f);
+        StartCoroutine(HideDamage(damage:true));
         SetPower(power - damage);
         CheckPower();
     }
 
-    public IEnumerator HideDamage()
+    public IEnumerator HideDamage(bool damage=true)
     {
-        StartCoroutine(ScaleDamage());
+        StartCoroutine(ScaleDamage(random:damage));
         yield return new WaitForSeconds(1.5f);
         damageObject.SetActive(false);
         yield return null;
     }
 
-    public IEnumerator ScaleDamage()
+    public IEnumerator ScaleDamage(bool random=true)
     {   
-        float basePosition = damageObject.transform.position.y;
+        float basePosition = damageObject.transform.localPosition.y;
         float module = 0.35f;
+        float startTime = Time.time;
         while (damageObject.activeSelf)
         {
-            float noise = Random.Range(-module, module);
+            float noise;
+            if (random)
+            {
+                noise = Random.Range(-module, module);
+            }
+            else
+            {
+                noise = module * Mathf.Sin((Time.time - startTime) * 5f);
+            }
             module -= 2f * Time.deltaTime;
             module = Mathf.Max(0, module);
-            damageObject.transform.position = new Vector3(damageObject.transform.position.x, basePosition + noise, damageObject.transform.position.z);
+            damageObject.transform.localPosition = new Vector3(damageObject.transform.localPosition.x, basePosition + noise, damageObject.transform.localPosition.z);
             yield return new WaitForSeconds(0.01f);
         }
-        damageObject.transform.position = new Vector3(damageObject.transform.position.x, basePosition, damageObject.transform.position.z);
+        damageObject.transform.localPosition = new Vector3(damageObject.transform.localPosition.x, basePosition, damageObject.transform.localPosition.z);
         yield return null;
     }
 
@@ -163,6 +178,15 @@ public class MinionManager : MonoBehaviour
 
     public void Heal(int amount)
     {
+        if (amount <= 0)
+        {
+            return;
+        }
+        damageObject.SetActive(true);
+        damageObject.GetComponent<TextMeshPro>().text = "+" + amount.ToString();
+        //damageObject.GetComponent<TextMeshPro>().overrideColorTags = true;
+        damageObject.GetComponent<TextMeshPro>().color = Color.green;
+        StartCoroutine(HideDamage(damage:false));
         SetPower(power + amount);
         CheckPower();
     }
