@@ -330,7 +330,14 @@ public class ServerDataProcesser : MonoBehaviour
                     boardManager.battlecryTrigger = true;
                     spellType = message.cardIndex;
                     newCard = handManager.GenerateCard(spellType).GetComponent<CardManager>();
-                    newCard.spellTargets = message.targets;
+                    if (newCard.GetCardStats().dummyTarget)
+                    {
+                        newCard.spellTargets = message.targets.GetRange(1, message.targets.Count - 1);
+                    }
+                    else
+                    {
+                        newCard.spellTargets = message.targets;
+                    }
                     newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots);
 
                     if (message.creatureTarget > 0)
