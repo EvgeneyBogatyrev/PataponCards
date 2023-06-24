@@ -10,7 +10,7 @@ public static class MyamsarStats
 
         stats.power = 2;
         stats.description = "At the end of your turn summon a copy of this minion with 1 less power.";
-        stats.name = "Myamsar";
+        stats.name = "Rapappa";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
@@ -47,7 +47,7 @@ public static class MyamsarStats
         }
         stats.endTurnEvent = MyamsarEndTurn;
 
-        stats.imagePath = "myamsar";
+        stats.imagePath = "rapappa";
         return stats;
     }
 }

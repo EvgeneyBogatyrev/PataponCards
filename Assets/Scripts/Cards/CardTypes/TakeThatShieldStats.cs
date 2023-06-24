@@ -13,6 +13,8 @@ public static class TakeThatShieldStats
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
 
+        stats.nameSize = 4;
+
         stats.isSpell = true;
 
         static bool TakeThatShieldCheckTarget(int _target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -58,6 +60,7 @@ public static class TakeThatShieldStats
             CardManager.CardStats stats = targetMinion.GetCardStats();
             stats.hasGreatshield = true;
             targetMinion.SetCardStats(stats);
+            
 
             targetMinion.Heal(takeThatShieldGain);
             yield return null;

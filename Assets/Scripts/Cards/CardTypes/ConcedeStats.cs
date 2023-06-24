@@ -11,6 +11,8 @@ public static class ConcedeStats
         stats.description = "You win this round";
         stats.name = "Opponent concedes";
 
+        stats.nameSize = 4;
+
         stats.isSpell = true;
         static IEnumerator ConcedeRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

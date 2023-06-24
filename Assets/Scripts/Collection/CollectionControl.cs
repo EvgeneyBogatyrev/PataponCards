@@ -122,7 +122,7 @@ public class CollectionControl : MonoBehaviour
         {
             GameObject card = GenerateCard(type);
             List<Runes> runes = card.GetComponent<CardManager>().GetCardStats().runes;
-            card.GetComponent<CardManager>().DestroyCard();
+            //card.GetComponent<CardManager>().DestroyCard();
             Destroy(card);
             
             int tmpSpear = spearDevotion;
@@ -328,7 +328,8 @@ public class CollectionControl : MonoBehaviour
                 GameObject card = GenerateCard(type);
                 CardReprManager cardReprObj = Instantiate(cardRepr).GetComponent<CardReprManager>();
                 cardReprObj.SetName(card.GetComponent<CardManager>().GetName());
-                card.GetComponent<CardManager>().DestroyCard();
+                //card.GetComponent<CardManager>().DestroyCard();
+                Destroy(card);
 
                 cardReprObj.gameObject.transform.position = new Vector3(deckStartX, curPosY, 0f);
 

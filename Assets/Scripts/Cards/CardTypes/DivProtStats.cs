@@ -13,6 +13,8 @@ public static class DivProtStats
 
         stats.description = "Summon " + divineProtectionTateponCount.ToString() + " Tatepons with " + divineProtectionTateponPower.ToString() + " power.";
         stats.name = "Divine Protection";
+
+        stats.nameSize = 4;
         
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);

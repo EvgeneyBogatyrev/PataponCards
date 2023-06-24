@@ -16,6 +16,8 @@ public static class AlossonStats
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
+
+        stats.legendary = true;
         
 
         stats.hasOnPlay = true;
@@ -74,8 +76,6 @@ public static class AlossonStats
 
                     foreach (SpearManager spear in spearArray)
                     {
-                        //Debug.Log(spear.exhausted);
-                        //Debug.Log(spear.reachDestination);
                         if (!spear.reachDestination)
                         {
                             arrowsExists = true;
@@ -84,7 +84,6 @@ public static class AlossonStats
                         {
                             spear.DestroySelf();
                             spear.GetSlotToGo().GetConnectedMinion().ReceiveDamage(alossonDamage);
-                            //Debug.Log("deal damage");
                             MinionManager connectedMinion = spear.GetSlotToGo().GetConnectedMinion();
                             if (connectedMinion == null || connectedMinion.GetPower() <= 0)
                             {
@@ -94,10 +93,7 @@ public static class AlossonStats
                         }
                         Debug.Log(arrowsExists);
                     }
-                    Debug.Log("Before new Time");
                     yield return new WaitForSeconds(0.1f);
-                    Debug.Log("Arrows exists");
-                    Debug.Log(arrowsExists);
                 }
                 
                 if (!someoneDied)

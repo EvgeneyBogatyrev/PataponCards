@@ -16,6 +16,8 @@ public static class PyokoriderHeroStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
+        stats.nameSize = 4;
+
 
         static IEnumerator PyokoriderHeroEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

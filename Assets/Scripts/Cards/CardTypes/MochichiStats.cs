@@ -34,6 +34,7 @@ public static class MochiAccumStats
         stats.description = "Give Motiti +" + motiti1Heal.ToString() + " power.";
         stats.name = "Accumulate power";
 
+        stats.nameSize = 4;
         stats.isSpell = true;
         static IEnumerator MotitiOpt1Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -71,6 +72,7 @@ public static class MochiciCounterStats
         stats.description = "Transform Motiti into Angry Motiti with Haste.";
         stats.name = "Motiti Counteratack";
 
+        stats.nameSize = 4;
         stats.isSpell = true;
         static IEnumerator MotitiOpt2Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

@@ -37,6 +37,7 @@ public static class TonKampon_option2Stats
                 
         stats.description = "Add Alldemonium to your hand.";
         stats.name = "Demon Weapon";
+        stats.nameSize = 4;
 
         stats.isSpell = true;
         static IEnumerator TonKampon_option2Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

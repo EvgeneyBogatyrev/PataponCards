@@ -59,6 +59,12 @@ public class CardManager : MonoBehaviour
 
         public string imagePath = "500x500";
 
+        public bool legendary = false;
+
+        public int nameSize = 6;
+        public int descriptionSize = 4;
+
+
         public Sprite GetSprite()
         {
             return Resources.Load<Sprite>("Images/" + this.imagePath);
@@ -124,6 +130,13 @@ public class CardManager : MonoBehaviour
             {
                 newStats.runes.Add(rn);
             }
+
+            newStats.imagePath = this.imagePath;
+
+            newStats.legendary = this.legendary;
+
+            newStats.nameSize = this.nameSize;
+            newStats.descriptionSize = this.descriptionSize;
 
             return newStats;
         }

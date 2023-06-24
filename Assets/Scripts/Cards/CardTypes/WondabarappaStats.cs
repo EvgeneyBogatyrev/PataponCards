@@ -75,6 +75,7 @@ public static class WondabarappaStats
         stats.hasBattlecry = true;
         stats.onPlayEvent = Battlecry;
 
+        stats.legendary = true;
 
         stats.imagePath = "wondabarappa";
         return stats;

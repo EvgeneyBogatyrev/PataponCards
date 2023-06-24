@@ -82,6 +82,18 @@ public class DeckManager : MonoBehaviour
     public static bool CheckCardNumber(CardTypes card)
     {
         int number = GetCardQty(card);
+        
+        CardManager.CardStats stats = CardGenerator.GetCardStats(card);
+
+        if (stats.legendary)
+        {
+            if (number < 1)
+            {
+                return true;
+            }
+            return false;
+        }
+
         if (number < maxCopy)
         {
             return true;

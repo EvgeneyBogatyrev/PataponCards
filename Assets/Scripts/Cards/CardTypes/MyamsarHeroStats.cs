@@ -16,6 +16,9 @@ public static class MyamsarHeroStats
 
         stats.hasBattlecry = true;
         stats.hasDeathrattle = true;
+        stats.descriptionSize = 3;
+
+        stats.legendary = true;
 
         static void MyamsarBattlecry(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

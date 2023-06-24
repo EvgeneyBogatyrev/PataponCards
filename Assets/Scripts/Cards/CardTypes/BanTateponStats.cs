@@ -18,6 +18,9 @@ public static class BanTateponStats
         
         stats.hasOnPlay = true;
 
+        stats.legendary = true;
+        stats.descriptionSize = 3;
+
         static IEnumerator BanTateponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             bool completed = false;

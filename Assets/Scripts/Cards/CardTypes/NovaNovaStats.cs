@@ -12,7 +12,7 @@ public class NovaNovaStats : MonoBehaviour
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
-        //card.SetNameSize(4);
+        stats.legendary = true;
 
         stats.isSpell = true;
         static IEnumerator NovaNovaRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
