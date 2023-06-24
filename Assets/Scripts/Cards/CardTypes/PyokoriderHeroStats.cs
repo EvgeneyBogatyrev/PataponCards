@@ -32,7 +32,38 @@ public static class PyokoriderHeroStats
             
             if (connectedMinion != null)
             {
-                connectedMinion.ReceiveDamage(pyokoDamage);
+
+                GameController gameController = GameObject.Find("GameController").GetComponent<GameController>(); 
+                gameController.actionIsHappening = true;
+
+
+                if (connectedMinion != null)
+                {
+                    AnimationManager animationManager = GameObject.Find("GameController").GetComponent<AnimationManager>();
+                    SpearManager spear = animationManager.CreateObject(AnimationManager.Animations.Spear, friendlySlots[index].GetPosition()).GetComponent<SpearManager>();
+                    spear.gameObject.transform.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/pyokorider_hero");
+                    spear.SetSlotToGo(connectedMinion.GetSlot());
+
+                    spear.speed = 20f;
+                    spear.rotate = false;
+                    spear.constantSpeed = true;
+
+                    while (!spear.reachDestination)
+                    {
+                        yield return new WaitForSeconds(0.1f);
+                    }
+
+                    connectedMinion.ReceiveDamage(pyokoDamage);
+
+                    while (!spear.outOfScreen)
+                    {
+                        yield return new WaitForSeconds(0.1f);
+                    }
+
+                    spear.DestroySelf();                    
+                    
+                }
+                gameController.actionIsHappening = false;
             }
             yield return null;
         }

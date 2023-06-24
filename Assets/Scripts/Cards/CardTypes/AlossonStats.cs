@@ -18,7 +18,6 @@ public static class AlossonStats
         stats.runes.Add(Runes.Bow);
 
         stats.legendary = true;
-        
 
         stats.hasOnPlay = true;
 
@@ -38,6 +37,7 @@ public static class AlossonStats
                     {
                         //slot.GetConnectedMinion().GetDamage(yumiponDamage);
                         SpearManager spear = animationManager.CreateObject(AnimationManager.Animations.Spear, friendlySlots[index].GetPosition()).GetComponent<SpearManager>();
+                        //spear.gameObject.transform.Find("sprite").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/pyokorider_hero");
                         spear.SetSlotToGo(slot);
                         spearArray.Add(spear);
                         if (enemySlots[index].GetFriendly())
@@ -57,6 +57,7 @@ public static class AlossonStats
                         }
                         //slot.GetConnectedMinion().GetDamage(yumiponDamage);
                         SpearManager spear = animationManager.CreateObject(AnimationManager.Animations.Spear, friendlySlots[index].GetPosition()).GetComponent<SpearManager>();
+                        //spear.gameObject.transform.Find("sprite").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/pyokorider_hero");
                         spear.SetSlotToGo(slot);
                         spearArray.Add(spear);
                         if (enemySlots[index].GetFriendly())

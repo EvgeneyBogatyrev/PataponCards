@@ -42,6 +42,7 @@ public class MinionManager : MonoBehaviour
     public float shrinkSpeed = 3f;
     public bool fading = false;
     public bool dying = false;
+    public float startTime = 0f;
 
     public void CustomizeMinion(CardManager playedCard, BoardManager.Slot slot)
     {
@@ -84,6 +85,8 @@ public class MinionManager : MonoBehaviour
         damageObject.SetActive(false);
         //outlineBackObject.SetActive(false);
         normalBackObject.SetActive(false);
+
+        startTime = Time.time;
     }
 
     public void OnCanAttack(bool can=true)
@@ -488,6 +491,12 @@ public class MinionManager : MonoBehaviour
         else
         {
             transform.position += (desiredPosition - transform.position) * Time.deltaTime * 6f;
+            if (GetCardStats().flying)
+            {
+                //transform.localScale = new Vector3()
+                transform.position = new Vector3(transform.position.x + 0.001f * Mathf.Sin(1.5f * (startTime - Time.time)), transform.position.y + 0.001f * Mathf.Cos(1.5f * (startTime - Time.time)), transform.position.z);
+                //transform.rotation = Quaternion.Euler(10f * Mathf.Sin(Time.time), 10f * Mathf.Cos(Time.time), 0f);
+            }
         }
         if (!dying)
         {
