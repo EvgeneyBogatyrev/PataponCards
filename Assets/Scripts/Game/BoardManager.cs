@@ -162,7 +162,7 @@ public class BoardManager : MonoBehaviour
 
         if (destroy)
         {
-            Destroy(card.gameObject);
+            card.DestroyCard();
         }
 
 

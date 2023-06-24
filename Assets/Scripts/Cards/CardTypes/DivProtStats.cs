@@ -18,7 +18,7 @@ public static class DivProtStats
         stats.runes.Add(Runes.Shield);
 
         stats.isSpell = true;
-        static void DivineProtectionRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator DivineProtectionRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
             BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
@@ -41,6 +41,7 @@ public static class DivProtStats
             }
 
             tateponCard.DestroyCard();
+            yield return null;
         }
 
         stats.spell = DivineProtectionRealization;

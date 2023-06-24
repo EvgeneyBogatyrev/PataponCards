@@ -72,7 +72,7 @@ public static class CardGenerator
 
         static IEnumerator EmptyMethod(int index, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { yield return null; }
         static void EmptyMethod_(int index, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { }
-        static void EmptySpell(List<int> targets, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { }
+        static IEnumerator EmptySpell(List<int> targets, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { yield return null; }
         static bool EmptyCheckSpellTargets(List<int> targets, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { return true; }
         static bool EmptyCheckSpellTarget(int target, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { return true; }
         //static bool EmptyCondition(List<int> targets, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { return true; }
@@ -224,7 +224,7 @@ public static class CardGenerator
 
             case CardTypes.ProfessionalWIthStandards:
                 stats = ProfessionalWithStandards.GetStats();
-                card.SetNameSize(3);
+                //card.SetNameSize(3);
                 break;
 
             case CardTypes.SpeedBoost: 

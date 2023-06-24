@@ -21,6 +21,8 @@ public static class TonKamponStats
         stats.connectedCards.Add(CardTypes.TonKampon_option1);
         stats.connectedCards.Add(CardTypes.TonKampon_option2);
 
+        stats.imagePath = "ton_kampon";
+
         return stats;
     }
 }
@@ -37,7 +39,7 @@ public static class TonKampon_option2Stats
         stats.name = "Demon Weapon";
 
         stats.isSpell = true;
-        static void TonKampon_option2Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator TonKampon_option2Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             MinionManager host;
             if (targets[0] < 0)
@@ -58,8 +60,9 @@ public static class TonKampon_option2Stats
             else
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.DrawCardOpponent();
+                handManager.DrawCardOpponent(fromDeck:false);
             }
+            yield return null;
         }
         stats.spell = TonKampon_option2Realization;
         stats.numberOfTargets = 0;
@@ -82,7 +85,7 @@ public static class TonKampon_option1Stats
         stats.name = "Divine Weapon";
 
         stats.isSpell = true;
-        static void TonKampon_option1Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator TonKampon_option1Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             MinionManager host;
             if (targets[0] < 0)
@@ -105,9 +108,10 @@ public static class TonKampon_option1Stats
                 //Debug.Log("Here");
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
                 //Debug.Log(handManager.GetNumberOfOpponentsCards());
-                handManager.DrawCardOpponent();
+                handManager.DrawCardOpponent(fromDeck:false);
                 //handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
             }
+            yield return null;
         }
         stats.spell = TonKampon_option1Realization;
         stats.numberOfTargets = 0;
@@ -138,7 +142,7 @@ public static class CronoRiggersStats
             return true;
         }
 
-        static void CronoRiggersRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator CronoRiggersRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             BoardManager.Slot targetSlot;
 
@@ -157,7 +161,7 @@ public static class CronoRiggersStats
             CardManager.CardStats stats = targetMinion.GetCardStats();
             stats.armor += cronoRiggersDamageReduction;
             targetMinion.SetCardStats(stats);
-
+            yield return null;
         }
 
         stats.spell = CronoRiggersRealization;
@@ -196,7 +200,7 @@ public static class AlldemoniumStats
             yield return null;
         }
 
-        static void AlldemoniumRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator AlldemoniumRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             BoardManager.Slot targetSlot;
 
@@ -216,7 +220,7 @@ public static class AlldemoniumStats
             CardManager.CardStats stats = targetMinion.GetCardStats();
             stats.additionalEndTurnEvents.Add(AlldemoniumEndTurn);
             //targetMinion.SetCardStats(stats);
-
+            yield return null;
         }
 
         static bool AlldemoniumCheckTarget(int _target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

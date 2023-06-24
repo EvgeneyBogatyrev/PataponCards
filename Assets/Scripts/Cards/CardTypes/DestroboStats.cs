@@ -15,7 +15,7 @@ public static class DestroboStats
 
         stats.hasOnPlay = true;
 
-        static void DestroboRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator DestroboRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             BoardManager.Slot selectedSlot;
             int target = targets[0];
@@ -41,11 +41,14 @@ public static class DestroboStats
             {
                 selectedMinion.ReceiveDamage(destroboDamage);
             }
-            
+            yield return null;
         }
 
         stats.spell = DestroboRealization;
         stats.numberOfTargets = 1;
+
+
+        stats.imagePath = "destrobo";
 
         return stats;
     }

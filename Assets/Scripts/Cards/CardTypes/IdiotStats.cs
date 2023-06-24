@@ -10,10 +10,13 @@ public static class IdiotStats
 
         const int burusSelfDamage = 1;
         stats.power = 2;
-        stats.description = "At the end of your turn draw a card and deal " + burusSelfDamage.ToString() + " damage to itself.";
-        stats.name = "Fucking Idiot";
+        stats.description = "At the start of your turn draw a card and deal " + burusSelfDamage.ToString() + " damage to itself.";
+        stats.name = "Bent Compass";
+        stats.canAttack = false;
+        stats.limitedVision = true;
+        stats.canDealDamage = false;
 
-        static IEnumerator FuckingIdiotEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator FuckingIdiotStartTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             if (!enemySlots[0].GetFriendly())
             {
@@ -29,9 +32,9 @@ public static class IdiotStats
             yield return null;
         }
 
-        stats.endTurnEvent = FuckingIdiotEndTurn;
+        stats.startTurnEvent = FuckingIdiotStartTurn;
 
-        stats.imagePath = "burus";
+        stats.imagePath = "bent_compass";
         return stats;
     }
 }

@@ -10,7 +10,7 @@ public static class BaloonStats
         const int baloonDamage = 1;
         stats.power = 2;
         stats.description = "Cannot be a target of an attack. At the end of your turn deal " + baloonDamage.ToString() + " damage to the enemy Hatapon.";
-        stats.name = "Helicopter";
+        stats.name = "Hot Air Ballon";
         stats.flying = true;
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
@@ -34,6 +34,8 @@ public static class BaloonStats
             yield return null;
         }
         stats.endTurnEvent = BaloonEndTurn;
+
+        stats.imagePath = "hot_air_ballon";
         return stats;
     }
 }

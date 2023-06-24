@@ -30,6 +30,7 @@ public class HandManager : MonoBehaviour
 
     void Start()
     {
+        mulliganing = true;
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
         drawStartPosition = GameObject.Find("DrawFromDeck").transform.position;
         DeckManager.CopyDeck();
@@ -136,9 +137,9 @@ public class HandManager : MonoBehaviour
         mulliganButtonObject.SetActive(false);
 
         // Play Hatapons
-        PlayHatapons();
         GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
         gameController.StartGame();
+        PlayHatapons();
         ServerDataProcesser.instance.SendCardNumber(hand.Count);
     }
 
@@ -172,14 +173,21 @@ public class HandManager : MonoBehaviour
         gameController.ProcessCardDraw(friendly:true);
     }
 
-    public void DrawCardOpponent()
+    public void DrawCardOpponent(bool fromDeck=true)
     {
         if (GetNumberOfOpponentsCards() >= 7)
         {
             return;
         }
         GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
-        if (gameController.ProcessCardDraw(friendly:false))
+        if (fromDeck)
+        {
+            if (gameController.ProcessCardDraw(friendly:false))
+            {
+                SetNumberOfOpponentsCards(GetNumberOfOpponentsCards() + 1);
+            }
+        }
+        else
         {
             SetNumberOfOpponentsCards(GetNumberOfOpponentsCards() + 1);
         }

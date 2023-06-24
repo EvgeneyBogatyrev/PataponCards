@@ -83,21 +83,21 @@ public class MinionManager : MonoBehaviour
 
         damageObject.SetActive(false);
         //outlineBackObject.SetActive(false);
-        //normalBackObject.SetActive(false);
+        normalBackObject.SetActive(false);
     }
 
     public void OnCanAttack(bool can=true)
     {
-        if (friendly)
+        if (GameController.playerTurn && friendly && !(!cardStats.canAttack && cardStats.limitedVision && !cardStats.isStatic))
         {
             summoningSickness = !can;
             outlineBackObject.SetActive(can);
-            normalBackObject.SetActive(!can);
+            //normalBackObject.SetActive(!can);
         }
         else
         {
             outlineBackObject.SetActive(false);
-            normalBackObject.SetActive(false);
+            //normalBackObject.SetActive(false);
         }
     }
 

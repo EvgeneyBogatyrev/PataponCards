@@ -301,7 +301,7 @@ public class ServerDataProcesser : MonoBehaviour
                     
                     newCard.arrowList = null;
                     newCard.spellTargets = message.targets;
-                    newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots);
+                    StartCoroutine(newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots));
                     HandManager.DestroyDisplayedCards();
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
@@ -338,7 +338,7 @@ public class ServerDataProcesser : MonoBehaviour
                     {
                         newCard.spellTargets = message.targets;
                     }
-                    newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots);
+                    StartCoroutine(newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots));
 
                     if (message.creatureTarget > 0)
                     {

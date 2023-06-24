@@ -35,7 +35,7 @@ public static class MochiAccumStats
         stats.name = "Accumulate power";
 
         stats.isSpell = true;
-        static void MotitiOpt1Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator MotitiOpt1Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             MinionManager host;
             if (targets[0] < 0)
@@ -49,6 +49,7 @@ public static class MochiAccumStats
 
             host.TakePower(motiti1HealthCost);
             host.Heal(motiti1Heal);
+            yield return null;
         }
         stats.spell = MotitiOpt1Realization;
         stats.numberOfTargets = 0;
@@ -71,7 +72,7 @@ public static class MochiciCounterStats
         stats.name = "Motiti Counteratack";
 
         stats.isSpell = true;
-        static void MotitiOpt2Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator MotitiOpt2Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             MinionManager host;
             if (targets[0] < 0)
@@ -93,7 +94,7 @@ public static class MochiciCounterStats
             //host.TakePower(host.GetPower());
             host.DestroySelf(unattach:true);
             boardManager.PlayCard(newCard, slot, destroy: true, record: false);
-
+            yield return null;
         }
         stats.spell = MotitiOpt2Realization;
         stats.numberOfTargets = 0;

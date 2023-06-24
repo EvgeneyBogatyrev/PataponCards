@@ -36,7 +36,7 @@ public static class GiveFangStats
         stats.name = "Bone Weapon";
 
         stats.isSpell = true;
-        static void GiveFangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator GiveFangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             MinionManager host;
             if (targets[0] < 0)
@@ -57,10 +57,10 @@ public static class GiveFangStats
             else
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.DrawCardOpponent();
+                handManager.DrawCardOpponent(fromDeck:false);
                 //handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
             }
-
+            yield return null;
         }
         stats.spell = GiveFangRealization;
         stats.numberOfTargets = 0;
@@ -86,7 +86,7 @@ public static class NutritionStats
 
         stats.isSpell = true;
 
-        static void NutritionRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator NutritionRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             MinionManager host;
             if (targets[0] < 0)
@@ -108,6 +108,7 @@ public static class NutritionStats
                     minion.Heal(nutritionHeal);
                 }
             }
+            yield return null;
         }
         stats.spell = NutritionRealization;
         stats.numberOfTargets = 0;

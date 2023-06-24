@@ -13,7 +13,7 @@ public static class FangStats
         stats.name = "Fang";
 
         stats.isSpell = true;
-        static void FangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator FangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             BoardManager.Slot targetSlot;
 
@@ -29,7 +29,7 @@ public static class FangStats
 
             MinionManager targetMinion = targetSlot.GetConnectedMinion();
             targetMinion.ReceiveDamage(fangDamage);
-
+            yield return null;
         }
 
         static bool FangCheckTarget(int target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

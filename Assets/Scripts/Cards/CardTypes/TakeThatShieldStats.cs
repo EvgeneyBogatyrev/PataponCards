@@ -39,7 +39,7 @@ public static class TakeThatShieldStats
             return true;
         }
 
-        static void TakeThatShieldRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator TakeThatShieldRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             BoardManager.Slot targetSlot;
 
@@ -60,12 +60,14 @@ public static class TakeThatShieldStats
             targetMinion.SetCardStats(stats);
 
             targetMinion.Heal(takeThatShieldGain);
-
+            yield return null;
         }
 
         stats.spell = TakeThatShieldRealization;
         stats.checkSpellTarget = TakeThatShieldCheckTarget;
         stats.numberOfTargets = 1;
+
+        stats.imagePath = "take_this_shield";
 
         return stats;
     }

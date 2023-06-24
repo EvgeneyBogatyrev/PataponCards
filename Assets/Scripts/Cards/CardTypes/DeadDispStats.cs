@@ -15,7 +15,7 @@ public static class DeadDispStats
         stats.runes.Add(Runes.Spear);
 
         stats.isSpell = true;
-        static void DeadlyDisputeRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator DeadlyDisputeRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             List<MinionManager> minions = new List<MinionManager>();
 
@@ -36,6 +36,7 @@ public static class DeadDispStats
             }
 
             minions[0].Attack(minions[1]);
+            yield return null;
         }
 
         static bool DeadlyDisputeCheckTargets(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -51,7 +52,7 @@ public static class DeadDispStats
         stats.checkSpellTargets = DeadlyDisputeCheckTargets;
         stats.numberOfTargets = 2;
 
-        stats.imagePath = "pon_chaka_song";
+        stats.imagePath = "deadly_dispute";
         return stats;
     }
 }

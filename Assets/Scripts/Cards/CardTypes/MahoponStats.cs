@@ -20,7 +20,7 @@ public static class MahoponStats
 
         stats.hasOnPlay = true;
 
-        static void MahoponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator MahoponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             BoardManager.Slot selectedSlot;
             int target = targets[0];
@@ -53,6 +53,7 @@ public static class MahoponStats
                     slot.GetConnectedMinion().ReceiveDamage(mahoponAoEDamage);
                 }
             }
+            yield return null;
         }
 
         stats.spell = MahoponRealization;

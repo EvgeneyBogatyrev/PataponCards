@@ -36,7 +36,7 @@ public static class BowmunkStats
 
         stats.hasOnPlay = true;
 
-        static void BowmunkRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator BowmunkRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             BoardManager.Slot thisOne = friendlySlots[targets[0]];
 
@@ -60,6 +60,7 @@ public static class BowmunkStats
 
                 boulderCard.DestroyCard();
             }
+            yield return null;
         }
 
         stats.spell = BowmunkRealization;

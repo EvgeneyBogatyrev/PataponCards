@@ -35,7 +35,7 @@ public static class WondabarappaStats
             }
         }
 
-        static void Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             // Deal damage
             BoardManager.Slot selectedSlot;
@@ -66,6 +66,7 @@ public static class WondabarappaStats
                     }
                 }
             }
+            yield return null;
         }
 
         stats.spell = Realization;

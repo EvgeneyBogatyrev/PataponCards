@@ -18,7 +18,7 @@ public static class BanTateponStats
         
         stats.hasOnPlay = true;
 
-        static void BanTateponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator BanTateponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             bool completed = false;
             foreach (BoardManager.Slot slot in friendlySlots)
@@ -66,7 +66,7 @@ public static class BanTateponStats
                 }
 
             }
-
+            yield return null;
         }
 
         stats.spell = BanTateponRealization;

@@ -16,7 +16,7 @@ public static class BuruchStats
 
         stats.hasOnPlay = true;
 
-        static void BuruchRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator BuruchRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
 
             BoardManager.Slot selectedSlot;
@@ -39,7 +39,8 @@ public static class BuruchStats
                 selectedMinion = selectedSlot.GetConnectedMinion();
                 
                 selectedMinion.DestroyMinion();   
-            }                 
+            }  
+            yield return null;               
         }
 
         static bool BuruchCheckTarget(int _target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

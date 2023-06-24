@@ -15,7 +15,7 @@ public static class TurnToStoneStats
         //card.SetNameSize(4);
 
         stats.isSpell = true;
-        static void TurnToStoneRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator TurnToStoneRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             int powerToSet = 0;
             BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
@@ -23,7 +23,7 @@ public static class TurnToStoneStats
             {
                 if (boardManager.lastDeadOpponent == CardTypes.Hatapon)
                 {
-                    return;
+                    yield return null;
                 }
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
                 CardManager minionCard = handManager.GenerateCard(boardManager.lastDeadOpponent).GetComponent<CardManager>();
@@ -46,7 +46,7 @@ public static class TurnToStoneStats
             {
                 if (boardManager.lastDeadYou == CardTypes.Hatapon)
                 {
-                    return;
+                    yield return null;
                 }
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
                 CardManager minionCard = handManager.GenerateCard(boardManager.lastDeadYou).GetComponent<CardManager>();
@@ -64,6 +64,7 @@ public static class TurnToStoneStats
                     }
                 }
             }
+            yield return null;
         }
 
         stats.spell = TurnToStoneRealization;

@@ -27,7 +27,7 @@ public static class MegaponStats
             }
         }
 
-        static void MegaponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator MegaponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             if (targets[0] == targets[1])
             {
@@ -67,6 +67,7 @@ public static class MegaponStats
                 //handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
                 handManager.DrawCardOpponent();
             }
+            yield return null;
         }
 
         stats.spell = MegaponRealization;

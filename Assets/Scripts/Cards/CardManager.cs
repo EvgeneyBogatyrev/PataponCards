@@ -15,7 +15,7 @@ public enum Runes
 public class CardManager : MonoBehaviour
 {
     public delegate IEnumerator EndTurnEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
-    public delegate void Spell(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
+    public delegate IEnumerator Spell(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate void OnPlayEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate void OnDeathEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null, CardStats thisStats = null);
     public delegate bool CheckSpellTarget(int target = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
@@ -342,7 +342,7 @@ public class CardManager : MonoBehaviour
                         handManager.RemoveCard(GetIndexIHand());
                         handManager.SetCanPlayCard(false);
                         ServerDataProcesser.instance.CastSpell(this, spellTargets);
-                        cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots);
+                        StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
                         spellTargets = new List<int>();
                         foreach (BoardManager.Slot slot in boardManager.friendlySlots)
                         {
@@ -403,7 +403,8 @@ public class CardManager : MonoBehaviour
                     {
                         boardManager.battlecryTrigger = true;
                         ServerDataProcesser.instance.CastSpell(this, spellTargets);
-                        cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots);
+                        StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
+                        
                         if (cardStats.dummyTarget)
                         {
                             int _old = spellTargets[0];
@@ -566,7 +567,7 @@ public class CardManager : MonoBehaviour
 
                     if (cardStats.damageToHost <= hostMinion.GetPower()) 
                     {
-                        cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots);
+                        StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
                         ServerDataProcesser.instance.CastSpell(this, spellTargets);
                         spellTargets = new List<int>();
                         hostMinion.ReturnToNormalAfterOptions();
@@ -636,10 +637,27 @@ public class CardManager : MonoBehaviour
         
         }
     }
-
+    
     public void DestroyCard()
     {
+        StartCoroutine(IenumDestroyCard());
+    }
+    
+    public IEnumerator IenumDestroyCard()
+    {
+        transform.position = new Vector3(-50f, 0f, 0f);
+        cardState = CardState.asOption;
+
+        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+
+        while (gameController.actionIsHappening)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+
         Destroy(gameObject);
+
+        yield return null;
     }
 
     public void ReturnToHand()

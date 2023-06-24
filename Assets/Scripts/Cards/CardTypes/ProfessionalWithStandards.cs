@@ -9,11 +9,12 @@ public static class ProfessionalWithStandards
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 2;
         stats.description = "When it dies, you draw a card.";
-        stats.name = "Professional With Standards";
+        stats.name = "Questing beast";
 
         static void ProfessionalWIthStandardsDeathrattle(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots, CardManager.CardStats thisStats)
         {
-            if (index > 0)
+            //Debug.Log(index);
+            if (friendlySlots[0].GetFriendly())
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
                 handManager.DrawCard();
@@ -27,6 +28,8 @@ public static class ProfessionalWithStandards
 
         stats.hasDeathrattle = true;
         stats.onDeathEvent = ProfessionalWIthStandardsDeathrattle;
+
+        stats.imagePath = "questing_beast";
 
         return stats;
     }

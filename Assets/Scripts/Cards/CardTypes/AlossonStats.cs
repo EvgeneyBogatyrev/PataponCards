@@ -8,10 +8,10 @@ public static class AlossonStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int alossonDamage = 2;
-        const int alossonMax = 5;
+        const int alossonDamage = 1;
+        const int alossonMax = 14;
         stats.power = 4;
-        stats.description = "Deal " + alossonDamage.ToString() + " damage to the unit with highest power. If it survives, repeat the process (Up to " + alossonMax.ToString() + ")";
+        stats.description = "Deal " + alossonDamage.ToString() + " damage to all characters. If at least of them dies, repeat the process (Up to " + alossonMax.ToString() + " times).";
         stats.name = "Alosson";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
@@ -20,49 +20,100 @@ public static class AlossonStats
 
         stats.hasOnPlay = true;
 
-        static void AlossonRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator AlossonRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
-
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
+            int index = targets[0];
             for (int limit = 0; limit < alossonMax; ++limit)
             {
-                MinionManager strongestMinion = null;
+                AnimationManager animationManager = GameObject.Find("GameController").GetComponent<AnimationManager>();
+                List<SpearManager> spearArray = new List<SpearManager>();
+
                 foreach (BoardManager.Slot slot in enemySlots)
                 {
-                    MinionManager minion = slot.GetConnectedMinion();
-                    if (minion != null && minion.GetCardType() != CardTypes.Hatapon)
+                    if (!slot.GetFree())
                     {
-                        if (strongestMinion == null || strongestMinion.GetPower() < minion.GetPower())
+                        //slot.GetConnectedMinion().GetDamage(yumiponDamage);
+                        SpearManager spear = animationManager.CreateObject(AnimationManager.Animations.Spear, friendlySlots[index].GetPosition()).GetComponent<SpearManager>();
+                        spear.SetSlotToGo(slot);
+                        spearArray.Add(spear);
+                        if (enemySlots[index].GetFriendly())
                         {
-                            strongestMinion = minion;
-                        }
-                    }
-                }
-                foreach (BoardManager.Slot slot in friendlySlots)
-                {
-                    MinionManager minion = slot.GetConnectedMinion();
-                    if (minion != null && minion.GetCardType() != CardTypes.Hatapon)
-                    {
-                        if (strongestMinion == null || strongestMinion.GetPower() < minion.GetPower())
-                        {
-                            strongestMinion = minion;
+                            spear.isEnemy = true;
                         }
                     }
                 }
 
-                if (strongestMinion == null)
+                foreach (BoardManager.Slot slot in friendlySlots)
+                {
+                    if (!slot.GetFree())
+                    {
+                        if (slot == friendlySlots[index])
+                        {
+                            continue;
+                        }
+                        //slot.GetConnectedMinion().GetDamage(yumiponDamage);
+                        SpearManager spear = animationManager.CreateObject(AnimationManager.Animations.Spear, friendlySlots[index].GetPosition()).GetComponent<SpearManager>();
+                        spear.SetSlotToGo(slot);
+                        spearArray.Add(spear);
+                        if (enemySlots[index].GetFriendly())
+                        {
+                            spear.isEnemy = true;
+                        }
+                    }
+                }
+
+                Debug.Log(spearArray.Count);
+
+                bool someoneDied = false;
+                bool arrowsExists = true;
+                while (arrowsExists)
+                {
+                    arrowsExists = false;
+
+                    foreach (SpearManager spear in spearArray)
+                    {
+                        //Debug.Log(spear.exhausted);
+                        //Debug.Log(spear.reachDestination);
+                        if (!spear.reachDestination)
+                        {
+                            arrowsExists = true;
+                        }
+                        else if (!spear.exhausted)
+                        {
+                            spear.DestroySelf();
+                            spear.GetSlotToGo().GetConnectedMinion().ReceiveDamage(alossonDamage);
+                            //Debug.Log("deal damage");
+                            MinionManager connectedMinion = spear.GetSlotToGo().GetConnectedMinion();
+                            if (connectedMinion == null || connectedMinion.GetPower() <= 0)
+                            {
+                                someoneDied = true;
+                            }
+                            spear.exhausted = true;
+                        }
+                        Debug.Log(arrowsExists);
+                    }
+                    Debug.Log("Before new Time");
+                    yield return new WaitForSeconds(0.1f);
+                    Debug.Log("Arrows exists");
+                    Debug.Log(arrowsExists);
+                }
+                
+                if (!someoneDied)
                 {
                     break;
-                }
-                strongestMinion.ReceiveDamage(alossonDamage);
-                if (strongestMinion.GetPower() <= 0)
-                {
-                    break;
-                }
+                }      
             }
+            gameController.actionIsHappening = false;
+            yield return null;
         }
 
         stats.spell = AlossonRealization;
-        stats.numberOfTargets = 0;
+        stats.numberOfTargets = 1;
+        stats.dummyTarget = true;
+
+        stats.imagePath = "alosson";
 
         return stats;
     }

@@ -15,7 +15,7 @@ public class NovaNovaStats : MonoBehaviour
         //card.SetNameSize(4);
 
         stats.isSpell = true;
-        static void NovaNovaRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator NovaNovaRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             foreach (BoardManager.Slot slot in enemySlots)
             {
@@ -34,6 +34,7 @@ public class NovaNovaStats : MonoBehaviour
                     minion.DestroyMinion();
                 }
             }
+            yield return null;
         }
 
         stats.spell = NovaNovaRealization;
