@@ -25,7 +25,7 @@ public static class DivProtStats
             HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
             BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
-            CardManager tateponCard = handManager.GenerateCard(CardTypes.Tatepon).GetComponent<CardManager>();
+            CardManager tateponCard = handManager.GenerateCard(CardTypes.Tatepon, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
             tateponCard.SetPower(divineProtectionTateponPower);
 
             int count = 0;
@@ -37,7 +37,7 @@ public static class DivProtStats
                 }
                 if (slot.GetFree())
                 {
-                    boardManager.PlayCard(tateponCard, slot, destroy: false, record: false);
+                    boardManager.PlayCard(tateponCard, new Vector3(0f, 0f, 0f), slot, destroy: false, record: false);
                     count += 1;
                 }
             }

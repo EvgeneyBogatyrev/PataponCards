@@ -39,9 +39,9 @@ public static class MyamsarStats
             int newPower = thisOne.GetPower() - 1;
             if (newPower > 0)
             {
-                CardManager newCard = handManager.GenerateCard(CardTypes.Myamsar).GetComponent<CardManager>();
+                CardManager newCard = handManager.GenerateCard(CardTypes.Myamsar, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                 newCard.SetPower(newPower);
-                boardManager.PlayCard(newCard, targetSlot, destroy: true, record: false);
+                boardManager.PlayCard(newCard, new Vector3(0f, 0f, 0f), targetSlot, destroy: true, record: false);
             }
             yield return null;
         }

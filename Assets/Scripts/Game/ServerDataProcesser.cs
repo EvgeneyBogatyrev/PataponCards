@@ -132,7 +132,7 @@ public class ServerDataProcesser : MonoBehaviour
             {
                 CardTypes type = messages[messageIndex].cardIndex;
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                CardManager _newCard = handManager.GenerateCard(type).GetComponent<CardManager>();
+                CardManager _newCard = handManager.GenerateCard(type, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
 
                 if (!_newCard.GetCardStats().hasOnPlay)
                 {
@@ -220,7 +220,7 @@ public class ServerDataProcesser : MonoBehaviour
                     }
                     
                     newCard = handManager.GenerateCard(type, newCard).GetComponent<CardManager>();
-                    boardManager.PlayCard(newCard, targetSlot, destroy: false, record: false);
+                    boardManager.PlayCard(newCard, new Vector3(0f, 10f, 0f), targetSlot, destroy: false, record: false);
                     HandManager.DestroyDisplayedCards();
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);
 
@@ -292,7 +292,7 @@ public class ServerDataProcesser : MonoBehaviour
                     }
 
                     spellType = message.cardIndex;
-                    newCard = handManager.GenerateCard(spellType).GetComponent<CardManager>();
+                    newCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                     
                     if (newCard.GetCardStats().damageToHost == -1 && newCard.GetCardType() != CardTypes.Concede)
                     {
@@ -329,7 +329,7 @@ public class ServerDataProcesser : MonoBehaviour
                     handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
                     boardManager.battlecryTrigger = true;
                     spellType = message.cardIndex;
-                    newCard = handManager.GenerateCard(spellType).GetComponent<CardManager>();
+                    newCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                     if (newCard.GetCardStats().dummyTarget)
                     {
                         newCard.spellTargets = message.targets.GetRange(1, message.targets.Count - 1);
@@ -350,7 +350,7 @@ public class ServerDataProcesser : MonoBehaviour
                         message.creatureTarget = (-1 * message.creatureTarget) - 1;
                         fromSlot = boardManager.friendlySlots[message.creatureTarget];
                     }
-                    boardManager.PlayCard(newCard, fromSlot, destroy: false, record: false);
+                    boardManager.PlayCard(newCard, new Vector3(0f, 10f, 0f), fromSlot, destroy: false, record: false);
 
                     HandManager.DestroyDisplayedCards();
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);

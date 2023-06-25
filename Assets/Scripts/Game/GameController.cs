@@ -476,7 +476,7 @@ public class GameController : MonoBehaviour
     {
         if (playerTurn && CursorController.cursorState == CursorController.CursorStates.Free)
         {
-            CardManager concedeCard = handManager.GenerateCard(CardTypes.Concede).GetComponent<CardManager>();
+            CardManager concedeCard = handManager.GenerateCard(CardTypes.Concede, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
             StartCoroutine(concedeCard.GetCardStats().spell(new List<int>(), boardManager.enemySlots, boardManager.friendlySlots));
             ServerDataProcesser.instance.CastSpell(concedeCard, new List<int>());
             concedeCard.DestroyCard();

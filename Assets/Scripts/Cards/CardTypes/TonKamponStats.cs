@@ -185,6 +185,7 @@ public static class AlldemoniumStats
         const int alldemonuimDamage = 2;
         stats.description = "Target creature under your controll gains " + alldemonuimGain.ToString() + " power, but recieves " + alldemonuimDamage.ToString() + " at the end of your turn.";
         stats.name = "Alldemonium Shield";
+        stats.nameSize = 3;
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);

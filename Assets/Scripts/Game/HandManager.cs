@@ -70,7 +70,7 @@ public class HandManager : MonoBehaviour
         //opponentHand = new List<CardManager>();
         for (int i = opponentHand.Count; i < number; ++i) 
         {
-            CardManager newCard = GenerateCard(CardTypes.Fang).GetComponent<CardManager>();
+            CardManager newCard = GenerateCard(CardTypes.Fang, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
             opponentHand.Add(newCard);
             newCard.SetCardState(CardManager.CardState.opponentHolding);
         }
@@ -146,14 +146,14 @@ public class HandManager : MonoBehaviour
     public void PlayHatapons()
     {
         BoardManager.Slot slot1 = boardManager.friendlySlots[3];
-        CardManager card1 = GenerateCard(CardTypes.Hatapon).GetComponent<CardManager>();
+        CardManager card1 = GenerateCard(CardTypes.Hatapon, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
         card1.SetPower(hataponHealth);
-        boardManager.PlayCard(card1, slot1, record: false);
+        boardManager.PlayCard(card1, new Vector3(0f, 0f, 0f), slot1, record: false);
 
         BoardManager.Slot slot2 = boardManager.enemySlots[3];
-        CardManager card2 = GenerateCard(CardTypes.Hatapon).GetComponent<CardManager>();
+        CardManager card2 = GenerateCard(CardTypes.Hatapon, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
         card2.SetPower(hataponHealth);
-        boardManager.PlayCard(card2, slot2, record: false);
+        boardManager.PlayCard(card2, new Vector3(0f, 0f, 0f), slot2, record: false);
 
         hataponHealth -= hataponHealthDecrease;
     }
@@ -207,7 +207,7 @@ public class HandManager : MonoBehaviour
         CardIsDrawing = true;
         if (hand.Count < 7)
         {
-            CardManager newCard = GenerateCard(card).GetComponent<CardManager>();
+            CardManager newCard = GenerateCard(card, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
             hand.Add(newCard);
             UpdateHandPosition();
 
@@ -234,7 +234,23 @@ public class HandManager : MonoBehaviour
         GameObject newCard;
         if (origin == null) 
         {
-            newCard = Instantiate(cardPrefab);
+            newCard = Instantiate(cardPrefab, new Vector3(-10f, -10f, 0f), Quaternion.identity);
+        }
+        else
+        {
+            newCard = origin.gameObject;
+        }
+        CardGenerator.CustomizeCard(newCard.GetComponent<CardManager>(), cardType);
+        return newCard;
+    }
+
+    public GameObject GenerateCard(CardTypes cardType, Vector3 positionFrom, CardManager origin=null)
+    {
+
+        GameObject newCard;
+        if (origin == null) 
+        {
+            newCard = Instantiate(cardPrefab, positionFrom, Quaternion.identity);
         }
         else
         {

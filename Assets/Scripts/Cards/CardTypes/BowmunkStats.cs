@@ -55,8 +55,8 @@ public static class BowmunkStats
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
                 BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
-                CardManager boulderCard = handManager.GenerateCard(CardTypes.Boulder).GetComponent<CardManager>();
-                boardManager.PlayCard(boulderCard, targetSlot, destroy: false, record: false);
+                CardManager boulderCard = handManager.GenerateCard(CardTypes.Boulder, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                boardManager.PlayCard(boulderCard, new Vector3(0f, 0f, 0f), targetSlot, destroy: false, record: false);
 
                 boulderCard.DestroyCard();
             }

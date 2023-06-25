@@ -43,6 +43,7 @@ public class MinionManager : MonoBehaviour
     public bool fading = false;
     public bool dying = false;
     public float startTime = 0f;
+    public CardManager previewedCard = null;
 
     public void CustomizeMinion(CardManager playedCard, BoardManager.Slot slot)
     {
@@ -277,8 +278,8 @@ public class MinionManager : MonoBehaviour
                                 CursorController.cursorState = CursorController.CursorStates.ChooseOption;
                                 connectedCardObjects = new List<CardManager>();
 
-                                CardManager option1 = handManager.GenerateCard(cardStats.connectedCards[0]).GetComponent<CardManager>();
-                                CardManager option2 = handManager.GenerateCard(cardStats.connectedCards[1]).GetComponent<CardManager>();
+                                CardManager option1 = handManager.GenerateCard(cardStats.connectedCards[0], transform.position).GetComponent<CardManager>();
+                                CardManager option2 = handManager.GenerateCard(cardStats.connectedCards[1], transform.position).GetComponent<CardManager>();
 
                                 option1.SetCardState(CardManager.CardState.asOption);
                                 option2.SetCardState(CardManager.CardState.asOption);
@@ -494,7 +495,7 @@ public class MinionManager : MonoBehaviour
             if (GetCardStats().flying)
             {
                 //transform.localScale = new Vector3()
-                transform.position = new Vector3(transform.position.x + 0.004f * Mathf.Sin(1.5f * (startTime - Time.time)), transform.position.y + 0.0025f * Mathf.Cos(1.5f * (startTime - Time.time)), transform.position.z);
+                transform.position = new Vector3(transform.position.x + 0.04f * Mathf.Sin(1.5f * (startTime - Time.time)), transform.position.y + 0.025f * Mathf.Cos(1.5f * (startTime - Time.time)), transform.position.z);
                 //transform.rotation = Quaternion.Euler(10f * Mathf.Sin(Time.time), 10f * Mathf.Cos(Time.time), 0f);
             }
         }
@@ -768,12 +769,50 @@ public class MinionManager : MonoBehaviour
         return connectedSlot;
     }
 
+    private IEnumerator CardPreview()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        if (mouseOver && previewedCard == null)
+        {
+            previewedCard = handManager.GenerateCard(cardType).GetComponent<CardManager>();
+            previewedCard.SetCardState(CardManager.CardState.hilightOver);
+            
+            if (friendly && connectedSlot.GetIndex() > 1)
+            {
+                previewedCard.transform.position = this.transform.position + new Vector3(-4f, 3.5f, -6f);
+            }
+            else if (friendly && connectedSlot.GetIndex() <= 1)
+            {
+                previewedCard.transform.position = this.transform.position + new Vector3(3.5f, 3.5f, -6f);
+            }
+            else if (!friendly && connectedSlot.GetIndex() > 1)
+            {
+                previewedCard.transform.position = this.transform.position + new Vector3(-4f, -2.5f, -6f);
+            } 
+            else
+            {
+                previewedCard.transform.position = this.transform.position + new Vector3(3.5f, -2.5f, -6f);
+            }
+        }
+        
+        yield return null;
+    }
+
     private void OnMouseOver()
     {
         mouseOver = true;
+        if (previewedCard == null)
+        {
+            StartCoroutine(CardPreview());
+        }
     }
     private void OnMouseExit()
     {
         mouseOver = false;
+        if (previewedCard != null)
+        {
+            previewedCard.DestroyCard();
+        }
     }
 }

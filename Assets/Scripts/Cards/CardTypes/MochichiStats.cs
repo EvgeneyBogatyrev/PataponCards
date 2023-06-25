@@ -90,12 +90,12 @@ public static class MochiciCounterStats
             BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
             host.TakePower(motiti2HealthCost);
-            CardManager newCard = handManager.GenerateCard(CardTypes.MotitiAngry).GetComponent<CardManager>();
+            CardManager newCard = handManager.GenerateCard(CardTypes.MotitiAngry, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
             newCard.SetPower(host.GetPower());
             BoardManager.Slot slot = host.GetSlot();
             //host.TakePower(host.GetPower());
             host.DestroySelf(unattach:true);
-            boardManager.PlayCard(newCard, slot, destroy: true, record: false);
+            boardManager.PlayCard(newCard, new Vector3(0f, 0f, 0f), slot, destroy: true, record: false);
             yield return null;
         }
         stats.spell = MotitiOpt2Realization;

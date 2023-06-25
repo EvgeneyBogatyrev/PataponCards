@@ -27,8 +27,8 @@ public static class CoppenStats
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
                 BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
-                CardManager iceWallCard = handManager.GenerateCard(CardTypes.IceWall).GetComponent<CardManager>();
-                boardManager.PlayCard(iceWallCard, slot, destroy:false, record:false);
+                CardManager iceWallCard = handManager.GenerateCard(CardTypes.IceWall, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                boardManager.PlayCard(iceWallCard, new Vector3(0f, 0f, 0f), slot, destroy:false, record:false);
                 
                 iceWallCard.DestroyCard();
             }

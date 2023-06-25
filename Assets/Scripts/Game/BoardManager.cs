@@ -139,6 +139,39 @@ public class BoardManager : MonoBehaviour
         normalColorStatic = normalColor;
     }
 
+    public void PlayCard(CardManager card, Vector3 position, Slot slot = null, bool destroy=true, bool record=true)
+    {
+        GameObject newMinion = Instantiate(minionPrefab, position, Quaternion.identity);
+        newMinion.transform.rotation = Quaternion.Euler(minionRotation, 0f, 0f);
+        newMinion.GetComponent<MinionManager>().CustomizeMinion(card, slot);
+
+        if (card.GetCardStats().hasBattlecry)
+        {
+            int index;
+            if (!slot.GetFriendly())
+            {
+                index = slot.GetIndex() * (-1) - 1;
+            }
+            else
+            {
+                index = slot.GetIndex() + 1;
+            }
+
+            card.GetCardStats().onPlayEvent(index, enemySlots, friendlySlots);
+        }
+
+        if (destroy)
+        {
+            card.DestroyCard();
+        }
+
+
+        if (record)
+        {
+            ServerDataProcesser.instance.PlayCard(card, slot);
+        }
+    }
+
     public void PlayCard(CardManager card, Slot slot = null, bool destroy=true, bool record=true)
     {     
         GameObject newMinion = Instantiate(minionPrefab, card.transform.position, Quaternion.identity);

@@ -26,7 +26,7 @@ public static class TurnToStoneStats
                     yield return null;
                 }
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
-                CardManager minionCard = handManager.GenerateCard(boardManager.lastDeadOpponent).GetComponent<CardManager>();
+                CardManager minionCard = handManager.GenerateCard(boardManager.lastDeadOpponent, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                 powerToSet = minionCard.GetPower();
                 minionCard.DestroyCard();
 
@@ -34,9 +34,9 @@ public static class TurnToStoneStats
                 {
                     if (slot.GetFree())
                     {
-                        CardManager boulderCard = handManager.GenerateCard(CardTypes.StoneFree).GetComponent<CardManager>();
+                        CardManager boulderCard = handManager.GenerateCard(CardTypes.StoneFree, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                         boulderCard.SetPower(powerToSet);
-                        boardManager.PlayCard(boulderCard, slot, destroy:false, record:false);
+                        boardManager.PlayCard(boulderCard, new Vector3(0f, 0f, 0f), slot, destroy:false, record:false);
                         boulderCard.DestroyCard();
                         break;
                     }
@@ -49,16 +49,16 @@ public static class TurnToStoneStats
                     yield return null;
                 }
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
-                CardManager minionCard = handManager.GenerateCard(boardManager.lastDeadYou).GetComponent<CardManager>();
+                CardManager minionCard = handManager.GenerateCard(boardManager.lastDeadYou, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                 powerToSet = minionCard.GetPower();
                 minionCard.DestroyCard();
                 foreach (BoardManager.Slot slot in friendlySlots)
                 {
                     if (slot.GetFree())
                     {
-                        CardManager boulderCard = handManager.GenerateCard(CardTypes.StoneFree).GetComponent<CardManager>();
+                        CardManager boulderCard = handManager.GenerateCard(CardTypes.StoneFree, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                         boulderCard.SetPower(powerToSet);
-                        boardManager.PlayCard(boulderCard, slot, destroy:false, record:false);
+                        boardManager.PlayCard(boulderCard, new Vector3(0f, 0f, 0f), slot, destroy:false, record:false);
                         boulderCard.DestroyCard();
                         break;
                     }
