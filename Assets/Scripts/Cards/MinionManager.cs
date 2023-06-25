@@ -494,7 +494,7 @@ public class MinionManager : MonoBehaviour
             if (GetCardStats().flying)
             {
                 //transform.localScale = new Vector3()
-                transform.position = new Vector3(transform.position.x + 0.001f * Mathf.Sin(1.5f * (startTime - Time.time)), transform.position.y + 0.001f * Mathf.Cos(1.5f * (startTime - Time.time)), transform.position.z);
+                transform.position = new Vector3(transform.position.x + 0.004f * Mathf.Sin(1.5f * (startTime - Time.time)), transform.position.y + 0.0025f * Mathf.Cos(1.5f * (startTime - Time.time)), transform.position.z);
                 //transform.rotation = Quaternion.Euler(10f * Mathf.Sin(Time.time), 10f * Mathf.Cos(Time.time), 0f);
             }
         }
