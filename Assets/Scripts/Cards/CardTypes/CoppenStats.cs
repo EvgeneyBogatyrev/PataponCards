@@ -9,7 +9,7 @@ public static class CoppenStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "On Play: Summon an Ice Wall for your opponent in front of this card.";
+        stats.description = "On play: Summon an Ice Wall for your opponent in front of this card.";
         stats.name = "Coppen";
         stats.runes.Add(Runes.Bow);
 

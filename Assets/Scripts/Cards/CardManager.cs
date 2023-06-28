@@ -56,13 +56,11 @@ public class CardManager : MonoBehaviour
         public List<MinionManager> connectedMinions = new List<MinionManager>();
         public int damageToHost = -1;
         public List<Runes> runes = new List<Runes>();
-
         public string imagePath = "500x500";
-
         public bool legendary = false;
-
         public int nameSize = 6;
         public int descriptionSize = 4;
+        public bool poisoned = false;
 
 
         public Sprite GetSprite()

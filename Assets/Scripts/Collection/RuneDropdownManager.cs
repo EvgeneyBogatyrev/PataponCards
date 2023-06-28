@@ -5,77 +5,74 @@ using UnityEngine.UI;
 
 public class RuneDropdownManager : MonoBehaviour
 {
-    public Runes value;
+    public Runes value = Runes.Spear;
     private CollectionControl collection;
-    private bool noUpdate = false;
-    void Start()
-    {
-        var dropdown = transform.GetComponent<Dropdown>();
+    
+    private bool mouseOver = false;
+
+    private void Start() {
         collection = GameObject.Find("Collection").GetComponent<CollectionControl>();
-
-        dropdown.options.Clear();
-
-        List<string> items = new List<string>();
-        items.Add("Spear");
-        items.Add("Shield");
-        items.Add("Bow");
-
-        foreach (var item in items)
-        {
-            dropdown.options.Add(new Dropdown.OptionData() { text = item });
-        }
-
-        dropdown.onValueChanged.AddListener(delegate { DropdownItemSelected(dropdown); });
     }
-
-    IEnumerator CallFunc(Dropdown dropdown)
-    {
-        yield return new WaitForSeconds(0.5f);
-        DropdownItemSelected(dropdown);
-    }
-
-    void DropdownItemSelected(Dropdown dropdown)
-    {
-        int index = dropdown.value;
-
-        if (index == 0)
-        {
-            value = Runes.Spear;
-        }
-        else if (index == 1)
-        {
-            value = Runes.Shield;
-        }
-        if (index == 2)
-        {
-            value = Runes.Bow;
-        }
-       
-        if (!noUpdate)
-        {
-            collection.UpdateRunes();
-        }
-        noUpdate = false;
-        
-        
-    } 
 
     public void SetRune(Runes rune)
     {
-        noUpdate = true;
         value = rune;
-        if (value == Runes.Spear || value == Runes.Neutral)
+        if (value == Runes.Spear)
         {
-            transform.GetComponent<Dropdown>().value = 0;
+            this.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/spear_rune");
         }
         else if (value == Runes.Shield)
         {
-            transform.GetComponent<Dropdown>().value = 1;
+            this.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/shield_rune");
         }
-        if (value == Runes.Bow)
+        else if (value == Runes.Bow)
         {
-            transform.GetComponent<Dropdown>().value = 2;
+            this.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/bow_rune");
         }
+    }
+
+    private void Update() 
+    {
+        if (mouseOver && Input.GetMouseButtonDown(0))
+        {
+            if (value == Runes.Spear)
+            {
+                SetRune(Runes.Shield);
+            }
+            else if (value == Runes.Shield)
+            {
+                SetRune(Runes.Bow);
+            }
+            else if (value == Runes.Bow)
+            {
+                SetRune(Runes.Spear);
+            }
+            collection.UpdateRunes();
+            StartCoroutine(Bounce());
+            
+        }
+    }
+
+    private IEnumerator Bounce()
+    {
+        float startTime = Time.time;
+        for (int _ = 0; _ < 75; ++_)
+        {
+            float scale = 1f + Mathf.PingPong((Time.time - startTime) * 2.5f, 1.5f - 1f);
+            transform.localScale = new Vector3(scale, scale, 1f);
+            yield return new WaitForSeconds(0.005f);
+        }
+        transform.localScale = new Vector3(1f, 1f, 1f);
+        yield return null;
+    }
+
+    private void OnMouseOver()
+    {
+        mouseOver = true;
+    }
+    private void OnMouseExit()
+    {
+        mouseOver = false;
     }
     
 }

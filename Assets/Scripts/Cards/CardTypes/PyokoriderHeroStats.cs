@@ -10,7 +10,7 @@ public static class PyokoriderHeroStats
         const int pyokoDamage = 3;
 
         stats.power = 3;
-        stats.description = "At the end of your turn deal " + pyokoDamage.ToString() + " damage to the right-most enemy.";
+        stats.description = "At the end of your turn deal " + pyokoDamage.ToString() + " damage to the right-most enemy character.";
         stats.name = "Pyokorider, hero";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);

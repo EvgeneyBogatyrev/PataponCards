@@ -8,7 +8,7 @@ public static class TakeThatShieldStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         const int takeThatShieldGain = 3;
-        stats.description = "Target non-Hatapon creature under your control gains +" + takeThatShieldGain.ToString() + " power and Greatshield.";
+        stats.description = "Target non-Hatapon character under your control gains +" + takeThatShieldGain.ToString() + " power and Greatshield.";
         stats.name = "Take That Shield";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);

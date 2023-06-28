@@ -237,6 +237,10 @@ public class GameController : MonoBehaviour
                 {
                     order.Add(minion);
                     minion.SetCanAttack(true);
+                    if (minion.GetCardStats().poisoned)
+                    {
+                        minion.TakePower(1);
+                    }
                 }
             }
 
@@ -263,6 +267,10 @@ public class GameController : MonoBehaviour
                 {
                     order.Add(minion);
                     minion.SetCanAttack(true);
+                    if (minion.GetCardStats().poisoned)
+                    {
+                        minion.TakePower(1);
+                    }
                 }
             }
 

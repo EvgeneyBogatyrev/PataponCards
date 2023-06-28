@@ -8,7 +8,7 @@ public static class SpeedBoost
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         
-        stats.description = "Target non-Hatapon creature under your control gains can attack again this turn.";
+        stats.description = "Target non-Hatapon character under your control gains can attack again this turn.";
         stats.name = "Speed Boost";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);

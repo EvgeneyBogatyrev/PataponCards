@@ -9,8 +9,8 @@ public static class BoulderStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "Greatshield.\nCan't attack, move and deal damage.";
-        stats.name = "The rock";
+        stats.description = "Greatshield.";
+        stats.name = "The Boulder";
         stats.canAttack = false;
         stats.canDealDamage = false;
         stats.limitedVision = true;

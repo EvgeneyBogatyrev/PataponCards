@@ -8,7 +8,7 @@ public static class TurnToStoneStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.name = "Turn to stone";
-        stats.description = "Summon the last friendly unit died this round. It has Greatshield, can't attack and deal damage.";
+        stats.description = "Summon the last friendly unit died this round as an artifact with Greatshield.";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
         //stats.runes.Add(Runes.Bow);

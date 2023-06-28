@@ -8,7 +8,7 @@ public static class ProfessionalWithStandards
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 2;
-        stats.description = "When it dies, you draw a card.";
+        stats.description = "On death: You draw a card.";
         stats.name = "Questing beast";
 
         static void ProfessionalWIthStandardsDeathrattle(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots, CardManager.CardStats thisStats)

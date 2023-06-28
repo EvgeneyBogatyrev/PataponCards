@@ -9,7 +9,7 @@ public static class FangStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         const int fangDamage = 3;
-        stats.description = "Deal " + fangDamage.ToString() + " damage to an enemy.";
+        stats.description = "Deal " + fangDamage.ToString() + " damage to an enemy character.";
         stats.name = "Fang";
 
         stats.isSpell = true;

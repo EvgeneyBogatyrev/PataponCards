@@ -15,7 +15,7 @@ public static class MahoponStats
         stats.runes.Add(Runes.Bow);
 
         stats.power = 2;
-        stats.description = "Deal " + mahoponTargetDamage.ToString() + " damage to target creature and " + mahoponAoEDamage.ToString() + " damage to all other creatures.";
+        stats.description = "On play: Deal " + mahoponTargetDamage.ToString() + " damage to target character and " + mahoponAoEDamage.ToString() + " damage to all other characters.";
         stats.name = "Mahopon";
 
         stats.hasOnPlay = true;

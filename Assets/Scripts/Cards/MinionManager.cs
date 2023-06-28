@@ -19,6 +19,7 @@ public class MinionManager : MonoBehaviour
     public GameObject heartObject;
     public GameObject normalBackObject;
     public GameObject outlineBackObject;
+    public GameObject poisonObject;
     public float normalScale;
     public float selectedScale;
     public Renderer myRenderer;
@@ -86,6 +87,7 @@ public class MinionManager : MonoBehaviour
         damageObject.SetActive(false);
         //outlineBackObject.SetActive(false);
         normalBackObject.SetActive(false);
+        poisonObject.SetActive(false);
 
         startTime = Time.time;
     }
@@ -103,6 +105,16 @@ public class MinionManager : MonoBehaviour
             outlineBackObject.SetActive(false);
             //normalBackObject.SetActive(false);
         }
+    }
+
+    public void PoisonMinion(bool poison=true)
+    {
+        if (cardStats.isStatic || (cardStats.canDealDamage == false && cardType != CardTypes.Hatapon))
+        {
+            return;
+        }
+        poisonObject.SetActive(poison);
+        cardStats.poisoned = poison;
     }
 
 
@@ -715,6 +727,10 @@ public class MinionManager : MonoBehaviour
             connectedSlot.SetConnectedMinion(null);
         }
         Destroy(gameObject);
+        if (previewedCard != null)
+        {
+            previewedCard.DestroyCard();
+        }
 
         if (friendly)
         {

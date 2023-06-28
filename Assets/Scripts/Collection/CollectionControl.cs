@@ -51,6 +51,7 @@ public class CollectionControl : MonoBehaviour
         reservedList.Add(CardTypes.IceWall_option);
         reservedList.Add(CardTypes.Concede);
         reservedList.Add(CardTypes.StoneFree);
+        reservedList.Add(CardTypes.Mushroom);
 
         return reservedList;
     }
@@ -201,7 +202,7 @@ public class CollectionControl : MonoBehaviour
             }
         }
 
-        SaveSystem.SaveRunes(DeckManager.runes);
+        //SaveSystem.SaveRunes(DeckManager.runes);
         ShowDeck();
     }
 
@@ -302,6 +303,7 @@ public class CollectionControl : MonoBehaviour
 
     public void BackButton()
     {
+        SaveSystem.SaveRunes(DeckManager.runes);
         SaveSystem.SaveDeck(DeckManager.deck);
         if (DeckManager.GetDeckSize() == DeckManager.minDeckSize)
         {

@@ -11,7 +11,7 @@ public static class IceWall_optionStats
         const int IceWallHealthCost = 0;
         const int IceWallSelfDamage = 1;
         
-        stats.description = "Deal 1 damage to this.";
+        stats.description = "0: Deal 1 damage to this.";
         stats.name = "Melt Down";
 
         stats.isSpell = true;

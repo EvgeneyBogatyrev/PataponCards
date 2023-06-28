@@ -11,7 +11,7 @@ public static class YumiponStats
         const int yumiponDamage = 1;
 
         stats.power = 2;
-        stats.description = "At the end of your turn deal " + yumiponDamage.ToString() + " damage to all enemys.";
+        stats.description = "At the end of your turn deal " + yumiponDamage.ToString() + " damage to all enemy characters.";
         stats.name = "Yumipon";
         stats.runes.Add(Runes.Bow);
 

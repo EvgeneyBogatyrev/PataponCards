@@ -9,7 +9,7 @@ public static class MegaponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 2;
-        stats.description = "Deal two damage split between 1 or 2 creatures.\nDraw a card.";
+        stats.description = "On play: Deal 2 damage split between one or two creatures.\nDraw a card.";
         stats.name = "Megapon";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);

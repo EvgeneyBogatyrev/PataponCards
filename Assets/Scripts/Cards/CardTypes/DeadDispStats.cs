@@ -8,7 +8,7 @@ public static class DeadDispStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.description = "Choose 2 creatures. They fight each other.";
+        stats.description = "Choose 2 characters. They fight each other.";
         stats.name = "Deadly Dispute";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);

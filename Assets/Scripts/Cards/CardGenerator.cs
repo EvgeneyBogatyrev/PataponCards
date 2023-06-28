@@ -46,6 +46,9 @@ public enum CardTypes
     TurnToStone,
     Moribu,
     Wondabarappa,
+    Jamsch,
+    DoomShroom,
+    Venomist,
     //------------------------
     Motiti_option1,
     Motiti_option2,
@@ -60,6 +63,7 @@ public enum CardTypes
     IceWall_option,
     Concede,
     StoneFree,
+    Mushroom,
 };
 
 //Rewrite this entire piece of sheesh
@@ -108,7 +112,6 @@ public static class CardGenerator
 
             case CardTypes.Fang: 
                 stats = FangStats.GetStats();
-
                 break;
 
             case CardTypes.Nutrition:
@@ -293,6 +296,22 @@ public static class CardGenerator
 
             case CardTypes.Wondabarappa:
                 stats = WondabarappaStats.GetStats();
+                break;
+
+            case CardTypes.Jamsch:
+                stats = JamschStats.GetStats();
+                break;
+
+            case CardTypes.Mushroom:
+                stats = MushroomStats.GetStats();
+                break;
+
+            case CardTypes.DoomShroom:
+                stats = DoomShroomStats.GetStats();
+                break;
+
+            case CardTypes.Venomist:
+                stats = VenomistStats.GetStats();
                 break;
 
             default:

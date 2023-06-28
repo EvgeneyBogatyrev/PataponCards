@@ -10,7 +10,7 @@ public static class TargetDummyStats
 
         stats.power = 3;
         stats.description = "Greatshield.";
-        stats.name = "Target dumby";
+        stats.name = "Target dummy";
         stats.hasGreatshield = true;
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);

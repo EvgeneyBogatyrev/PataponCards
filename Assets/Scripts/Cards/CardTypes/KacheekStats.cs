@@ -8,7 +8,7 @@ public static class KacheekStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 5;
+        stats.power = 3;
         stats.description = "-1: Add Fang to your hand.\n-1: Give your creatures +1 power.";
         stats.name = "Kacheek";
 

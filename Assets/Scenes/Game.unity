@@ -1025,6 +1025,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spearPrefab: {fileID: 4274472123739717661, guid: 68826ed8be5250d439acc86c2f65f9ff, type: 3}
+  sporesPrefab: {fileID: 2462930456808526329, guid: 1bcd48d722e4f7b4898cf631a940f52c, type: 3}
 --- !u!114 &1101498039
 MonoBehaviour:
   m_ObjectHideFlags: 0

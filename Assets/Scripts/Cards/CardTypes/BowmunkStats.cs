@@ -10,7 +10,7 @@ public static class BowmunkStats
 
         const int bowmunkHealing = 2;
         stats.power = 2;
-        stats.description = "Summon the rock with Greatshield. At the end of your turn heal your Hatapon by " + bowmunkHealing.ToString() + ".";
+        stats.description = "On play: Summon the boulder artifact with Greatshield.\nAt the end of your turn heal your Hatapon by " + bowmunkHealing.ToString() + ".";
         stats.name = "Bowmunk";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);

@@ -8,7 +8,7 @@ public static class BuruchStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 9;
-        stats.description = "Destroy 2 creatures under your control.";
+        stats.description = "On play: Destroy 2 creatures under your control.";
         stats.name = "Buruch";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);

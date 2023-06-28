@@ -6,10 +6,12 @@ public class AnimationManager : MonoBehaviour
 {
     public enum Animations 
     {
-        Spear
+        Spear,
+        Spores
     }
 
     public GameObject spearPrefab;
+    public GameObject sporesPrefab;
 
     public GameObject CreateObject(Animations type, Vector3 position)
     {
@@ -18,6 +20,11 @@ public class AnimationManager : MonoBehaviour
         {
             case Animations.Spear:
                 gameObject = Instantiate(spearPrefab);
+                gameObject.transform.position = position;
+                break;
+
+            case Animations.Spores:
+                gameObject = Instantiate(sporesPrefab);
                 gameObject.transform.position = position;
                 break;
 

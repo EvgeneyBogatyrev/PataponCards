@@ -12,7 +12,7 @@ public static class PyokoriderStats
 
         stats.power = 5;
         stats.description = "Haste.\nAt the start of your turn set this creature's power to " + pyokoriderStartTurnPower.ToString();
-        stats.name = "Pyokorider";
+        stats.name = "Ladodon";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
@@ -25,7 +25,7 @@ public static class PyokoriderStats
         stats.startTurnEvent = PyokoriderStartTurn;
         stats.hasHaste = true;
 
-        stats.imagePath = "pyokorider";
+        stats.imagePath = "ladodon";
         return stats;
     }
 }
