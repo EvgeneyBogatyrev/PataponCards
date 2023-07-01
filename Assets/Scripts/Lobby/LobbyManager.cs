@@ -42,4 +42,9 @@ public class LobbyManager : MonoBehaviour
         InfoSaver.opponentHash = InfoSaver.myHash;
         SceneManager.LoadScene("Game");
     }
+
+    public void PlayOnline()
+    {
+        
+    }
 }

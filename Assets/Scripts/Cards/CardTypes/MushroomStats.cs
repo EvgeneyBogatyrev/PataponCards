@@ -7,8 +7,6 @@ public class MushroomStats : MonoBehaviour
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-
-        const int damage = 1;
         const int selfDamage = 1;
 
         stats.power = 4;

@@ -13,7 +13,6 @@ public static class TargetDummyStats
         stats.name = "Target dummy";
         stats.hasGreatshield = true;
         stats.runes.Add(Runes.Shield);
-        stats.runes.Add(Runes.Shield);
 
         stats.imagePath = "target_dummy";
         return stats;

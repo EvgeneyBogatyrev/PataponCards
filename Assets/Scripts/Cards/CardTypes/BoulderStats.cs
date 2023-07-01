@@ -9,7 +9,7 @@ public static class BoulderStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "Greatshield.";
+        stats.description = "Greatshield.\nI wish I could pay taxes, but I don't know how.";
         stats.name = "The Boulder";
         stats.canAttack = false;
         stats.canDealDamage = false;

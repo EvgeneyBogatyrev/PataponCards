@@ -49,6 +49,12 @@ public enum CardTypes
     Jamsch,
     DoomShroom,
     Venomist,
+    Rantan,
+    DeadlyShot,
+    GongTheHawkeye,
+    Moforumo,
+    SparringPartner,
+    Cannasault,
     //------------------------
     Motiti_option1,
     Motiti_option2,
@@ -63,7 +69,7 @@ public enum CardTypes
     IceWall_option,
     Concede,
     StoneFree,
-    Mushroom,
+    Mushroom
 };
 
 //Rewrite this entire piece of sheesh
@@ -312,6 +318,30 @@ public static class CardGenerator
 
             case CardTypes.Venomist:
                 stats = VenomistStats.GetStats();
+                break;
+
+            case CardTypes.Rantan:
+                stats = RantanStats.GetStats();
+                break;
+
+            case CardTypes.DeadlyShot:
+                stats = DeadlyShotStats.GetStats();
+                break;
+
+            case CardTypes.GongTheHawkeye:
+                stats = GongStats.GetStats();
+                break;
+
+            case CardTypes.Moforumo:
+                stats = Moforumo.GetStats();
+                break;
+
+            case CardTypes.SparringPartner:
+                stats = SparringPartnerStats.GetStats();
+                break;
+
+            case CardTypes.Cannasault:
+                stats = CannasaultStats.GetStats();
                 break;
 
             default:

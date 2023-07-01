@@ -61,7 +61,7 @@ public class CardManager : MonoBehaviour
         public int nameSize = 6;
         public int descriptionSize = 4;
         public bool poisoned = false;
-
+        public bool hexproof = false;
 
         public Sprite GetSprite()
         {
@@ -93,6 +93,7 @@ public class CardManager : MonoBehaviour
             newStats.hasBattlecry = this.hasBattlecry;
             newStats.isStatic = this.isStatic;
             newStats.healthCost = this.healthCost;
+            newStats.hexproof = this.hexproof;
 
             newStats.connectedCards = new List<CardTypes>();
             foreach (CardTypes ct in this.connectedCards)
@@ -492,7 +493,8 @@ public class CardManager : MonoBehaviour
                             {
                                 index *= -1;
                             }
-                            if (cardStats.checkSpellTarget(index, boardManager.enemySlots, boardManager.friendlySlots))
+
+                            if (cardStats.checkSpellTarget(index, boardManager.enemySlots, boardManager.friendlySlots) && !target.GetCardStats().hexproof)
                             {
                                 spellTargets.Add(index);
                                 curArrow = new Arrow(transform.position);

@@ -171,12 +171,42 @@ public class GameController : MonoBehaviour
     public float secondsBetweenAnimations = 0.5f;
     public bool actionIsHappening = false;
 
+    public bool effectsBlocked = false;
+
     private void Start()
     {
         endTurnButtonObject.SetActive(false);
         concedeObject.SetActive(false);
         handManager = GameObject.Find("Hand").GetComponent<HandManager>();
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
+    }
+
+    public IEnumerator CheckBoardEffects()
+    {
+        while (true)
+        {
+            effectsBlocked = false;
+            foreach (BoardManager.Slot slot in boardManager.friendlySlots)
+            {
+                MinionManager minion = slot.GetConnectedMinion();
+                if (minion != null && minion.GetCardType() == CardTypes.Cannasault)
+                {
+                    effectsBlocked = true;
+                    break;
+                }
+            }
+
+            foreach (BoardManager.Slot slot in boardManager.enemySlots)
+            {
+                MinionManager minion = slot.GetConnectedMinion();
+                if (minion != null && minion.GetCardType() == CardTypes.Cannasault)
+                {
+                    effectsBlocked = true;
+                    break;
+                }
+            }
+            yield return new WaitForSeconds(0.2f);
+        }
     }
 
     public void StartGame()
@@ -204,6 +234,7 @@ public class GameController : MonoBehaviour
             DeckManager.ResetOpponentsDeck();
         }
         StartCoroutine(ServerDataProcesser.instance.ObtainData());
+        StartCoroutine(CheckBoardEffects());
     }
 
     public void StartTurn(bool friendly, bool hataponJustDied=false)
@@ -244,15 +275,18 @@ public class GameController : MonoBehaviour
                 }
             }
 
-            foreach (MinionManager minion in order)
+            if (!effectsBlocked)
             {
-                CardManager.EndTurnEvent thisStartTurnEvent = minion.GetCardStats().startTurnEvent;
-                if (thisStartTurnEvent != null)
+                foreach (MinionManager minion in order)
                 {
-                    StartCoroutine(thisStartTurnEvent(minion.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots));
-                    do {
-                        yield return new WaitForSeconds(secondsBetweenAnimations);
-                    } while(actionIsHappening);
+                    CardManager.EndTurnEvent thisStartTurnEvent = minion.GetCardStats().startTurnEvent;
+                    if (thisStartTurnEvent != null)
+                    {
+                        StartCoroutine(thisStartTurnEvent(minion.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots));
+                        do {
+                            yield return new WaitForSeconds(secondsBetweenAnimations);
+                        } while(actionIsHappening);
+                    }
                 }
             }
         }
@@ -274,15 +308,18 @@ public class GameController : MonoBehaviour
                 }
             }
 
-            foreach (MinionManager minion in order)
+            if (!effectsBlocked)
             {
-                CardManager.EndTurnEvent thisStartTurnEvent = minion.GetCardStats().startTurnEvent;
-                if (thisStartTurnEvent != null)
+                foreach (MinionManager minion in order)
                 {
-                    StartCoroutine(thisStartTurnEvent(minion.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots));
-                    do {
-                        yield return new WaitForSeconds(secondsBetweenAnimations);
-                    } while(actionIsHappening);
+                    CardManager.EndTurnEvent thisStartTurnEvent = minion.GetCardStats().startTurnEvent;
+                    if (thisStartTurnEvent != null)
+                    {
+                        StartCoroutine(thisStartTurnEvent(minion.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots));
+                        do {
+                            yield return new WaitForSeconds(secondsBetweenAnimations);
+                        } while(actionIsHappening);
+                    }
                 }
             }
         }
@@ -317,23 +354,25 @@ public class GameController : MonoBehaviour
                     minion.OnCanAttack(false);
                 }
             }
-
-            foreach (MinionManager minion in order)
+            if (!effectsBlocked)
             {
-                CardManager.EndTurnEvent thisEndTurnEvent = minion.GetCardStats().endTurnEvent;
-                if (thisEndTurnEvent != null)
+                foreach (MinionManager minion in order)
                 {
-                    StartCoroutine(thisEndTurnEvent(minion.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots));
-                    do {
-                        yield return new WaitForSeconds(secondsBetweenAnimations);
-                    } while(actionIsHappening);
-                }
-                foreach (CardManager.EndTurnEvent addEndTurn in minion.GetCardStats().additionalEndTurnEvents)
-                {
-                    StartCoroutine(addEndTurn(minion.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots));
-                    do {
-                        yield return new WaitForSeconds(secondsBetweenAnimations);
-                    } while(actionIsHappening);
+                    CardManager.EndTurnEvent thisEndTurnEvent = minion.GetCardStats().endTurnEvent;
+                    if (thisEndTurnEvent != null)
+                    {
+                        StartCoroutine(thisEndTurnEvent(minion.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots));
+                        do {
+                            yield return new WaitForSeconds(secondsBetweenAnimations);
+                        } while(actionIsHappening);
+                    }
+                    foreach (CardManager.EndTurnEvent addEndTurn in minion.GetCardStats().additionalEndTurnEvents)
+                    {
+                        StartCoroutine(addEndTurn(minion.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots));
+                        do {
+                            yield return new WaitForSeconds(secondsBetweenAnimations);
+                        } while(actionIsHappening);
+                    }
                 }
             }
         }
@@ -349,22 +388,25 @@ public class GameController : MonoBehaviour
                     minion.SetState(MinionManager.MinionState.Free);
                 }
             }
-            foreach (MinionManager minion in order)
+            if (!effectsBlocked)
             {
-                CardManager.EndTurnEvent thisEndTurnEvent = minion.GetCardStats().endTurnEvent;
-                if (thisEndTurnEvent != null)
+                foreach (MinionManager minion in order)
                 {
-                    StartCoroutine(thisEndTurnEvent(minion.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots));
-                    do {
-                        yield return new WaitForSeconds(secondsBetweenAnimations);
-                    } while(actionIsHappening);
-                }
-                foreach (CardManager.EndTurnEvent addEndTurn in minion.GetCardStats().additionalEndTurnEvents)
-                {
-                    StartCoroutine(addEndTurn(minion.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots));
-                    do {
-                        yield return new WaitForSeconds(secondsBetweenAnimations);
-                    } while(actionIsHappening);
+                    CardManager.EndTurnEvent thisEndTurnEvent = minion.GetCardStats().endTurnEvent;
+                    if (thisEndTurnEvent != null)
+                    {
+                        StartCoroutine(thisEndTurnEvent(minion.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots));
+                        do {
+                            yield return new WaitForSeconds(secondsBetweenAnimations);
+                        } while(actionIsHappening);
+                    }
+                    foreach (CardManager.EndTurnEvent addEndTurn in minion.GetCardStats().additionalEndTurnEvents)
+                    {
+                        StartCoroutine(addEndTurn(minion.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots));
+                        do {
+                            yield return new WaitForSeconds(secondsBetweenAnimations);
+                        } while(actionIsHappening);
+                    }
                 }
             }
         }
