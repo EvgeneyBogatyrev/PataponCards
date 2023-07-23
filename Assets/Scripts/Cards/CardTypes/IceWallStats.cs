@@ -16,6 +16,8 @@ public static class IceWallStats
         stats.connectedCards.Add(CardTypes.IceWall_option);
         stats.connectedCards.Add(CardTypes.IceWall_option);
 
+        stats.imagePath = "ice_wall";
+
         return stats;
     }
 }

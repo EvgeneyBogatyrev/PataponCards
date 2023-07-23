@@ -44,6 +44,17 @@ public enum CardTypes
     NovaNova,
     BanTatepon,
     TurnToStone,
+    Moribu,
+    Wondabarappa,
+    Jamsch,
+    DoomShroom,
+    Venomist,
+    Rantan,
+    DeadlyShot,
+    GongTheHawkeye,
+    Moforumo,
+    SparringPartner,
+    Cannasault,
     //------------------------
     Motiti_option1,
     Motiti_option2,
@@ -58,27 +69,22 @@ public enum CardTypes
     IceWall_option,
     Concede,
     StoneFree,
+    Mushroom
 };
 
 //Rewrite this entire piece of sheesh
 public static class CardGenerator
 {
-    public static void CustomizeCard(CardManager card, CardTypes cardType)
-    {
-        card.SetCardType(cardType);
-        CardManager.CardStats stats = new CardManager.CardStats();
 
+    public static CardManager.CardStats GetCardStats(CardTypes cardType)
+    {
         static IEnumerator EmptyMethod(int index, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { yield return null; }
         static void EmptyMethod_(int index, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { }
-        static void EmptySpell(List<int> targets, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { }
+        static IEnumerator EmptySpell(List<int> targets, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { yield return null; }
         static bool EmptyCheckSpellTargets(List<int> targets, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { return true; }
         static bool EmptyCheckSpellTarget(int target, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { return true; }
-        //static bool EmptyCondition(List<int> targets, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { return true; }
 
-        
-        //card.condition = EmptyCondition;
-        //card.heroMode = EmptyMethod;
-
+        CardManager.CardStats stats = new CardManager.CardStats();
         switch (cardType)
         {
             case CardTypes.Hatapon:
@@ -108,12 +114,10 @@ public static class CardGenerator
 
             case CardTypes.DivineProtection:
                 stats = DivProtStats.GetStats();
-                card.SetNameSize(4);
                 break;
 
             case CardTypes.Fang: 
                 stats = FangStats.GetStats();
-
                 break;
 
             case CardTypes.Nutrition:
@@ -190,7 +194,6 @@ public static class CardGenerator
 
             case CardTypes.TargetDummy:
                 stats = TargetDummyStats.GetStats();
-
                 break;
 
             case CardTypes.Boulder:
@@ -207,7 +210,6 @@ public static class CardGenerator
 
             case CardTypes.Alldemonium: 
                 stats = AlldemoniumStats.GetStats();
-                card.SetNameSize(4);
                 break;
 
             case CardTypes.CronoRiggers: 
@@ -216,12 +218,10 @@ public static class CardGenerator
 
             case CardTypes.TakeThatShield: 
                 stats = TakeThatShieldStats.GetStats();
-                card.SetNameSize(4);
                 break;
 
             case CardTypes.ProfessionalWIthStandards:
                 stats = ProfessionalWithStandards.GetStats();
-                card.SetNameSize(3);
                 break;
 
             case CardTypes.SpeedBoost: 
@@ -229,8 +229,7 @@ public static class CardGenerator
                 break;
 
             case CardTypes.MyamsarHero:
-                stats = MyamsarHeroStats.GetStats();
-                card.SetDescriptionSize(3);            
+                stats = MyamsarHeroStats.GetStats();        
                 break;
 
             case CardTypes.Destrobo:
@@ -275,7 +274,6 @@ public static class CardGenerator
 
             case CardTypes.PyokoriderHero:
                 stats = PyokoriderHeroStats.GetStats();
-                card.SetNameSize(4);
                 break;
 
             case CardTypes.Baloon:
@@ -288,7 +286,6 @@ public static class CardGenerator
 
             case CardTypes.BanTatepon:
                 stats = BanTateponStats.GetStats();
-                card.SetDescriptionSize(3);
                 break;
 
             case CardTypes.StoneFree:
@@ -297,6 +294,54 @@ public static class CardGenerator
 
             case CardTypes.TurnToStone:
                 stats = TurnToStoneStats.GetStats();
+                break;
+
+            case CardTypes.Moribu:
+                stats = MoribuStats.GetStats();
+                break;
+
+            case CardTypes.Wondabarappa:
+                stats = WondabarappaStats.GetStats();
+                break;
+
+            case CardTypes.Jamsch:
+                stats = JamschStats.GetStats();
+                break;
+
+            case CardTypes.Mushroom:
+                stats = MushroomStats.GetStats();
+                break;
+
+            case CardTypes.DoomShroom:
+                stats = DoomShroomStats.GetStats();
+                break;
+
+            case CardTypes.Venomist:
+                stats = VenomistStats.GetStats();
+                break;
+
+            case CardTypes.Rantan:
+                stats = RantanStats.GetStats();
+                break;
+
+            case CardTypes.DeadlyShot:
+                stats = DeadlyShotStats.GetStats();
+                break;
+
+            case CardTypes.GongTheHawkeye:
+                stats = GongStats.GetStats();
+                break;
+
+            case CardTypes.Moforumo:
+                stats = Moforumo.GetStats();
+                break;
+
+            case CardTypes.SparringPartner:
+                stats = SparringPartnerStats.GetStats();
+                break;
+
+            case CardTypes.Cannasault:
+                stats = CannasaultStats.GetStats();
                 break;
 
             default:
@@ -310,9 +355,24 @@ public static class CardGenerator
         if (stats.checkSpellTarget == null) stats.checkSpellTarget = EmptyCheckSpellTarget;
         if (stats.checkSpellTargets == null) stats.checkSpellTargets = EmptyCheckSpellTargets;
 
+        return stats;
+    }
+
+    public static void CustomizeCard(CardManager card, CardTypes cardType)
+    {
+        card.SetCardType(cardType);
+        CardManager.CardStats stats = GetCardStats(cardType);
+        //static bool EmptyCondition(List<int> targets, List<BoardManager.Slot> slots1, List<BoardManager.Slot> slots2) { return true; }
+
+        //card.condition = EmptyCondition;
+        //card.heroMode = EmptyMethod;
+
+        
         card.SetCardStats(stats);
         card.SetPower(stats.power);
         card.SetDescription(stats.description);
+        card.SetNameSize(stats.nameSize);
+        card.SetDescriptionSize(stats.descriptionSize);
         card.SetName(stats.name);
         card.imageObject.GetComponent<SpriteRenderer>().sprite = stats.GetSprite();
 

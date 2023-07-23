@@ -11,10 +11,18 @@ public class SpearManager : MonoBehaviour
     public bool exhausted = false;
     private bool rotationSet = false;
 
+    public bool rotate = true;
+    public float speed = 30f;
+
+    public bool constantSpeed = false;
     public bool isEnemy = false;
+    public Vector3 startPosition;
+
+    public bool outOfScreen = false;
 
     public void SetSlotToGo(BoardManager.Slot slot)
     {
+        startPosition = transform.position;
         slotToGo = slot;
     }
 
@@ -38,6 +46,10 @@ public class SpearManager : MonoBehaviour
 
     private Quaternion Rotation(Vector3 from, Vector3 to)
     {
+        if (!rotate)
+        {
+            return Quaternion.Euler(0.0f, 0.0f, 0.0f);
+        }
         Vector3 directionVector = (to - from);
         
         Vector2 direction = new Vector2(directionVector.x, directionVector.y).normalized;
@@ -56,19 +68,33 @@ public class SpearManager : MonoBehaviour
     void Update()
     {
         Vector3 targetPosition = slotToGo.GetSlotObject().transform.position;
-        transform.position += (targetPosition - transform.position).normalized *  Time.deltaTime * 30f;
-        transform.position = new Vector3(transform.position.x, transform.position.y, zLevel);
-
-        if (!rotationSet)
+        if (!constantSpeed)
         {
-            transform.rotation = Rotation(transform.position, slotToGo.GetSlotObject().transform.position);
-            rotationSet = true;
+            transform.position += (targetPosition - transform.position).normalized *  Time.deltaTime * speed;
+            transform.position = new Vector3(transform.position.x, transform.position.y, zLevel);
+
+            if (!rotationSet)
+            {
+                transform.rotation = Rotation(transform.position, slotToGo.GetSlotObject().transform.position);
+                rotationSet = true;
+            }
+        }
+        else
+        {
+            transform.position += (targetPosition - startPosition).normalized * speed * Time.deltaTime;
+            transform.position = new Vector3(transform.position.x, transform.position.y, zLevel);
         }
 
         if (Distance(targetPosition, transform.position) < threshold)
         {
             reachDestination = true;
         }
+
+    }
+
+    private void OnBecameInvisible()
+    {
+        outOfScreen = true;
     }
 
     

@@ -132,9 +132,9 @@ public class ServerDataProcesser : MonoBehaviour
             {
                 CardTypes type = messages[messageIndex].cardIndex;
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                CardManager newCard = handManager.GenerateCard(type).GetComponent<CardManager>();
+                CardManager _newCard = handManager.GenerateCard(type, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
 
-                if (!newCard.GetCardStats().hasOnPlay)
+                if (!_newCard.GetCardStats().hasOnPlay)
                 {
                     processedMessages.Add(messages[messageIndex]);
                 }
@@ -158,10 +158,11 @@ public class ServerDataProcesser : MonoBehaviour
                     messageIndex += 1;
                 }
 
-                newCard.DestroyCard();
+                _newCard.DestroyCard();
             }
         }
 
+        CardManager newCard = null;
         foreach (MessageFromServer message in processedMessages)
         {
             bool found = false;
@@ -182,7 +183,7 @@ public class ServerDataProcesser : MonoBehaviour
             BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             BoardManager.Slot fromSlot, toSlot;
-            CardManager newCard;
+            
             CardTypes spellType;
 
             switch (message.action)
@@ -192,6 +193,18 @@ public class ServerDataProcesser : MonoBehaviour
                     //gameController.StartTurn(true);
                     break;
                 case MessageFromServer.Action.PlayCard:
+                    if (newCard != null)
+                    {
+                        if (newCard.arrowList != null)
+                        {
+                            foreach (Arrow arrow in newCard.arrowList)
+                            {
+                                arrow.DestroyArrow();
+                            }
+                            newCard.arrowList = null;
+                        }
+                    }
+                    newCard = handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1, returnCard:true);
                     CardTypes type = message.cardIndex;
                     int target = message.targets[0];
                     BoardManager.Slot targetSlot;
@@ -206,17 +219,31 @@ public class ServerDataProcesser : MonoBehaviour
                         targetSlot = boardManager.friendlySlots[target];
                     }
                     
-                    newCard = handManager.GenerateCard(type).GetComponent<CardManager>();
-                    boardManager.PlayCard(newCard, targetSlot, destroy: false, record: false);
+                    newCard = handManager.GenerateCard(type, newCard).GetComponent<CardManager>();
+                    boardManager.PlayCard(newCard, new Vector3(0f, 10f, 0f), targetSlot, destroy: false, record: false);
+                    HandManager.DestroyDisplayedCards();
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);
+
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
-                    newCard.destroyTimer = 5f;
-                    handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
+                    newCard.destroyTimer = HandManager.cardDestroyTimer;
                     break;
 
                 case MessageFromServer.Action.Move:
                     fromSlot = boardManager.enemySlots[message.targets[0] - 1];
-                    toSlot = boardManager.enemySlots[message.targets[1] - 1];
+                    
+                    if (message.targets[1] > 0)
+                    {
+                        toSlot = boardManager.enemySlots[message.targets[1] - 1];
+                    }
+                    else
+                    {
+                        toSlot = boardManager.friendlySlots[-message.targets[1] - 1];
+                        MinionManager connectedMinion = toSlot.GetConnectedMinion();
+                        if (connectedMinion != null)
+                        {
+                            connectedMinion.DestroyMinion();
+                        }
+                    }
 
                     fromSlot.GetConnectedMinion().Move(toSlot);
                     break;
@@ -252,24 +279,66 @@ public class ServerDataProcesser : MonoBehaviour
                     fromMinion.Attack(toMinion);
                     break;
                 case MessageFromServer.Action.CastSpell:
-                    spellType = message.cardIndex;
-                    newCard = handManager.GenerateCard(spellType).GetComponent<CardManager>();
-                    newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots);
-                    newCard.SetCardState(CardManager.CardState.opponentPlayed);
-                    newCard.transform.position = new Vector3(0f, 10f, 0f);
-                    newCard.destroyTimer = 5f;
+                    if (newCard != null)
+                    {
+                        if (newCard.arrowList != null)
+                        {
+                            foreach (Arrow arrow in newCard.arrowList)
+                            {
+                                arrow.DestroyArrow();
+                            }
+                            newCard.arrowList = null;
+                        }
+                    }
 
+                    spellType = message.cardIndex;
+                    newCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                    
                     if (newCard.GetCardStats().damageToHost == -1 && newCard.GetCardType() != CardTypes.Concede)
                     {
                         handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
                     }
+                    
+                    newCard.arrowList = null;
+                    newCard.spellTargets = message.targets;
+                    StartCoroutine(newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots));
+                    HandManager.DestroyDisplayedCards();
+                    newCard.SetCardState(CardManager.CardState.opponentPlayed);
+                    newCard.transform.position = new Vector3(0f, 10f, 0f);
+                    newCard.destroyTimer = HandManager.cardDestroyTimer;
+
+                    if (newCard.GetCardStats().damageToHost != -1)
+                    {
+                        newCard.transform.position = boardManager.enemySlots[message.targets[0] - 1].GetPosition();
+                        newCard.transform.localScale = new Vector3(0.2f, 0.2f, 1f);
+                    }
                     break;
 
                 case MessageFromServer.Action.CastOnPlayCard:
+                    if (newCard != null)
+                    {
+                        if (newCard.arrowList != null)
+                        {
+                            foreach (Arrow arrow in newCard.arrowList)
+                            {
+                                arrow.DestroyArrow();
+                            }
+                            newCard.arrowList = null;
+                        }
+                    }
+                    handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
                     boardManager.battlecryTrigger = true;
                     spellType = message.cardIndex;
-                    newCard = handManager.GenerateCard(spellType).GetComponent<CardManager>();
-                    newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots);
+                    newCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                    if (newCard.GetCardStats().dummyTarget)
+                    {
+                        newCard.spellTargets = message.targets.GetRange(1, message.targets.Count - 1);
+                    }
+                    else
+                    {
+                        newCard.spellTargets = message.targets;
+                    }
+                    StartCoroutine(newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots));
 
                     if (message.creatureTarget > 0)
                     {
@@ -281,36 +350,68 @@ public class ServerDataProcesser : MonoBehaviour
                         message.creatureTarget = (-1 * message.creatureTarget) - 1;
                         fromSlot = boardManager.friendlySlots[message.creatureTarget];
                     }
-                    boardManager.PlayCard(newCard, fromSlot, destroy: false, record: false);
+                    boardManager.PlayCard(newCard, new Vector3(0f, 10f, 0f), fromSlot, destroy: false, record: false);
 
-
+                    HandManager.DestroyDisplayedCards();
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
-                    newCard.destroyTimer = 5f;
+                    newCard.destroyTimer = HandManager.cardDestroyTimer;
 
                     boardManager.battlecryTrigger = false;
-                    handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
+                    
                     break;
 
                 case MessageFromServer.Action.NumberOfCards:
-                    handManager.SetNumberOfOpponentsCards(message.targets[0]);
+                    
+                    if (message.targets[0] != handManager.GetNumberOfOpponentsCards())
+                    {
+                        int difference = message.targets[0] - handManager.GetNumberOfOpponentsCards();
+                        if (difference > 0)
+                        {
+                            for (int i = 0; i < difference; ++i)
+                            {
+                                handManager.DrawCardOpponent();
+                            }
+                        }
+                        else
+                        {
+                            handManager.SetNumberOfOpponentsCards(message.targets[0]);
+                        }
+                    }
+                    
+                    
                     break;
             }
 
             doneActions.Add(message);
-            
-            yield return new WaitForSeconds(2); 
+            yield return new WaitForSeconds(2f); 
+            /*
+            if (message.action == MessageFromServer.Action.PlayCard ||
+                    message.action == MessageFromServer.Action.CastSpell ||
+                        message.action == MessageFromServer.Action.CastOnPlayCard)
+            {
+                yield return new WaitForSeconds(2f); 
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.5f); 
+            }
+            */
         }
     }
 
     public IEnumerator ObtainData()
     {
+        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
         while (true)
         {
-            if (GameController.playerTurn)
+            if (!gameController.NeedToSync())
             {
-                yield return new WaitForSeconds(secondsBetweenServerUpdates);
-                continue;
+                if (GameController.playerTurn)
+                {
+                    yield return new WaitForSeconds(secondsBetweenServerUpdates);
+                    continue;
+                }
             }
             Debug.Log("Start obtaining....");
             UnityWebRequest www = UnityWebRequest.Get(GOOGLE_API_URL);

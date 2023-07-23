@@ -16,6 +16,8 @@ public static class BuzzcraveStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
+        stats.legendary = true;
+
         stats.imagePath = "buzzcrave";
         return stats;
     }

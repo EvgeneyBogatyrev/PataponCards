@@ -18,7 +18,10 @@ public static class BanTateponStats
         
         stats.hasOnPlay = true;
 
-        static void BanTateponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        stats.legendary = true;
+        stats.descriptionSize = 3;
+
+        static IEnumerator BanTateponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             bool completed = false;
             foreach (BoardManager.Slot slot in friendlySlots)
@@ -39,7 +42,7 @@ public static class BanTateponStats
                 HandManager _handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
                 BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
-                CardManager tateponCard = _handManager.GenerateCard(CardTypes.Tatepon).GetComponent<CardManager>();
+                CardManager tateponCard = _handManager.GenerateCard(CardTypes.Tatepon, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                 tateponCard.SetPower(banTateponPower);
                 tateponCard.GetCardStats().hasGreatshield = true;
                 tateponCard.GetCardStats().hasHaste = true;
@@ -48,7 +51,7 @@ public static class BanTateponStats
                 {
                     if (slot.GetFree() && slot != friendlySlots[targets[0]])
                     {
-                        boardManager.PlayCard(tateponCard, slot, destroy:false, record:false);
+                        boardManager.PlayCard(tateponCard, new Vector3(0f, 0f, 0f), slot, destroy:false, record:false);
                     }
                 }
 
@@ -66,7 +69,7 @@ public static class BanTateponStats
                 }
 
             }
-
+            yield return null;
         }
 
         stats.spell = BanTateponRealization;

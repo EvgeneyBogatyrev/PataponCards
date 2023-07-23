@@ -139,6 +139,39 @@ public class BoardManager : MonoBehaviour
         normalColorStatic = normalColor;
     }
 
+    public void PlayCard(CardManager card, Vector3 position, Slot slot = null, bool destroy=true, bool record=true)
+    {
+        GameObject newMinion = Instantiate(minionPrefab, position, Quaternion.identity);
+        newMinion.transform.rotation = Quaternion.Euler(minionRotation, 0f, 0f);
+        newMinion.GetComponent<MinionManager>().CustomizeMinion(card, slot);
+
+        if (card.GetCardStats().hasBattlecry)
+        {
+            int index;
+            if (!slot.GetFriendly())
+            {
+                index = slot.GetIndex() * (-1) - 1;
+            }
+            else
+            {
+                index = slot.GetIndex() + 1;
+            }
+
+            card.GetCardStats().onPlayEvent(index, enemySlots, friendlySlots);
+        }
+
+        if (destroy)
+        {
+            card.DestroyCard();
+        }
+
+
+        if (record)
+        {
+            ServerDataProcesser.instance.PlayCard(card, slot);
+        }
+    }
+
     public void PlayCard(CardManager card, Slot slot = null, bool destroy=true, bool record=true)
     {     
         GameObject newMinion = Instantiate(minionPrefab, card.transform.position, Quaternion.identity);
@@ -162,7 +195,7 @@ public class BoardManager : MonoBehaviour
 
         if (destroy)
         {
-            Destroy(card.gameObject);
+            card.DestroyCard();
         }
 
 
@@ -208,55 +241,27 @@ public class BoardManager : MonoBehaviour
         hatapon.TakePower(amount);
     }
 
-    public void CallEndRound(bool looser)
+    public void ClearBoard()
     {
-        StartCoroutine(EndRound(looser));
-    }
-
-    IEnumerator EndRound(bool looser)
-    {
-        while (battlecryTrigger)
+        foreach (Slot slot in friendlySlots)
         {
-            yield return new WaitForSeconds(0.1f);
+            MinionManager minion = slot.GetConnectedMinion();
+            if (minion != null)
+            {
+                minion.DestroySelf(unattach:true);
+            }
         }
 
-        if (gameController.EndRound(!looser))
+        foreach (Slot slot in enemySlots)
         {
-            yield return null;
+            MinionManager minion = slot.GetConnectedMinion();
+            if (minion != null)
+            {
+                minion.DestroySelf(unattach:true);
+            }
         }
-        else
-        {
-            foreach (Slot slot in friendlySlots)
-            {
-                MinionManager minion = slot.GetConnectedMinion();
-                if (minion != null)
-                {
-                    minion.DestroySelf();
-                }
-            }
-
-            foreach (Slot slot in enemySlots)
-            {
-                MinionManager minion = slot.GetConnectedMinion();
-                if (minion != null)
-                {
-                    minion.DestroySelf();
-                }
-            }
-
-            HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-            for (int i = 0; i < 3; ++i)
-            {
-                handManager.DrawCard();
-            }
-            handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 3);
-
-            handManager.PlayHatapons();
-
-            lastDeadOpponent = CardTypes.Hatapon;
-            lastDeadYou = CardTypes.Hatapon;
-            yield return null;
-        }
+        lastDeadOpponent = CardTypes.Hatapon;
+        lastDeadYou = CardTypes.Hatapon;
     }
 }
 

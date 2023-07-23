@@ -8,7 +8,7 @@ public static class BuruchStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 9;
-        stats.description = "Destroy 2 creatures under your control.";
+        stats.description = "On play: Destroy 2 creatures under your control.";
         stats.name = "Buruch";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
@@ -16,7 +16,7 @@ public static class BuruchStats
 
         stats.hasOnPlay = true;
 
-        static void BuruchRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator BuruchRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
 
             BoardManager.Slot selectedSlot;
@@ -39,7 +39,8 @@ public static class BuruchStats
                 selectedMinion = selectedSlot.GetConnectedMinion();
                 
                 selectedMinion.DestroyMinion();   
-            }                 
+            }  
+            yield return null;               
         }
 
         static bool BuruchCheckTarget(int _target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

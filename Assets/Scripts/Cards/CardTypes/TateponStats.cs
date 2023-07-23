@@ -8,7 +8,7 @@ public static class TateponStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 4;
-        stats.description = "Your Hatapon is immune.";
+        stats.description = "Shield (Your Hatapon is immune).";
         stats.name = "Tatepon";
         stats.hasShield = true;
         stats.runes.Add(Runes.Shield);

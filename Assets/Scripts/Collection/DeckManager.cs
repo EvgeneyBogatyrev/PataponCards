@@ -12,9 +12,16 @@ public class DeckManager : MonoBehaviour
     public const int minDeckSize = 20;
     public const int maxCopy = 3;
 
+    public static int opponentDeckSize = 20;
+
     public static void CopyDeck()
     {
         playDeck = deck;
+    }
+
+    public static void ResetOpponentsDeck(int cardNum = 20)
+    {
+        opponentDeckSize = cardNum;
     }
 
     public static CardTypes GetRandomCard(bool remove=true)
@@ -75,6 +82,18 @@ public class DeckManager : MonoBehaviour
     public static bool CheckCardNumber(CardTypes card)
     {
         int number = GetCardQty(card);
+        
+        CardManager.CardStats stats = CardGenerator.GetCardStats(card);
+
+        if (stats.legendary)
+        {
+            if (number < 1)
+            {
+                return true;
+            }
+            return false;
+        }
+
         if (number < maxCopy)
         {
             return true;

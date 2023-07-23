@@ -8,10 +8,12 @@ public static class TakeThatShieldStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         const int takeThatShieldGain = 3;
-        stats.description = "Target non-Hatapon creature under your control gains +" + takeThatShieldGain.ToString() + " power and Greatshield.";
+        stats.description = "Target non-Hatapon character under your control gains +" + takeThatShieldGain.ToString() + " power and Greatshield.";
         stats.name = "Take That Shield";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
+
+        stats.nameSize = 4;
 
         stats.isSpell = true;
 
@@ -39,7 +41,7 @@ public static class TakeThatShieldStats
             return true;
         }
 
-        static void TakeThatShieldRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator TakeThatShieldRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             BoardManager.Slot targetSlot;
 
@@ -58,14 +60,17 @@ public static class TakeThatShieldStats
             CardManager.CardStats stats = targetMinion.GetCardStats();
             stats.hasGreatshield = true;
             targetMinion.SetCardStats(stats);
+            
 
             targetMinion.Heal(takeThatShieldGain);
-
+            yield return null;
         }
 
         stats.spell = TakeThatShieldRealization;
         stats.checkSpellTarget = TakeThatShieldCheckTarget;
         stats.numberOfTargets = 1;
+
+        stats.imagePath = "take_this_shield";
 
         return stats;
     }

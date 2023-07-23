@@ -11,8 +11,10 @@ public static class ConcedeStats
         stats.description = "You win this round";
         stats.name = "Opponent concedes";
 
+        stats.nameSize = 4;
+
         stats.isSpell = true;
-        static void ConcedeRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator ConcedeRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             foreach (BoardManager.Slot slot in friendlySlots)
             {
@@ -26,6 +28,7 @@ public static class ConcedeStats
                     }
                 }
             }
+            yield return null;
         }
 
         stats.spell = ConcedeRealization;

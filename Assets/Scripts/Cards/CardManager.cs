@@ -15,7 +15,7 @@ public enum Runes
 public class CardManager : MonoBehaviour
 {
     public delegate IEnumerator EndTurnEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
-    public delegate void Spell(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
+    public delegate IEnumerator Spell(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate void OnPlayEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate void OnDeathEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null, CardStats thisStats = null);
     public delegate bool CheckSpellTarget(int target = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
@@ -56,8 +56,12 @@ public class CardManager : MonoBehaviour
         public List<MinionManager> connectedMinions = new List<MinionManager>();
         public int damageToHost = -1;
         public List<Runes> runes = new List<Runes>();
-
         public string imagePath = "500x500";
+        public bool legendary = false;
+        public int nameSize = 6;
+        public int descriptionSize = 4;
+        public bool poisoned = false;
+        public bool hexproof = false;
 
         public Sprite GetSprite()
         {
@@ -89,6 +93,7 @@ public class CardManager : MonoBehaviour
             newStats.hasBattlecry = this.hasBattlecry;
             newStats.isStatic = this.isStatic;
             newStats.healthCost = this.healthCost;
+            newStats.hexproof = this.hexproof;
 
             newStats.connectedCards = new List<CardTypes>();
             foreach (CardTypes ct in this.connectedCards)
@@ -125,6 +130,13 @@ public class CardManager : MonoBehaviour
                 newStats.runes.Add(rn);
             }
 
+            newStats.imagePath = this.imagePath;
+
+            newStats.legendary = this.legendary;
+
+            newStats.nameSize = this.nameSize;
+            newStats.descriptionSize = this.descriptionSize;
+
             return newStats;
         }
     }
@@ -133,11 +145,13 @@ public class CardManager : MonoBehaviour
     {
         display, // Just like an image. Use to show in collection
         inHand,
+        Drawing,
         selected,
         selectingTargets, // For spells with more than one target
         asOption,
         opponentPlayed,
         opponentHolding,
+        hilightOver,
     }
 
     public GameObject powerObject;
@@ -172,12 +186,18 @@ public class CardManager : MonoBehaviour
     private Vector3 positionInHand;
     private int indexInHand = 0;
     private bool mouseOver = false;
-    private List<int> spellTargets;
+    public List<int> spellTargets;
     private BoardManager.Slot slotToPlay;
     private float curRotation;
     
     private BoardManager boardManager;
     private HandManager handManager;
+
+    private Vector3 drawEndPosition;
+    private Vector3 playEndPosition;
+
+    public List<Arrow> arrowList = null;
+    private Arrow curArrow = null;
 
     private void Start()
     {
@@ -186,6 +206,8 @@ public class CardManager : MonoBehaviour
         {
             boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
             handManager = GameObject.Find("Hand").GetComponent<HandManager>();
+            drawEndPosition = GameObject.Find("DrawnCardDisplay").transform.position;
+            playEndPosition = GameObject.Find("PlayedCardPosition").transform.position;
         }
     }
 
@@ -194,10 +216,11 @@ public class CardManager : MonoBehaviour
         switch (cardState) 
         {
             case CardState.inHand:
-                if (mouseOver && CursorController.cursorState == CursorController.CursorStates.Free)
+                if (!HandManager.mulliganing && mouseOver && (CursorController.cursorState == CursorController.CursorStates.Free ||
+                                    CursorController.cursorState == CursorController.CursorStates.EnemyTurn))
                 {
                     transform.localScale = new Vector3(selectedScale, selectedScale, 1f);
-                    transform.position = new Vector3(positionInHand.x, selectedY, selectedZ);
+                    transform.position = Vector3.Lerp(transform.position, new Vector3(positionInHand.x, selectedY, selectedZ), 30f * Time.deltaTime);
                     transform.rotation = Quaternion.Euler(0, 0, 0);
 
                     if (Input.GetMouseButtonDown(0) && handManager.CanPlayCard())
@@ -217,9 +240,33 @@ public class CardManager : MonoBehaviour
                 else
                 {
                     transform.localScale = new Vector3(normalScale, normalScale, 1f);
-                    transform.position = positionInHand;
+                    transform.position = Vector3.Lerp(transform.position, new Vector3(positionInHand.x, positionInHand.y, positionInHand.z), 10f * Time.deltaTime);
                     transform.rotation = Quaternion.Euler(0, 0, curRotation);
                 }
+                break;
+
+            case CardState.Drawing:
+                
+                float spd, dst;
+                if (HandManager.mulliganing)
+                {
+                    spd = 20f;
+                    dst = 0.25f;   
+                }
+                else
+                {
+                    spd = 5f;
+                    dst = 0.05f; 
+                }
+
+                transform.localScale = new Vector3(1.35f * normalScale, 1.35f * normalScale, 1f);
+                transform.position = Vector3.Lerp(transform.position, drawEndPosition, Time.deltaTime * spd);
+
+                if ((transform.position - drawEndPosition).magnitude < dst)
+                {
+                    cardState = CardState.inHand;
+                }
+                
                 break;
 
             case CardState.selected:
@@ -308,7 +355,7 @@ public class CardManager : MonoBehaviour
                         handManager.RemoveCard(GetIndexIHand());
                         handManager.SetCanPlayCard(false);
                         ServerDataProcesser.instance.CastSpell(this, spellTargets);
-                        cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots);
+                        StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
                         spellTargets = new List<int>();
                         foreach (BoardManager.Slot slot in boardManager.friendlySlots)
                         {
@@ -342,7 +389,7 @@ public class CardManager : MonoBehaviour
                 break;
 
             case CardState.selectingTargets:
-                
+
                 if (cardStats.isSpell)
                 {
                     transform.localScale = new Vector3(selectedScale, selectedScale, 1f);
@@ -352,7 +399,16 @@ public class CardManager : MonoBehaviour
                 {
                     transform.localScale = new Vector3(normalScale, normalScale, 1f);
                     transform.position = new Vector3(slotToPlay.GetPosition().x, slotToPlay.GetPosition().y, selectedZ);
+                    transform.rotation = Quaternion.identity;
                 }
+
+                if (arrowList == null)
+                {
+                    arrowList = new List<Arrow>();
+                    curArrow = new Arrow(transform.position);
+                    arrowList.Add(curArrow);
+                }
+                curArrow.UpdatePosition();
 
                 if (spellTargets.Count >= cardStats.numberOfTargets)
                 {
@@ -360,7 +416,8 @@ public class CardManager : MonoBehaviour
                     {
                         boardManager.battlecryTrigger = true;
                         ServerDataProcesser.instance.CastSpell(this, spellTargets);
-                        cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots);
+                        StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
+                        
                         if (cardStats.dummyTarget)
                         {
                             int _old = spellTargets[0];
@@ -408,6 +465,16 @@ public class CardManager : MonoBehaviour
                         CursorController.cursorState = CursorController.CursorStates.Free;
                         ReturnToHand();
                     }
+
+                    if (arrowList != null)
+                    {
+                        foreach (Arrow arrow in arrowList)
+                        {
+                            arrow.DestroyArrow();
+                        }
+                        curArrow = null;
+                        arrowList = null;
+                    }
                 }
 
 
@@ -426,9 +493,12 @@ public class CardManager : MonoBehaviour
                             {
                                 index *= -1;
                             }
-                            if (cardStats.checkSpellTarget(index, boardManager.enemySlots, boardManager.friendlySlots))
+
+                            if (cardStats.checkSpellTarget(index, boardManager.enemySlots, boardManager.friendlySlots) && !target.GetCardStats().hexproof)
                             {
                                 spellTargets.Add(index);
+                                curArrow = new Arrow(transform.position);
+                                arrowList.Add(curArrow);
                             }
                             else
                             {
@@ -511,7 +581,7 @@ public class CardManager : MonoBehaviour
 
                     if (cardStats.damageToHost <= hostMinion.GetPower()) 
                     {
-                        cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots);
+                        StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
                         ServerDataProcesser.instance.CastSpell(this, spellTargets);
                         spellTargets = new List<int>();
                         hostMinion.ReturnToNormalAfterOptions();
@@ -525,46 +595,89 @@ public class CardManager : MonoBehaviour
 
             case CardState.opponentPlayed:
 
-                float y = transform.position.y;
-                y += (0.5f - y) * 2f * Time.deltaTime;
-
-                if (y < 0.5f)
+                if (arrowList == null)
                 {
-                    y = 0.5f;
+                    arrowList = new List<Arrow>();
+                    foreach (int target in spellTargets)
+                    {
+                        BoardManager.Slot targetSlot;
+                        if (target < 0)
+                        {
+                            targetSlot = boardManager.friendlySlots[-target - 1];
+                        }
+                        else
+                        {
+                            targetSlot = boardManager.enemySlots[target - 1];
+                        }
+
+                        arrowList.Add(new Arrow(transform.position, targetSlot.GetPosition()));
+                    }
                 }
 
-                transform.position = new Vector3(0f, y, -3f);
-                transform.localScale = new Vector3(1f, 1f, 1f);
+                foreach (Arrow arrow in arrowList)
+                {
+                    arrow.UpdatePosition(transform.position);
+                }
+
+                transform.position = Vector3.Lerp(transform.position, playEndPosition, 3.5f * Time.deltaTime);
+                Vector3 targetLocalScale = new Vector3(0.8f, 0.8f, 0.8f);
+
+                transform.localScale = Vector3.Lerp(transform.localScale, targetLocalScale, 3.5f * Time.deltaTime);
 
                 destroyTimer -= 1f * Time.deltaTime;
 
                 if (destroyTimer < 0f || (mouseOver && Input.GetMouseButtonDown(0)))
                 {
+                    if (arrowList != null)
+                    {
+                        foreach (Arrow arrow in arrowList)
+                        {
+                            arrow.DestroyArrow();
+                        }
+                        curArrow = null;
+                        arrowList = null;
+                    }
                     DestroyCard();
                 }
-                
-                
-                //var trans = 0.5f;
-                //var col = gameObject.GetComponent<MeshRenderer>().material.color;
-                //col.a = trans;
-                
-                //var col = gameObject.GetComponent<Renderer>().material.GetColor("_TintColor");
 
                 break;
 
             case CardState.opponentHolding:
                 transform.localScale = new Vector3(normalScale, normalScale, 1f);
-                transform.position = positionInHand;
+                transform.position = Vector3.Lerp(transform.position, positionInHand, 15f * Time.deltaTime);
                 transform.rotation = Quaternion.Euler(180f, 0, curRotation);
                 
+                break;
+
+            case CardState.hilightOver:
+                transform.localScale = new Vector3(selectedScale, selectedScale, 1f);
+                //transform.position = Vector3.Lerp(transform.position, positionInHand, 15f * Time.deltaTime);
+                //transform.rotation = Quaternion.Euler(180f, 0, curRotation);
                 break;
         
         }
     }
-
+    
     public void DestroyCard()
     {
+        StartCoroutine(IenumDestroyCard());
+    }
+    
+    public IEnumerator IenumDestroyCard()
+    {
+        transform.position = new Vector3(-50f, 0f, 0f);
+        cardState = CardState.asOption;
+
+        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+
+        while (gameController.actionIsHappening)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+
         Destroy(gameObject);
+
+        yield return null;
     }
 
     public void ReturnToHand()
@@ -578,6 +691,16 @@ public class CardManager : MonoBehaviour
         }
 
         spellTargets = new List<int>();
+        
+        if (arrowList != null)
+        {
+            foreach (Arrow arrow in arrowList)
+            {
+                arrow.DestroyArrow();
+            }
+            curArrow = null;
+            arrowList = null;
+        }
 
     }
 
@@ -595,6 +718,7 @@ public class CardManager : MonoBehaviour
     {
         cardType = type;
     }
+
     public CardTypes GetCardType()
     {
         return cardType;
@@ -604,6 +728,11 @@ public class CardManager : MonoBehaviour
     {
         this.cardState = state;
     }
+    public CardState GetCardState()
+    {
+        return cardState;
+    }
+
     public void SetCardStats(CardStats stats)
     {
         cardStats = stats;

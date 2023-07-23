@@ -10,7 +10,7 @@ public static class GuardiraStats
 
         const int guardiraPower = 1;
 
-        stats.power = 9;
+        stats.power = 6;
         stats.description = "Greatshield.\nAlways deals " + guardiraPower.ToString() + " damage regardless of its power.";
         stats.name = "Guardira";
         stats.hasGreatshield = true;

@@ -9,13 +9,13 @@ public static class DestroboStats
         CardManager.CardStats stats = new CardManager.CardStats();
         const int destroboDamage = 1;
         stats.power = 2;
-        stats.description = "Choose a creature. If it's an artifact or it can't attack, destroy it. Otherwise, deal " + destroboDamage.ToString() +  " damage.";
+        stats.description = "On play: Choose a character. If it's an artifact, destroy it. Otherwise, deal " + destroboDamage.ToString() +  " damage to it.";
         stats.name = "Destrobo";
         stats.runes.Add(Runes.Shield);
 
         stats.hasOnPlay = true;
 
-        static void DestroboRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator DestroboRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             BoardManager.Slot selectedSlot;
             int target = targets[0];
@@ -41,11 +41,14 @@ public static class DestroboStats
             {
                 selectedMinion.ReceiveDamage(destroboDamage);
             }
-            
+            yield return null;
         }
 
         stats.spell = DestroboRealization;
         stats.numberOfTargets = 1;
+
+
+        stats.imagePath = "destrobo";
 
         return stats;
     }

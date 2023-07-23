@@ -9,7 +9,7 @@ public static class DekaponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 7;
-        stats.description = "Can not move.";
+        stats.description = "Cannot move.";
         stats.name = "Dekapon";
         stats.limitedVision = true;
         stats.runes.Add(Runes.Shield);

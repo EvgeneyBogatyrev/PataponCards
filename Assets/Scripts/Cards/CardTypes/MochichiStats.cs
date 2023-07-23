@@ -9,7 +9,7 @@ public static class MochichiStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "+0: Add +2 power.\n+0: Transform into Angry Motiti with Haste.";
+        stats.description = "-0: Add +2 power.\n-0: Transform into Angry Motiti with Haste.";
         stats.name = "Motiti";
 
         stats.isStatic = true;
@@ -31,11 +31,12 @@ public static class MochiAccumStats
         const int motiti1HealthCost = 0;
         const int motiti1Heal = 2;
 
-        stats.description = "Give Motiti +" + motiti1Heal.ToString() + " power.";
+        stats.description = "-0: Give Motiti +" + motiti1Heal.ToString() + " power.";
         stats.name = "Accumulate power";
 
+        stats.nameSize = 4;
         stats.isSpell = true;
-        static void MotitiOpt1Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator MotitiOpt1Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             MinionManager host;
             if (targets[0] < 0)
@@ -49,6 +50,7 @@ public static class MochiAccumStats
 
             host.TakePower(motiti1HealthCost);
             host.Heal(motiti1Heal);
+            yield return null;
         }
         stats.spell = MotitiOpt1Realization;
         stats.numberOfTargets = 0;
@@ -67,11 +69,12 @@ public static class MochiciCounterStats
 
         const int motiti2HealthCost = 0;
 
-        stats.description = "Transform Motiti into Angry Motiti with Haste.";
+        stats.description = "-0: Transform Motiti into Angry Motiti with Haste.";
         stats.name = "Motiti Counteratack";
 
+        stats.nameSize = 4;
         stats.isSpell = true;
-        static void MotitiOpt2Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator MotitiOpt2Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             MinionManager host;
             if (targets[0] < 0)
@@ -87,18 +90,19 @@ public static class MochiciCounterStats
             BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
             host.TakePower(motiti2HealthCost);
-            CardManager newCard = handManager.GenerateCard(CardTypes.MotitiAngry).GetComponent<CardManager>();
+            CardManager newCard = handManager.GenerateCard(CardTypes.MotitiAngry, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
             newCard.SetPower(host.GetPower());
             BoardManager.Slot slot = host.GetSlot();
-            host.TakePower(host.GetPower());
-            boardManager.PlayCard(newCard, slot, destroy: true, record: false);
-
+            //host.TakePower(host.GetPower());
+            host.DestroySelf(unattach:true);
+            boardManager.PlayCard(newCard, new Vector3(0f, 0f, 0f), slot, destroy: true, record: false);
+            yield return null;
         }
         stats.spell = MotitiOpt2Realization;
         stats.numberOfTargets = 0;
         stats.damageToHost = motiti2HealthCost;
 
-        stats.imagePath = "";
+        stats.imagePath = "MotitiAngry";
         return stats;
     }
 }
@@ -115,7 +119,7 @@ public static class MochichiAngryStats
 
         stats.hasHaste = true;
 
-        stats.imagePath = "";
+        stats.imagePath = "MotitiAngry";
         return stats;
     }
 }

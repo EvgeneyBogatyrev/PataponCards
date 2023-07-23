@@ -8,7 +8,7 @@ public static class SpeedBoost
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         
-        stats.description = "Target non-Hatapon creature under your control gains can attack again this turn.";
+        stats.description = "Target non-Hatapon character under your control gains can attack again this turn.";
         stats.name = "Speed Boost";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
@@ -39,7 +39,7 @@ public static class SpeedBoost
             return true;
         }
 
-        static void SpeedBoostRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator SpeedBoostRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             BoardManager.Slot targetSlot;
 
@@ -56,12 +56,14 @@ public static class SpeedBoost
             MinionManager targetMinion = targetSlot.GetConnectedMinion();
 
             targetMinion.SetCanAttack(true);
-
+            yield return null;
         }
 
         stats.spell = SpeedBoostRealization;
         stats.checkSpellTarget = SpeedBoostCheckTarget;
         stats.numberOfTargets = 1;
+
+        stats.imagePath = "speed_boost";
 
         return stats;
     }

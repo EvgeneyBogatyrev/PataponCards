@@ -11,11 +11,11 @@ public static class IceWall_optionStats
         const int IceWallHealthCost = 0;
         const int IceWallSelfDamage = 1;
         
-        stats.description = "Deal 1 damage to this.";
+        stats.description = "0: Deal 1 damage to this.";
         stats.name = "Melt Down";
 
         stats.isSpell = true;
-        static void IceWall_optionRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator IceWall_optionRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             MinionManager host;
             if (targets[0] < 0)
@@ -29,10 +29,13 @@ public static class IceWall_optionStats
 
             host.TakePower(IceWallHealthCost);
             host.ReceiveDamage(IceWallSelfDamage);
+            yield return null;
         }
         stats.spell = IceWall_optionRealization;
         stats.numberOfTargets = 0;
         stats.damageToHost = IceWallHealthCost;
+
+        stats.imagePath = "ice_wall";
 
         return stats;
     }

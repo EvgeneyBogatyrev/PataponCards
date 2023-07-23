@@ -15,12 +15,12 @@ public static class MahoponStats
         stats.runes.Add(Runes.Bow);
 
         stats.power = 2;
-        stats.description = "Deal " + mahoponTargetDamage.ToString() + " damage to target creature and " + mahoponAoEDamage.ToString() + " damage to all other creatures.";
+        stats.description = "On play: Deal " + mahoponTargetDamage.ToString() + " damage to target character and " + mahoponAoEDamage.ToString() + " damage to all other characters.";
         stats.name = "Mahopon";
 
         stats.hasOnPlay = true;
 
-        static void MahoponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator MahoponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             BoardManager.Slot selectedSlot;
             int target = targets[0];
@@ -53,6 +53,7 @@ public static class MahoponStats
                     slot.GetConnectedMinion().ReceiveDamage(mahoponAoEDamage);
                 }
             }
+            yield return null;
         }
 
         stats.spell = MahoponRealization;

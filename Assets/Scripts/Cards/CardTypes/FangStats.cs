@@ -9,11 +9,11 @@ public static class FangStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         const int fangDamage = 3;
-        stats.description = "Deal " + fangDamage.ToString() + " damage to an enemy.";
+        stats.description = "Deal " + fangDamage.ToString() + " damage to an enemy character.";
         stats.name = "Fang";
 
         stats.isSpell = true;
-        static void FangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator FangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             BoardManager.Slot targetSlot;
 
@@ -29,7 +29,7 @@ public static class FangStats
 
             MinionManager targetMinion = targetSlot.GetConnectedMinion();
             targetMinion.ReceiveDamage(fangDamage);
-
+            yield return null;
         }
 
         static bool FangCheckTarget(int target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

@@ -8,7 +8,7 @@ public static class MyamsarHeroStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 3;
-        stats.description = "When it enters the battlefield, enemy non-Hatapon minion in front of it loses all abilities, can't attack and move until this is alive.";
+        stats.description = "On play: Enemy creature in front of it loses all abilities, can't attack and move until this is alive.";
         stats.name = "Myamsar, hero";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
@@ -16,6 +16,9 @@ public static class MyamsarHeroStats
 
         stats.hasBattlecry = true;
         stats.hasDeathrattle = true;
+        stats.descriptionSize = 3;
+
+        stats.legendary = true;
 
         static void MyamsarBattlecry(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

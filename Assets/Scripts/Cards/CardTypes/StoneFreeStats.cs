@@ -8,8 +8,9 @@ public static class StoneFreeStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 1;
-        stats.description = "Greatshield.\nCan't attack and move.";
+        stats.description = "Greatshield.";
         stats.name = "Petrified Patapon";
+        stats.nameSize = 3;
         stats.canAttack = false;
         stats.canDealDamage = false;
         stats.limitedVision = true;

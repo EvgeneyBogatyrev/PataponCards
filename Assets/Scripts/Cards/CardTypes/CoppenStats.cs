@@ -9,33 +9,37 @@ public static class CoppenStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "Summon an Ice Wall for your opponent.";
+        stats.description = "On play: Summon an Ice Wall for your opponent in front of this card.";
         stats.name = "Coppen";
         stats.runes.Add(Runes.Bow);
 
 
         stats.hasOnPlay = true;
 
-        static void CoppenRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator CoppenRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
-            foreach (BoardManager.Slot slot in enemySlots)
+            int index = targets[0];
+            Debug.Log(index);
+            BoardManager.Slot slot;
+            slot = enemySlots[index];
+            if (slot.GetFree())
             {
-                if (slot.GetFree())
-                {
-                    HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
-                    BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
+                HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
+                BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
-                    CardManager iceWallCard = handManager.GenerateCard(CardTypes.IceWall).GetComponent<CardManager>();
-                    boardManager.PlayCard(iceWallCard, slot, destroy:false, record:false);
-                    
-                    iceWallCard.DestroyCard();
-                    break;
-                }
-            }                                   
+                CardManager iceWallCard = handManager.GenerateCard(CardTypes.IceWall, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                boardManager.PlayCard(iceWallCard, new Vector3(0f, 0f, 0f), slot, destroy:false, record:false);
+                
+                iceWallCard.DestroyCard();
+            }
+            yield return null;                            
         }
 
         stats.spell = CoppenRealization;
-        stats.numberOfTargets = 0;
+        stats.dummyTarget = true;
+        stats.numberOfTargets = 1;
+
+        stats.imagePath = "coppen";
 
         return stats;
     }

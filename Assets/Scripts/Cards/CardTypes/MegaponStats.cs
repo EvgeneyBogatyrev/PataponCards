@@ -9,7 +9,7 @@ public static class MegaponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 2;
-        stats.description = "Deal two damage split between 1 or 2 creatures.\nDraw a card.";
+        stats.description = "On play: Deal 2 damage split between one or two creatures.\nDraw a card.";
         stats.name = "Megapon";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
@@ -27,7 +27,7 @@ public static class MegaponStats
             }
         }
 
-        static void MegaponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator MegaponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             if (targets[0] == targets[1])
             {
@@ -64,8 +64,10 @@ public static class MegaponStats
             if (enemySlots[1].GetFriendly())
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
+                //handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
+                handManager.DrawCardOpponent();
             }
+            yield return null;
         }
 
         stats.spell = MegaponRealization;
