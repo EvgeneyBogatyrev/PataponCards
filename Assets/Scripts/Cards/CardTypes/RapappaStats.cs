@@ -32,18 +32,21 @@ public static class MyamsarStats
             {
                 yield return null;
             }
-
-            HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-            BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
-
-            int newPower = thisOne.GetPower() - 1;
-            if (newPower > 0)
+            else
             {
-                CardManager newCard = handManager.GenerateCard(CardTypes.Myamsar, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
-                newCard.SetPower(newPower);
-                boardManager.PlayCard(newCard, new Vector3(0f, 0f, 0f), targetSlot, destroy: true, record: false);
-            }
+
+                HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
+                BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
+
+                int newPower = thisOne.GetPower() - 1;
+                if (newPower > 0)
+                {
+                    CardManager newCard = handManager.GenerateCard(CardTypes.Myamsar, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                    newCard.SetPower(newPower);
+                    boardManager.PlayCard(newCard, new Vector3(0f, 0f, 0f), targetSlot, destroy: true, record: false);
+                }
             yield return null;
+            }
         }
         stats.endTurnEvent = MyamsarEndTurn;
 
