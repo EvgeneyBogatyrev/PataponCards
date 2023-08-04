@@ -9,13 +9,13 @@ public static class MegaponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 2;
-        stats.description = "On play: Deal 2 damage split between one or two creatures.\nDraw a card.";
+        stats.description = "On play: Deal 2 damage split between one or two creatures.\nCycling.";
         stats.name = "Megapon";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
 
 
-        stats.hasBattlecry = true;
+        //stats.hasBattlecry = true;
         stats.hasOnPlay = true;
 
         static void MegaponBattlecry(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -60,20 +60,14 @@ public static class MegaponStats
                     selectedSlot.GetConnectedMinion().ReceiveDamage(1);
                 }
             }
-
-            if (enemySlots[1].GetFriendly())
-            {
-                HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                //handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
-                handManager.DrawCardOpponent();
-            }
             yield return null;
         }
 
         stats.spell = MegaponRealization;
         stats.numberOfTargets = 2;
+        stats.cycling = true;
 
-        stats.onPlayEvent = MegaponBattlecry;
+        //stats.onPlayEvent = MegaponBattlecry;
 
         stats.imagePath = "megapon";
         return stats;

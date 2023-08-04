@@ -8,7 +8,7 @@ public static class ProfessionalWithStandards
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 2;
-        stats.description = "On death: You draw a card.";
+        stats.description = "Cycling.";
         stats.name = "Questing beast";
 
         static void ProfessionalWIthStandardsDeathrattle(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots, CardManager.CardStats thisStats)
@@ -26,8 +26,9 @@ public static class ProfessionalWithStandards
             }
         }
 
-        stats.hasDeathrattle = true;
-        stats.onDeathEvent = ProfessionalWIthStandardsDeathrattle;
+        //stats.hasDeathrattle = true;
+        //stats.onDeathEvent = ProfessionalWIthStandardsDeathrattle;
+        stats.cycling = true;
 
         stats.imagePath = "questing_beast";
 

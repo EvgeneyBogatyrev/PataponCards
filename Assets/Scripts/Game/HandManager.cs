@@ -33,6 +33,8 @@ public class HandManager : MonoBehaviour
         mulliganing = true;
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
         drawStartPosition = GameObject.Find("DrawFromDeck").transform.position;
+        DeckManager.deck = SaveSystem.LoadDeck();
+        DeckManager.runes = SaveSystem.LoadRunes();
         DeckManager.CopyDeck();
 
         for (int i = 0; i < 7; ++i)
@@ -264,7 +266,7 @@ public class HandManager : MonoBehaviour
     {
         if (!mulliganing)
         {
-            Vector3 center = new Vector3(0f, -3.2f, -0.75f);
+            Vector3 center = new Vector3(-1.5f, -3.2f, -0.75f);
             int numberOfCards = hand.Count;
             float startPoint = center.x - ((numberOfCards - 1) * cardSpace / 2f);
             float startRot = 5f * ((float)(numberOfCards - 1) / 2);
@@ -295,7 +297,7 @@ public class HandManager : MonoBehaviour
 
     private void UpdateHandPositionOpponent()
     {
-        Vector3 center = new Vector3(0f, 7.7f, -0.75f);
+        Vector3 center = new Vector3(-1.5f, 7.7f, -0.75f);
         int numberOfCards = opponentHand.Count;
         float startPoint = center.x - ((numberOfCards - 1) * cardSpace / 2f);
         float startRot = 5f * ((float)(numberOfCards - 1) / 2);

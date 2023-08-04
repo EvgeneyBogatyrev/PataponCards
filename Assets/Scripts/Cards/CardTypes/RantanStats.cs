@@ -8,11 +8,13 @@ public class RantanStats : MonoBehaviour
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int heal = 3;
+        const int heal = 4;
+        const int lesserHeal = 2;
+
         stats.runes.Add(Runes.Bow);
 
         stats.power = 2;
-        stats.description = "On play: Restore " + heal.ToString() + " health to your Hatapon.";
+        stats.description = "On play: Restore " + heal.ToString() + " health to your Hatapon.\nCycling.\nWhenever you cycle this card, restore " + lesserHeal.ToString() + " health to your Hatapon.";
         stats.name = "Rantan";
         
         stats.hasOnPlay = true;
@@ -34,8 +36,27 @@ public class RantanStats : MonoBehaviour
             yield return null;
         }
 
+        static IEnumerator OnCycle(List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        {
+            foreach (BoardManager.Slot slot in friendlySlots)
+            {
+                MinionManager connectedMinion = slot.GetConnectedMinion();
+                if (connectedMinion != null)
+                {
+                    if (connectedMinion.GetCardType() == CardTypes.Hatapon)
+                    {
+                        connectedMinion.Heal(lesserHeal);
+                    }
+                }
+            }
+            yield return null;
+        }
+
         stats.spell = Realization;
+        stats.onCycleEvent = OnCycle;
         stats.numberOfTargets = 0;
+        stats.descriptionSize = 3;
+        stats.cycling = true;
 
         stats.imagePath = "rantan";
         return stats;

@@ -36,22 +36,23 @@ public class CollectionControl : MonoBehaviour
     public List<CardTypes> GetForbiddenCards()
     {
         // Cards that are not collectable and should not be displayed
-        List<CardTypes> reservedList = new List<CardTypes>();
-
-        reservedList.Add(CardTypes.Hatapon);
-        reservedList.Add(CardTypes.Nutrition);
-        reservedList.Add(CardTypes.GiveFang);
-        reservedList.Add(CardTypes.Motiti_option1);
-        reservedList.Add(CardTypes.Motiti_option2);
-        reservedList.Add(CardTypes.MotitiAngry);
-        reservedList.Add(CardTypes.Boulder);
-        reservedList.Add(CardTypes.TonKampon_option1);
-        reservedList.Add(CardTypes.TonKampon_option2);
-        reservedList.Add(CardTypes.IceWall);
-        reservedList.Add(CardTypes.IceWall_option);
-        reservedList.Add(CardTypes.Concede);
-        reservedList.Add(CardTypes.StoneFree);
-        reservedList.Add(CardTypes.Mushroom);
+        List<CardTypes> reservedList = new()
+        {
+            CardTypes.Hatapon,
+            CardTypes.Nutrition,
+            CardTypes.GiveFang,
+            CardTypes.Motiti_option1,
+            CardTypes.Motiti_option2,
+            CardTypes.MotitiAngry,
+            CardTypes.Boulder,
+            CardTypes.TonKampon_option1,
+            CardTypes.TonKampon_option2,
+            CardTypes.IceWall,
+            CardTypes.IceWall_option,
+            CardTypes.Concede,
+            CardTypes.StoneFree,
+            CardTypes.Mushroom
+        };
 
         return reservedList;
     }
@@ -116,7 +117,7 @@ public class CollectionControl : MonoBehaviour
             }
         }
 
-        List<int> indices = new List<int>();
+        List<int> indices = new();
 
         int i = 0;
         foreach (CardTypes type in DeckManager.deck)
@@ -161,7 +162,7 @@ public class CollectionControl : MonoBehaviour
             i += 1;
         }
 
-        List<CardTypes> newDeck = new List<CardTypes>();
+        List<CardTypes> newDeck = new();
 
         int ind = 0;
         foreach (CardTypes ct in DeckManager.deck)

@@ -26,7 +26,8 @@ public class MessageFromServer
         Attack,
         Move,
         Exchange,
-        CastOnPlayCard
+        CastOnPlayCard,
+        Cycle
     }
 
     public Action GetAction(string s)
@@ -70,6 +71,10 @@ public class MessageFromServer
         if (s == "game accept")
         {
             return Action.GameAccept;
+        }
+        if (s == "cycle card")
+        {
+            return Action.Cycle;
         }
         return Action.EndTurn;
     }

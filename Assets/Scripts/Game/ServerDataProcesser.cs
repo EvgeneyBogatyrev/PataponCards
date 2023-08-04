@@ -55,6 +55,12 @@ public class ServerDataProcesser : MonoBehaviour
         StartCoroutine(Post("1", "play card", cardIndex.ToString(), slotIndex.ToString()));
     }
 
+    public void CycleCard(CardManager card)
+    {
+        int cardIndex = (int)card.GetCardType();
+        StartCoroutine(Post("1", "cycle card", cardIndex.ToString(), ""));
+    }
+
     public void CastSpell(CardManager card, List<int> targets)
     {
         string targetString = "";
@@ -378,8 +384,38 @@ public class ServerDataProcesser : MonoBehaviour
                             handManager.SetNumberOfOpponentsCards(message.targets[0]);
                         }
                     }
+                    break;
+
+                case MessageFromServer.Action.Cycle:
+                    if (newCard != null)
+                    {
+                        if (newCard.arrowList != null)
+                        {
+                            foreach (Arrow arrow in newCard.arrowList)
+                            {
+                                arrow.DestroyArrow();
+                            }
+                            newCard.arrowList = null;
+                        }
+                    }
+                    newCard = handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1, returnCard:true);
+                    CardTypes cycleType = message.cardIndex;
                     
-                    
+                    handManager.DrawCardOpponent();
+
+                    newCard = handManager.GenerateCard(cycleType, newCard).GetComponent<CardManager>();
+                    newCard.SetName("Cycling: " + newCard.GetName());
+                    newCard.SetNameSize(3);
+                    HandManager.DestroyDisplayedCards();
+                    newCard.SetCardState(CardManager.CardState.opponentPlayed);
+
+                    if (newCard.GetCardStats().onCycleEvent != null)
+                    {
+                        StartCoroutine(newCard.GetCardStats().onCycleEvent(boardManager.friendlySlots, boardManager.enemySlots));
+                    }
+
+                    newCard.transform.position = new Vector3(0f, 10f, 0f);
+                    newCard.destroyTimer = HandManager.cardDestroyTimer;
                     break;
             }
 

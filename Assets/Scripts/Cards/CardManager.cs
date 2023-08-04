@@ -16,6 +16,7 @@ public class CardManager : MonoBehaviour
 {
     public delegate IEnumerator EndTurnEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate IEnumerator Spell(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
+    public delegate IEnumerator OnCycleEvent(List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate void OnPlayEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate void OnDeathEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null, CardStats thisStats = null);
     public delegate bool CheckSpellTarget(int target = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
@@ -43,6 +44,7 @@ public class CardManager : MonoBehaviour
         public bool hasOnPlay = false;
         public OnPlayEvent onPlayEvent = null;
         public OnDeathEvent onDeathEvent = null;
+        public OnCycleEvent onCycleEvent = null;
         public bool hasBattlecry = false;
         public bool isStatic = false;
         public int healthCost = 0;
@@ -62,6 +64,7 @@ public class CardManager : MonoBehaviour
         public int descriptionSize = 4;
         public bool poisoned = false;
         public bool hexproof = false;
+        public bool cycling = false;
 
         public Sprite GetSprite()
         {
@@ -70,32 +73,35 @@ public class CardManager : MonoBehaviour
 
         public CardStats CopyStats()
         {
-            CardStats newStats = new CardStats();
+            CardStats newStats = new()
+            {
+                isSpell = this.isSpell,
+                canAttack = this.canAttack,
+                canDealDamage = this.canDealDamage,
+                hasHaste = this.hasHaste,
+                hasShield = this.hasShield,
+                hasGreatshield = this.hasGreatshield,
+                limitedVision = this.limitedVision,
+                megaVision = this.megaVision,
+                fixedPower = this.fixedPower,
+                endTurnEvent = this.endTurnEvent,
+                startTurnEvent = this.startTurnEvent,
+                spell = this.spell,
+                numberOfTargets = this.numberOfTargets,
+                checkSpellTarget = this.checkSpellTarget,
+                checkSpellTargets = this.checkSpellTargets,
+                hasOnPlay = this.hasOnPlay,
+                onPlayEvent = this.onPlayEvent,
+                onDeathEvent = this.onDeathEvent,
+                hasBattlecry = this.hasBattlecry,
+                isStatic = this.isStatic,
+                healthCost = this.healthCost,
+                hexproof = this.hexproof,
+                cycling = this.cycling,
+                onCycleEvent = this.onCycleEvent,
 
-            newStats.isSpell = this.isSpell;
-            newStats.canAttack = this.canAttack;
-            newStats.canDealDamage = this.canDealDamage;
-            newStats.hasHaste = this.hasHaste;
-            newStats.hasShield = this.hasShield;
-            newStats.hasGreatshield = this.hasGreatshield;
-            newStats.limitedVision = this.limitedVision;
-            newStats.megaVision = this.megaVision;
-            newStats.fixedPower = this.fixedPower;
-            newStats.endTurnEvent = this.endTurnEvent;
-            newStats.startTurnEvent = this.startTurnEvent;
-            newStats.spell = this.spell;
-            newStats.numberOfTargets = this.numberOfTargets;
-            newStats.checkSpellTarget = this.checkSpellTarget;
-            newStats.checkSpellTargets = this.checkSpellTargets;
-            newStats.hasOnPlay = this.hasOnPlay;
-            newStats.onPlayEvent = this.onPlayEvent;
-            newStats.onDeathEvent = this.onDeathEvent;
-            newStats.hasBattlecry = this.hasBattlecry;
-            newStats.isStatic = this.isStatic;
-            newStats.healthCost = this.healthCost;
-            newStats.hexproof = this.hexproof;
-
-            newStats.connectedCards = new List<CardTypes>();
+                connectedCards = new List<CardTypes>()
+            };
             foreach (CardTypes ct in this.connectedCards)
             {
                 newStats.connectedCards.Add(ct);
@@ -284,13 +290,24 @@ public class CardManager : MonoBehaviour
                     foreach (BoardManager.Slot slot in boardManager.friendlySlots)
                     {
                         slot.Highlight(false);
-                        float distance = (transform.position - slot.GetPosition()).magnitude;
+                        float distance = Mathf.Abs(transform.position.x - slot.GetPosition().x);
                         if (minDistance == -1f || minDistance > distance)
                         {
                             minDistance = distance;
                             closestSlot = slot;
                         }
                     }
+
+                    boardManager.cyclingSlot.Highlight(false);
+                    if (cardStats.cycling)
+                    {
+                        float distanceToCycle = Mathf.Abs(transform.position.x - boardManager.cyclingSlot.GetPosition().x);
+                        if (minDistance == -1f || minDistance > distanceToCycle)
+                        {
+                            closestSlot = boardManager.cyclingSlot;
+                        }
+                    }
+                    
 
                     if (closestSlot.GetFree())
                     {
@@ -337,6 +354,19 @@ public class CardManager : MonoBehaviour
                         {
                             ReturnToHand();
                         }
+                        else if (closestSlot == boardManager.cyclingSlot)
+                        {
+                            handManager.RemoveCard(GetIndexIHand());
+                            boardManager.CycleCard(this);
+                            handManager.DrawCard();
+                            handManager.SetCanPlayCard(false);
+                            CursorController.cursorState = CursorController.CursorStates.Free;
+                            boardManager.cyclingSlot.Highlight(false);
+                            if (cardStats.onCycleEvent != null)
+                            {
+                                StartCoroutine(cardStats.onCycleEvent(boardManager.enemySlots, boardManager.friendlySlots));
+                            }
+                        }
                         else
                         {
                             boardManager.PlayCard(this, closestSlot);
@@ -369,6 +399,19 @@ public class CardManager : MonoBehaviour
                         if (closestSlot == null)
                         {
                             ReturnToHand();
+                        }
+                        else if (closestSlot == boardManager.cyclingSlot)
+                        {
+                            handManager.RemoveCard(GetIndexIHand());
+                            boardManager.CycleCard(this);
+                            handManager.DrawCard();
+                            handManager.SetCanPlayCard(false);
+                            CursorController.cursorState = CursorController.CursorStates.Free;
+                            boardManager.cyclingSlot.Highlight(false);
+                            if (cardStats.onCycleEvent != null)
+                            {
+                                StartCoroutine(cardStats.onCycleEvent(boardManager.enemySlots, boardManager.friendlySlots));
+                            }
                         }
                         else
                         {

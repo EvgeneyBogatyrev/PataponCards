@@ -13,15 +13,17 @@ public class BoardManager : MonoBehaviour
         private int index;
         private bool friendly;
         private bool free;
+        private bool cycling;
 
 
-        public Slot(Vector3 position, int _index, bool _friendly)
+        public Slot(Vector3 position, int _index, bool _friendly, bool _cycling=false)
         {
             slotObject = Instantiate(BoardManager.slotPrefabStatic);
             slotObject.transform.position = position;
             index = _index;
             friendly = _friendly;
             free = true;
+            cycling = _cycling;
             Highlight(false);
         }
 
@@ -29,11 +31,19 @@ public class BoardManager : MonoBehaviour
         {
             if (_active)
             {
+                slotObject.SetActive(true);
                 slotObject.GetComponent<SpriteRenderer>().color = BoardManager.highlightedColorStatic;
             }
             else
             {
-                slotObject.GetComponent<SpriteRenderer>().color = BoardManager.normalColorStatic;
+                if (cycling)
+                {
+                    slotObject.SetActive(false);
+                }
+                else
+                {
+                    slotObject.GetComponent<SpriteRenderer>().color = BoardManager.normalColorStatic;
+                }
             }
         }
 
@@ -91,12 +101,14 @@ public class BoardManager : MonoBehaviour
 
     public List<Slot> friendlySlots = new List<Slot>();
     public List<Slot> enemySlots = new List<Slot>();
+    public Slot cyclingSlot;
 
     public int numberOfSlots = 7;
     public float friendlySlotsPosition = 1f;
     public float enemySlotsPosition = 3f;
     public float leftSlotOffset = 10f;
     public float minionRotation = 0f;
+    public float leftSlotSlide = -5f;
 
     public int randomHash;
     public int opponentHash;
@@ -114,14 +126,15 @@ public class BoardManager : MonoBehaviour
         float step = 2 * leftSlotOffset / (numberOfSlots + 1);
         for (int i = 1; i <= numberOfSlots; ++i)
         {
-            Slot newSlot = new Slot(new Vector3(-leftSlotOffset + i * step, friendlySlotsPosition, 1.5f), i - 1, true);            
+            Slot newSlot = new Slot(new Vector3(leftSlotSlide + i * step, friendlySlotsPosition, 1.5f), i - 1, true);            
             friendlySlots.Add(newSlot);
         }
         for (int i = 1; i <= numberOfSlots; ++i)
         {
-            Slot newSlot = new Slot(new Vector3(-leftSlotOffset + i * step, enemySlotsPosition, 1.5f), i - 1, false);
+            Slot newSlot = new Slot(new Vector3(leftSlotSlide + i * step, enemySlotsPosition, 1.5f), i - 1, false);
             enemySlots.Add(newSlot);
         }
+        cyclingSlot = new Slot(new Vector3(leftSlotSlide + numberOfSlots * step + 1f * step, friendlySlotsPosition - 4.2f, 1.5f), numberOfSlots, true, _cycling: true);
 
         randomHash = InfoSaver.myHash;
         opponentHash = InfoSaver.opponentHash;
@@ -169,6 +182,19 @@ public class BoardManager : MonoBehaviour
         if (record)
         {
             ServerDataProcesser.instance.PlayCard(card, slot);
+        }
+    }
+
+    public void CycleCard(CardManager card, bool destroy=true, bool record=true)
+    {   
+        if (destroy)
+        {
+            card.DestroyCard();
+        }
+
+        if (record)
+        {
+            ServerDataProcesser.instance.CycleCard(card);
         }
     }
 
