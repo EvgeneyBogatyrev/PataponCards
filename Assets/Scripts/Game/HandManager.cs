@@ -164,6 +164,7 @@ public class HandManager : MonoBehaviour
     {
         if (hand.Count >= 7)
         {
+            //Debug.Log("Here");
             return;
         }
         GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
@@ -327,9 +328,14 @@ public class HandManager : MonoBehaviour
 
     public void StartRoundActions(int cardIncrement = 3)
     {
-        for (int i = 0; i < cardIncrement; ++i)
+        int numberOfDraws = Mathf.Min(cardIncrement, 7 - hand.Count);
+        for (int i = 0; i < numberOfDraws; ++i)
         {
             DrawCard();
+        }
+        int numberOfDrawsOpp = Mathf.Min(cardIncrement, 7 - opponentHand.Count);
+        for (int i = 0; i < numberOfDrawsOpp; ++i)
+        {
             DrawCardOpponent();
         }
 

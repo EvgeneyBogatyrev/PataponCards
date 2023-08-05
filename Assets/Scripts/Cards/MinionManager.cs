@@ -37,6 +37,7 @@ public class MinionManager : MonoBehaviour
     private bool mouseOver;
     private MinionState state;
     private bool summoningSickness = true;
+    private bool additionalAttack = false;
     private List<CardManager> connectedCardObjects;
     private Arrow arrow = null;
     public float fadeSpeed = 10f;
@@ -107,9 +108,24 @@ public class MinionManager : MonoBehaviour
         }
     }
 
+    public void GiveAdditionalAttack()
+    {
+        if (GameController.playerTurn && friendly && !(!cardStats.canAttack && cardStats.limitedVision && !cardStats.isStatic))
+        {
+            additionalAttack = true;
+            outlineBackObject.SetActive(true);
+            //normalBackObject.SetActive(!can);
+        }
+        else
+        {
+            outlineBackObject.SetActive(false);
+            //normalBackObject.SetActive(false);
+        }
+    }
+
     public void PoisonMinion(bool poison=true)
     {
-        if (cardStats.isStatic || (cardStats.canDealDamage == false && cardType != CardTypes.Hatapon))
+        if (cardStats.isStatic || cardStats.canDealDamage == false)
         {
             return;
         }
@@ -272,7 +288,7 @@ public class MinionManager : MonoBehaviour
                         //transform.localScale = new Vector3(normalScale, normalScale, 1f);
                         desiredScale = normalScale;
                     }
-                    else if (CursorController.cursorState == CursorController.CursorStates.Free && !summoningSickness)
+                    else if (CursorController.cursorState == CursorController.CursorStates.Free && (!summoningSickness || additionalAttack))
                     {
                         desiredPosition = new Vector3(connectedSlot.GetPosition().x, connectedSlot.GetPosition().y, connectedSlot.GetPosition().z - 0.2f);
                         desiredScale = selectedScale;
@@ -361,7 +377,7 @@ public class MinionManager : MonoBehaviour
                         {
                             MinionManager target = hit.collider.GetComponent<MinionManager>();
 
-                            if (GetCardType() == CardTypes.Moribu && !target.GetFriendly() && Mathf.Abs(target.GetIndex() - GetIndex()) == 2)
+                            if (!summoningSickness && GetCardType() == CardTypes.Moribu && !target.GetFriendly() && Mathf.Abs(target.GetIndex() - GetIndex()) == 2)
                             {
                                 BoardManager.Slot nextSlot = target.GetSlot();
                                 target.DestroyMinion();
@@ -371,7 +387,7 @@ public class MinionManager : MonoBehaviour
                                 CursorController.cursorState = CursorController.CursorStates.Free;
                                 arrow.DestroyArrow();
                                 arrow = null;
-                            } else if (target != this && target.friendly && (Mathf.Abs(target.GetIndex() - GetIndex()) == 1) && !cardStats.limitedVision)
+                            } else if (!summoningSickness && target != this && target.friendly && (Mathf.Abs(target.GetIndex() - GetIndex()) == 1) && !cardStats.limitedVision)
                             {
                                 if (!target.cardStats.limitedVision && !target.summoningSickness && !target.cardStats.isStatic)
                                 {
@@ -384,7 +400,6 @@ public class MinionManager : MonoBehaviour
                             }
                             else
                             {
-
                                 bool existsGreatshield = false;
                                 foreach (BoardManager.Slot enemySlot in boardManager.enemySlots)
                                 {
@@ -410,12 +425,13 @@ public class MinionManager : MonoBehaviour
                                     CursorController.cursorState = CursorController.CursorStates.Free;
                                     arrow.DestroyArrow();
                                     arrow = null;
+                                    additionalAttack = false;
                                 }
                             }
 
                             
                         }
-                        else if (hit.collider.name == "Slot(Clone)") // Fix this shit!
+                        else if (hit.collider.name == "Slot(Clone)" && !summoningSickness) // Fix this shit!
                         {
                             BoardManager.Slot slotToGo = null;
                             foreach (BoardManager.Slot slot in boardManager.friendlySlots)
@@ -562,6 +578,31 @@ public class MinionManager : MonoBehaviour
             int myIndex = GetIndex() + 1;
             int enemyIndex = -enemy.GetIndex() - 1;
             ServerDataProcesser.instance.Attack(myIndex, enemyIndex);
+        }
+        if (GetCardStats().onAttackEvent != null)
+        {
+            int myIndex, enemyIndex;
+            List<BoardManager.Slot> friends, enemies; 
+            if (GetFriendly())
+            {
+                myIndex = GetIndex() + 1;
+                enemyIndex = -enemy.GetIndex() - 1;
+                friends = boardManager.friendlySlots;
+                enemies = boardManager.enemySlots;
+            }
+            else
+            {
+                myIndex = -GetIndex() - 1;
+                enemyIndex = enemy.GetIndex() + 1;
+                enemies = boardManager.friendlySlots;
+                friends = boardManager.enemySlots;
+            }
+            List<int> targets = new()
+            {
+                myIndex,
+                enemyIndex
+            };
+            StartCoroutine(GetCardStats().onAttackEvent(targets, enemies, friends));
         }
         attacking = true;
         attackPosition = enemy.GetSlot().GetPosition();
@@ -764,7 +805,7 @@ public class MinionManager : MonoBehaviour
     }
     public bool GetCanAttack()
     {
-        return !summoningSickness;
+        return (!summoningSickness || additionalAttack);
     }
     public void SetCanAttack(bool _can)
     {

@@ -22,21 +22,15 @@ public class MushroomStats : MonoBehaviour
             if (index > 0) 
             {
                 MinionManager minion = friendlySlots[index - 1].GetConnectedMinion();
-                if (minion != null)
-                {
-                    //minion.ReceiveDamage(damage);
-                    minion.PoisonMinion();
-                }
+                //minion.ReceiveDamage(damage);
+                minion?.PoisonMinion();
             }
 
             if (index < 6) 
             {
                 MinionManager minion = friendlySlots[index + 1].GetConnectedMinion();
-                if (minion != null)
-                {
-                    //minion.ReceiveDamage(damage);
-                    minion.PoisonMinion();
-                }
+                //minion.ReceiveDamage(damage);
+                minion?.PoisonMinion();
             }
 
             MinionManager me = friendlySlots[index].GetConnectedMinion();

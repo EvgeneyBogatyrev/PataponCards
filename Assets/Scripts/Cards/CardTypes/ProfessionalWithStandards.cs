@@ -7,7 +7,7 @@ public static class ProfessionalWithStandards
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-        stats.power = 2;
+        stats.power = 3;
         stats.description = "Cycling.";
         stats.name = "Questing beast";
 

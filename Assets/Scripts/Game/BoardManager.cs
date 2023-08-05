@@ -18,7 +18,14 @@ public class BoardManager : MonoBehaviour
 
         public Slot(Vector3 position, int _index, bool _friendly, bool _cycling=false)
         {
-            slotObject = Instantiate(BoardManager.slotPrefabStatic);
+            if (!_cycling) 
+            {
+                slotObject = Instantiate(BoardManager.slotPrefabStatic);
+            }
+            else
+            {
+                slotObject = Instantiate(BoardManager.cyclePrefabStatic);
+            }
             slotObject.transform.position = position;
             index = _index;
             friendly = _friendly;
@@ -59,7 +66,11 @@ public class BoardManager : MonoBehaviour
 
         public Vector3 GetPosition()
         {
-            return slotObject.transform.position;
+            if (!cycling)
+            {
+                return slotObject.transform.position;
+            }
+            return new Vector3(slotObject.transform.position.x + 10f/8f, 0f, 0f); // Fix that! 
         }
 
         public GameObject GetSlotObject()
@@ -90,6 +101,9 @@ public class BoardManager : MonoBehaviour
 
     public static GameObject slotPrefabStatic;
     public GameObject slotPrefab;
+
+    public static GameObject cyclePrefabStatic;
+    public GameObject cyclePrefab;
 
     public static Color highlightedColorStatic;
     public Color highlightedColor;
@@ -134,7 +148,7 @@ public class BoardManager : MonoBehaviour
             Slot newSlot = new Slot(new Vector3(leftSlotSlide + i * step, enemySlotsPosition, 1.5f), i - 1, false);
             enemySlots.Add(newSlot);
         }
-        cyclingSlot = new Slot(new Vector3(leftSlotSlide + numberOfSlots * step + 1f * step, friendlySlotsPosition - 4.2f, 1.5f), numberOfSlots, true, _cycling: true);
+        cyclingSlot = new Slot(new Vector3(leftSlotSlide + numberOfSlots * step + 0.65f * step, friendlySlotsPosition - 5.2f, 1.5f), numberOfSlots, true, _cycling: true);
 
         randomHash = InfoSaver.myHash;
         opponentHash = InfoSaver.opponentHash;
@@ -148,6 +162,7 @@ public class BoardManager : MonoBehaviour
     public void InitStaticObjects()
     {
         slotPrefabStatic = slotPrefab;
+        cyclePrefabStatic = cyclePrefab;
         highlightedColorStatic = highlightedColor;
         normalColorStatic = normalColor;
     }

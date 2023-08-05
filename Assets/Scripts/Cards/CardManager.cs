@@ -17,6 +17,7 @@ public class CardManager : MonoBehaviour
     public delegate IEnumerator EndTurnEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate IEnumerator Spell(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate IEnumerator OnCycleEvent(List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
+    public delegate IEnumerator OnAttackEvent(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate void OnPlayEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate void OnDeathEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null, CardStats thisStats = null);
     public delegate bool CheckSpellTarget(int target = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
@@ -45,6 +46,7 @@ public class CardManager : MonoBehaviour
         public OnPlayEvent onPlayEvent = null;
         public OnDeathEvent onDeathEvent = null;
         public OnCycleEvent onCycleEvent = null;
+        public OnAttackEvent onAttackEvent = null;
         public bool hasBattlecry = false;
         public bool isStatic = false;
         public int healthCost = 0;
@@ -65,6 +67,7 @@ public class CardManager : MonoBehaviour
         public bool poisoned = false;
         public bool hexproof = false;
         public bool cycling = false;
+        public bool blockEffects = false;
 
         public Sprite GetSprite()
         {
@@ -99,6 +102,8 @@ public class CardManager : MonoBehaviour
                 hexproof = this.hexproof,
                 cycling = this.cycling,
                 onCycleEvent = this.onCycleEvent,
+                onAttackEvent = this.onAttackEvent,
+                blockEffects = this.blockEffects,
 
                 connectedCards = new List<CardTypes>()
             };
@@ -330,7 +335,6 @@ public class CardManager : MonoBehaviour
                         toPosition = new Vector3(toPosition.x, toPosition.y, selectedZ);
                         transform.position = Vector3.Lerp(transform.position, toPosition, Time.deltaTime * 30.0f);
 
-                        
                         
                         transform.localScale = new Vector3(selectedScale, selectedScale, 1f);
 
@@ -732,6 +736,7 @@ public class CardManager : MonoBehaviour
         {
             slot.Highlight(false);
         }
+        boardManager.cyclingSlot.Highlight(false);
 
         spellTargets = new List<int>();
         
