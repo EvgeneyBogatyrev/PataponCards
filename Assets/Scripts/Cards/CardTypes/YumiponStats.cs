@@ -60,7 +60,6 @@ public static class YumiponStats
                 yield return new WaitForSeconds(0.1f);
             }
 
-
             gameController.actionIsHappening = false;
             yield return null;
         }

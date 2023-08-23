@@ -27,7 +27,8 @@ public class MessageFromServer
         Move,
         Exchange,
         CastOnPlayCard,
-        Cycle
+        Cycle,
+        Discard
     }
 
     public Action GetAction(string s)
@@ -75,6 +76,10 @@ public class MessageFromServer
         if (s == "cycle card")
         {
             return Action.Cycle;
+        }
+        if (s == "discard")
+        {
+            return Action.Discard;
         }
         return Action.EndTurn;
     }
@@ -421,6 +426,7 @@ public class GameController : MonoBehaviour
     {
         if (friendly)
         {
+            handManager.CheckEphemeral();
             handManager.SetCanPlayCard(false);
             CursorController.cursorState = CursorController.CursorStates.EnemyTurn;
 
@@ -460,6 +466,7 @@ public class GameController : MonoBehaviour
         }
         else
         {
+            //handManager.CheckEphemeral();
             List<MinionManager> order = new List<MinionManager>();
             foreach (BoardManager.Slot slot in boardManager.enemySlots)
             {

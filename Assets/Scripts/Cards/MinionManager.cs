@@ -177,7 +177,23 @@ public class MinionManager : MonoBehaviour
         damageObject.GetComponent<TextMeshPro>().color = new Color(255f, 0f, 0f, 1f);
         StartCoroutine(HideDamage(damage:true));
         SetPower(power - damage);
-        CheckPower();
+        if (CheckPower())
+        {
+            if (cardStats.onDamageEvent != null)
+            {
+                int idx = connectedSlot.GetIndex();
+                if (friendly)
+                {
+                    StartCoroutine(cardStats.onDamageEvent(idx, boardManager.enemySlots, boardManager.friendlySlots));
+                }
+                else
+                {
+                    StartCoroutine(cardStats.onDamageEvent(idx, boardManager.friendlySlots, boardManager.enemySlots));
+                }
+            }
+        }
+
+
     }
 
     public IEnumerator HideDamage(bool damage=true)
@@ -682,12 +698,14 @@ public class MinionManager : MonoBehaviour
         //CheckPower();
     }
 
-    public void CheckPower()
+    public bool CheckPower()
     {
         if (power <= 0)
         {
             StartCoroutine(Die());
+            return false;
         }
+        return true;
     }
 
     private IEnumerator Die()

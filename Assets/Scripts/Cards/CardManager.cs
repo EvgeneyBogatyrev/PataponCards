@@ -44,6 +44,7 @@ public class CardManager : MonoBehaviour
         public CheckSpellTargets checkSpellTargets = null;
         public bool hasOnPlay = false;
         public OnPlayEvent onPlayEvent = null;
+        public EndTurnEvent onDamageEvent = null;
         public OnDeathEvent onDeathEvent = null;
         public OnCycleEvent onCycleEvent = null;
         public OnAttackEvent onAttackEvent = null;
@@ -68,6 +69,7 @@ public class CardManager : MonoBehaviour
         public bool hexproof = false;
         public bool cycling = false;
         public bool blockEffects = false;
+        public int ephemeral = -1;
 
         public Sprite GetSprite()
         {
@@ -104,6 +106,8 @@ public class CardManager : MonoBehaviour
                 onCycleEvent = this.onCycleEvent,
                 onAttackEvent = this.onAttackEvent,
                 blockEffects = this.blockEffects,
+                ephemeral = this.ephemeral,
+                onDamageEvent = this.onDamageEvent,
 
                 connectedCards = new List<CardTypes>()
             };
@@ -387,6 +391,7 @@ public class CardManager : MonoBehaviour
                     else if (cardStats.isSpell)
                     {
                         handManager.RemoveCard(GetIndexIHand());
+                        Debug.Log("In card:" + handManager.GetNumberOfCards().ToString());
                         handManager.SetCanPlayCard(false);
                         ServerDataProcesser.instance.CastSpell(this, spellTargets);
                         StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
@@ -461,6 +466,8 @@ public class CardManager : MonoBehaviour
                 {
                     if (cardStats.checkSpellTargets(spellTargets, boardManager.enemySlots, boardManager.friendlySlots))
                     {
+                        handManager.RemoveCard(GetIndexIHand());
+                        handManager.SetCanPlayCard(false);
                         boardManager.battlecryTrigger = true;
                         ServerDataProcesser.instance.CastSpell(this, spellTargets);
                         StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
@@ -475,8 +482,7 @@ public class CardManager : MonoBehaviour
                         {
                             spellTargets = new List<int>();
                         }
-                        handManager.RemoveCard(GetIndexIHand());
-                        handManager.SetCanPlayCard(false);
+                        
                         foreach (BoardManager.Slot slot in boardManager.friendlySlots)
                         {
                             slot.Highlight(false);
@@ -719,7 +725,7 @@ public class CardManager : MonoBehaviour
 
         while (gameController.actionIsHappening)
         {
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(5f);
         }
 
         Destroy(gameObject);

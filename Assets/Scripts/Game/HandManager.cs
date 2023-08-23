@@ -46,7 +46,7 @@ public class HandManager : MonoBehaviour
         
     }
 
-    public CardManager SetNumberOfOpponentsCards(int number, bool returnCard=false)
+    public CardManager SetNumberOfOpponentsCards(int number, bool returnCard=false, int ephemeral=-1)
     {
         CardManager returnedCard = null;
         CardManager[] copyHand = new CardManager[opponentHand.Count];
@@ -75,15 +75,51 @@ public class HandManager : MonoBehaviour
             CardManager newCard = GenerateCard(CardTypes.Fang, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
             opponentHand.Add(newCard);
             newCard.SetCardState(CardManager.CardState.opponentHolding);
+            newCard.GetCardStats().ephemeral = ephemeral;
         }
 
         UpdateHandPositionOpponent();
         return returnedCard;
     }
 
+    public int GetNumberOfCards()
+    {
+        return hand.Count;
+    }
+
     public int GetNumberOfOpponentsCards()
     {
         return opponentHand.Count;
+    }
+
+    public void CheckEphemeral()
+    {
+        Debug.Log("In ephe");
+        CardManager[] cards = new CardManager[hand.Count];
+        hand.CopyTo(cards);
+        int index = -1;
+        int removed = 0;
+        foreach (CardManager card in cards)
+        {
+            index += 1;
+            int eph = card.GetCardStats().ephemeral;
+            Debug.Log(eph.ToString());
+            if (eph == -1)
+            {
+                continue;
+            }
+            if (card.GetCardStats().ephemeral == 0)
+            {
+                hand[index - removed].DestroyCard();
+                RemoveCard(index - removed);
+                removed += 1;
+            }
+            card.GetCardStats().ephemeral = eph - 1;
+            
+        }
+        UpdateHandPosition();
+        Debug.Log("Removed=" + removed.ToString());
+        ServerDataProcesser.instance.Discard(removed);
     }
 
     public static void DestroyDisplayedCards()
@@ -160,7 +196,7 @@ public class HandManager : MonoBehaviour
         hataponHealth -= hataponHealthDecrease;
     }
 
-    public void DrawCard()
+    public void DrawCard(int ephemeral=-1)
     {
         if (hand.Count >= 7)
         {
@@ -171,12 +207,12 @@ public class HandManager : MonoBehaviour
         CardTypes cardType = DeckManager.GetRandomCard(remove:true);
         if (cardType != CardTypes.Hatapon)
         {
-            AddCardToHand(cardType);
+            AddCardToHand(cardType, ephemeral:ephemeral);
         }
         gameController.ProcessCardDraw(friendly:true);
     }
 
-    public void DrawCardOpponent(bool fromDeck=true)
+    public void DrawCardOpponent(bool fromDeck=true, int ephemeral=-1)
     {
         if (GetNumberOfOpponentsCards() >= 7)
         {
@@ -187,21 +223,21 @@ public class HandManager : MonoBehaviour
         {
             if (gameController.ProcessCardDraw(friendly:false))
             {
-                SetNumberOfOpponentsCards(GetNumberOfOpponentsCards() + 1);
+                SetNumberOfOpponentsCards(GetNumberOfOpponentsCards() + 1, ephemeral:ephemeral);
             }
         }
         else
         {
-            SetNumberOfOpponentsCards(GetNumberOfOpponentsCards() + 1);
+            SetNumberOfOpponentsCards(GetNumberOfOpponentsCards() + 1, ephemeral:ephemeral);
         }
     }
 
-    public void AddCardToHand(CardTypes card)
+    public void AddCardToHand(CardTypes card, int ephemeral=-1)
     {
-        StartCoroutine(AddCardToHandAsync(card));
+        StartCoroutine(AddCardToHandAsync(card, ephemeral:ephemeral));
     }
 
-    public IEnumerator AddCardToHandAsync(CardTypes card)
+    public IEnumerator AddCardToHandAsync(CardTypes card, int ephemeral=-1)
     {
         while (CardIsDrawing)
         {
@@ -216,6 +252,7 @@ public class HandManager : MonoBehaviour
 
             newCard.transform.position = drawStartPosition;
             newCard.SetCardState(CardManager.CardState.Drawing);
+            newCard.GetCardStats().ephemeral = ephemeral;
 
             if (!HandManager.mulliganing)
             {
@@ -267,12 +304,16 @@ public class HandManager : MonoBehaviour
     {
         if (!mulliganing)
         {
+            Debug.Log("In update: " + hand.Count.ToString());
             Vector3 center = new Vector3(-1.5f, -3.2f, -0.75f);
             int numberOfCards = hand.Count;
+            Debug.Log("number of crds " + numberOfCards.ToString());
             float startPoint = center.x - ((numberOfCards - 1) * cardSpace / 2f);
             float startRot = 5f * ((float)(numberOfCards - 1) / 2);
+            Debug.Log("start rot " + startRot.ToString());
             for (int i = 0; i < numberOfCards; ++i)
             {
+                Debug.Log("Iter");
                 hand[i].SetPositionInHand(new Vector3(startPoint + cardSpace * i, center.y, center.z - (float)i / 5f));
                 hand[i].SetRotation(startRot);
                 hand[i].SetIndexInHand(i);

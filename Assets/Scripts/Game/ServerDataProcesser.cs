@@ -61,6 +61,11 @@ public class ServerDataProcesser : MonoBehaviour
         StartCoroutine(Post("1", "cycle card", cardIndex.ToString(), ""));
     }
 
+    public void Discard(int number)
+    {
+        StartCoroutine(Post("1", "discard", number.ToString(), ""));
+    }
+
     public void CastSpell(CardManager card, List<int> targets)
     {
         string targetString = "";
@@ -150,14 +155,16 @@ public class ServerDataProcesser : MonoBehaviour
                         messages[messageIndex + 1].cardIndex == messages[messageIndex].cardIndex && 
                         messages[messageIndex + 1].action == MessageFromServer.Action.PlayCard)
                     {
-                        MessageFromServer newMessage = new MessageFromServer();
-                        newMessage.action = MessageFromServer.Action.CastOnPlayCard;
-                        newMessage.cardIndex = messages[messageIndex].cardIndex;
-                        newMessage.hash = messages[messageIndex].hash;
-                        newMessage.index = messages[messageIndex].index;
-                        newMessage.targets = messages[messageIndex].targets;
-                        newMessage.creatureTarget = messages[messageIndex + 1].targets[0];
-                        newMessage.additionalIndex = messages[messageIndex + 1].index;
+                        MessageFromServer newMessage = new MessageFromServer
+                        {
+                            action = MessageFromServer.Action.CastOnPlayCard,
+                            cardIndex = messages[messageIndex].cardIndex,
+                            hash = messages[messageIndex].hash,
+                            index = messages[messageIndex].index,
+                            targets = messages[messageIndex].targets,
+                            creatureTarget = messages[messageIndex + 1].targets[0],
+                            additionalIndex = messages[messageIndex + 1].index
+                        };
 
                         processedMessages.Add(newMessage);
                     }
@@ -416,6 +423,11 @@ public class ServerDataProcesser : MonoBehaviour
 
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
                     newCard.destroyTimer = HandManager.cardDestroyTimer;
+                    break;
+
+                case MessageFromServer.Action.Discard:
+                    handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - (int)message.cardIndex);
+                    Debug.Log("Setting to " + (handManager.GetNumberOfOpponentsCards() - (int)message.cardIndex).ToString());
                     break;
             }
 

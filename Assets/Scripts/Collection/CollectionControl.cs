@@ -51,7 +51,8 @@ public class CollectionControl : MonoBehaviour
             CardTypes.IceWall_option,
             CardTypes.Concede,
             CardTypes.StoneFree,
-            CardTypes.Mushroom
+            CardTypes.Mushroom,
+            CardTypes.TrentOnFire,
         };
 
         return reservedList;

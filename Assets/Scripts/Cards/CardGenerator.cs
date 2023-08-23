@@ -55,6 +55,9 @@ public enum CardTypes
     Moforumo,
     SparringPartner,
     Cannasault,
+    TropicalTailwind,
+    HuntingSpirit,
+    Trent,
     //------------------------
     Motiti_option1,
     Motiti_option2,
@@ -69,7 +72,8 @@ public enum CardTypes
     IceWall_option,
     Concede,
     StoneFree,
-    Mushroom
+    Mushroom,
+    TrentOnFire
 };
 
 //Rewrite this entire piece of sheesh
@@ -344,13 +348,29 @@ public static class CardGenerator
                 stats = CannasaultStats.GetStats();
                 break;
 
+            case CardTypes.TropicalTailwind:
+                stats = TropicalTailwindStats.GetStats();
+                break;
+
+            case CardTypes.HuntingSpirit:
+                stats = HuntingSpiritStats.GetStats();
+                break;
+
+            case CardTypes.Trent:
+                stats = TrentStats.GetStats();
+                break;
+
+            case CardTypes.TrentOnFire:
+                stats = TrentFireStats.GetStats();
+                break;
+
             default:
                 break;
         }
 
         if (stats.onPlayEvent == null) stats.onPlayEvent = EmptyMethod_;
-        if (stats.endTurnEvent == null) stats.endTurnEvent = EmptyMethod;
-        if (stats.startTurnEvent == null) stats.startTurnEvent = EmptyMethod;
+        //if (stats.endTurnEvent == null) stats.endTurnEvent = EmptyMethod;
+        //if (stats.startTurnEvent == null) stats.startTurnEvent = EmptyMethod;
         if (stats.spell == null) stats.spell = EmptySpell;
         if (stats.checkSpellTarget == null) stats.checkSpellTarget = EmptyCheckSpellTarget;
         if (stats.checkSpellTargets == null) stats.checkSpellTargets = EmptyCheckSpellTargets;
