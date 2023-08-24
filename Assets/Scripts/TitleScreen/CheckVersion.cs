@@ -5,10 +5,11 @@ using System.Net;
 using System.IO;
 using System.ComponentModel;
 using TMPro;
+using System.Collections;
 
 public class CheckVersionModule : MonoBehaviour
 {
-    public static string version = "0.0.2";
+    public static string version = "0.0.3";
     public static bool isAndroid = true;
 
     private static string versionURL = "https://drive.google.com/uc?export=download&id=1ZQlz7Hmznk7C3k86EeZOC-ze4vnhegXc";
@@ -21,16 +22,17 @@ public class CheckVersionModule : MonoBehaviour
     private void Start() {
         button.SetActive(false);
         rootPath = Directory.GetCurrentDirectory();
-        CheckVersion();
+        StartCoroutine(CheckVersion());
     }
 
-    public void CheckVersion()
+    public IEnumerator CheckVersion()
     {
         textbox.GetComponent<TextMeshProUGUI>().text = "Checking versions...";
         WebClient client = new WebClient();
         //client.DownloadFileCompleted += new AsyncCompletedEventHandler(DownloadGameCompletedCallback);
         //client.DownloadFileAsync(new Uri(versionURL), Path.Combine(rootPath, "version.txt"));
         string onlineVersion = client.DownloadString(new Uri(versionURL));
+        
         if (version == onlineVersion)
         {
             textbox.GetComponent<TextMeshProUGUI>().text = "Your version is up-to-date!";
@@ -41,6 +43,7 @@ public class CheckVersionModule : MonoBehaviour
             textbox.GetComponent<TextMeshProUGUI>().text = "There is a newer version of the game.";
             button.SetActive(true);
         }
+        yield return new WaitForSeconds(2f);
     }
 
     private void DownloadGameCompletedCallback(object sender, AsyncCompletedEventArgs e)

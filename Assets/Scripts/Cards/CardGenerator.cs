@@ -58,6 +58,7 @@ public enum CardTypes
     TropicalTailwind,
     HuntingSpirit,
     Trent,
+    PoisonArcher,
     //------------------------
     Motiti_option1,
     Motiti_option2,
@@ -362,6 +363,10 @@ public static class CardGenerator
 
             case CardTypes.TrentOnFire:
                 stats = TrentFireStats.GetStats();
+                break;
+
+            case CardTypes.PoisonArcher:
+                stats = PoisonArcherStats.GetStats();
                 break;
 
             default:

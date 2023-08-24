@@ -125,10 +125,6 @@ public class MinionManager : MonoBehaviour
 
     public void PoisonMinion(bool poison=true)
     {
-        if (cardStats.isStatic || cardStats.canDealDamage == false)
-        {
-            return;
-        }
         poisonObject.SetActive(poison);
         cardStats.poisoned = poison;
     }
