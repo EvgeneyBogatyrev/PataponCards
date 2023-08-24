@@ -14,7 +14,7 @@ public static class KibaponStats
         stats.hasHaste = true;
         //stats.hasShield = true;
         stats.runes.Add(Runes.Spear);
-        stats.runes.Add(Runes.Spear);
+        //stats.runes.Add(Runes.Spear);
 
         stats.imagePath = "kibapon";
 
