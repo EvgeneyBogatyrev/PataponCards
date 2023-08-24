@@ -56,7 +56,6 @@ public static class TropicalTailwindStats
             }
             else
             {
-                Debug.Log("In tailwind:" + handManager.GetNumberOfCards().ToString());
                 int cardIncrement = System.Math.Min(drawAmount, 7 - handManager.GetNumberOfCards());
                 for (int i = 0; i < cardIncrement; ++i)
                 {

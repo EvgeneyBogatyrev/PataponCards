@@ -67,8 +67,6 @@ public static class AlossonStats
                     }
                 }
 
-                Debug.Log(spearArray.Count);
-
                 bool someoneDied = false;
                 bool arrowsExists = true;
                 while (arrowsExists)
@@ -92,7 +90,6 @@ public static class AlossonStats
                             }
                             spear.exhausted = true;
                         }
-                        Debug.Log(arrowsExists);
                     }
                     yield return new WaitForSeconds(0.1f);
                 }

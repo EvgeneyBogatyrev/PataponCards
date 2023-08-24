@@ -106,9 +106,7 @@ public static class TonKampon_option1Stats
             }
             else
             {
-                //Debug.Log("Here");
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                //Debug.Log(handManager.GetNumberOfOpponentsCards());
                 handManager.DrawCardOpponent(fromDeck:false);
                 //handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
             }

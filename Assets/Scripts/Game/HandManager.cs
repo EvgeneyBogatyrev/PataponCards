@@ -94,7 +94,6 @@ public class HandManager : MonoBehaviour
 
     public void CheckEphemeral()
     {
-        Debug.Log("In ephe");
         CardManager[] cards = new CardManager[hand.Count];
         hand.CopyTo(cards);
         int index = -1;
@@ -103,7 +102,6 @@ public class HandManager : MonoBehaviour
         {
             index += 1;
             int eph = card.GetCardStats().ephemeral;
-            Debug.Log(eph.ToString());
             if (eph == -1)
             {
                 continue;
@@ -118,7 +116,6 @@ public class HandManager : MonoBehaviour
             
         }
         UpdateHandPosition();
-        Debug.Log("Removed=" + removed.ToString());
         ServerDataProcesser.instance.Discard(removed);
     }
 
@@ -200,7 +197,6 @@ public class HandManager : MonoBehaviour
     {
         if (hand.Count >= 7)
         {
-            //Debug.Log("Here");
             return;
         }
         GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
@@ -304,16 +300,12 @@ public class HandManager : MonoBehaviour
     {
         if (!mulliganing)
         {
-            Debug.Log("In update: " + hand.Count.ToString());
             Vector3 center = new Vector3(-1.5f, -3.2f, -0.75f);
             int numberOfCards = hand.Count;
-            Debug.Log("number of crds " + numberOfCards.ToString());
             float startPoint = center.x - ((numberOfCards - 1) * cardSpace / 2f);
             float startRot = 5f * ((float)(numberOfCards - 1) / 2);
-            Debug.Log("start rot " + startRot.ToString());
             for (int i = 0; i < numberOfCards; ++i)
             {
-                Debug.Log("Iter");
                 hand[i].SetPositionInHand(new Vector3(startPoint + cardSpace * i, center.y, center.z - (float)i / 5f));
                 hand[i].SetRotation(startRot);
                 hand[i].SetIndexInHand(i);

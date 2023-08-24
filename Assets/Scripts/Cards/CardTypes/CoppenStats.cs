@@ -19,7 +19,6 @@ public static class CoppenStats
         static IEnumerator CoppenRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             int index = targets[0];
-            Debug.Log(index);
             BoardManager.Slot slot;
             slot = enemySlots[index];
             if (slot.GetFree())

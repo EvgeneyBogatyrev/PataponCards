@@ -13,7 +13,6 @@ public static class ProfessionalWithStandards
 
         static void ProfessionalWIthStandardsDeathrattle(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots, CardManager.CardStats thisStats)
         {
-            //Debug.Log(index);
             if (friendlySlots[0].GetFriendly())
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();

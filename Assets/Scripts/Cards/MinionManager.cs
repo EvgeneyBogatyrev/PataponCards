@@ -785,12 +785,7 @@ public class MinionManager : MonoBehaviour
             connectedSlot.SetFree(true);
             connectedSlot.SetConnectedMinion(null);
         }
-        Destroy(gameObject);
-        if (previewedCard != null)
-        {
-            previewedCard.DestroyCard();
-        }
-
+        
         if (friendly)
         {
             boardManager.lastDeadYou = this.cardType;
@@ -799,6 +794,15 @@ public class MinionManager : MonoBehaviour
         {
             boardManager.lastDeadOpponent = this.cardType;
         }
+
+
+        Destroy(gameObject);
+        if (previewedCard != null)
+        {
+            previewedCard.DestroyCard();
+        }
+
+        
     }
 
     public void ReturnToNormalAfterOptions()

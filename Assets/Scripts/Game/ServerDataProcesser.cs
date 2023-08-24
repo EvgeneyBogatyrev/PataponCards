@@ -63,7 +63,10 @@ public class ServerDataProcesser : MonoBehaviour
 
     public void Discard(int number)
     {
-        StartCoroutine(Post("1", "discard", number.ToString(), ""));
+        if (number > 0)
+        {
+            StartCoroutine(Post("1", "discard", number.ToString(), ""));
+        }
     }
 
     public void CastSpell(CardManager card, List<int> targets)
@@ -427,7 +430,6 @@ public class ServerDataProcesser : MonoBehaviour
 
                 case MessageFromServer.Action.Discard:
                     handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - (int)message.cardIndex);
-                    Debug.Log("Setting to " + (handManager.GetNumberOfOpponentsCards() - (int)message.cardIndex).ToString());
                     break;
             }
 

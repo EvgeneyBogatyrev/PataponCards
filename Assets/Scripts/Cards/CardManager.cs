@@ -391,7 +391,6 @@ public class CardManager : MonoBehaviour
                     else if (cardStats.isSpell)
                     {
                         handManager.RemoveCard(GetIndexIHand());
-                        Debug.Log("In card:" + handManager.GetNumberOfCards().ToString());
                         handManager.SetCanPlayCard(false);
                         ServerDataProcesser.instance.CastSpell(this, spellTargets);
                         StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
