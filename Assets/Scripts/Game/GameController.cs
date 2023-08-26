@@ -28,7 +28,8 @@ public class MessageFromServer
         Exchange,
         CastOnPlayCard,
         Cycle,
-        Discard
+        Discard,
+        SendDeck,
     }
 
     public Action GetAction(string s)
@@ -80,6 +81,10 @@ public class MessageFromServer
         if (s == "discard")
         {
             return Action.Discard;
+        }
+        if (s == "send deck")
+        {
+            return Action.SendDeck;
         }
         return Action.EndTurn;
     }
@@ -578,6 +583,9 @@ public class GameController : MonoBehaviour
             {
                 DeckManager.opponentDeckSize -= 1;
                 couldDraw = true;
+                Debug.Log("Opponent draws");
+                Debug.Log(DeckManager.opponentsDeck[0]);
+                DeckManager.opponentsDeck.RemoveAt(0);
             }
             else 
             {

@@ -59,6 +59,7 @@ public enum CardTypes
     HuntingSpirit,
     Trent,
     PoisonArcher,
+    TraitorBoulder,
     //------------------------
     Motiti_option1,
     Motiti_option2,
@@ -367,6 +368,10 @@ public static class CardGenerator
 
             case CardTypes.PoisonArcher:
                 stats = PoisonArcherStats.GetStats();
+                break;
+
+            case CardTypes.TraitorBoulder:
+                stats = TraitorBoulderStats.GetStats();
                 break;
 
             default:

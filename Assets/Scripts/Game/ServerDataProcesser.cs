@@ -61,6 +61,20 @@ public class ServerDataProcesser : MonoBehaviour
         StartCoroutine(Post("1", "cycle card", cardIndex.ToString(), ""));
     }
 
+    public void SendDeck(List<int> encodedDeck)
+    {
+        string targetString = "";
+        for (int i = 0; i < encodedDeck.Count; ++i)
+        {
+            if (i != 0)
+            {
+                targetString += ",";
+            }
+            targetString += encodedDeck[i].ToString();
+        }
+        StartCoroutine(Post("1", "send deck", "", targetString));
+    }
+
     public void Discard(int number)
     {
         if (number > 0)
@@ -381,6 +395,8 @@ public class ServerDataProcesser : MonoBehaviour
                     
                     if (message.targets[0] != handManager.GetNumberOfOpponentsCards())
                     {
+                        handManager.SetNumberOfOpponentsCards(message.targets[0]);
+                        /*
                         int difference = message.targets[0] - handManager.GetNumberOfOpponentsCards();
                         if (difference > 0)
                         {
@@ -393,6 +409,7 @@ public class ServerDataProcesser : MonoBehaviour
                         {
                             handManager.SetNumberOfOpponentsCards(message.targets[0]);
                         }
+                        */
                     }
                     break;
 
@@ -430,6 +447,10 @@ public class ServerDataProcesser : MonoBehaviour
 
                 case MessageFromServer.Action.Discard:
                     handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - (int)message.cardIndex);
+                    break;
+
+                case MessageFromServer.Action.SendDeck:
+                    DeckManager.ReceiveOpponentsDeck(message.targets);
                     break;
             }
 
@@ -501,7 +522,7 @@ public class ServerDataProcesser : MonoBehaviour
                     }
                     else if (batchIndex == 2)
                     {
-                        if (curHash == boardManager.opponentHash && currentMessage.action != MessageFromServer.Action.EndTurn && currentMessage.action != MessageFromServer.Action.Attack && currentMessage.action != MessageFromServer.Action.Move && currentMessage.action != MessageFromServer.Action.Exchange && currentMessage.action != MessageFromServer.Action.NumberOfCards)
+                        if (curHash == boardManager.opponentHash && currentMessage.action != MessageFromServer.Action.EndTurn && currentMessage.action != MessageFromServer.Action.Attack && currentMessage.action != MessageFromServer.Action.Move && currentMessage.action != MessageFromServer.Action.Exchange && currentMessage.action != MessageFromServer.Action.NumberOfCards && currentMessage.action != MessageFromServer.Action.SendDeck)
                         {
                             currentMessage.cardIndex = (CardTypes)Int32.Parse(s);
                         }

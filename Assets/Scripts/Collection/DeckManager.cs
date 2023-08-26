@@ -1,11 +1,14 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class DeckManager : MonoBehaviour
 {
     public static List<CardTypes> deck;
     public static List<CardTypes> playDeck;
+    public static List<CardTypes> opponentsDeck;
 
     public static List<Runes> runes;
 
@@ -17,6 +20,26 @@ public class DeckManager : MonoBehaviour
     public static void CopyDeck()
     {
         playDeck = deck;
+        playDeck = playDeck.OrderBy(a => Guid.NewGuid()).ToList();
+    }
+
+    public static void ReceiveOpponentsDeck(List<int> encodedDeck)
+    {
+        opponentsDeck = new();
+        foreach (int hash in encodedDeck)
+        {
+            opponentsDeck.Add((CardTypes) hash);
+        }
+    }
+
+    public static List<int> GetEncodedDeck()
+    {
+        List<int> hashDeck = new();
+        foreach (CardTypes type in playDeck)
+        {
+            hashDeck.Add((int) type);
+        }
+        return hashDeck;
     }
 
     public static void ResetOpponentsDeck(int cardNum = 20)
@@ -30,11 +53,26 @@ public class DeckManager : MonoBehaviour
         {
             return CardTypes.Hatapon;
         }
-        int index = Random.Range(0, playDeck.Count);
+        int index = UnityEngine.Random.Range(0, playDeck.Count);
         CardTypes card = playDeck[index];
         if (remove)
         {
             playDeck.RemoveAt(index);
+        }
+        return card;
+    }
+
+    public static CardTypes GetTopCard(bool remove=true)
+    {
+        if (playDeck.Count == 0)
+        {
+            return CardTypes.Hatapon;
+        }
+
+        CardTypes card = playDeck[0];
+        if (remove)
+        {
+            playDeck.RemoveAt(0);
         }
         return card;
     }

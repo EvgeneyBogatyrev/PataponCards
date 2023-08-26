@@ -143,9 +143,11 @@ public class HandManager : MonoBehaviour
         
         foreach (CardManager card in hand)
         {
-            DeckManager.PutCardBack(card.GetCardType());
+            //DeckManager.PutCardBack(card.GetCardType());
             Destroy(card.gameObject);
         }
+
+        DeckManager.CopyDeck();
 
         hand = new List<CardManager>();
 
@@ -166,6 +168,7 @@ public class HandManager : MonoBehaviour
         {
             return;
         }
+        ServerDataProcesser.instance.SendDeck(DeckManager.GetEncodedDeck());
         HandManager.mulliganing = false;
         UpdateHandPosition();
         keepHandButtonObject.SetActive(false);
@@ -200,7 +203,7 @@ public class HandManager : MonoBehaviour
             return;
         }
         GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
-        CardTypes cardType = DeckManager.GetRandomCard(remove:true);
+        CardTypes cardType = DeckManager.GetTopCard(remove:true);
         if (cardType != CardTypes.Hatapon)
         {
             AddCardToHand(cardType, ephemeral:ephemeral);
