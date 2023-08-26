@@ -301,6 +301,7 @@ public class GameController : MonoBehaviour
 
     IEnumerator IenumStartTurn(bool friendly, bool hataponJustDied=false)
     {
+        UpdateDecks();
         if (!friendly)
         {
             CursorController.cursorState = CursorController.CursorStates.EnemyTurn;
@@ -579,12 +580,12 @@ public class GameController : MonoBehaviour
         bool couldDraw;
         if (!friendly)
         {
-            if (DeckManager.opponentDeckSize > 0)
+            if (DeckManager.opponentsDeck.Count > 0)
             {
-                DeckManager.opponentDeckSize -= 1;
+                //DeckManager.opponentDeckSize -= 1;
                 couldDraw = true;
-                Debug.Log("Opponent draws");
-                Debug.Log(DeckManager.opponentsDeck[0]);
+                //Debug.Log("Opponent draws");
+                //Debug.Log(DeckManager.opponentsDeck[0]);
                 DeckManager.opponentsDeck.RemoveAt(0);
             }
             else 
@@ -604,11 +605,19 @@ public class GameController : MonoBehaviour
                 couldDraw = false;
             }
         }
+        //Debug.Log("Me: " + DeckManager.GetDeckSize().ToString());
+        //Debug.Log("Opp: " + DeckManager.opponentsDeck.Count.ToString());
 
         deckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.GetDeckSize().ToString();
-        enemyDeckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.opponentDeckSize.ToString();
+        enemyDeckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.opponentsDeck.Count.ToString();
 
         return couldDraw;
+    }
+
+    public void UpdateDecks()
+    {
+        deckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.GetDeckSize().ToString();
+        enemyDeckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.opponentsDeck.Count.ToString();
     }
 
     // Buttons

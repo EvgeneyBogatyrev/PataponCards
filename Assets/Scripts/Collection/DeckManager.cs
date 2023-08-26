@@ -8,7 +8,7 @@ public class DeckManager : MonoBehaviour
 {
     public static List<CardTypes> deck;
     public static List<CardTypes> playDeck;
-    public static List<CardTypes> opponentsDeck;
+    public static List<CardTypes> opponentsDeck = new();
 
     public static List<Runes> runes;
 
@@ -77,6 +77,52 @@ public class DeckManager : MonoBehaviour
         return card;
     }
 
+    public static bool RemoveCardFromDeck(CardTypes card)
+    {
+        int index = -1;
+        int count = 0;
+        foreach (CardTypes type in playDeck)
+        {
+            if (type == card)
+            {
+                index = count;
+                break;
+            }
+            count++;
+        }
+
+        if (index == -1)
+        {
+            return false;
+        }
+
+        playDeck.RemoveAt(index);
+        return true;
+    }
+
+    public static bool RemoveCardFromOppDeck(CardTypes card)
+    {
+        int index = -1;
+        int count = 0;
+        foreach (CardTypes type in opponentsDeck)
+        {
+            if (type == card)
+            {
+                index = count;
+                break;
+            }
+            count++;
+        }
+
+        if (index == -1)
+        {
+            return false;
+        }
+
+        opponentsDeck.RemoveAt(index);
+        return true;
+    }
+
     public static void PutCardBack(CardTypes card)
     {
         playDeck.Add(card);
@@ -101,7 +147,7 @@ public class DeckManager : MonoBehaviour
 
     public static int GetDeckSize()
     {
-        return deck.Count;
+        return playDeck.Count;
     }
 
     public static int GetCardQty(CardTypes type)
