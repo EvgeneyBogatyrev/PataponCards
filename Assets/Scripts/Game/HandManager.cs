@@ -132,6 +132,20 @@ public class HandManager : MonoBehaviour
         }
     }
 
+    public void MillCard()
+    {
+        CardTypes card = DeckManager.GetTopCard(remove:true);
+        CardManager newCard = GenerateCard(card, drawStartPosition).GetComponent<CardManager>();
+        newCard.SetCardState(CardManager.CardState.toMill);
+    }
+
+    public void MillCardOpp()
+    {
+        CardTypes card = DeckManager.GetTopCardOpp(remove:true);
+        CardManager newCard = GenerateCard(card, drawStartPosition).GetComponent<CardManager>();
+        newCard.SetCardState(CardManager.CardState.toMill);
+    }
+
 
     public void Mulligan()
     {

@@ -61,6 +61,7 @@ public enum CardTypes
     PoisonArcher,
     TraitorBoulder,
     BirdRider,
+    Ponteo,
     //------------------------
     Motiti_option1,
     Motiti_option2,
@@ -377,6 +378,10 @@ public static class CardGenerator
 
             case CardTypes.BirdRider:
                 stats = BirdRiderStats.GetStats();
+                break;
+
+            case CardTypes.Ponteo:
+                stats = PonteoStats.GetStats();
                 break;
 
             default:

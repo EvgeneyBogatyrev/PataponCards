@@ -167,6 +167,8 @@ public class CardManager : MonoBehaviour
         opponentPlayed,
         opponentHolding,
         hilightOver,
+        Mill,
+        toMill
     }
 
     public GameObject powerObject;
@@ -210,6 +212,7 @@ public class CardManager : MonoBehaviour
 
     private Vector3 drawEndPosition;
     private Vector3 playEndPosition;
+    private Vector3 MillPosition;
 
     public List<Arrow> arrowList = null;
     private Arrow curArrow = null;
@@ -223,6 +226,7 @@ public class CardManager : MonoBehaviour
             handManager = GameObject.Find("Hand").GetComponent<HandManager>();
             drawEndPosition = GameObject.Find("DrawnCardDisplay").transform.position;
             playEndPosition = GameObject.Find("PlayedCardPosition").transform.position;
+            MillPosition = GameObject.Find("MillPosition").transform.position;
         }
     }
 
@@ -280,6 +284,42 @@ public class CardManager : MonoBehaviour
                 if ((transform.position - drawEndPosition).magnitude < dst)
                 {
                     cardState = CardState.inHand;
+                }
+                
+                break;
+
+            case CardState.toMill:
+                
+                float _spd, _dst;
+                if (HandManager.mulliganing)
+                {
+                    _spd = 20f;
+                    _dst = 0.25f;   
+                }
+                else
+                {
+                    _spd = 5f;
+                    _dst = 0.05f; 
+                }
+
+                transform.localScale = new Vector3(1.35f * normalScale, 1.35f * normalScale, 1f);
+                transform.position = Vector3.Lerp(transform.position, drawEndPosition, Time.deltaTime * _spd);
+
+                if ((transform.position - drawEndPosition).magnitude < _dst)
+                {
+                    cardState = CardState.Mill;
+                }
+                
+                break;
+
+            case CardState.Mill:
+                
+                //transform.localScale = new Vector3(1.35f * normalScale, 1.35f * normalScale, 1f);
+                transform.position = Vector3.Lerp(transform.position, MillPosition, Time.deltaTime * 10f);
+
+                if ((transform.position - MillPosition).magnitude < 0.05f)
+                {
+                    DestroyCard();
                 }
                 
                 break;

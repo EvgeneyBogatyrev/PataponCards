@@ -77,6 +77,21 @@ public class DeckManager : MonoBehaviour
         return card;
     }
 
+    public static CardTypes GetTopCardOpp(bool remove=true)
+    {
+        if (opponentsDeck.Count == 0)
+        {
+            return CardTypes.Hatapon;
+        }
+
+        CardTypes card = opponentsDeck[0];
+        if (remove)
+        {
+            opponentsDeck.RemoveAt(0);
+        }
+        return card;
+    }
+
     public static bool RemoveCardFromDeck(CardTypes card)
     {
         int index = -1;
@@ -145,10 +160,15 @@ public class DeckManager : MonoBehaviour
     }
 
 
-    public static int GetDeckSize()
+    public static int GetPlayDeckSize()
     {
         return playDeck.Count;
     }
+    public static int GetDeckSize()
+    {
+        return deck.Count;
+    }
+    
 
     public static int GetCardQty(CardTypes type)
     {

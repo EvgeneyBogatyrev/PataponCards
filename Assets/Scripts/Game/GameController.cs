@@ -596,7 +596,7 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            if (DeckManager.GetDeckSize() > 0)
+            if (DeckManager.GetPlayDeckSize() > 0)
             {
                 couldDraw = true;
             }
@@ -608,7 +608,7 @@ public class GameController : MonoBehaviour
         //Debug.Log("Me: " + DeckManager.GetDeckSize().ToString());
         //Debug.Log("Opp: " + DeckManager.opponentsDeck.Count.ToString());
 
-        deckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.GetDeckSize().ToString();
+        deckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.GetPlayDeckSize().ToString();
         enemyDeckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.opponentsDeck.Count.ToString();
 
         return couldDraw;
@@ -616,7 +616,7 @@ public class GameController : MonoBehaviour
 
     public void UpdateDecks()
     {
-        deckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.GetDeckSize().ToString();
+        deckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.GetPlayDeckSize().ToString();
         enemyDeckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.opponentsDeck.Count.ToString();
     }
 
