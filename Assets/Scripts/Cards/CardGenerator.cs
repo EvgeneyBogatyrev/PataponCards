@@ -6,62 +6,81 @@ using System.Linq;
 
 public enum CardTypes
 {
-    Tatepon,
-    Yaripon,
     Yumipon,
-    Kibapon,
-    Dekapon,
-    DivineProtection,
-    Fang,
-    DeadlyDispute,
-    Mahopon,
-    Pyokorider,
     Megapon,
-    FuckingIdiot,
-    Buzzcrave,
-    Guardira,
-    Kacheek,
-    Motiti,
-    Robopon,
-    Myamsar,
-    Toripon,
-    TargetDummy,
-    Bowmunk,
-    Grenburr,
-    Alldemonium,
-    CronoRiggers,
-    TakeThatShield,
-    ProfessionalWIthStandards,
-    SpeedBoost,
-    MyamsarHero,
-    Destrobo,
-    Buruch,
-    TonKampon,
-    Coppen,
-    Alosson,
-    PyokoriderHero,
-    Baloon,
-    NovaNova,
-    BanTatepon,
-    TurnToStone,
-    Moribu,
-    Wondabarappa,
+    Mahopon,
     Jamsch,
     DoomShroom,
-    Venomist,
     Rantan,
-    DeadlyShot,
-    GongTheHawkeye,
-    Moforumo,
-    SparringPartner,
-    Cannasault,
-    TropicalTailwind,
-    HuntingSpirit,
-    Trent,
+    Coppen,
+    NovaNova,
+    Alosson,
     PoisonArcher,
-    TraitorBoulder,
+    DonTheYumipon,
+    PanThePakapon,
+    MedenKidnapped,
+    TropicalTailwind,
+    NaturalEnemy,
+    HealingScepter,
+    Armory,
+    Scout,
+    Desperado,
+    BackToHideout,
+    Tatepon,
+    Dekapon,
+    Robopon,
+    Moforumo,
+    Destrobo,
+    Guardira,
+    TargetDummy,
+    DivineProtection,
+    Buruch,
+    Kuwagattan,
+    Trent,
+    Alldemonium,
+    CronoRiggers,
+    TonKampon,
+    TakeThatShield,
+    Bowmunk,
+    BanTatepon,
+    MyamsarHero,
+    EarthShatteringBlow,
+    SparringPartner,
+    Yaripon,
+    Kibapon,
+    DeadlyDispute,
+    Buzzcrave,
+    Toripon,
+    Myamsar,
+    Baloon,
+    Pyokorider,
+    PyokoriderHero,
     BirdRider,
     Ponteo,
+    HuntingSpirit,
+    DeepImpact,
+    GanTheYaripon,
+    Wooyari,
+    Wep,
+    OfferingToKami,
+    // ------------------------------
+    Fang,
+    FuckingIdiot,
+    Kacheek,
+    Motiti,
+    ProfessionalWIthStandards,
+    YariponBushwacker,
+    TraitorBoulder,
+    DeadlyShot,
+    GongTheHawkeye,
+    Cannasault,
+
+    SpeedBoost,
+    TurnToStone,
+    Moribu,
+    Grenburr,
+    Wondabarappa,
+    Venomist,
     //------------------------
     Motiti_option1,
     Motiti_option2,
@@ -77,7 +96,12 @@ public enum CardTypes
     Concede,
     StoneFree,
     Mushroom,
-    TrentOnFire
+    TrentOnFire,
+    Armory_option1,
+    Armory_option2,
+    TokenTatepon,
+    Horserider
+
 };
 
 //Rewrite this entire piece of sheesh
@@ -384,11 +408,96 @@ public static class CardGenerator
                 stats = PonteoStats.GetStats();
                 break;
 
+            case CardTypes.DonTheYumipon:
+                stats = DonTheYumiponStats.GetStats();
+                break;
+
+            case CardTypes.PanThePakapon:
+                stats = PanThePakaponStats.GetStats();
+                break;
+
+            case CardTypes.MedenKidnapped:
+                stats = MedenKidnappedStats.GetStats();
+                break;
+
+            case CardTypes.NaturalEnemy:
+                stats = NaturalEnemyStats.GetStats();
+                break;
+
+            case CardTypes.HealingScepter:
+                stats = HealingScepterStats.GetStats();
+                break;
+
+            case CardTypes.Armory:
+                stats = ArmoryStats.GetStats();
+                break;
+
+            case CardTypes.Armory_option1:
+                stats = Armory_option1Stats.GetStats();
+                break;
+
+            case CardTypes.Armory_option2:
+                stats = Armory_option2Stats.GetStats();
+                break;
+
+            case CardTypes.Scout:
+                stats = ScoutStats.GetStats();
+                break;
+
+            case CardTypes.Kuwagattan:
+                stats = KuwagattanStats.GetStats();
+                break;
+
+            case CardTypes.Desperado:
+                stats = DesperadoStats.GetStats();
+                break;
+
+            case CardTypes.BackToHideout:
+                stats = BackToHideoutStats.GetStats();
+                break;
+
+            case CardTypes.EarthShatteringBlow:
+                stats = EarthShatteringBlowStats.GetStats();
+                break;
+
+            case CardTypes.TokenTatepon:
+                stats = TokenTateponStats.GetStats();
+                break;
+
+            case CardTypes.DeepImpact:
+                stats = DeepImpactStats.GetStats();
+                break;
+
+            case CardTypes.Horserider:
+                stats = HorseriderStats.GetStats();
+                break;
+
+            case CardTypes.GanTheYaripon:
+                stats = GanTheYariponStats.GetStats();
+                break;
+
+            case CardTypes.YariponBushwacker:
+                stats = YariponBushwackerStats.GetStats();
+                break;
+
+            case CardTypes.Wooyari:
+                stats = WooyariStats.GetStats();
+                break;
+            
+            case CardTypes.Wep:
+                stats = WebStats.GetStats();
+                break;
+
+            case CardTypes.OfferingToKami:
+                stats = OfferingToKamiStats.GetStats();
+                break;
+
+
             default:
                 break;
         }
 
-        if (stats.onPlayEvent == null) stats.onPlayEvent = EmptyMethod_;
+        //if (stats.onPlayEvent == null) stats.onPlayEvent = EmptyMethod_;
         //if (stats.endTurnEvent == null) stats.endTurnEvent = EmptyMethod;
         //if (stats.startTurnEvent == null) stats.startTurnEvent = EmptyMethod;
         if (stats.spell == null) stats.spell = EmptySpell;

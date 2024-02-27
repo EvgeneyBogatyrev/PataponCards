@@ -9,13 +9,15 @@ public class CannasaultStats : MonoBehaviour
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 4;
-        stats.description = "Haste.\nWhen this unit attacks, it gains \"End turn and start turn effects can't trigger\" until the start of your next turn.";
+        stats.description = "Haste.\nOn attack: Gain \"End turn and start turn effects can't trigger\" until the start of your next turn.";
         stats.name = "Cannasault";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Spear);
 
         static IEnumerator OnAttack(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
             int thisIndex = targets[0];
             BoardManager.Slot thisSlot;
             if (thisIndex > 0)
@@ -32,8 +34,18 @@ public class CannasaultStats : MonoBehaviour
             MinionManager minion = thisSlot.GetConnectedMinion();
             if (minion != null)
             { 
+                float angle = 0f;
+                while (angle <= 360f)
+                {
+                    minion.transform.eulerAngles = new Vector3(0f, 0f, angle);
+                    angle += 10f;
+                    yield return new WaitForSeconds(0.02f);
+                }
+                
                 minion.GetCardStats().blockEffects = true;
+                minion.onAttackActionProgress = false;
             }
+            gameController.actionIsHappening = false;
             yield return null;
         }
 

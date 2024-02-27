@@ -134,6 +134,9 @@ public class BoardManager : MonoBehaviour
     public CardTypes lastDeadYou = CardTypes.Hatapon;
     public CardTypes lastDeadOpponent = CardTypes.Hatapon;
 
+    public List<CardTypes> playedCards = new();
+    public List<CardTypes> playedCardsOpponent = new();
+
     void Start()
     {
         InitStaticObjects();
@@ -167,13 +170,26 @@ public class BoardManager : MonoBehaviour
         normalColorStatic = normalColor;
     }
 
-    public void PlayCard(CardManager card, Vector3 position, Slot slot = null, bool destroy=true, bool record=true)
+    public MinionManager PlayCard(CardManager card, Vector3 position, Slot slot = null, bool destroy=true, bool record=true, bool fromHand=true)
     {
         GameObject newMinion = Instantiate(minionPrefab, position, Quaternion.identity);
         newMinion.transform.rotation = Quaternion.Euler(minionRotation, 0f, 0f);
         newMinion.GetComponent<MinionManager>().CustomizeMinion(card, slot);
 
-        if (card.GetCardStats().hasBattlecry)
+        if (record)
+        {
+            if (!slot.GetFriendly())
+            {
+                playedCardsOpponent.Add(card.GetCardType());
+            }
+            else
+            {
+                playedCards.Add(card.GetCardType());
+            }
+        }
+        
+
+        if (fromHand && card.GetCardStats().hasBattlecry)
         {
             int index;
             if (!slot.GetFriendly())
@@ -185,8 +201,37 @@ public class BoardManager : MonoBehaviour
                 index = slot.GetIndex() + 1;
             }
 
-            card.GetCardStats().onPlayEvent(index, enemySlots, friendlySlots);
+            Debug.Log("Battlecry");
+
+            StartCoroutine(card.GetCardStats().onPlayEvent(index, enemySlots, friendlySlots));
         }
+
+        List<Slot> _slots;
+        if (slot.GetFriendly())
+        {
+            _slots = friendlySlots;
+        }
+        else
+        {
+            _slots = enemySlots;
+        }
+
+        foreach (Slot _slot in _slots)
+        {
+            MinionManager _minion = _slot.GetConnectedMinion();
+            if (_minion != null)
+            {
+                if (_minion.GetCardStats().lifelinkMeTo == slot.GetIndex())
+                {
+                    _minion.GetCardStats().lifelinkMeTo = -1;
+                    _minion.GetCardStats().lifelinkedTo = new()
+                    {
+                        newMinion.GetComponent<MinionManager>()
+                    };
+                }
+            }
+        }
+        
 
         if (destroy)
         {
@@ -198,29 +243,70 @@ public class BoardManager : MonoBehaviour
         {
             ServerDataProcesser.instance.PlayCard(card, slot);
         }
+
+        return newMinion.GetComponent<MinionManager>();
     }
 
-    public void CycleCard(CardManager card, bool destroy=true, bool record=true)
-    {   
-        if (destroy)
-        {
-            card.DestroyCard();
-        }
-
+    public IEnumerator CycleCard(CardManager card, bool destroy=true, bool record=true)
+    {
         if (record)
         {
             ServerDataProcesser.instance.CycleCard(card);
         }
+
+        card.SetCardState(CardManager.CardState.Mill);
+        
+        
+        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+        int idx = 0;
+        foreach (Slot slot in friendlySlots)
+        {
+            MinionManager minion = slot.GetConnectedMinion();
+            if (minion != null)
+            {
+                if (minion.GetCardStats().onCycleOtherEvent != null)
+                {
+                    do {
+                        yield return new WaitForSeconds(0.1f);
+                    } while (gameController.actionIsHappening);
+                    StartCoroutine(minion.GetCardStats().onCycleOtherEvent(idx, enemySlots, friendlySlots));
+                    do {
+                        yield return new WaitForSeconds(0.1f);
+                    } while (gameController.actionIsHappening);
+                }
+            }
+            idx += 1;
+        }
+
+        if (destroy)
+        {
+            card.DestroyCard();
+        }
+        
+        yield return null;
     }
 
-    public void PlayCard(CardManager card, Slot slot = null, bool destroy=true, bool record=true)
+    public MinionManager PlayCard(CardManager card, Slot slot = null, bool destroy=true, bool record=true, bool fromHand=true)
     {     
         GameObject newMinion = Instantiate(minionPrefab, card.transform.position, Quaternion.identity);
         newMinion.transform.rotation = Quaternion.Euler(minionRotation, 0f, 0f);
         newMinion.GetComponent<MinionManager>().CustomizeMinion(card, slot);
 
-        if (card.GetCardStats().hasBattlecry)
+        if (record)
         {
+            if (!slot.GetFriendly())
+            {
+                playedCardsOpponent.Add(card.GetCardType());
+            }
+            else
+            {
+                playedCards.Add(card.GetCardType());
+            }
+        }
+
+        if (fromHand && card.GetCardStats().hasBattlecry)
+        {
+            Debug.Log("Battlecry (me)");
             int index;
             if (!slot.GetFriendly())
             {
@@ -230,8 +316,34 @@ public class BoardManager : MonoBehaviour
             {
                 index = slot.GetIndex() + 1;
             }
+            Debug.Log(card.GetCardStats().onPlayEvent);
+            StartCoroutine(card.GetCardStats().onPlayEvent(index, enemySlots, friendlySlots));
+        }
 
-            card.GetCardStats().onPlayEvent(index, enemySlots, friendlySlots);
+        List<Slot> _slots;
+        if (slot.GetFriendly())
+        {
+            _slots = friendlySlots;
+        }
+        else
+        {
+            _slots = enemySlots;
+        }
+
+        foreach (Slot _slot in _slots)
+        {
+            MinionManager _minion = _slot.GetConnectedMinion();
+            if (_minion != null)
+            {
+                if (_minion.GetCardStats().lifelinkMeTo == slot.GetIndex())
+                {
+                    _minion.GetCardStats().lifelinkMeTo = -1;
+                    _minion.GetCardStats().lifelinkedTo = new()
+                    {
+                        newMinion.GetComponent<MinionManager>()
+                    };
+                }
+            }
         }
 
         if (destroy)
@@ -244,6 +356,7 @@ public class BoardManager : MonoBehaviour
         {
             ServerDataProcesser.instance.PlayCard(card, slot);
         }
+        return newMinion.GetComponent<MinionManager>();
     }
 
     

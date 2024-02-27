@@ -8,16 +8,14 @@ public static class KacheekStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 3;
-        stats.description = "-1: Add Fang to your hand.\n-1: Give your creatures +1 power.";
+        stats.power = 4;
+        stats.description = "Pacifism. Abilities:\n-1: Add Fang to your hand.\n-2: Give your units +1 power.";
         stats.name = "Kacheek";
 
         stats.isStatic = true;
         stats.connectedCards = new List<CardTypes>();
         stats.connectedCards.Add(CardTypes.GiveFang);
         stats.connectedCards.Add(CardTypes.Nutrition);
-        stats.runes.Add(Runes.Spear);
-        stats.runes.Add(Runes.Spear);
 
         stats.imagePath = "kacheek";
         return stats;
@@ -32,7 +30,7 @@ public static class GiveFangStats
 
         const int giveFangHealthCost = 1;
 
-        stats.description = "Add Fang to your hand.";
+        stats.description = "-1: Add Fang to your hand.";
         stats.name = "Bone Weapon";
 
         stats.isSpell = true;
@@ -79,9 +77,9 @@ public static class NutritionStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         const int nutritionHeal = 1;
-        const int nutritionHealthCost = 1;
+        const int nutritionHealthCost = 2;
 
-        stats.description = "Restore " + nutritionHeal.ToString() + " power to all allies.";
+        stats.description = "-2: Give your units +" + nutritionHeal.ToString() + " power.";
         stats.name = "Nutrition";
 
         stats.isSpell = true;

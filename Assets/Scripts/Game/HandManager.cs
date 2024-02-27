@@ -16,10 +16,11 @@ public class HandManager : MonoBehaviour
     private List<CardManager> hand = new List<CardManager>();
     private List<CardManager> opponentHand = new List<CardManager>();
     private bool canPlayCard = false;
+    private bool canCycleCard = false;
     private BoardManager boardManager;
 
     private int hataponHealth = 20;
-    private int hataponHealthDecrease = 5;
+    private int hataponHealthDecrease = 0;
     private Vector3 drawStartPosition;
 
     private bool CardIsDrawing = false;
@@ -117,6 +118,29 @@ public class HandManager : MonoBehaviour
         }
         UpdateHandPosition();
         ServerDataProcesser.instance.Discard(removed);
+    }
+
+    public void DiscardHand(bool friendly=true)
+    {
+        if (friendly)
+        {
+            CardManager[] cards = new CardManager[hand.Count];
+            hand.CopyTo(cards);
+            int index = -1;
+            int removed = 0;
+            foreach (CardManager card in cards)
+            {
+                index += 1;
+                hand[index - removed].DestroyCard();
+                RemoveCard(index - removed);
+                removed += 1;            
+            }
+            UpdateHandPosition();
+        }
+        else
+        {
+            SetNumberOfOpponentsCards(0);
+        }
     }
 
     public static void DestroyDisplayedCards()
@@ -371,9 +395,20 @@ public class HandManager : MonoBehaviour
     {
         return canPlayCard;
     }
+
+     public bool CanCycleCard()
+    {
+        return canCycleCard;
+    }
+
     public void SetCanPlayCard(bool _can)
     {
         canPlayCard = _can;
+    }
+
+    public void SetCanCycleCard(bool _can)
+    {
+        canCycleCard = _can;
     }
 
     public void StartRoundActions(int cardIncrement = 3)

@@ -64,12 +64,23 @@ public class ServerDataProcesser : MonoBehaviour
     public void SendDeck(List<int> encodedDeck)
     {
         string targetString = "";
-        for (int i = 0; i < encodedDeck.Count; ++i)
+        List<Runes> runes = DeckManager.runes;
+        bool start = true;
+        foreach (Runes rune in runes)
         {
-            if (i != 0)
+            if (start)
+            {
+                start = false;
+            }
+            else
             {
                 targetString += ",";
             }
+            targetString += ((int) rune).ToString();
+        }
+        for (int i = 0; i < encodedDeck.Count; ++i)
+        {
+            targetString += ",";
             targetString += encodedDeck[i].ToString();
         }
         StartCoroutine(Post("1", "send deck", "", targetString));
@@ -236,6 +247,7 @@ public class ServerDataProcesser : MonoBehaviour
                     }
                     newCard = handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1, returnCard:true);
                     CardTypes type = message.cardIndex;
+                    boardManager.playedCardsOpponent.Add(type);
                     int target = message.targets[0];
                     BoardManager.Slot targetSlot;
                     if (target > 0)
@@ -322,6 +334,7 @@ public class ServerDataProcesser : MonoBehaviour
                     }
 
                     spellType = message.cardIndex;
+                    boardManager.playedCardsOpponent.Add(spellType);
                     newCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                     
                     if (newCard.GetCardStats().damageToHost == -1 && newCard.GetCardType() != CardTypes.Concede)
@@ -359,6 +372,7 @@ public class ServerDataProcesser : MonoBehaviour
                     handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
                     boardManager.battlecryTrigger = true;
                     spellType = message.cardIndex;
+                    boardManager.playedCardsOpponent.Add(spellType);
                     newCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                     if (newCard.GetCardStats().dummyTarget)
                     {
@@ -428,21 +442,41 @@ public class ServerDataProcesser : MonoBehaviour
                     newCard = handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1, returnCard:true);
                     CardTypes cycleType = message.cardIndex;
                     
-                    handManager.DrawCardOpponent();
-
                     newCard = handManager.GenerateCard(cycleType, newCard).GetComponent<CardManager>();
                     newCard.SetName("Cycling: " + newCard.GetName());
                     newCard.SetNameSize(3);
                     HandManager.DestroyDisplayedCards();
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);
+                    newCard.destroyTimer = HandManager.cardDestroyTimer;
+                    newCard.transform.position = new Vector3(0f, 10f, 0f);
 
                     if (newCard.GetCardStats().onCycleEvent != null)
                     {
                         StartCoroutine(newCard.GetCardStats().onCycleEvent(boardManager.friendlySlots, boardManager.enemySlots));
                     }
 
-                    newCard.transform.position = new Vector3(0f, 10f, 0f);
-                    newCard.destroyTimer = HandManager.cardDestroyTimer;
+                    //GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+                    int idx = 0;
+                    foreach (BoardManager.Slot slot in boardManager.enemySlots)
+                    {
+                        MinionManager minion = slot.GetConnectedMinion();
+                        if (minion != null)
+                        {
+                            if (minion.GetCardStats().onCycleOtherEvent != null)
+                            {
+                                do {
+                                    yield return new WaitForSeconds(0.1f);
+                                } while (gameController.actionIsHappening);
+                                StartCoroutine(minion.GetCardStats().onCycleOtherEvent(idx, boardManager.friendlySlots, boardManager.enemySlots));
+                                do {
+                                    yield return new WaitForSeconds(0.1f);
+                                } while (gameController.actionIsHappening);
+                            }
+                        }
+                        idx += 1;
+                    }
+
+                    handManager.DrawCardOpponent();
                     break;
 
                 case MessageFromServer.Action.Discard:

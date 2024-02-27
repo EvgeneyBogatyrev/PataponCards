@@ -9,15 +9,15 @@ public static class AlossonStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         const int alossonDamage = 1;
-        const int alossonMax = 14;
-        stats.power = 4;
-        stats.description = "Deal " + alossonDamage.ToString() + " damage to all characters. If at least of them dies, repeat the process (Up to " + alossonMax.ToString() + " times).";
+        const int alossonMax = 4;
+        stats.power = 2;
+        stats.description = "On play: Deal " + alossonDamage.ToString() + " damage to all units. If at least of them dies, repeat the process (Up to " + alossonMax.ToString() + " times).";
         stats.name = "Alosson";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
-        stats.runes.Add(Runes.Bow);
+        //stats.runes.Add(Runes.Bow);
 
-        stats.legendary = true;
+        //stats.legendary = true;
 
         stats.hasOnPlay = true;
 

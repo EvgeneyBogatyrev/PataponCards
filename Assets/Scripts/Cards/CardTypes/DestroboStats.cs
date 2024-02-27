@@ -9,7 +9,7 @@ public static class DestroboStats
         CardManager.CardStats stats = new CardManager.CardStats();
         const int destroboDamage = 1;
         stats.power = 2;
-        stats.description = "On play: Choose a character. If it's an artifact, destroy it. Otherwise, deal " + destroboDamage.ToString() +  " damage to it.";
+        stats.description = "On play: Choose a unit. If it's not a Hatapon and has no Devotion, destroy it. Otherwise, deal " + destroboDamage.ToString() +  " damage to it.";
         stats.name = "Destrobo";
         stats.runes.Add(Runes.Shield);
 
@@ -17,6 +17,8 @@ public static class DestroboStats
 
         static IEnumerator DestroboRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
             BoardManager.Slot selectedSlot;
             int target = targets[0];
             if (target < 0)
@@ -33,7 +35,8 @@ public static class DestroboStats
 
             MinionManager selectedMinion = selectedSlot.GetConnectedMinion();
             
-            if (selectedMinion.GetCardStats().isStatic || (!selectedMinion.GetCardStats().canAttack && selectedMinion.GetCardType() != CardTypes.Hatapon))
+            if (selectedMinion.GetCardType() != CardTypes.Hatapon && selectedMinion.GetDevotion(Runes.Bow) == 0 
+                && selectedMinion.GetDevotion(Runes.Spear) == 0 && selectedMinion.GetDevotion(Runes.Shield) == 0)
             {
                 selectedMinion.DestroyMinion();
             }
@@ -41,15 +44,14 @@ public static class DestroboStats
             {
                 selectedMinion.ReceiveDamage(destroboDamage);
             }
+            gameController.actionIsHappening = false;
             yield return null;
         }
 
         stats.spell = DestroboRealization;
         stats.numberOfTargets = 1;
 
-
-        stats.imagePath = "destrobo";
-
+        stats.imagePath = "destrobo";        
         return stats;
     }
 }

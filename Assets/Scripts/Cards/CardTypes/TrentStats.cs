@@ -51,7 +51,7 @@ public static class TrentFireStats
 
         const int selfDamage = 1;
         stats.power = 10;
-        stats.description = "At the end of your turn deal " + selfDamage.ToString() + " to itself.";
+        stats.description = "End of turn: Deal " + selfDamage.ToString() + " to itself.";
         stats.name = "Treant on Fire";
         
         static IEnumerator endTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

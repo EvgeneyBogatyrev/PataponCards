@@ -11,11 +11,12 @@ public class DeckManager : MonoBehaviour
     public static List<CardTypes> opponentsDeck = new();
 
     public static List<Runes> runes;
+    public static List<Runes> opponentRunes = new();
 
-    public const int minDeckSize = 20;
+    public const int minDeckSize = 24;
     public const int maxCopy = 3;
 
-    public static int opponentDeckSize = 20;
+    public static int opponentDeckSize = 24;
 
     public static void CopyDeck()
     {
@@ -25,11 +26,45 @@ public class DeckManager : MonoBehaviour
 
     public static void ReceiveOpponentsDeck(List<int> encodedDeck)
     {
+        int counter = 0;
         opponentsDeck = new();
+        opponentRunes = new();
         foreach (int hash in encodedDeck)
         {
-            opponentsDeck.Add((CardTypes) hash);
+            if (counter < 3)
+            {
+                opponentRunes.Add((Runes)((int)hash));
+            }
+            else
+            {
+                opponentsDeck.Add((CardTypes) hash);
+            }
+            counter++;
         }
+
+    }
+
+    public static int GetDeckDevotion(Runes runeType, bool opponent=false)
+    {
+        List<Runes> curDeck;
+        if (opponent)
+        {
+            curDeck = opponentRunes;
+        }
+        else
+        {
+            curDeck = runes;
+        }
+
+        int count = 0;
+        foreach (Runes rune in curDeck)
+        {
+            if (rune == runeType)
+            {
+                count++;
+            }
+        }
+        return count;
     }
 
     public static List<int> GetEncodedDeck()
@@ -75,6 +110,18 @@ public class DeckManager : MonoBehaviour
             playDeck.RemoveAt(0);
         }
         return card;
+    }
+
+    public static void PutCardOnTop(CardTypes card, bool opp=false)
+    {
+        if (!opp)
+        {
+            playDeck.Insert(0, card);
+        }
+        else
+        {
+            opponentsDeck.Insert(0, card);
+        }
     }
 
     public static CardTypes GetTopCardOpp(bool remove=true)

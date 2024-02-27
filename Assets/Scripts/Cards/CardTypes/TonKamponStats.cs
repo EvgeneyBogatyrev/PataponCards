@@ -8,12 +8,13 @@ public static class TonKamponStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 6;
-        stats.description = "-1: Add Crono Riggers to your hand.\n-2: Add Alldemonium to your hand.";
+        stats.power = 9;
+        stats.description = "Pacifism. Abilities:\n-3: Add Oharan to your hand.\n-3: Add Alldemonium to your hand.";
         stats.name = "Ton Kampon";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
-        stats.runes.Add(Runes.Shield);
+
+        stats.descriptionSize = 4;
 
 
         stats.isStatic = true;
@@ -33,9 +34,9 @@ public static class TonKampon_option2Stats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int TonKamponAlldemoniumHealthCost = 2;
+        const int TonKamponAlldemoniumHealthCost = 3;
                 
-        stats.description = "-2: Add Alldemonium to your hand.";
+        stats.description = "-3: Add Alldemonium to your hand.";
         stats.name = "Demon Weapon";
         stats.nameSize = 4;
 
@@ -80,9 +81,9 @@ public static class TonKampon_option1Stats
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-        const int TonKamponCronoRiggersHealthCost = 1;
+        const int TonKamponCronoRiggersHealthCost = 3;
                 
-        stats.description = "-1: Add Crono Riggers to your hand.";
+        stats.description = "-3: Add Oharan to your hand.";
         stats.name = "Divine Weapon";
 
         stats.isSpell = true;
@@ -115,7 +116,7 @@ public static class TonKampon_option1Stats
         stats.spell = TonKampon_option1Realization;
         stats.numberOfTargets = 0;
         stats.damageToHost = TonKamponCronoRiggersHealthCost;
-        stats.imagePath = "crono_riggers";
+        stats.imagePath = "oharan";
 
         return stats;
     }
@@ -127,47 +128,63 @@ public static class CronoRiggersStats
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-        const int cronoRiggersDamageReduction = 1;
-        stats.description = "Target creature under your controll gains +" + cronoRiggersDamageReduction.ToString() + " armor.";
-        stats.name = "Crono Riggers";
+        const int cronoRiggersDamageReduction = 2;
+        const int threshold = 8;
+        stats.description = "All units under your controll gain +" + cronoRiggersDamageReduction.ToString() + " power. Then, your strongest non-Hatapon unit fights the strongest enemy unit.";
+        stats.name = "Oharan";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
-        stats.runes.Add(Runes.Shield);
+        
+        //stats.descriptionSize = 3;
 
         stats.isSpell = true;
 
-        static bool CronoRiggersCheckTarget(int _target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-        {
-            return true;
-        }
-
         static IEnumerator CronoRiggersRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
-            BoardManager.Slot targetSlot;
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
 
-            int target = targets[0];
-            if (target > 0)
+
+            MinionManager attackMinion = null;
+            foreach (BoardManager.Slot slot in friendlySlots)
             {
-                targetSlot = friendlySlots[target - 1];
+                MinionManager minion = slot.GetConnectedMinion();
+                if (minion != null)
+                {
+                    minion.Heal(cronoRiggersDamageReduction);
+                    if ((attackMinion == null || minion.GetPower() >= attackMinion.GetPower()) && minion.GetCardType() != CardTypes.Hatapon && minion.GetCardStats().canDealDamage)
+                    {
+                        attackMinion = minion;
+                    }
+                }
             }
-            else
+
+            MinionManager attackEnemyMinion = null;
+            foreach (BoardManager.Slot slot in enemySlots)
             {
-                targetSlot = enemySlots[-target - 1];
+                MinionManager minion = slot.GetConnectedMinion();
+                if (minion != null)
+                {
+                    //minion.Heal(cronoRiggersDamageReduction);
+                    if (attackEnemyMinion == null || minion.GetPower() >= attackEnemyMinion.GetPower())
+                    {
+                        attackEnemyMinion = minion;
+                    }
+                }
             }
 
-            MinionManager targetMinion = targetSlot.GetConnectedMinion();
+            if (attackEnemyMinion != null && attackMinion != null)
+            {
+                attackMinion.Attack(attackEnemyMinion);
+            }
 
-            CardManager.CardStats stats = targetMinion.GetCardStats();
-            stats.armor += cronoRiggersDamageReduction;
-            targetMinion.SetCardStats(stats);
+            gameController.actionIsHappening = false;
             yield return null;
         }
 
         stats.spell = CronoRiggersRealization;
-        stats.checkSpellTarget = CronoRiggersCheckTarget;
-        stats.numberOfTargets = 1;
         
-        stats.imagePath = "crono_riggers";
+        stats.imagePath = "oharan";
 
         return stats;
     }
@@ -179,24 +196,26 @@ public static class AlldemoniumStats
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-        const int alldemonuimGain = 4;
-        const int alldemonuimDamage = 2;
-        stats.description = "Target non-Hatapon character under your controll gains " + alldemonuimGain.ToString() + " power, but recieves " + alldemonuimDamage.ToString() + " at the end of your turn.";
+        const int alldemonuimGain = 5;
+        const int alldemonuimDamage = 1;
+        stats.description = "Target non-Hatapon character under your controll gains +" + alldemonuimGain.ToString() + " power, but recieves " + alldemonuimDamage.ToString() + " damage at the end of your turn.";
         stats.name = "Alldemonium Shield";
         stats.nameSize = 3;
-        stats.runes.Add(Runes.Shield);
-        stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
 
         stats.isSpell = true;
 
         static IEnumerator AlldemoniumEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
             MinionManager connectedMinion = friendlySlots[index].GetConnectedMinion();
             if (connectedMinion != null)
             {
                 connectedMinion.ReceiveDamage(alldemonuimDamage);
             }
+            //GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = false;
             yield return null;
         }
 

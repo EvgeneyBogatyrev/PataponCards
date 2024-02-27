@@ -20,11 +20,18 @@ public class MinionManager : MonoBehaviour
     public GameObject normalBackObject;
     public GameObject outlineBackObject;
     public GameObject poisonObject;
+    public GameObject shieldObject;
+    public GameObject lifelinkObject;
+    public GameObject lifelinkObjectHatapon;
+    public GameObject hexproofObject;
+    public GameObject endTurnObject;
+    public GameObject onAttackObject;
     public float normalScale;
     public float selectedScale;
     public Renderer myRenderer;
 
     private bool attacking = false;
+    public bool onAttackActionProgress = false;
     private Vector3 attackPosition;
 
     private Vector3 desiredPosition;
@@ -89,6 +96,10 @@ public class MinionManager : MonoBehaviour
         //outlineBackObject.SetActive(false);
         normalBackObject.SetActive(false);
         poisonObject.SetActive(false);
+        shieldObject.SetActive(false);
+        lifelinkObject.SetActive(false);
+        hexproofObject.SetActive(false);
+        endTurnObject.SetActive(false);
 
         startTime = Time.time;
     }
@@ -129,6 +140,21 @@ public class MinionManager : MonoBehaviour
         cardStats.poisoned = poison;
     }
 
+    public bool LifelinkRedirectDamage(int damage)
+    {
+        bool found = false;
+        foreach (MinionManager minion in cardStats.lifelinkedTo)
+        {
+            if (minion != null && minion.GetFriendly() == friendly)
+            {
+                //Debug.Log(minion.GetSlot().GetIndex());
+                minion.ReceiveDamage(damage);
+                found = true;
+            }
+        }
+        return found;
+    }
+
 
     public void SetCardType(CardTypes type)
     {
@@ -161,11 +187,21 @@ public class MinionManager : MonoBehaviour
         return power;
     }
 
-    public void TakePower(int damage)
+    public bool DealDamageToThis(int damage)
+    {
+        // Just to make it easier to understand
+        return TakePower(damage);
+    }
+
+    public bool TakePower(int damage)
     {
         if (damage <= 0)
         {
-            return;
+            return false;
+        }
+        if (LifelinkRedirectDamage(damage))
+        {
+            return false;
         }
         damageObject.SetActive(true);
         damageObject.GetComponent<TextMeshPro>().text = "-" + damage.ToString();
@@ -187,6 +223,11 @@ public class MinionManager : MonoBehaviour
                     StartCoroutine(cardStats.onDamageEvent(idx, boardManager.friendlySlots, boardManager.enemySlots));
                 }
             }
+            return false;
+        }
+        else
+        {
+            return true;
         }
 
 
@@ -225,21 +266,25 @@ public class MinionManager : MonoBehaviour
         yield return null;
     }
 
-    public void ReceiveDamage(int damage)
+    public bool ReceiveDamage(int damage)
     {
         if (cardType == CardTypes.Hatapon)
         {
             if (IsHataponSafe(friendly))
             {
-                return;
+                return false;
             }
+        }
+        if (LifelinkRedirectDamage(damage))
+        {
+            return false;
         }
         int actualDamage = damage - cardStats.armor;
         if (actualDamage < 0) 
         {
             actualDamage = 0;
         }
-        TakePower(actualDamage);
+        return TakePower(actualDamage);
     }
 
     public void Heal(int amount)
@@ -529,7 +574,7 @@ public class MinionManager : MonoBehaviour
             }
 
         }
-        else
+        else if (!onAttackActionProgress)
         {
             transform.position += (desiredPosition - transform.position) * Time.deltaTime * 6f;
             if (GetCardStats().flying)
@@ -543,6 +588,87 @@ public class MinionManager : MonoBehaviour
         {
             transform.localScale = new Vector3(transform.localScale.x + (desiredScale - transform.localScale.x) * Time.deltaTime * 15f, transform.localScale.y + (desiredScale - transform.localScale.y) * Time.deltaTime * 15f, 1f);
         }
+
+        if (cardStats.hasShield != shieldObject.activeSelf)
+        {
+            shieldObject.SetActive(cardStats.hasShield);
+        }
+
+        if (cardStats.hexproof != hexproofObject.activeSelf)
+        {
+            hexproofObject.SetActive(cardStats.hexproof);
+        }
+
+        if (cardStats.endTurnEvent != null && !endTurnObject.activeSelf)
+        {
+            endTurnObject.SetActive(true);
+        }
+        if (cardStats.endTurnEvent == null && endTurnObject.activeSelf)
+        {
+            endTurnObject.SetActive(false);
+        }
+
+        if (cardStats.onAttackEvent != null && !onAttackObject.activeSelf)
+        {
+            onAttackObject.SetActive(true);
+        }
+        if (cardStats.onAttackEvent == null && onAttackObject.activeSelf)
+        {
+            onAttackObject.SetActive(false);
+        }
+
+        bool hataponLifelinkActive = false;
+        if (cardType == CardTypes.Hatapon)
+        {
+            List<BoardManager.Slot> slotList;
+            if (GetSlot().GetFriendly())
+            {
+                slotList = boardManager.friendlySlots;
+            }
+            else
+            {
+                slotList = boardManager.enemySlots;
+            }
+            foreach (BoardManager.Slot _slot in slotList)
+            {
+                MinionManager minion = _slot.GetConnectedMinion();
+                if (minion != null && minion.GetCardStats().hasShield)
+                {
+                    hataponLifelinkActive = true;
+                }
+            }
+        }
+
+        if (hataponLifelinkActive != lifelinkObjectHatapon.activeSelf)
+        {
+            lifelinkObjectHatapon.SetActive(hataponLifelinkActive);
+        }
+
+
+        /*
+        bool lifelinkActive = false;
+        foreach (MinionManager potentialLifelinker in cardStats.lifelinkedTo)
+        {
+            if (potentialLifelinker != null && potentialLifelinker.GetFriendly() == friendly)
+            {
+                lifelinkActive = true;
+
+                float yPositionDiff = 0.3f * Mathf.Sin(1.5f * (startTime - Time.time));
+
+                Vector3 from = new Vector3(this.transform.position.x, this.transform.position.y + yPositionDiff, this.transform.position.z);
+                Vector3 to = new Vector3(potentialLifelinker.transform.position.x, potentialLifelinker.transform.position.y + yPositionDiff, potentialLifelinker.transform.position.z);
+
+                lifelinkObject.GetComponent<LineRenderer>().SetPosition(0, from);
+                lifelinkObject.GetComponent<LineRenderer>().SetPosition(1, to);
+            }
+        }
+
+        if (lifelinkActive != shieldObject.activeSelf)
+        {
+            shieldObject.SetActive(lifelinkActive);
+            lifelinkObject.SetActive(lifelinkActive);
+        }
+        */
     }
 
     public void Move(BoardManager.Slot slotToMove, bool record=false)
@@ -591,6 +717,13 @@ public class MinionManager : MonoBehaviour
             int enemyIndex = -enemy.GetIndex() - 1;
             ServerDataProcesser.instance.Attack(myIndex, enemyIndex);
         }
+        attackPosition = enemy.GetSlot().GetPosition();
+        attackPosition = new Vector3(attackPosition.x, attackPosition.y, attackPosition.z - 1f);
+        StartCoroutine(DoAttack(enemy));
+    }
+
+    private IEnumerator DoAttack(MinionManager enemy)
+    {
         if (GetCardStats().onAttackEvent != null)
         {
             int myIndex, enemyIndex;
@@ -614,16 +747,17 @@ public class MinionManager : MonoBehaviour
                 myIndex,
                 enemyIndex
             };
+            onAttackActionProgress = true;
             StartCoroutine(GetCardStats().onAttackEvent(targets, enemies, friends));
         }
-        attacking = true;
-        attackPosition = enemy.GetSlot().GetPosition();
-        attackPosition = new Vector3(attackPosition.x, attackPosition.y, attackPosition.z - 1f);
-        StartCoroutine(DoAttack(enemy));
-    }
 
-    private IEnumerator DoAttack(MinionManager enemy)
-    {
+        while (onAttackActionProgress)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        attacking = true;
+
 
         while (attacking)
         {
@@ -782,6 +916,7 @@ public class MinionManager : MonoBehaviour
             connectedSlot.SetConnectedMinion(null);
         }
         
+        /*
         if (friendly)
         {
             boardManager.lastDeadYou = this.cardType;
@@ -790,6 +925,7 @@ public class MinionManager : MonoBehaviour
         {
             boardManager.lastDeadOpponent = this.cardType;
         }
+        */
 
 
         Destroy(gameObject);
@@ -842,6 +978,30 @@ public class MinionManager : MonoBehaviour
     public BoardManager.Slot GetSlot()
     {
         return connectedSlot;
+    }
+
+    public void SetSlot(BoardManager.Slot _slot)
+    {
+        connectedSlot.SetConnectedMinion(null);
+        connectedSlot.SetFree(true);
+        connectedSlot = _slot;
+        connectedSlot.SetConnectedMinion(this);
+    }
+
+    public int GetDevotion(Runes kind)
+    {
+        int count = 0;
+        foreach (Runes rune in cardStats.runes)
+        {
+            Debug.Log(rune);
+            Debug.Log(kind);
+            if (rune == kind)
+            {
+                count += 1;
+                Debug.Log("==");
+            }
+        }
+        return count;
     }
 
     private IEnumerator CardPreview()

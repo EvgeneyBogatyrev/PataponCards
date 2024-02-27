@@ -8,20 +8,32 @@ public static class RoboponStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 3;
-        stats.description = "At the end and the start of your turn gain +1 power.";
+        stats.power = 1;
+        stats.description = "End of turn: Gain +X power, where X is your Devotion to Shield.";
         stats.name = "Robopon";
         stats.runes.Add(Runes.Shield);
 
 
         static IEnumerator RoboponEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
-            friendlySlots[index].GetConnectedMinion().Heal(1);
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
+
+            if (friendlySlots[1].GetFriendly())
+            {
+                friendlySlots[index].GetConnectedMinion().Heal(DeckManager.GetDeckDevotion(Runes.Shield, false));
+            }
+            else
+            {
+                friendlySlots[index].GetConnectedMinion().Heal(DeckManager.GetDeckDevotion(Runes.Shield, true));
+            }
+
+            
+            gameController.actionIsHappening = false;
             yield return null;
         }
 
         stats.endTurnEvent = RoboponEndTurn;
-        stats.startTurnEvent = RoboponEndTurn;
 
         stats.imagePath = "robopon";
         return stats;

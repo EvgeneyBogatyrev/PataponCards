@@ -10,13 +10,54 @@ public static class GuardiraStats
 
         const int guardiraPower = 1;
 
-        stats.power = 6;
-        stats.description = "Greatshield.\nAlways deals " + guardiraPower.ToString() + " damage regardless of its power.";
+        stats.power = 7;
+        stats.description = "Lifelink.\nAlways deals " + guardiraPower.ToString() + " damage regardless of its power.";
         stats.name = "Guardira";
-        stats.hasGreatshield = true;
         stats.fixedPower = guardiraPower;
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
+        stats.hasShield = true;
+        //stats.hasOnPlay = true;
+
+        static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        {
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
+
+            BoardManager.Slot selectedSlot;
+            int target = targets[1];
+            if (target < 0)
+            {
+                target *= -1;
+                target -= 1;
+                selectedSlot = enemySlots[target];
+            }
+            else
+            {
+                target -= 1;
+                selectedSlot = friendlySlots[target];
+            }
+
+            MinionManager selectedMinion = selectedSlot.GetConnectedMinion();
+            selectedMinion.GetCardStats().lifelinkMeTo = targets[0];
+            Debug.Log("dummy target " + targets[0].ToString());
+            gameController.actionIsHappening = false;
+            yield return null;
+        }
+
+        static bool CheckTarget(int target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        {
+            if (target < 0)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        //stats.spell = Realization;
+        //stats.checkSpellTarget = CheckTarget;
+        //stats.numberOfTargets = 2;
+        //stats.dummyTarget = true;
 
         stats.imagePath = "Guardira";
         return stats;

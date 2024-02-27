@@ -8,88 +8,72 @@ public static class MyamsarHeroStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 3;
-        stats.description = "On play: Enemy creature in front of it loses all abilities, can't attack and move until this is alive.";
-        stats.name = "Myamsar, hero";
+        stats.description = "On attack: Destroy the weakest enemy unit if its power is less than Myamsar's power.";
+        stats.name = "Myamsar";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
-        stats.runes.Add(Runes.Shield);
+        //stats.runes.Add(Runes.Shield);
 
-        stats.hasBattlecry = true;
-        stats.hasDeathrattle = true;
-        stats.descriptionSize = 3;
+        //stats.descriptionSize = 3;
 
-        stats.legendary = true;
-
-        static void MyamsarBattlecry(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator OnAttack(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
-            int targetMinionIndex = -1 * index;
-
-            CardManager.CardStats newStats = new CardManager.CardStats();
-            newStats.canAttack = false;
-            newStats.limitedVision = true;
-
-            MinionManager targetMinion;
-            if (targetMinionIndex > 0) 
+            int thisIndex = targets[0];
+            BoardManager.Slot thisSlot;
+            if (thisIndex > 0)
             {
-                targetMinion = friendlySlots[targetMinionIndex - 1].GetConnectedMinion();
+                thisIndex -= 1;
+                thisSlot = friendlySlots[thisIndex];
             }
             else
             {
-                targetMinion = enemySlots[-1 * targetMinionIndex - 1].GetConnectedMinion();
-            }
-            if (targetMinion == null)
-            {
-                return;
-            }
-            if (targetMinion.GetCardType() == CardTypes.Hatapon)
-            {
-                return;
-            }
-            newStats.savedStats = targetMinion.GetCardStats();
-
-            targetMinion.SetCardStats(newStats);
-            CardManager.CardStats thisStats;
-            if (index > 0)
-            {
-                thisStats = friendlySlots[index - 1].GetConnectedMinion().GetCardStats();
-            }
-            else
-            {
-                thisStats = enemySlots[-index - 1].GetConnectedMinion().GetCardStats();
+                thisIndex = -1 * thisIndex - 1;
+                thisSlot = friendlySlots[thisIndex];
             }
 
-            thisStats.connectedMinions.Add(targetMinion);
-
-            if (index > 0)
+            MinionManager minion = thisSlot.GetConnectedMinion();
+            if (minion != null)
             {
-                friendlySlots[index - 1].GetConnectedMinion().SetCardStats(thisStats);
-            }
-            else
-            {
-                enemySlots[-index - 1].GetConnectedMinion().SetCardStats(thisStats);
-            }
+                GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+                gameController.actionIsHappening = true;
 
-        }
+                AnimationManager animationManager = GameObject.Find("GameController").GetComponent<AnimationManager>();
+                List<SpearManager> spearArray = new List<SpearManager>();
 
-
-        static void MyamsarDeathrattle(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots, CardManager.CardStats thisStats)
-        {
-            foreach (MinionManager connectedMinion in thisStats.connectedMinions)
-            {
+                MinionManager weakestEnemy = null;
                 foreach (BoardManager.Slot slot in enemySlots)
                 {
-                    MinionManager slotMinion = slot.GetConnectedMinion();
-                    if (slotMinion != null && slotMinion == connectedMinion)
+                    if (!slot.GetFree())
                     {
-                            connectedMinion.SetCardStats(connectedMinion.GetCardStats().savedStats);
+                        MinionManager enemy = slot.GetConnectedMinion();
+                        if (weakestEnemy == null || enemy.GetPower() < weakestEnemy.GetPower())
+                        {
+                            weakestEnemy = enemy;
+                        }
                     }
                 }
+
+                if (weakestEnemy.GetPower() < minion.GetPower())
+                {
+                    while ((minion.transform.position - weakestEnemy.transform.position).magnitude > 0.1f)
+                    {
+                        //Debug.Log((minion.transform.position - weakestEnemy.transform.position).magnitude);
+                        minion.transform.position = Vector3.Lerp(minion.transform.position, weakestEnemy.transform.position, 0.3f);
+                        yield return new WaitForSeconds(0.03f);
+                    }
+
+                    weakestEnemy.DestroyMinion();
+                }
+
+               
+                minion.onAttackActionProgress = false;
+                gameController.actionIsHappening = false;
             }
+            
+            yield return null;
         }
 
-
-        stats.onPlayEvent = MyamsarBattlecry;
-        stats.onDeathEvent = MyamsarDeathrattle; 
+        stats.onAttackEvent = OnAttack;
 
         stats.imagePath = "myamsar";
 

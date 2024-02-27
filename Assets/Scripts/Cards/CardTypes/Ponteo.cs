@@ -9,7 +9,7 @@ public static class PonteoStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "On play: Discard cards from the top of your deck until you find a unit with Haste. Draw a card.";
+        stats.description = "On play: Reveal the top of your library until you find a unit with Haste. Draw it and discard the rest.";
         stats.name = "Ponteo";
 
         stats.runes.Add(Runes.Spear);

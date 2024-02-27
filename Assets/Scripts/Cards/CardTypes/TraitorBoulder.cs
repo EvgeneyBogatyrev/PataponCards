@@ -9,38 +9,76 @@ public static class TraitorBoulderStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 2;
-        stats.description = "Pacifism. Greatshield.\nOn death: Your opponent summons Infinite Boulder.";
-        stats.name = "Infinite Boulder";
+        stats.description = "Pacifism.\nOn play: Your opponent takes control of it.";
+        stats.name = "The Rock";
 
         stats.canAttack = false;
         stats.canDealDamage = false;
         stats.limitedVision = true;
-        stats.hasGreatshield = true;
+        //stats.hasGreatshield = true;
 
-        stats.nameSize = 4;
-        stats.hasDeathrattle = true;
+        //stats.nameSize = 4;
        
 
-        static void onDeath(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots, CardManager.CardStats thisStats)
+        static IEnumerator OnPlay(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
-            foreach (BoardManager.Slot slot in enemySlots)
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
+            MinionManager thisMinion;
+            BoardManager.Slot enemySlot;
+            List<BoardManager.Slot> _enemySlots;
+            Debug.Log(index);
+            if (index > 0)
             {
-                if (slot.GetFree())
-                {
-                    HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
-                    BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
+                thisMinion = friendlySlots[index - 1].GetConnectedMinion();
+                _enemySlots = enemySlots;
+                enemySlot = enemySlots[index - 1];
+            }
+            else
+            {
+                thisMinion = enemySlots[-index - 1].GetConnectedMinion();
+                _enemySlots = friendlySlots;
+                enemySlot = friendlySlots[-index - 1];
+            }
 
-                    CardManager iceWallCard = handManager.GenerateCard(CardTypes.TraitorBoulder, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
-                    boardManager.PlayCard(iceWallCard, new Vector3(0f, 0f, 0f), slot, destroy:false, record:false);
-                    
-                    iceWallCard.DestroyCard();
-                    break;
+
+            if (enemySlot.GetFree())
+            {
+                HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
+                BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
+
+                CardManager iceWallCard = handManager.GenerateCard(CardTypes.TraitorBoulder, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                boardManager.PlayCard(iceWallCard, new Vector3(0f, 0f, 0f), enemySlot, destroy:false, record:false, fromHand:false);
+                
+                iceWallCard.DestroyCard();       
+            } 
+            else 
+            {
+
+                foreach (BoardManager.Slot slot in _enemySlots)
+                {
+                    if (slot.GetFree())
+                    {
+                        HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
+                        BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
+
+                        CardManager iceWallCard = handManager.GenerateCard(CardTypes.TraitorBoulder, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                        boardManager.PlayCard(iceWallCard, new Vector3(0f, 0f, 0f), slot, destroy:false, record:false, fromHand:false);
+                        
+                        iceWallCard.DestroyCard();   
+                        break;
+                    }
                 }
             }
-            //yield return null;                            
+
+            thisMinion.GetSlot().SetFree(true);
+            thisMinion.DestroySelf();
+            gameController.actionIsHappening = false;
+            yield return null;                            
         }
 
-        stats.onDeathEvent = onDeath;
+        stats.hasBattlecry = true;
+        stats.onPlayEvent = OnPlay;
 
         stats.imagePath = "traiter_bolder";
 

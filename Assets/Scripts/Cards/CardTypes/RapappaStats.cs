@@ -9,13 +9,15 @@ public static class MyamsarStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 2;
-        stats.description = "At the end of your turn summon a copy of this minion with 1 less power.";
+        stats.description = "End of turn: Summon a copy of this unit with 1 less power.";
         stats.name = "Rapappa";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
         static IEnumerator MyamsarEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
             MinionManager thisOne = friendlySlots[index].GetConnectedMinion();
 
             BoardManager.Slot targetSlot = null;
@@ -30,7 +32,7 @@ public static class MyamsarStats
 
             if (targetSlot == null)
             {
-                yield return null;
+                //yield return null;
             }
             else
             {
@@ -41,12 +43,15 @@ public static class MyamsarStats
                 int newPower = thisOne.GetPower() - 1;
                 if (newPower > 0)
                 {
-                    CardManager newCard = handManager.GenerateCard(CardTypes.Myamsar, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                    CardManager newCard = handManager.GenerateCard(thisOne.GetCardType(), new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                     newCard.SetPower(newPower);
-                    boardManager.PlayCard(newCard, new Vector3(0f, 0f, 0f), targetSlot, destroy: true, record: false);
+
+                    boardManager.PlayCard(newCard, new Vector3(0f, 0f, 0f), targetSlot, destroy: true, record: false, fromHand:false);
                 }
-            yield return null;
             }
+            //GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = false;
+            yield return null;
         }
         stats.endTurnEvent = MyamsarEndTurn;
 

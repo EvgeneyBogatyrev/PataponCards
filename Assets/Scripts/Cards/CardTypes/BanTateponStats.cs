@@ -9,8 +9,8 @@ public static class BanTateponStats
         CardManager.CardStats stats = new CardManager.CardStats();
         const int banTateponThreshold = 8;
         const int banTateponPower = 2;
-        stats.power = 5;
-        stats.description = "On play: If you control a minion with power " + banTateponThreshold.ToString() + " or greater, fill your board with Tatepons with " + banTateponPower +  " power, Greatshield and Haste, and draw a card.";
+        stats.power = 4;
+        stats.description = "On play: If you control a non-Hatapon unit with power " + banTateponThreshold.ToString() + " or greater, fill your board with Tatepons with " + banTateponPower +  " power and Haste, and draw a card.";
         stats.name = "Ban Tatepon";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
@@ -18,8 +18,8 @@ public static class BanTateponStats
         
         stats.hasOnPlay = true;
 
-        stats.legendary = true;
         stats.descriptionSize = 3;
+        //stats.nameSize = 4;
 
         static IEnumerator BanTateponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -42,9 +42,8 @@ public static class BanTateponStats
                 HandManager _handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
                 BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
-                CardManager tateponCard = _handManager.GenerateCard(CardTypes.Tatepon, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                CardManager tateponCard = _handManager.GenerateCard(CardTypes.TokenTatepon, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                 tateponCard.SetPower(banTateponPower);
-                tateponCard.GetCardStats().hasGreatshield = true;
                 tateponCard.GetCardStats().hasHaste = true;
 
                 foreach (BoardManager.Slot slot in friendlySlots)
@@ -65,7 +64,7 @@ public static class BanTateponStats
                 else
                 {
                     HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                    handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
+                    handManager.DrawCardOpponent();
                 }
 
             }

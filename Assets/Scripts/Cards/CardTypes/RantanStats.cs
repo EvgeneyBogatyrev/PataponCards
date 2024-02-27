@@ -14,7 +14,7 @@ public class RantanStats : MonoBehaviour
         stats.runes.Add(Runes.Bow);
 
         stats.power = 2;
-        stats.description = "On play: Restore " + heal.ToString() + " health to your Hatapon.\nCycling.\nWhenever you cycle this card, restore " + lesserHeal.ToString() + " health to your Hatapon.";
+        stats.description = "Cycling.\nOn play: Restore " + heal.ToString() + " health to your Hatapon.\nWhenever you cycle this card, restore " + lesserHeal.ToString() + " health to your Hatapon.";
         stats.name = "Rantan";
         
         stats.hasOnPlay = true;

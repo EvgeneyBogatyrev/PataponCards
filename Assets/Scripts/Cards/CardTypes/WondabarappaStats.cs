@@ -73,7 +73,7 @@ public static class WondabarappaStats
         stats.numberOfTargets = 1;
 
         stats.hasBattlecry = true;
-        stats.onPlayEvent = Battlecry;
+        //stats.onPlayEvent = Battlecry;
 
         stats.legendary = true;
 

@@ -9,7 +9,7 @@ public static class MegaponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 2;
-        stats.description = "On play: Deal 2 damage split between one or two creatures.\nCycling.";
+        stats.description = "On play: Deal 2 damage split between one or two units. Draw a card for each unit destroyed this way.";
         stats.name = "Megapon";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
@@ -17,15 +17,6 @@ public static class MegaponStats
 
         //stats.hasBattlecry = true;
         stats.hasOnPlay = true;
-
-        static void MegaponBattlecry(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-        {
-            if (index > 0)
-            {
-                HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.DrawCard();
-            }
-        }
 
         static IEnumerator MegaponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -41,7 +32,20 @@ public static class MegaponStats
                     selectedSlot = friendlySlots[targets[0] - 1];
                 }
 
-                selectedSlot.GetConnectedMinion().ReceiveDamage(2);
+                bool dead = selectedSlot.GetConnectedMinion().ReceiveDamage(2);
+                if (dead)
+                {
+                    if (friendlySlots[1].GetFriendly())
+                    {
+                        HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
+                        handManager.DrawCard();
+                    }
+                    else
+                    {
+                        HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
+                        handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
+                    }
+                }
             }
             else
             {
@@ -57,7 +61,20 @@ public static class MegaponStats
                         selectedSlot = friendlySlots[target - 1];
                     }
 
-                    selectedSlot.GetConnectedMinion().ReceiveDamage(1);
+                    bool dead = selectedSlot.GetConnectedMinion().ReceiveDamage(1);
+                    if (dead)
+                    {
+                        if (friendlySlots[1].GetFriendly())
+                        {
+                            HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
+                            handManager.DrawCard();
+                        }
+                        else
+                        {
+                            HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
+                            handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() + 1);
+                        }
+                    }
                 }
             }
             yield return null;
@@ -65,7 +82,7 @@ public static class MegaponStats
 
         stats.spell = MegaponRealization;
         stats.numberOfTargets = 2;
-        stats.cycling = true;
+        //stats.cycling = true;
 
         //stats.onPlayEvent = MegaponBattlecry;
 

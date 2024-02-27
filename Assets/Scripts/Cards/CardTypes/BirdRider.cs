@@ -9,7 +9,7 @@ public static class BirdRiderStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 2;
-        stats.description = "On play: Summon all copies of this minion from your deck.";
+        stats.description = "On play: Summon all other copies of Bird Rider from your deck.";
         stats.name = "Bird Rider";
 
         stats.runes.Add(Runes.Spear);

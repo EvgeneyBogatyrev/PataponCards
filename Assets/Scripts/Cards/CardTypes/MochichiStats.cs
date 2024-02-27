@@ -9,7 +9,7 @@ public static class MochichiStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "-0: Add +2 power.\n-0: Transform into Angry Motiti with Haste.";
+        stats.description = "Pacifism. Abilities:\n-0: Give Motiti +1 power.\n-0: Transform into Angry Motiti with Haste.";
         stats.name = "Motiti";
 
         stats.isStatic = true;
@@ -29,7 +29,7 @@ public static class MochiAccumStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         const int motiti1HealthCost = 0;
-        const int motiti1Heal = 2;
+        const int motiti1Heal = 1;
 
         stats.description = "-0: Give Motiti +" + motiti1Heal.ToString() + " power.";
         stats.name = "Accumulate power";
@@ -70,7 +70,7 @@ public static class MochiciCounterStats
         const int motiti2HealthCost = 0;
 
         stats.description = "-0: Transform Motiti into Angry Motiti with Haste.";
-        stats.name = "Motiti Counteratack";
+        stats.name = "Motiti Counterattack";
 
         stats.nameSize = 4;
         stats.isSpell = true;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System;
 
 public enum Runes
 {
@@ -14,11 +15,13 @@ public enum Runes
 
 public class CardManager : MonoBehaviour
 {
+    static bool DEBUG = false;
     public delegate IEnumerator EndTurnEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate IEnumerator Spell(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate IEnumerator OnCycleEvent(List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate IEnumerator OnAttackEvent(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
-    public delegate void OnPlayEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
+    public delegate IEnumerator OnPlayEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
+    public delegate IEnumerator OnCycleOtherEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate void OnDeathEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null, CardStats thisStats = null);
     public delegate bool CheckSpellTarget(int target = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate bool CheckSpellTargets(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
@@ -47,6 +50,7 @@ public class CardManager : MonoBehaviour
         public EndTurnEvent onDamageEvent = null;
         public OnDeathEvent onDeathEvent = null;
         public OnCycleEvent onCycleEvent = null;
+        public OnCycleOtherEvent onCycleOtherEvent = null;
         public OnAttackEvent onAttackEvent = null;
         public bool hasBattlecry = false;
         public bool isStatic = false;
@@ -70,10 +74,31 @@ public class CardManager : MonoBehaviour
         public bool cycling = false;
         public bool blockEffects = false;
         public int ephemeral = -1;
+        public bool giveCyclingToCardsInHand = false;
+        public int cardsDrawnByThis = 0;
+        public List<MinionManager> lifelinkedTo = new();
+        public int lifelinkMeTo = -1;
 
         public Sprite GetSprite()
         {
             return Resources.Load<Sprite>("Images/" + this.imagePath);
+        }
+
+        public bool HaveCycling()
+        {
+            BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
+            foreach (BoardManager.Slot slot in boardManager.friendlySlots)
+            {
+                MinionManager minion = slot.GetConnectedMinion();
+                if (minion != null)
+                {
+                    if (minion.GetCardStats().giveCyclingToCardsInHand)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return cycling;
         }
 
         public CardStats CopyStats()
@@ -104,10 +129,15 @@ public class CardManager : MonoBehaviour
                 hexproof = this.hexproof,
                 cycling = this.cycling,
                 onCycleEvent = this.onCycleEvent,
+                onCycleOtherEvent = this.onCycleOtherEvent,
                 onAttackEvent = this.onAttackEvent,
                 blockEffects = this.blockEffects,
                 ephemeral = this.ephemeral,
                 onDamageEvent = this.onDamageEvent,
+                giveCyclingToCardsInHand = this.giveCyclingToCardsInHand,
+                cardsDrawnByThis = this.cardsDrawnByThis,
+                lifelinkedTo = this.lifelinkedTo,
+                lifelinkMeTo = this.lifelinkMeTo,
 
                 connectedCards = new List<CardTypes>()
             };
@@ -115,6 +145,12 @@ public class CardManager : MonoBehaviour
             {
                 newStats.connectedCards.Add(ct);
             }
+
+            foreach (MinionManager mn in this.lifelinkedTo)
+            {
+                newStats.lifelinkedTo.Add(mn);
+            }
+
 
             //newStats.connectedCards = new List<CardTypes>(this.connectedCards);
 
@@ -168,7 +204,8 @@ public class CardManager : MonoBehaviour
         opponentHolding,
         hilightOver,
         Mill,
-        toMill
+        toMill,
+        ShuffleIntoDeck
     }
 
     public GameObject powerObject;
@@ -242,9 +279,9 @@ public class CardManager : MonoBehaviour
                     transform.position = Vector3.Lerp(transform.position, new Vector3(positionInHand.x, selectedY, selectedZ), 30f * Time.deltaTime);
                     transform.rotation = Quaternion.Euler(0, 0, 0);
 
-                    if (Input.GetMouseButtonDown(0) && handManager.CanPlayCard())
+                    if (Input.GetMouseButtonDown(0) && (handManager.CanPlayCard() || (handManager.CanCycleCard() && cardStats.HaveCycling())))
                     {
-                        if (cardStats.isSpell && cardStats.numberOfTargets > 0)
+                        if (cardStats.isSpell && cardStats.numberOfTargets > 0 && !cardStats.HaveCycling())
                         {
                             cardState = CardState.selectingTargets;
                         }
@@ -324,6 +361,16 @@ public class CardManager : MonoBehaviour
                 
                 break;
 
+            case CardState.ShuffleIntoDeck:
+                transform.position = Vector3.Lerp(transform.position, MillPosition + new Vector3(2f, 0f, 0f), Time.deltaTime * 10f);
+
+                if ((transform.position - MillPosition).magnitude < 0.05f)
+                {
+                    DestroyCard();
+                }
+                
+                break;
+
             case CardState.selected:
                 BoardManager.Slot closestSlot = null;
                 if (!cardStats.isSpell)
@@ -347,18 +394,7 @@ public class CardManager : MonoBehaviour
                         }
                     }
 
-                    boardManager.cyclingSlot.Highlight(false);
-                    if (cardStats.cycling)
-                    {
-                        float distanceToCycle = Mathf.Abs(transform.position.x - boardManager.cyclingSlot.GetPosition().x);
-                        if (minDistance == -1f || minDistance > distanceToCycle)
-                        {
-                            closestSlot = boardManager.cyclingSlot;
-                        }
-                    }
-                    
-
-                    if (closestSlot.GetFree())
+                    if (closestSlot.GetFree() && handManager.CanPlayCard())
                     {
                         closestSlot.Highlight(true);
                     }
@@ -366,10 +402,39 @@ public class CardManager : MonoBehaviour
                     {
                         closestSlot = null;
                     }
+
+                    boardManager.cyclingSlot.Highlight(false);
+                    if (cardStats.HaveCycling() && handManager.CanCycleCard())
+                    {
+                        float distanceToCycle = Mathf.Abs(transform.position.x - boardManager.cyclingSlot.GetPosition().x);
+                        if (minDistance == -1f || minDistance > distanceToCycle)
+                        {
+                            closestSlot = boardManager.cyclingSlot;
+                            closestSlot.Highlight(true);
+                        }
+                    }
+                    
+
+                    
                 }
                 else if (cardStats.isSpell)
                 {
-                    if (cardStats.numberOfTargets == 0)
+                    if (transform.position.y > 2f && cardStats.numberOfTargets > 0)
+                    {
+                        if (handManager.CanPlayCard())
+                            cardState = CardState.selectingTargets;
+                        else
+                            ReturnToHand();
+                    }
+
+                    boardManager.cyclingSlot.Highlight(false);
+                    if (cardStats.HaveCycling() && handManager.CanCycleCard())
+                    {
+                        closestSlot = boardManager.cyclingSlot;
+                        closestSlot.Highlight(true);
+                    }
+
+                    if (cardStats.numberOfTargets == 0 || cardStats.HaveCycling())
                     {
                         Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                         Quaternion toRotation = Quaternion.Euler((mousePosition.y - transform.position.y) * 25, -(mousePosition.x - transform.position.x) * 25, 0);
@@ -402,20 +467,25 @@ public class CardManager : MonoBehaviour
                         {
                             ReturnToHand();
                         }
-                        else if (closestSlot == boardManager.cyclingSlot)
+                        else if (closestSlot == boardManager.cyclingSlot && handManager.CanCycleCard())
                         {
                             handManager.RemoveCard(GetIndexIHand());
-                            boardManager.CycleCard(this);
-                            handManager.DrawCard();
-                            handManager.SetCanPlayCard(false);
+                            //handManager.SetCanPlayCard(false);
+                            handManager.SetCanCycleCard(false);
                             CursorController.cursorState = CursorController.CursorStates.Free;
                             boardManager.cyclingSlot.Highlight(false);
+                            foreach (BoardManager.Slot slot in boardManager.friendlySlots)
+                            {
+                                slot.Highlight(false);
+                            }
                             if (cardStats.onCycleEvent != null)
                             {
                                 StartCoroutine(cardStats.onCycleEvent(boardManager.enemySlots, boardManager.friendlySlots));
                             }
+                            StartCoroutine(boardManager.CycleCard(this));
+                            handManager.DrawCard();
                         }
-                        else
+                        else if (handManager.CanPlayCard())
                         {
                             boardManager.PlayCard(this, closestSlot);
                             handManager.RemoveCard(GetIndexIHand());
@@ -425,22 +495,53 @@ public class CardManager : MonoBehaviour
                             {
                                 slot.Highlight(false);
                             }
+                            boardManager.cyclingSlot.Highlight(false);
                             CursorController.cursorState = CursorController.CursorStates.Free;
                         }
                     }
                     else if (cardStats.isSpell)
                     {
-                        handManager.RemoveCard(GetIndexIHand());
-                        handManager.SetCanPlayCard(false);
-                        ServerDataProcesser.instance.CastSpell(this, spellTargets);
-                        StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
-                        spellTargets = new List<int>();
-                        foreach (BoardManager.Slot slot in boardManager.friendlySlots)
+                        float distanceToCycle = Mathf.Abs(transform.position.x - boardManager.cyclingSlot.GetPosition().x);
+                        if (cardStats.HaveCycling() && distanceToCycle < 2f)
                         {
-                            slot.Highlight(false);
+                            handManager.RemoveCard(GetIndexIHand());
+                            handManager.SetCanCycleCard(false);
+                            CursorController.cursorState = CursorController.CursorStates.Free;
+                            boardManager.cyclingSlot.Highlight(false);
+                            foreach (BoardManager.Slot slot in boardManager.friendlySlots)
+                            {
+                                slot.Highlight(false);
+                            }
+                            if (cardStats.onCycleEvent != null)
+                            {
+                                StartCoroutine(cardStats.onCycleEvent(boardManager.enemySlots, boardManager.friendlySlots));
+                            }
+                            StartCoroutine(boardManager.CycleCard(this));
+                            handManager.DrawCard();
                         }
-                        CursorController.cursorState = CursorController.CursorStates.Free;
-                        DestroyCard();
+                        else if (cardStats.numberOfTargets == 0)
+                        {
+                            handManager.RemoveCard(GetIndexIHand());
+                            handManager.SetCanPlayCard(false);
+                            boardManager.cyclingSlot.Highlight(false);
+                            foreach (BoardManager.Slot slot in boardManager.friendlySlots)
+                            {
+                                slot.Highlight(false);
+                            }
+                            ServerDataProcesser.instance.CastSpell(this, spellTargets);
+                            StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
+                            spellTargets = new List<int>();
+                            foreach (BoardManager.Slot slot in boardManager.friendlySlots)
+                            {
+                                slot.Highlight(false);
+                            }
+                            CursorController.cursorState = CursorController.CursorStates.Free;
+                            DestroyCard();
+                        }
+                        else
+                        {
+                            ReturnToHand();
+                        }
                     }
                     else if (cardStats.hasOnPlay)
                     {
@@ -448,20 +549,24 @@ public class CardManager : MonoBehaviour
                         {
                             ReturnToHand();
                         }
-                        else if (closestSlot == boardManager.cyclingSlot)
+                        else if (closestSlot == boardManager.cyclingSlot && handManager.CanCycleCard())
                         {
                             handManager.RemoveCard(GetIndexIHand());
-                            boardManager.CycleCard(this);
-                            handManager.DrawCard();
-                            handManager.SetCanPlayCard(false);
+                            handManager.SetCanCycleCard(false);
                             CursorController.cursorState = CursorController.CursorStates.Free;
                             boardManager.cyclingSlot.Highlight(false);
                             if (cardStats.onCycleEvent != null)
                             {
                                 StartCoroutine(cardStats.onCycleEvent(boardManager.enemySlots, boardManager.friendlySlots));
                             }
+                            StartCoroutine(boardManager.CycleCard(this));
+                            handManager.DrawCard();
+                            foreach (BoardManager.Slot slot in boardManager.friendlySlots)
+                            {
+                                slot.Highlight(false);
+                            }
                         }
-                        else
+                        else if (handManager.CanPlayCard())
                         {
                             cardState = CardState.selectingTargets;
                             CursorController.cursorState = CursorController.CursorStates.Select;
@@ -526,6 +631,7 @@ public class CardManager : MonoBehaviour
                         {
                             slot.Highlight(false);
                         }
+                        boardManager.cyclingSlot.Highlight(false);
                         CursorController.cursorState = CursorController.CursorStates.Free;
 
                         if (cardStats.isSpell)
@@ -554,6 +660,7 @@ public class CardManager : MonoBehaviour
                         {
                             slot.Highlight(false);
                         }
+                        boardManager.cyclingSlot.Highlight(false);
                         CursorController.cursorState = CursorController.CursorStates.Free;
                         ReturnToHand();
                     }
@@ -644,7 +751,7 @@ public class CardManager : MonoBehaviour
                                 }
                             }
                             
-                            if (!bad)
+                            if (DEBUG || !bad)
                             {
                                 DeckManager.AddCard(cardType);
                                 collection.ShowDeck();

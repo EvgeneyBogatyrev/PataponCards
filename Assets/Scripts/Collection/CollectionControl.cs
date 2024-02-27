@@ -11,7 +11,7 @@ public class CollectionControl : MonoBehaviour
     public int columns = 3;
     public float cardScale = 0.75f;
     public GameObject cardPrefab;
-    public GameObject cardRepr; 
+    public GameObject cardRepr;
     public List<GameObject> runeObjects;
 
     public float xOffset;
@@ -53,6 +53,17 @@ public class CollectionControl : MonoBehaviour
             CardTypes.StoneFree,
             CardTypes.Mushroom,
             CardTypes.TrentOnFire,
+            CardTypes.Armory_option1,
+            CardTypes.Armory_option2,
+            CardTypes.Horserider,
+            CardTypes.TokenTatepon,
+            CardTypes.SpeedBoost,
+            CardTypes.TurnToStone,
+            CardTypes.Moribu,
+            CardTypes.Grenburr,
+            CardTypes.Wondabarappa,
+            CardTypes.Venomist,
+            //CardTypes.TraitorBoulder,
         };
 
         return reservedList;
@@ -69,7 +80,6 @@ public class CollectionControl : MonoBehaviour
 
         DeckManager.deck = SaveSystem.LoadDeck();
         DeckManager.runes = SaveSystem.LoadRunes();
-
 
         spearDevotion = 0;
         shieldDevotion = 0;
@@ -127,13 +137,13 @@ public class CollectionControl : MonoBehaviour
             List<Runes> runes = card.GetComponent<CardManager>().GetCardStats().runes;
             //card.GetComponent<CardManager>().DestroyCard();
             Destroy(card);
-            
+
             int tmpSpear = spearDevotion;
             int tmpShield = shieldDevotion;
             int tmpBow = bowDevotion;
 
             bool bad = false;
-            
+
             foreach (Runes rune in runes)
             {
                 if (rune == Runes.Spear)
@@ -191,14 +201,16 @@ public class CollectionControl : MonoBehaviour
             if (rune == Runes.Spear)
             {
                 runeString += "Sp ";
-            } else if (rune == Runes.Shield)
+            }
+            else if (rune == Runes.Shield)
             {
                 runeString += "Sh ";
-            } else if (rune == Runes.Bow)
+            }
+            else if (rune == Runes.Bow)
             {
                 runeString += "Bo ";
             }
-            else 
+            else
             {
                 runeString += "?? ";
             }

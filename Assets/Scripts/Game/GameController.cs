@@ -274,6 +274,7 @@ public class GameController : MonoBehaviour
         {
             playerTurn = true;
             handManager.SetCanPlayCard(true);
+            handManager.SetCanCycleCard(true);
             CursorController.cursorState = CursorController.CursorStates.Free;
             gameState.Increment(friendly:true, turnsObject, enemyTurnsObject, nextDmgObject, enemyNextDmgObject);
             boardManager.DealSuddenDeathDamage(friendly:true, gameState.GetSuddenDeathDamage(friendly:true));
@@ -282,6 +283,7 @@ public class GameController : MonoBehaviour
         {
             playerTurn = false;
             handManager.SetCanPlayCard(false);
+            handManager.SetCanCycleCard(false);
             CursorController.cursorState = CursorController.CursorStates.EnemyTurn;
             gameState.Increment(friendly:false, turnsObject, enemyTurnsObject, nextDmgObject, enemyNextDmgObject);
             boardManager.DealSuddenDeathDamage(friendly:false, gameState.GetSuddenDeathDamage(friendly:false));
@@ -312,6 +314,7 @@ public class GameController : MonoBehaviour
         }
         GameController.playerTurn = friendly;
         handManager.SetCanPlayCard(friendly);
+        handManager.SetCanCycleCard(friendly);
 
         gameState.Increment(friendly, turnsObject, enemyTurnsObject, nextDmgObject, enemyNextDmgObject);
         boardManager.DealSuddenDeathDamage(friendly, gameState.GetSuddenDeathDamage(friendly));
@@ -430,10 +433,15 @@ public class GameController : MonoBehaviour
 
     private IEnumerator IenumEndTurn(bool friendly)
     {
+        playerTurn = false;
+        do {
+            yield return new WaitForSeconds(secondsBetweenAnimations);
+        } while(actionIsHappening);
         if (friendly)
         {
             handManager.CheckEphemeral();
             handManager.SetCanPlayCard(false);
+            handManager.SetCanCycleCard(false);
             CursorController.cursorState = CursorController.CursorStates.EnemyTurn;
 
             List<MinionManager> order = new List<MinionManager>();

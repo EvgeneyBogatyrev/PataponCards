@@ -9,8 +9,8 @@ public class MushroomStats : MonoBehaviour
         CardManager.CardStats stats = new CardManager.CardStats();
         const int selfDamage = 1;
 
-        stats.power = 4;
-        stats.description = "At the start of your turn poison the adjacent minions, then deal " + selfDamage.ToString() + " damage to itself.";
+        stats.power = 3;
+        stats.description = "Start of turn: Poison the adjacent units, then deal " + selfDamage.ToString() + " damage to itself.";
         stats.name = "Mushroom";
         stats.runes.Add(Runes.Bow);
         stats.canAttack = false;
