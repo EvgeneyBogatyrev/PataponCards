@@ -189,7 +189,7 @@ public class BoardManager : MonoBehaviour
         }
         
 
-        if (fromHand && card.GetCardStats().hasBattlecry)
+        if (fromHand && card.GetCardStats().hasAfterPlayEvent)
         {
             int index;
             if (!slot.GetFriendly())
@@ -203,7 +203,7 @@ public class BoardManager : MonoBehaviour
 
             Debug.Log("Battlecry");
 
-            StartCoroutine(card.GetCardStats().onPlayEvent(index, enemySlots, friendlySlots));
+            StartCoroutine(card.GetCardStats().afterPlayEvent(index, enemySlots, friendlySlots));
         }
 
         List<Slot> _slots;
@@ -304,7 +304,7 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        if (fromHand && card.GetCardStats().hasBattlecry)
+        if (fromHand && card.GetCardStats().hasAfterPlayEvent)
         {
             Debug.Log("Battlecry (me)");
             int index;
@@ -316,8 +316,8 @@ public class BoardManager : MonoBehaviour
             {
                 index = slot.GetIndex() + 1;
             }
-            Debug.Log(card.GetCardStats().onPlayEvent);
-            StartCoroutine(card.GetCardStats().onPlayEvent(index, enemySlots, friendlySlots));
+            Debug.Log(card.GetCardStats().afterPlayEvent);
+            StartCoroutine(card.GetCardStats().afterPlayEvent(index, enemySlots, friendlySlots));
         }
 
         List<Slot> _slots;

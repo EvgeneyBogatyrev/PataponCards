@@ -45,7 +45,7 @@ public class JamschStats : MonoBehaviour
             yield return null;
         }
 
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
         stats.spell = Realization;
         stats.numberOfTargets = 1;
         stats.dummyTarget = true;

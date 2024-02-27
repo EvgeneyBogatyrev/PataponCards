@@ -13,7 +13,7 @@ public static class WooyariStats
         stats.name = "Wooyari";
         stats.runes.Add(Runes.Spear);
 
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
 
         static IEnumerator DestroboRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

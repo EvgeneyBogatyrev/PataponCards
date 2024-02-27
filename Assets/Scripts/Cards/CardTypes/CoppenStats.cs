@@ -14,7 +14,7 @@ public static class CoppenStats
         stats.runes.Add(Runes.Bow);
 
 
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
 
         static IEnumerator CoppenRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

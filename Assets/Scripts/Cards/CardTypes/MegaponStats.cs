@@ -16,7 +16,7 @@ public static class MegaponStats
 
 
         //stats.hasBattlecry = true;
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
 
         static IEnumerator MegaponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

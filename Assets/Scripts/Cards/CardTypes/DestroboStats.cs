@@ -13,7 +13,7 @@ public static class DestroboStats
         stats.name = "Destrobo";
         stats.runes.Add(Runes.Shield);
 
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
 
         static IEnumerator DestroboRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

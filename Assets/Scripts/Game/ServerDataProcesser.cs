@@ -173,7 +173,7 @@ public class ServerDataProcesser : MonoBehaviour
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
                 CardManager _newCard = handManager.GenerateCard(type, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
 
-                if (!_newCard.GetCardStats().hasOnPlay)
+                if (!_newCard.GetCardStats().hasOnPlaySpell)
                 {
                     processedMessages.Add(messages[messageIndex]);
                 }

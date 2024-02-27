@@ -15,7 +15,7 @@ public static class GanTheYariponStats
         stats.runes.Add(Runes.Spear);
 
 
-        stats.hasBattlecry = true;
+        stats.hasAfterPlayEvent = true;
         //stats.hasOnPlay = true;
 
         static IEnumerator OnPlay(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -86,7 +86,7 @@ public static class GanTheYariponStats
             yield return null;
         }
 
-        stats.onPlayEvent = OnPlay;
+        stats.afterPlayEvent = OnPlay;
         //stats.numberOfTargets = 2;
         //stats.cycling = true;
 

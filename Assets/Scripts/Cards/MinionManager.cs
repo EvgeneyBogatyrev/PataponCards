@@ -853,7 +853,7 @@ public class MinionManager : MonoBehaviour
         {
             gameController.EndRound(!friendly);
         }
-        if (cardStats.hasDeathrattle)
+        if (cardStats.hasOnDeath)
         {
             if (friendly)
             {

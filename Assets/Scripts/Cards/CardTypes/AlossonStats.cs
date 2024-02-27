@@ -11,15 +11,20 @@ public static class AlossonStats
         const int alossonDamage = 1;
         const int alossonMax = 4;
         stats.power = 2;
-        stats.description = "On play: Deal " + alossonDamage.ToString() + " damage to all units. If at least of them dies, repeat the process (Up to " + alossonMax.ToString() + " times).";
+        stats.description = "On play: Deal " + alossonDamage.ToString() + 
+                            " damage to all units. If at least of them dies, " +
+                            "repeat the process (Up to " + alossonMax.ToString() + " times).";
         stats.name = "Alosson";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
-        //stats.runes.Add(Runes.Bow);
+        stats.imagePath = "alosson";
 
-        //stats.legendary = true;
+        stats.spell = AlossonRealization;
+        stats.numberOfTargets = 1;
+        stats.dummyTarget = true;
 
-        stats.hasOnPlay = true;
+        
+        stats.hasOnPlaySpell = true;
 
         static IEnumerator AlossonRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -35,9 +40,7 @@ public static class AlossonStats
                 {
                     if (!slot.GetFree())
                     {
-                        //slot.GetConnectedMinion().GetDamage(yumiponDamage);
                         SpearManager spear = animationManager.CreateObject(AnimationManager.Animations.Spear, friendlySlots[index].GetPosition()).GetComponent<SpearManager>();
-                        //spear.gameObject.transform.Find("sprite").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/pyokorider_hero");
                         spear.SetSlotToGo(slot);
                         spearArray.Add(spear);
                         if (enemySlots[index].GetFriendly())
@@ -55,9 +58,8 @@ public static class AlossonStats
                         {
                             continue;
                         }
-                        //slot.GetConnectedMinion().GetDamage(yumiponDamage);
+                        
                         SpearManager spear = animationManager.CreateObject(AnimationManager.Animations.Spear, friendlySlots[index].GetPosition()).GetComponent<SpearManager>();
-                        //spear.gameObject.transform.Find("sprite").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/pyokorider_hero");
                         spear.SetSlotToGo(slot);
                         spearArray.Add(spear);
                         if (enemySlots[index].GetFriendly())
@@ -102,13 +104,6 @@ public static class AlossonStats
             gameController.actionIsHappening = false;
             yield return null;
         }
-
-        stats.spell = AlossonRealization;
-        stats.numberOfTargets = 1;
-        stats.dummyTarget = true;
-
-        stats.imagePath = "alosson";
-
         return stats;
     }
 }

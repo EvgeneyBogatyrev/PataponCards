@@ -17,7 +17,7 @@ public class RantanStats : MonoBehaviour
         stats.description = "Cycling.\nOn play: Restore " + heal.ToString() + " health to your Hatapon.\nWhenever you cycle this card, restore " + lesserHeal.ToString() + " health to your Hatapon.";
         stats.name = "Rantan";
         
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
 
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

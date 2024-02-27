@@ -15,7 +15,7 @@ public static class BirdRiderStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
 
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

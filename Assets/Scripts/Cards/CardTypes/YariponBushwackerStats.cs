@@ -14,7 +14,7 @@ public static class YariponBushwackerStats
         stats.hasHaste = true;
         //stats.runes.Add(Runes.Shield);
         stats.nameSize = 4;
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
 
         static IEnumerator DestroboRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

@@ -16,7 +16,7 @@ public class SparringPartnerStats : MonoBehaviour
 
         stats.nameSize = 4;
 
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
 
         static bool CheckTarget(int _target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

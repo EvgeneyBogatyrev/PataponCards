@@ -17,7 +17,7 @@ public static class MahoponStats
         stats.description = "Cycling.\nOn play: Deal " + mahoponTargetDamage.ToString() + " damage to target unit and " + mahoponAoEDamage.ToString() + " damage to all other units.";
         stats.name = "Mahopon";
 
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
         stats.cycling = true;
 
         static IEnumerator MahoponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

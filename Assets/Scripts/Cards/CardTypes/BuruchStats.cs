@@ -14,7 +14,7 @@ public static class BuruchStats
         stats.runes.Add(Runes.Shield);
 
 
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
 
         static IEnumerator BuruchRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

@@ -18,7 +18,7 @@ public static class DonTheYumiponStats
         stats.descriptionSize = 3;
         //stats.nameSize = 5;
 
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
         stats.spell = OnPlay;
 
         static IEnumerator OnPlay(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

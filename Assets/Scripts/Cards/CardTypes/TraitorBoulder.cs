@@ -77,8 +77,8 @@ public static class TraitorBoulderStats
             yield return null;                            
         }
 
-        stats.hasBattlecry = true;
-        stats.onPlayEvent = OnPlay;
+        stats.hasAfterPlayEvent = true;
+        stats.afterPlayEvent = OnPlay;
 
         stats.imagePath = "traiter_bolder";
 

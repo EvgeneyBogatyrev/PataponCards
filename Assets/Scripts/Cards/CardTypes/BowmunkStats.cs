@@ -39,7 +39,7 @@ public static class BowmunkStats
         stats.endTurnEvent = BowmunkEndTurn;
 
 
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
 
         static IEnumerator BowmunkRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

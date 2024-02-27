@@ -18,8 +18,8 @@ public static class WebStats
         stats.canDealDamage = false;
         stats.limitedVision = true;
 
-        stats.hasOnPlay = true;
-        stats.hasDeathrattle = true;
+        stats.hasOnPlaySpell = true;
+        stats.hasOnDeath = true;
 
         static IEnumerator OnPlay(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

@@ -18,7 +18,7 @@ public static class WondabarappaStats
         stats.name = "Wondabarappa";
         
         stats.hasHaste = true;
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
 
         static void Battlecry(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -72,7 +72,7 @@ public static class WondabarappaStats
         stats.spell = Realization;
         stats.numberOfTargets = 1;
 
-        stats.hasBattlecry = true;
+        stats.hasAfterPlayEvent = true;
         //stats.onPlayEvent = Battlecry;
 
         stats.legendary = true;

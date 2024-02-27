@@ -16,7 +16,7 @@ public static class BanTateponStats
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
         
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
 
         stats.descriptionSize = 3;
         //stats.nameSize = 4;
