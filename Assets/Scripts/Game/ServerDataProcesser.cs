@@ -135,6 +135,11 @@ public class ServerDataProcesser : MonoBehaviour
         StartCoroutine(Post("1", "number of cards", "", number.ToString()));
     }
 
+    public void Ping()
+    {
+        StartCoroutine(Post("1", "ping", UnityEngine.Random.Range(0, 99999).ToString(), ""));
+    }
+
     IEnumerator Post(string key, string action, string cardIdx, string targets)
     {
         WWWForm form = new WWWForm();
@@ -226,7 +231,7 @@ public class ServerDataProcesser : MonoBehaviour
             BoardManager.Slot fromSlot, toSlot;
             
             CardTypes spellType;
-
+            gameController.ReceivePing();
             switch (message.action)
             {
                 case MessageFromServer.Action.EndTurn:
@@ -485,6 +490,9 @@ public class ServerDataProcesser : MonoBehaviour
 
                 case MessageFromServer.Action.SendDeck:
                     DeckManager.ReceiveOpponentsDeck(message.targets);
+                    break;
+
+                case MessageFromServer.Action.Ping:
                     break;
             }
 

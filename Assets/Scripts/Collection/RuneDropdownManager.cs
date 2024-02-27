@@ -56,9 +56,9 @@ public class RuneDropdownManager : MonoBehaviour
     private IEnumerator Bounce()
     {
         float startTime = Time.time;
-        while (Time.time - startTime < 1.5f)
+        while (Time.time - startTime < 0.5f)
         {
-            float scale = 1f + Mathf.PingPong((Time.time - startTime) * 250f * Time.deltaTime, 1.5f - 1f);
+            float scale = 1f + Mathf.PingPong((Time.time - startTime) * 2f, 1.5f - 1f);
             transform.localScale = new Vector3(scale, scale, 1f);
             yield return new WaitForSeconds(0.005f);
         }

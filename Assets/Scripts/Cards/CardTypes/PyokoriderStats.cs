@@ -44,7 +44,7 @@ public static class PyokoriderStats
             { 
                 if (minion.GetPower() > 1)
                 {
-                    minion.TakePower(1);
+                    minion.LoseLife(1);
                 }
                 minion.onAttackActionProgress = false;
             }

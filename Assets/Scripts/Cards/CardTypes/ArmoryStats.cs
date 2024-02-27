@@ -57,7 +57,7 @@ public static class Armory_option1Stats
                 host = friendlySlots[targets[0] - 1].GetConnectedMinion();
             }
 
-            host.TakePower(cost);
+            host.LoseLife(cost);
             if (!enemySlots[0].GetFriendly())
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
@@ -116,7 +116,7 @@ public static class Armory_option2Stats
                 host = friendlySlots[targets[0] - 1].GetConnectedMinion();
             }
 
-            host.TakePower(cost);
+            host.LoseLife(cost);
             HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
             if (!enemySlots[0].GetFriendly())
             {

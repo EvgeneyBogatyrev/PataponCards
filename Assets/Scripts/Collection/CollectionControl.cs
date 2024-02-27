@@ -63,6 +63,8 @@ public class CollectionControl : MonoBehaviour
             CardTypes.Grenburr,
             CardTypes.Wondabarappa,
             CardTypes.Venomist,
+            CardTypes.KibaForm,
+            CardTypes.BirdForm,
             //CardTypes.TraitorBoulder,
         };
 

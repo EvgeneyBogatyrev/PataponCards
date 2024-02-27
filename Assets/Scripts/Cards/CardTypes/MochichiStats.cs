@@ -48,7 +48,7 @@ public static class MochiAccumStats
                 host = friendlySlots[targets[0] - 1].GetConnectedMinion();
             }
 
-            host.TakePower(motiti1HealthCost);
+            host.LoseLife(motiti1HealthCost);
             host.Heal(motiti1Heal);
             yield return null;
         }
@@ -89,7 +89,7 @@ public static class MochiciCounterStats
             HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
             BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
-            host.TakePower(motiti2HealthCost);
+            host.LoseLife(motiti2HealthCost);
             CardManager newCard = handManager.GenerateCard(CardTypes.MotitiAngry, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
             newCard.SetPower(host.GetPower());
             BoardManager.Slot slot = host.GetSlot();

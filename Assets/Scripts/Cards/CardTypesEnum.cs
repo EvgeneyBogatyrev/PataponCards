@@ -57,6 +57,7 @@ public enum CardTypes
     Wooyari,
     Wep,
     OfferingToKami,
+    DarkOne,
     // ------------------------------
     Fang,
     FuckingIdiot,
@@ -94,7 +95,9 @@ public enum CardTypes
     Armory_option1,
     Armory_option2,
     TokenTatepon,
-    Horserider
+    Horserider,
+    KibaForm,
+    BirdForm,
 
 };
 
@@ -473,6 +476,18 @@ public static class CardTypeToStats
 
             case CardTypes.OfferingToKami:
                 stats = OfferingToKamiStats.GetStats();
+                break;
+
+            case CardTypes.DarkOne:
+                stats = DarkOneStats.GetStats();
+                break;
+
+            case CardTypes.KibaForm:
+                stats = KibaFormStats.GetStats();
+                break;
+
+            case CardTypes.BirdForm:
+                stats = BirdFormStats.GetStats();
                 break;
 
             default:

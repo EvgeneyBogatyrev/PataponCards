@@ -64,11 +64,11 @@ public class MinionManager : MonoBehaviour
         connectedSlot.SetFree(false);
         imageObject.GetComponent<SpriteRenderer>().sprite = playedCard.GetComponentInChildren<SpriteRenderer>().sprite;
         state = MinionState.Free;
-        OnCanAttack(false);
+        SetAbilityToAttack(false);
         
         if (cardStats.hasHaste || cardStats.isStatic)
         {
-            OnCanAttack(true);
+            SetAbilityToAttack(true);
         }
         slot.SetConnectedMinion(this);
 
@@ -104,7 +104,7 @@ public class MinionManager : MonoBehaviour
         startTime = Time.time;
     }
 
-    public void OnCanAttack(bool can=true)
+    public void SetAbilityToAttack(bool can=true)
     {
         if (GameController.playerTurn && friendly && !(!cardStats.canAttack && cardStats.limitedVision && !cardStats.isStatic))
         {
@@ -190,10 +190,10 @@ public class MinionManager : MonoBehaviour
     public bool DealDamageToThis(int damage)
     {
         // Just to make it easier to understand
-        return TakePower(damage);
+        return LoseLife(damage);
     }
 
-    public bool TakePower(int damage)
+    public bool LoseLife(int damage)
     {
         if (damage <= 0)
         {
@@ -284,7 +284,7 @@ public class MinionManager : MonoBehaviour
         {
             actualDamage = 0;
         }
-        return TakePower(actualDamage);
+        return LoseLife(actualDamage);
     }
 
     public void Heal(int amount)
@@ -439,7 +439,7 @@ public class MinionManager : MonoBehaviour
                                 BoardManager.Slot nextSlot = target.GetSlot();
                                 target.DestroyMinion();
                                 Move(nextSlot, record: true);
-                                OnCanAttack(false);
+                                SetAbilityToAttack(false);
                                 state = MinionState.Free;
                                 CursorController.cursorState = CursorController.CursorStates.Free;
                                 arrow.DestroyArrow();
@@ -477,7 +477,7 @@ public class MinionManager : MonoBehaviour
                                 else
                                 {
                                     Attack(target, record: true);
-                                    OnCanAttack(false);
+                                    SetAbilityToAttack(false);
                                     state = MinionState.Free;
                                     CursorController.cursorState = CursorController.CursorStates.Free;
                                     arrow.DestroyArrow();
@@ -520,7 +520,7 @@ public class MinionManager : MonoBehaviour
                                     connectedMinion.DestroyMinion();
                                 }
                                 Move(slotToGo, record: true);
-                                OnCanAttack(false);
+                                SetAbilityToAttack(false);
                                 state = MinionState.Free;
                                 CursorController.cursorState = CursorController.CursorStates.Free;
                                 arrow.DestroyArrow();
@@ -536,7 +536,7 @@ public class MinionManager : MonoBehaviour
                             else if (slotToGo.GetFriendly())
                             {
                                 Move(slotToGo, record: true);
-                                OnCanAttack(false);
+                                SetAbilityToAttack(false);
                                 state = MinionState.Free;
                                 CursorController.cursorState = CursorController.CursorStates.Free;
                                 arrow.DestroyArrow();
@@ -705,8 +705,8 @@ public class MinionManager : MonoBehaviour
         other.connectedSlot = connectedSlot;
         connectedSlot = slotToMove;
 
-        this.OnCanAttack(false);
-        other.OnCanAttack(false);
+        this.SetAbilityToAttack(false);
+        other.SetAbilityToAttack(false);
     }
 
     public void Attack(MinionManager enemy, bool record = false)
@@ -963,7 +963,7 @@ public class MinionManager : MonoBehaviour
     }
     public void SetCanAttack(bool _can)
     {
-        OnCanAttack(_can);
+        SetAbilityToAttack(_can);
     }
     public int GetIndex()
     {
@@ -993,12 +993,9 @@ public class MinionManager : MonoBehaviour
         int count = 0;
         foreach (Runes rune in cardStats.runes)
         {
-            Debug.Log(rune);
-            Debug.Log(kind);
             if (rune == kind)
             {
                 count += 1;
-                Debug.Log("==");
             }
         }
         return count;

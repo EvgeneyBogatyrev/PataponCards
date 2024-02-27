@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.Assertions;
 
 public class InfoSaver
 {
@@ -30,6 +31,7 @@ public class MessageFromServer
         Cycle,
         Discard,
         SendDeck,
+        Ping,
     }
 
     public Action GetAction(string s)
@@ -85,6 +87,10 @@ public class MessageFromServer
         if (s == "send deck")
         {
             return Action.SendDeck;
+        }
+        if (s == "ping")
+        {
+            return Action.Ping;
         }
         return Action.EndTurn;
     }
@@ -227,6 +233,14 @@ public class GameController : MonoBehaviour
     public bool effectsBlocked = false;
     public List<MinionManager> effectBlockers = new();
 
+    private float timeSinceOpponentResponsed = 0f;
+    private readonly float timeSinceOpponentResponsedLimit = 50f;
+
+    private float pingInterval = 0f;
+    private readonly float pingIntervalMax = 25f;
+
+    private int concedeTimes = 0;
+
     private void Start()
     {
         endTurnButtonObject.SetActive(false);
@@ -234,6 +248,38 @@ public class GameController : MonoBehaviour
         statsObject.SetActive(false);
         handManager = GameObject.Find("Hand").GetComponent<HandManager>();
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
+    }
+
+    private void Update()
+    {
+        if (!playerTurn)
+        {
+            timeSinceOpponentResponsed += Time.deltaTime;
+            //Debug.Log(timeSinceOpponentResponsed);
+            //Debug.Log(timeSinceOpponentResponsedLimit);
+
+            if (timeSinceOpponentResponsed >= timeSinceOpponentResponsedLimit)
+            {
+                timeSinceOpponentResponsed = 0f;
+                Debug.Log("Your opponent left");
+                StartCoroutine(EndGame(true));
+            }
+        }
+        else
+        {
+            pingInterval += Time.deltaTime;
+            
+            if (pingInterval > pingIntervalMax)
+            {
+                pingInterval = 0f;
+                //ServerDataProcesser.instance.Ping();
+            }
+        }
+    }
+
+    public void ReceivePing()
+    {
+        timeSinceOpponentResponsed = 0;
     }
 
     public IEnumerator CheckBoardEffects()
@@ -331,7 +377,7 @@ public class GameController : MonoBehaviour
                     minion.SetCanAttack(true);
                     if (minion.GetCardStats().poisoned)
                     {
-                        minion.TakePower(1);
+                        minion.LoseLife(1);
                     }
                 }
             }
@@ -381,7 +427,7 @@ public class GameController : MonoBehaviour
                     minion.SetCanAttack(true);
                     if (minion.GetCardStats().poisoned)
                     {
-                        minion.TakePower(1);
+                        minion.LoseLife(1);
                     }
                 }
             }
@@ -453,7 +499,7 @@ public class GameController : MonoBehaviour
                 {
                     order.Add(minion);
                     minion.SetState(MinionManager.MinionState.Free);
-                    minion.OnCanAttack(false);
+                    minion.SetAbilityToAttack(false);
                 }
             }
             if (!effectsBlocked)
@@ -520,6 +566,14 @@ public class GameController : MonoBehaviour
     public void EndRound(bool friendly)
     {
         StartCoroutine(OnEndRound(friendly));
+    }
+
+    public IEnumerator EndGame(bool friendlyVictory)
+    {
+        boardManager.ClearBoard();
+        yield return new WaitForSeconds(3f);
+        SceneManager.LoadScene("MainMenu");
+        yield return null;
     }
 
     public IEnumerator OnEndRound(bool friendlyVictory)
@@ -639,8 +693,9 @@ public class GameController : MonoBehaviour
 
     public void Concede()
     {
-        if (playerTurn && CursorController.cursorState == CursorController.CursorStates.Free)
+        if (concedeTimes < 3 && playerTurn && CursorController.cursorState == CursorController.CursorStates.Free)
         {
+            concedeTimes += 1;
             CardManager concedeCard = handManager.GenerateCard(CardTypes.Concede, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
             StartCoroutine(concedeCard.GetCardStats().spell(new List<int>(), boardManager.enemySlots, boardManager.friendlySlots));
             ServerDataProcesser.instance.CastSpell(concedeCard, new List<int>());

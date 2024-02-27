@@ -18,7 +18,7 @@ public class KeepHandButton : MonoBehaviour
         if (mouseOver && Input.GetMouseButtonDown(0))
         {
             handManager.KeepHandButton();
-            StartCoroutine(Bounce());
+            //StartCoroutine(Bounce());
         }
     }
 

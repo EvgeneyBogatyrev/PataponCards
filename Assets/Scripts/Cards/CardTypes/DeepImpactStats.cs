@@ -99,7 +99,7 @@ public static class HorseriderStats
 
         stats.power = 3;
         stats.description = "Haste.";
-        stats.name = "i forgor";
+        stats.name = "Horserider";
 
         stats.hasHaste = true;
 

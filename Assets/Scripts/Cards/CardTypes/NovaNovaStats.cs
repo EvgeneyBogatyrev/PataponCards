@@ -43,7 +43,7 @@ public class NovaNovaStats : MonoBehaviour
                 MinionManager minion = slot.GetConnectedMinion();
                 if (minion != null && minion.GetCardType() == CardTypes.Hatapon)
                 {
-                    minion.TakePower(healthLoss);
+                    minion.LoseLife(healthLoss);
                 }
             }
 

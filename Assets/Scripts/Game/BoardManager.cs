@@ -392,7 +392,7 @@ public class BoardManager : MonoBehaviour
             Debug.Log("Can't find Hatapon in DealSuddenDeathDamage");
         }
 
-        hatapon.TakePower(amount);
+        hatapon.LoseLife(amount);
     }
 
     public void ClearBoard()

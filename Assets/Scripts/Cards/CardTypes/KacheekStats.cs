@@ -46,7 +46,7 @@ public static class GiveFangStats
                 host = friendlySlots[targets[0] - 1].GetConnectedMinion();
             }
 
-            host.TakePower(giveFangHealthCost);
+            host.LoseLife(giveFangHealthCost);
             if (!enemySlots[0].GetFriendly())
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
@@ -96,7 +96,7 @@ public static class NutritionStats
                 host = friendlySlots[targets[0] - 1].GetConnectedMinion();
             }
 
-            host.TakePower(nutritionHealthCost);
+            host.LoseLife(nutritionHealthCost);
 
             foreach (BoardManager.Slot slot in friendlySlots)
             {

@@ -53,7 +53,7 @@ public static class TonKampon_option2Stats
                 host = friendlySlots[targets[0] - 1].GetConnectedMinion();
             }
 
-            host.TakePower(TonKamponAlldemoniumHealthCost);
+            host.LoseLife(TonKamponAlldemoniumHealthCost);
             if (!enemySlots[0].GetFriendly())
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
@@ -99,7 +99,7 @@ public static class TonKampon_option1Stats
                 host = friendlySlots[targets[0] - 1].GetConnectedMinion();
             }
 
-            host.TakePower(TonKamponCronoRiggersHealthCost);
+            host.LoseLife(TonKamponCronoRiggersHealthCost);
             if (!enemySlots[0].GetFriendly())
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
