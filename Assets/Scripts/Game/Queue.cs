@@ -25,6 +25,7 @@ public class QueueProcesser : MonoBehaviour
 
         public static ActionType GetActionType(string action)
         {
+            Debug.Log(action);
             switch (action)
             {
                 case "ping":
@@ -108,10 +109,12 @@ public class QueueProcesser : MonoBehaviour
         StartCoroutine(Post("game_search", hash));
         for (int i = 0; i < 5; ++i)
         {
-            yield return new WaitForSeconds(10f);
+            yield return new WaitForSeconds(15f);
             ObtainData(host:true);
         }
         StartCoroutine(Post("game_found", hash, hash));
+        hash = UnityEngine.Random.Range(0, 99999);
+        InfoSaver.myHash = hash;
         StartCoroutine(ObtainData(host:false));
         yield return null;
     }
@@ -132,10 +135,13 @@ public class QueueProcesser : MonoBehaviour
                 lastTime += 24 * 60 * 60;
             }
             int delta = lastTime - thisTime;
+            Debug.Log("Delta time " + delta.ToString());
             if (delta > timeInterval)
             {
                 continue;
             }
+
+            Debug.Log("Action " + message.action.ToString());
 
             if (message.action == MatchingMessage.ActionType.GameSearch)
             {
@@ -151,6 +157,11 @@ public class QueueProcesser : MonoBehaviour
                 if (potentialOpponents.Contains(message.secondPlayerId))
                     potentialOpponents.Remove(message.secondPlayerId);
             }
+        }
+
+        foreach (int hash_ in potentialOpponents)
+        {
+            Debug.Log(hash_);
         }
 
         if (potentialOpponents.Contains(hash))
@@ -175,6 +186,7 @@ public class QueueProcesser : MonoBehaviour
 
     public bool ProcessMessagesHost(List<MatchingMessage> messages)
     {
+        Debug.Log("Host");
         statusText.GetComponent<TextMeshProUGUI>().text = "Hosting the game...";
         int lastTime = messages[messages.Count - 1].time;
 
@@ -195,6 +207,7 @@ public class QueueProcesser : MonoBehaviour
 
             if (message.action == MatchingMessage.ActionType.GameFound)
             {
+                Debug.Log("Found game found");
                 if (message.firstPlayerId != message.secondPlayerId &&
                 (message.firstPlayerId == hash || message.secondPlayerId == hash))
                 {
@@ -261,6 +274,7 @@ public class QueueProcesser : MonoBehaviour
         int curHash = 0;
         foreach (string s in batches)
         {
+            
             if (iterIndex == 0)
             {
                 iterIndex = 1;
@@ -308,6 +322,7 @@ public class QueueProcesser : MonoBehaviour
                 else if (batchIndex == 3)
                 {
                     messagesFromServer.Add(currentMessage);
+                    currentMessage = new MatchingMessage();
                     batchIndex = -1;
                 }
                 batchIndex += 1;
