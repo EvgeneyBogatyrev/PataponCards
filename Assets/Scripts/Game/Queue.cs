@@ -267,14 +267,21 @@ public class QueueProcesser : MonoBehaviour
                 if (batchIndex == 0)
                 {
                     string[] elems = s.Split('"');
-                    string timeString = elems[elems.Length - 3];
-                    
-                    int seconds = DateToSeconds(timeString);
-                    if (seconds == -1)
+                    try
+                    {
+                        string timeString = elems[elems.Length - 3];
+
+                        int seconds = DateToSeconds(timeString);
+                        if (seconds == -1)
+                        {
+                            break;
+                        }
+                        currentMessage.time = seconds;
+                    }
+                    catch
                     {
                         break;
                     }
-                    currentMessage.time = seconds;
                 }
             }
             else
