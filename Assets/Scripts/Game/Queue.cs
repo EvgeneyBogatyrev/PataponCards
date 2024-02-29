@@ -112,6 +112,7 @@ public class QueueProcesser : MonoBehaviour
             yield return new WaitForSeconds(5f);
             StartCoroutine(ObtainData(host:true));
         }
+        yield return new WaitForSeconds(5f);
         StartCoroutine(Post("game_found", hash, hash));
         hash = UnityEngine.Random.Range(0, 99999);
         InfoSaver.myHash = hash;
