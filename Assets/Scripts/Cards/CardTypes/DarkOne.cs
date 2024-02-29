@@ -121,7 +121,7 @@ public static class KibaFormStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 4;
-        stats.description = "Haste.\nCan attack any enemy unit on the board and move to any square.";
+        stats.description = "Haste.\nCan attack any enemy unit on the board.";
         stats.name = "Kiba Form";
         stats.megaVision = true;
         stats.hasHaste = true;

@@ -9,7 +9,7 @@ public static class BuzzcraveStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "Haste.\nCan attack any enemy unit on the board and move to any square.";
+        stats.description = "Haste.\nCan attack any enemy unit on the board.";
         stats.name = "Buzzcrave";
         stats.megaVision = true;
         stats.hasHaste = true;

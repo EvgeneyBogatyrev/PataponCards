@@ -45,7 +45,7 @@ public class LobbyManager : MonoBehaviour
 
     public void PlayOnline()
     {
-        
+        SceneManager.LoadScene("FindGame");
     }
 
     public void Exit()
