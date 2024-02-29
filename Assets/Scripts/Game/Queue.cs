@@ -25,7 +25,7 @@ public class QueueProcesser : MonoBehaviour
 
         public static ActionType GetActionType(string action)
         {
-            Debug.Log(action);
+            //Debug.Log(action);
             switch (action)
             {
                 case "ping":
@@ -109,8 +109,8 @@ public class QueueProcesser : MonoBehaviour
         StartCoroutine(Post("game_search", hash));
         for (int i = 0; i < 5; ++i)
         {
-            yield return new WaitForSeconds(15f);
-            ObtainData(host:true);
+            yield return new WaitForSeconds(5f);
+            StartCoroutine(ObtainData(host:true));
         }
         StartCoroutine(Post("game_found", hash, hash));
         hash = UnityEngine.Random.Range(0, 99999);
@@ -135,13 +135,13 @@ public class QueueProcesser : MonoBehaviour
                 lastTime += 24 * 60 * 60;
             }
             int delta = lastTime - thisTime;
-            Debug.Log("Delta time " + delta.ToString());
+            //Debug.Log("Delta time " + delta.ToString());
             if (delta > timeInterval)
             {
                 continue;
             }
 
-            Debug.Log("Action " + message.action.ToString());
+            //Debug.Log("Action " + message.action.ToString());
 
             if (message.action == MatchingMessage.ActionType.GameSearch)
             {
@@ -258,6 +258,7 @@ public class QueueProcesser : MonoBehaviour
 
     public IEnumerator ObtainData(bool host=false)
     {
+        Debug.Log("In obtain " + host.ToString());
         StartCoroutine(Post("ping", 0));
         yield return new WaitForSeconds(1.5f);
         Debug.Log("Start obtaining Match....");
