@@ -8,7 +8,7 @@ public static class TakeThatShieldStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         const int takeThatShieldGain = 3;
-        stats.description = "Target non-Hatapon character under your control gains +" + takeThatShieldGain.ToString() + " power and Greatshield.";
+        stats.description = "Target non-Hatapon unit under your control gains +" + takeThatShieldGain.ToString() + " power. Heal your Hatapon by that unit's power.";
         stats.name = "Take That Shield";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
@@ -57,12 +57,17 @@ public static class TakeThatShieldStats
 
             MinionManager targetMinion = targetSlot.GetConnectedMinion();
 
-            CardManager.CardStats stats = targetMinion.GetCardStats();
-            stats.hasGreatshield = true;
-            targetMinion.SetCardStats(stats);
-            
-
             targetMinion.Heal(takeThatShieldGain);
+
+            foreach (BoardManager.Slot _slot in friendlySlots)
+            {
+                MinionManager minion = _slot.GetConnectedMinion();
+                if (minion != null && minion.GetCardType() == CardTypes.Hatapon)
+                {
+                    minion.Heal(targetMinion.GetPower());
+                }
+            }
+
             yield return null;
         }
 
@@ -70,7 +75,7 @@ public static class TakeThatShieldStats
         stats.checkSpellTarget = TakeThatShieldCheckTarget;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "take_this_shield";
+        stats.imagePath = "take_shield";
 
         return stats;
     }

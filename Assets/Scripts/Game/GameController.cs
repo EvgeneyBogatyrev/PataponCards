@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.Assertions;
 
 public class InfoSaver
 {
@@ -26,7 +27,11 @@ public class MessageFromServer
         Attack,
         Move,
         Exchange,
-        CastOnPlayCard
+        CastOnPlayCard,
+        Cycle,
+        Discard,
+        SendDeck,
+        Ping,
     }
 
     public Action GetAction(string s)
@@ -71,6 +76,22 @@ public class MessageFromServer
         {
             return Action.GameAccept;
         }
+        if (s == "cycle card")
+        {
+            return Action.Cycle;
+        }
+        if (s == "discard")
+        {
+            return Action.Discard;
+        }
+        if (s == "send deck")
+        {
+            return Action.SendDeck;
+        }
+        if (s == "ping")
+        {
+            return Action.Ping;
+        }
         return Action.EndTurn;
     }
 
@@ -102,17 +123,20 @@ public class GameState
         return false;
     }
 
-    public void Reset(GameObject turnsObject) 
+    public void Reset(GameObject turnsObject, GameObject enemyTurnsObject, GameObject nextDmd, GameObject enemyNextDmg) 
     {
         friendlyTurnNumber = 0;
         enemyTurnNumber = 0;
         friendlySuddenDeathDamage = 0;
         enemySuddenDeathDamage = 0;
 
-        turnsObject.GetComponent<TextMeshProUGUI>().text = "Turn: " + friendlyTurnNumber.ToString();
+        turnsObject.GetComponent<TextMeshPro>().text = friendlyTurnNumber.ToString();
+        nextDmd.GetComponent<TextMeshPro>().text = friendlySuddenDeathDamage.ToString();
+        enemyTurnsObject.GetComponent<TextMeshPro>().text = enemyTurnNumber.ToString();
+        enemyNextDmg.GetComponent<TextMeshPro>().text = enemySuddenDeathDamage.ToString();
     }
 
-    public void Increment(bool friendly, GameObject turnsObject)
+    public void Increment(bool friendly, GameObject turnsObject, GameObject enemyTurnsObject, GameObject nextDmg, GameObject enemyNextDmg)
     {
         if (friendly)
         {
@@ -120,6 +144,18 @@ public class GameState
             if (friendlyTurnNumber >= suddenDeathTurns)
             {
                 friendlySuddenDeathDamage += 1;
+            }
+            turnsObject.GetComponent<TextMeshPro>().text = friendlyTurnNumber.ToString();
+            nextDmg.GetComponent<TextMeshPro>().text = friendlySuddenDeathDamage.ToString();
+
+            if (friendlyTurnNumber + 1 >= suddenDeathTurns)
+            {
+                nextDmg.GetComponent<TextMeshPro>().text = (friendlySuddenDeathDamage + 1).ToString();
+            }
+
+            if (enemyTurnNumber + 1 >= suddenDeathTurns)
+            {
+                enemyNextDmg.GetComponent<TextMeshPro>().text = (enemySuddenDeathDamage + 1).ToString();
             }
         }
         else
@@ -129,9 +165,20 @@ public class GameState
             {
                 enemySuddenDeathDamage += 1;
             }
-        }
+            enemyTurnsObject.GetComponent<TextMeshPro>().text = enemyTurnNumber.ToString();
+            enemyNextDmg.GetComponent<TextMeshPro>().text = enemySuddenDeathDamage.ToString();
 
-        turnsObject.GetComponent<TextMeshProUGUI>().text = "Turn: " + friendlyTurnNumber.ToString();
+            if (friendlyTurnNumber + 1 >= suddenDeathTurns)
+            {
+                nextDmg.GetComponent<TextMeshPro>().text = (friendlySuddenDeathDamage + 1).ToString();
+            }
+
+            if (enemyTurnNumber + 1 >= suddenDeathTurns)
+            {
+                enemyNextDmg.GetComponent<TextMeshPro>().text = (enemySuddenDeathDamage + 1).ToString();
+            }
+            
+        }
     }
 
     public int GetSuddenDeathDamage(bool friendly)
@@ -155,16 +202,28 @@ public class GameController : MonoBehaviour
 
     [SerializeField]
     private GameObject scoreObject;
+    
+    
     [SerializeField]
     private GameObject turnsObject;
     [SerializeField]
     private GameObject deckSizeObject;
+    [SerializeField]
+    private GameObject nextDmgObject;
+
+    [SerializeField]
+    private GameObject enemyTurnsObject;
+    [SerializeField]
+    private GameObject enemyDeckSizeObject;
+    [SerializeField]
+    private GameObject enemyNextDmgObject;
 
     [SerializeField]
     private GameObject endTurnButtonObject;
-
     [SerializeField]
     private GameObject concedeObject;
+    [SerializeField]
+    private GameObject statsObject;
 
     private GameState gameState = new GameState();
 
@@ -172,13 +231,55 @@ public class GameController : MonoBehaviour
     public bool actionIsHappening = false;
 
     public bool effectsBlocked = false;
+    public List<MinionManager> effectBlockers = new();
+
+    private float timeSinceOpponentResponsed = 0f;
+    private readonly float timeSinceOpponentResponsedLimit = 50f;
+
+    private float pingInterval = 0f;
+    private readonly float pingIntervalMax = 25f;
+
+    private int concedeTimes = 0;
 
     private void Start()
     {
         endTurnButtonObject.SetActive(false);
         concedeObject.SetActive(false);
+        statsObject.SetActive(false);
         handManager = GameObject.Find("Hand").GetComponent<HandManager>();
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
+    }
+
+    private void Update()
+    {
+        if (!playerTurn)
+        {
+            timeSinceOpponentResponsed += Time.deltaTime;
+            //Debug.Log(timeSinceOpponentResponsed);
+            //Debug.Log(timeSinceOpponentResponsedLimit);
+
+            if (timeSinceOpponentResponsed >= timeSinceOpponentResponsedLimit)
+            {
+                timeSinceOpponentResponsed = 0f;
+                Debug.Log("Your opponent left");
+                StartCoroutine(EndGame(true));
+            }
+        }
+        else
+        {
+            pingInterval += Time.deltaTime;
+            
+            if (pingInterval > pingIntervalMax)
+            {
+                pingInterval = 0f;
+                //ServerDataProcesser.instance.Ping();
+            }
+        }
+    }
+
+    public void ReceivePing()
+    {
+        timeSinceOpponentResponsed = 0;
     }
 
     public IEnumerator CheckBoardEffects()
@@ -186,23 +287,24 @@ public class GameController : MonoBehaviour
         while (true)
         {
             effectsBlocked = false;
+            effectBlockers = new();
             foreach (BoardManager.Slot slot in boardManager.friendlySlots)
             {
                 MinionManager minion = slot.GetConnectedMinion();
-                if (minion != null && minion.GetCardType() == CardTypes.Cannasault)
+                if (minion != null && minion.GetCardStats().blockEffects)
                 {
                     effectsBlocked = true;
-                    break;
+                    effectBlockers.Add(minion);
                 }
             }
 
             foreach (BoardManager.Slot slot in boardManager.enemySlots)
             {
                 MinionManager minion = slot.GetConnectedMinion();
-                if (minion != null && minion.GetCardType() == CardTypes.Cannasault)
+                if (minion != null && minion.GetCardStats().blockEffects)
                 {
                     effectsBlocked = true;
-                    break;
+                    effectBlockers.Add(minion);
                 }
             }
             yield return new WaitForSeconds(0.2f);
@@ -213,20 +315,23 @@ public class GameController : MonoBehaviour
     {
         endTurnButtonObject.SetActive(true);
         concedeObject.SetActive(true);
+        statsObject.SetActive(true);
         if (InfoSaver.opponentHash <= InfoSaver.myHash)
         {
             playerTurn = true;
             handManager.SetCanPlayCard(true);
+            handManager.SetCanCycleCard(true);
             CursorController.cursorState = CursorController.CursorStates.Free;
-            gameState.Increment(friendly:true, turnsObject);
+            gameState.Increment(friendly:true, turnsObject, enemyTurnsObject, nextDmgObject, enemyNextDmgObject);
             boardManager.DealSuddenDeathDamage(friendly:true, gameState.GetSuddenDeathDamage(friendly:true));
         }
         else
         {
             playerTurn = false;
             handManager.SetCanPlayCard(false);
+            handManager.SetCanCycleCard(false);
             CursorController.cursorState = CursorController.CursorStates.EnemyTurn;
-            gameState.Increment(friendly:false, turnsObject);
+            gameState.Increment(friendly:false, turnsObject, enemyTurnsObject, nextDmgObject, enemyNextDmgObject);
             boardManager.DealSuddenDeathDamage(friendly:false, gameState.GetSuddenDeathDamage(friendly:false));
         }
         if (gameState.StartOfTheGame())
@@ -244,6 +349,7 @@ public class GameController : MonoBehaviour
 
     IEnumerator IenumStartTurn(bool friendly, bool hataponJustDied=false)
     {
+        UpdateDecks();
         if (!friendly)
         {
             CursorController.cursorState = CursorController.CursorStates.EnemyTurn;
@@ -254,8 +360,9 @@ public class GameController : MonoBehaviour
         }
         GameController.playerTurn = friendly;
         handManager.SetCanPlayCard(friendly);
+        handManager.SetCanCycleCard(friendly);
 
-        gameState.Increment(friendly, turnsObject);
+        gameState.Increment(friendly, turnsObject, enemyTurnsObject, nextDmgObject, enemyNextDmgObject);
         boardManager.DealSuddenDeathDamage(friendly, gameState.GetSuddenDeathDamage(friendly));
         if (friendly)
         {
@@ -270,7 +377,7 @@ public class GameController : MonoBehaviour
                     minion.SetCanAttack(true);
                     if (minion.GetCardStats().poisoned)
                     {
-                        minion.TakePower(1);
+                        minion.LoseLife(1);
                     }
                 }
             }
@@ -289,6 +396,23 @@ public class GameController : MonoBehaviour
                     }
                 }
             }
+            else
+            {
+                foreach (MinionManager minion in effectBlockers)
+                {
+                    if (minion.GetFriendly())
+                    {
+                        CardManager.EndTurnEvent thisStartTurnEvent = minion.GetCardStats().startTurnEvent;
+                        if (thisStartTurnEvent != null)
+                        {
+                            StartCoroutine(thisStartTurnEvent(minion.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots));
+                            do {
+                                yield return new WaitForSeconds(secondsBetweenAnimations);
+                            } while(actionIsHappening);
+                        }
+                    }
+                }
+            }
         }
         else
         {
@@ -303,7 +427,7 @@ public class GameController : MonoBehaviour
                     minion.SetCanAttack(true);
                     if (minion.GetCardStats().poisoned)
                     {
-                        minion.TakePower(1);
+                        minion.LoseLife(1);
                     }
                 }
             }
@@ -322,6 +446,24 @@ public class GameController : MonoBehaviour
                     }
                 }
             }
+            else
+            {
+                foreach (MinionManager minion in effectBlockers)
+                {
+                    if (!minion.GetFriendly())
+                    {
+                        CardManager.EndTurnEvent thisStartTurnEvent = minion.GetCardStats().startTurnEvent;
+                        if (thisStartTurnEvent != null)
+                        {
+                            StartCoroutine(thisStartTurnEvent(minion.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots));
+                            do {
+                                yield return new WaitForSeconds(secondsBetweenAnimations);
+                            } while(actionIsHappening);
+                        }
+                    }
+                }
+            }
+            
         }
         if (!friendly && !hataponJustDied)
         {
@@ -337,9 +479,15 @@ public class GameController : MonoBehaviour
 
     private IEnumerator IenumEndTurn(bool friendly)
     {
+        playerTurn = false;
+        do {
+            yield return new WaitForSeconds(secondsBetweenAnimations);
+        } while(actionIsHappening);
         if (friendly)
         {
+            handManager.CheckEphemeral();
             handManager.SetCanPlayCard(false);
+            handManager.SetCanCycleCard(false);
             CursorController.cursorState = CursorController.CursorStates.EnemyTurn;
 
             List<MinionManager> order = new List<MinionManager>();
@@ -351,7 +499,7 @@ public class GameController : MonoBehaviour
                 {
                     order.Add(minion);
                     minion.SetState(MinionManager.MinionState.Free);
-                    minion.OnCanAttack(false);
+                    minion.SetAbilityToAttack(false);
                 }
             }
             if (!effectsBlocked)
@@ -378,6 +526,7 @@ public class GameController : MonoBehaviour
         }
         else
         {
+            //handManager.CheckEphemeral();
             List<MinionManager> order = new List<MinionManager>();
             foreach (BoardManager.Slot slot in boardManager.enemySlots)
             {
@@ -419,6 +568,14 @@ public class GameController : MonoBehaviour
         StartCoroutine(OnEndRound(friendly));
     }
 
+    public IEnumerator EndGame(bool friendlyVictory)
+    {
+        boardManager.ClearBoard();
+        yield return new WaitForSeconds(3f);
+        SceneManager.LoadScene("MainMenu");
+        yield return null;
+    }
+
     public IEnumerator OnEndRound(bool friendlyVictory)
     {
         RecordGameResult(friendlyVictory);
@@ -438,7 +595,7 @@ public class GameController : MonoBehaviour
             boardManager.ClearBoard();
             handManager.StartRoundActions();
             
-            gameState.Reset(turnsObject);
+            gameState.Reset(turnsObject, enemyTurnsObject, nextDmgObject, enemyNextDmgObject);
 
             StartTurn(!friendlyVictory, hataponJustDied:true);
             yield return null;
@@ -485,10 +642,13 @@ public class GameController : MonoBehaviour
         bool couldDraw;
         if (!friendly)
         {
-            if (DeckManager.opponentDeckSize > 0)
+            if (DeckManager.opponentsDeck.Count > 0)
             {
-                DeckManager.opponentDeckSize -= 1;
+                //DeckManager.opponentDeckSize -= 1;
                 couldDraw = true;
+                //Debug.Log("Opponent draws");
+                //Debug.Log(DeckManager.opponentsDeck[0]);
+                DeckManager.opponentsDeck.RemoveAt(0);
             }
             else 
             {
@@ -498,7 +658,7 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            if (DeckManager.GetDeckSize() > 0)
+            if (DeckManager.GetPlayDeckSize() > 0)
             {
                 couldDraw = true;
             }
@@ -507,10 +667,19 @@ public class GameController : MonoBehaviour
                 couldDraw = false;
             }
         }
+        //Debug.Log("Me: " + DeckManager.GetDeckSize().ToString());
+        //Debug.Log("Opp: " + DeckManager.opponentsDeck.Count.ToString());
 
-        deckSizeObject.GetComponent<TextMeshProUGUI>().text = "Decks: " + DeckManager.GetDeckSize().ToString() + ":" + DeckManager.opponentDeckSize.ToString();
+        deckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.GetPlayDeckSize().ToString();
+        enemyDeckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.opponentsDeck.Count.ToString();
 
         return couldDraw;
+    }
+
+    public void UpdateDecks()
+    {
+        deckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.GetPlayDeckSize().ToString();
+        enemyDeckSizeObject.GetComponent<TextMeshPro>().text = DeckManager.opponentsDeck.Count.ToString();
     }
 
     // Buttons
@@ -524,8 +693,9 @@ public class GameController : MonoBehaviour
 
     public void Concede()
     {
-        if (playerTurn && CursorController.cursorState == CursorController.CursorStates.Free)
+        if (concedeTimes < 3 && playerTurn && CursorController.cursorState == CursorController.CursorStates.Free)
         {
+            concedeTimes += 1;
             CardManager concedeCard = handManager.GenerateCard(CardTypes.Concede, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
             StartCoroutine(concedeCard.GetCardStats().spell(new List<int>(), boardManager.enemySlots, boardManager.friendlySlots));
             ServerDataProcesser.instance.CastSpell(concedeCard, new List<int>());

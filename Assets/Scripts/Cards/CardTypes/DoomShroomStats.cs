@@ -9,11 +9,13 @@ public class DoomShroomStats : MonoBehaviour
         CardManager.CardStats stats = new CardManager.CardStats();
 
         const int damage = 2;
-        stats.description = "Deal " + damage.ToString() + " damage to a character. If that character dies, summon a poisonous Mushroom on its place.";
+        stats.description = "Deal " + damage.ToString() + " damage to a unit. If that unit dies, summon a Poisonous Mushroom on its place.\nCycling.";
         stats.name = "Doom Shroom";
 
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
+
+        stats.cycling = true;
 
         stats.isSpell = true;
         static IEnumerator realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

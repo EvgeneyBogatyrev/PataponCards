@@ -9,17 +9,16 @@ public static class CoppenStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "On play: Summon an Ice Wall for your opponent in front of this card.";
+        stats.description = "On play: Summon an Ice Wall for your opponent in front of Coppen.";
         stats.name = "Coppen";
         stats.runes.Add(Runes.Bow);
 
 
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
 
         static IEnumerator CoppenRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             int index = targets[0];
-            Debug.Log(index);
             BoardManager.Slot slot;
             slot = enemySlots[index];
             if (slot.GetFree())

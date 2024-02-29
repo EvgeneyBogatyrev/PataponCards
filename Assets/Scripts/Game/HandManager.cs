@@ -16,10 +16,11 @@ public class HandManager : MonoBehaviour
     private List<CardManager> hand = new List<CardManager>();
     private List<CardManager> opponentHand = new List<CardManager>();
     private bool canPlayCard = false;
+    private bool canCycleCard = false;
     private BoardManager boardManager;
 
     private int hataponHealth = 20;
-    private int hataponHealthDecrease = 5;
+    private int hataponHealthDecrease = 0;
     private Vector3 drawStartPosition;
 
     private bool CardIsDrawing = false;
@@ -33,6 +34,8 @@ public class HandManager : MonoBehaviour
         mulliganing = true;
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
         drawStartPosition = GameObject.Find("DrawFromDeck").transform.position;
+        DeckManager.deck = SaveSystem.LoadDeck();
+        DeckManager.runes = SaveSystem.LoadRunes();
         DeckManager.CopyDeck();
 
         for (int i = 0; i < 7; ++i)
@@ -44,7 +47,7 @@ public class HandManager : MonoBehaviour
         
     }
 
-    public CardManager SetNumberOfOpponentsCards(int number, bool returnCard=false)
+    public CardManager SetNumberOfOpponentsCards(int number, bool returnCard=false, int ephemeral=-1)
     {
         CardManager returnedCard = null;
         CardManager[] copyHand = new CardManager[opponentHand.Count];
@@ -73,15 +76,71 @@ public class HandManager : MonoBehaviour
             CardManager newCard = GenerateCard(CardTypes.Fang, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
             opponentHand.Add(newCard);
             newCard.SetCardState(CardManager.CardState.opponentHolding);
+            newCard.GetCardStats().ephemeral = ephemeral;
         }
 
         UpdateHandPositionOpponent();
         return returnedCard;
     }
 
+    public int GetNumberOfCards()
+    {
+        return hand.Count;
+    }
+
     public int GetNumberOfOpponentsCards()
     {
         return opponentHand.Count;
+    }
+
+    public void CheckEphemeral()
+    {
+        CardManager[] cards = new CardManager[hand.Count];
+        hand.CopyTo(cards);
+        int index = -1;
+        int removed = 0;
+        foreach (CardManager card in cards)
+        {
+            index += 1;
+            int eph = card.GetCardStats().ephemeral;
+            if (eph == -1)
+            {
+                continue;
+            }
+            if (card.GetCardStats().ephemeral == 0)
+            {
+                hand[index - removed].DestroyCard();
+                RemoveCard(index - removed);
+                removed += 1;
+            }
+            card.GetCardStats().ephemeral = eph - 1;
+            
+        }
+        UpdateHandPosition();
+        ServerDataProcesser.instance.Discard(removed);
+    }
+
+    public void DiscardHand(bool friendly=true)
+    {
+        if (friendly)
+        {
+            CardManager[] cards = new CardManager[hand.Count];
+            hand.CopyTo(cards);
+            int index = -1;
+            int removed = 0;
+            foreach (CardManager card in cards)
+            {
+                index += 1;
+                hand[index - removed].DestroyCard();
+                RemoveCard(index - removed);
+                removed += 1;            
+            }
+            UpdateHandPosition();
+        }
+        else
+        {
+            SetNumberOfOpponentsCards(0);
+        }
     }
 
     public static void DestroyDisplayedCards()
@@ -97,6 +156,20 @@ public class HandManager : MonoBehaviour
         }
     }
 
+    public void MillCard()
+    {
+        CardTypes card = DeckManager.GetTopCard(remove:true);
+        CardManager newCard = GenerateCard(card, drawStartPosition).GetComponent<CardManager>();
+        newCard.SetCardState(CardManager.CardState.toMill);
+    }
+
+    public void MillCardOpp()
+    {
+        CardTypes card = DeckManager.GetTopCardOpp(remove:true);
+        CardManager newCard = GenerateCard(card, drawStartPosition).GetComponent<CardManager>();
+        newCard.SetCardState(CardManager.CardState.toMill);
+    }
+
 
     public void Mulligan()
     {
@@ -108,9 +181,11 @@ public class HandManager : MonoBehaviour
         
         foreach (CardManager card in hand)
         {
-            DeckManager.PutCardBack(card.GetCardType());
+            //DeckManager.PutCardBack(card.GetCardType());
             Destroy(card.gameObject);
         }
+
+        DeckManager.CopyDeck();
 
         hand = new List<CardManager>();
 
@@ -131,6 +206,7 @@ public class HandManager : MonoBehaviour
         {
             return;
         }
+        ServerDataProcesser.instance.SendDeck(DeckManager.GetEncodedDeck());
         HandManager.mulliganing = false;
         UpdateHandPosition();
         keepHandButtonObject.SetActive(false);
@@ -158,22 +234,22 @@ public class HandManager : MonoBehaviour
         hataponHealth -= hataponHealthDecrease;
     }
 
-    public void DrawCard()
+    public void DrawCard(int ephemeral=-1)
     {
         if (hand.Count >= 7)
         {
             return;
         }
         GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
-        CardTypes cardType = DeckManager.GetRandomCard(remove:true);
+        CardTypes cardType = DeckManager.GetTopCard(remove:true);
         if (cardType != CardTypes.Hatapon)
         {
-            AddCardToHand(cardType);
+            AddCardToHand(cardType, ephemeral:ephemeral);
         }
         gameController.ProcessCardDraw(friendly:true);
     }
 
-    public void DrawCardOpponent(bool fromDeck=true)
+    public void DrawCardOpponent(bool fromDeck=true, int ephemeral=-1)
     {
         if (GetNumberOfOpponentsCards() >= 7)
         {
@@ -184,21 +260,21 @@ public class HandManager : MonoBehaviour
         {
             if (gameController.ProcessCardDraw(friendly:false))
             {
-                SetNumberOfOpponentsCards(GetNumberOfOpponentsCards() + 1);
+                SetNumberOfOpponentsCards(GetNumberOfOpponentsCards() + 1, ephemeral:ephemeral);
             }
         }
         else
         {
-            SetNumberOfOpponentsCards(GetNumberOfOpponentsCards() + 1);
+            SetNumberOfOpponentsCards(GetNumberOfOpponentsCards() + 1, ephemeral:ephemeral);
         }
     }
 
-    public void AddCardToHand(CardTypes card)
+    public void AddCardToHand(CardTypes card, int ephemeral=-1)
     {
-        StartCoroutine(AddCardToHandAsync(card));
+        StartCoroutine(AddCardToHandAsync(card, ephemeral:ephemeral));
     }
 
-    public IEnumerator AddCardToHandAsync(CardTypes card)
+    public IEnumerator AddCardToHandAsync(CardTypes card, int ephemeral=-1)
     {
         while (CardIsDrawing)
         {
@@ -213,6 +289,7 @@ public class HandManager : MonoBehaviour
 
             newCard.transform.position = drawStartPosition;
             newCard.SetCardState(CardManager.CardState.Drawing);
+            newCard.GetCardStats().ephemeral = ephemeral;
 
             if (!HandManager.mulliganing)
             {
@@ -264,7 +341,7 @@ public class HandManager : MonoBehaviour
     {
         if (!mulliganing)
         {
-            Vector3 center = new Vector3(0f, -3.2f, -0.75f);
+            Vector3 center = new Vector3(-1.5f, -3.2f, -0.75f);
             int numberOfCards = hand.Count;
             float startPoint = center.x - ((numberOfCards - 1) * cardSpace / 2f);
             float startRot = 5f * ((float)(numberOfCards - 1) / 2);
@@ -295,7 +372,7 @@ public class HandManager : MonoBehaviour
 
     private void UpdateHandPositionOpponent()
     {
-        Vector3 center = new Vector3(0f, 7.7f, -0.75f);
+        Vector3 center = new Vector3(-1.5f, 7.7f, -0.75f);
         int numberOfCards = opponentHand.Count;
         float startPoint = center.x - ((numberOfCards - 1) * cardSpace / 2f);
         float startRot = 5f * ((float)(numberOfCards - 1) / 2);
@@ -318,16 +395,32 @@ public class HandManager : MonoBehaviour
     {
         return canPlayCard;
     }
+
+     public bool CanCycleCard()
+    {
+        return canCycleCard;
+    }
+
     public void SetCanPlayCard(bool _can)
     {
         canPlayCard = _can;
     }
 
+    public void SetCanCycleCard(bool _can)
+    {
+        canCycleCard = _can;
+    }
+
     public void StartRoundActions(int cardIncrement = 3)
     {
-        for (int i = 0; i < cardIncrement; ++i)
+        int numberOfDraws = Mathf.Min(cardIncrement, 7 - hand.Count);
+        for (int i = 0; i < numberOfDraws; ++i)
         {
             DrawCard();
+        }
+        int numberOfDrawsOpp = Mathf.Min(cardIncrement, 7 - opponentHand.Count);
+        for (int i = 0; i < numberOfDrawsOpp; ++i)
+        {
             DrawCardOpponent();
         }
 

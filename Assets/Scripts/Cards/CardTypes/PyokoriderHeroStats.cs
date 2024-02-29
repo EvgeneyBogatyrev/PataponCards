@@ -10,8 +10,8 @@ public static class PyokoriderHeroStats
         const int pyokoDamage = 3;
 
         stats.power = 3;
-        stats.description = "At the end of your turn deal " + pyokoDamage.ToString() + " damage to the right-most enemy character.";
-        stats.name = "Pyokorider, hero";
+        stats.description = "End of turn: Deal damage equal to this unit's power to the right-most enemy unit.";
+        stats.name = "Pyokorider";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
@@ -21,6 +21,10 @@ public static class PyokoriderHeroStats
 
         static IEnumerator PyokoriderHeroEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
+            MinionManager thisMinion = friendlySlots[index].GetConnectedMinion();
+
             MinionManager connectedMinion = null;
             foreach (BoardManager.Slot slot in enemySlots)
             {
@@ -32,10 +36,6 @@ public static class PyokoriderHeroStats
             
             if (connectedMinion != null)
             {
-
-                GameController gameController = GameObject.Find("GameController").GetComponent<GameController>(); 
-                gameController.actionIsHappening = true;
-
 
                 if (connectedMinion != null)
                 {
@@ -53,7 +53,7 @@ public static class PyokoriderHeroStats
                         yield return new WaitForSeconds(0.1f);
                     }
 
-                    connectedMinion.ReceiveDamage(pyokoDamage);
+                    connectedMinion.ReceiveDamage(thisMinion.GetPower());
 
                     while (!spear.outOfScreen)
                     {
@@ -65,6 +65,8 @@ public static class PyokoriderHeroStats
                 }
                 gameController.actionIsHappening = false;
             }
+            //GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            //gameController.actionIsHappening = false;
             yield return null;
         }
         stats.endTurnEvent = PyokoriderHeroEndTurn;

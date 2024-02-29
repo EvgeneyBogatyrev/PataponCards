@@ -13,7 +13,7 @@ public class JamschStats : MonoBehaviour
         stats.runes.Add(Runes.Bow);
 
         stats.power = 1;
-        stats.description = "On play: Poison all enemy creatures and enemy Hatapon.";
+        stats.description = "On play: Poison all enemy units (Poisoned units receive 1 damage at the end thier controllers' turn).";
         stats.name = "Jamsch";
         
 
@@ -45,7 +45,7 @@ public class JamschStats : MonoBehaviour
             yield return null;
         }
 
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
         stats.spell = Realization;
         stats.numberOfTargets = 1;
         stats.dummyTarget = true;

@@ -7,10 +7,10 @@ public static class YariponStats
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-        const int yariponDamage = 3;
+        const int yariponDamage = 2;
 
-        stats.power = 2;
-        stats.description = "At the end of your turn deal " + yariponDamage.ToString() + " damage to an enemy character next to it.";
+        stats.power = 3;
+        stats.description = "End of turn: Deal " + yariponDamage.ToString() + " damage to an enemy unit next to it.";
         stats.name = "Yaripon";
         stats.imagePath = "yaripon";
         

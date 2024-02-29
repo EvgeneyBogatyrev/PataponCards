@@ -10,7 +10,7 @@ public static class IdiotStats
 
         const int burusSelfDamage = 1;
         stats.power = 2;
-        stats.description = "At the start of your turn draw a card and deal " + burusSelfDamage.ToString() + " damage to itself.";
+        stats.description = "Pacifism. Start of turn: Draw a card and deal " + burusSelfDamage.ToString() + " damage to Bent Compass.";
         stats.name = "Bent Compass";
         stats.canAttack = false;
         stats.limitedVision = true;

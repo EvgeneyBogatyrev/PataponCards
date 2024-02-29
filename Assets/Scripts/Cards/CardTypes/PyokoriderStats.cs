@@ -10,8 +10,8 @@ public static class PyokoriderStats
 
         const int pyokoriderStartTurnPower = 2;
 
-        stats.power = 5;
-        stats.description = "Haste.\nAt the start of your turn set this creature's power to " + pyokoriderStartTurnPower.ToString();
+        stats.power = 6;
+        stats.description = "Haste.\nOn attack: Reduce this unit's power by 1 (can't be below 1).";
         stats.name = "Ladodon";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
@@ -22,7 +22,38 @@ public static class PyokoriderStats
             yield return null;
         }
 
-        stats.startTurnEvent = PyokoriderStartTurn;
+        static IEnumerator OnAttack(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        {
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
+            int thisIndex = targets[0];
+            BoardManager.Slot thisSlot;
+            if (thisIndex > 0)
+            {
+                thisIndex -= 1;
+                thisSlot = friendlySlots[thisIndex];
+            }
+            else
+            {
+                thisIndex = -1 * thisIndex - 1;
+                thisSlot = friendlySlots[thisIndex];
+            }
+
+            MinionManager minion = thisSlot.GetConnectedMinion();
+            if (minion != null)
+            { 
+                if (minion.GetPower() > 1)
+                {
+                    minion.LoseLife(1);
+                }
+                minion.onAttackActionProgress = false;
+            }
+            gameController.actionIsHappening = false;
+            yield return null;
+        }
+
+        stats.onAttackEvent = OnAttack;
+        //stats.startTurnEvent = PyokoriderStartTurn;
         stats.hasHaste = true;
 
         stats.imagePath = "ladodon";

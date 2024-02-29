@@ -27,7 +27,7 @@ public static class IceWall_optionStats
                 host = friendlySlots[targets[0] - 1].GetConnectedMinion();
             }
 
-            host.TakePower(IceWallHealthCost);
+            host.LoseLife(IceWallHealthCost);
             host.ReceiveDamage(IceWallSelfDamage);
             yield return null;
         }

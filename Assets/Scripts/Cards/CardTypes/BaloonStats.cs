@@ -9,7 +9,7 @@ public static class BaloonStats
         CardManager.CardStats stats = new CardManager.CardStats();
         const int baloonDamage = 1;
         stats.power = 2;
-        stats.description = "Cannot be a target of an attack. At the end of your turn deal " + baloonDamage.ToString() + " damage to the enemy Hatapon.";
+        stats.description = "Can't be attacked by units.\nEnd of turn: Deal " + baloonDamage.ToString() + " damage to the enemy Hatapon.";
         stats.name = "Hot Air Ballon";
         stats.flying = true;
         stats.runes.Add(Runes.Spear);
@@ -18,6 +18,8 @@ public static class BaloonStats
 
         static IEnumerator BaloonEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
             MinionManager connectedMinion = null;
             foreach (BoardManager.Slot slot in enemySlots)
             {
@@ -31,6 +33,7 @@ public static class BaloonStats
             {
                 connectedMinion.ReceiveDamage(baloonDamage);
             }
+            gameController.actionIsHappening = false;
             yield return null;
         }
         stats.endTurnEvent = BaloonEndTurn;

@@ -11,7 +11,7 @@ public class CollectionControl : MonoBehaviour
     public int columns = 3;
     public float cardScale = 0.75f;
     public GameObject cardPrefab;
-    public GameObject cardRepr; 
+    public GameObject cardRepr;
     public List<GameObject> runeObjects;
 
     public float xOffset;
@@ -36,22 +36,37 @@ public class CollectionControl : MonoBehaviour
     public List<CardTypes> GetForbiddenCards()
     {
         // Cards that are not collectable and should not be displayed
-        List<CardTypes> reservedList = new List<CardTypes>();
-
-        reservedList.Add(CardTypes.Hatapon);
-        reservedList.Add(CardTypes.Nutrition);
-        reservedList.Add(CardTypes.GiveFang);
-        reservedList.Add(CardTypes.Motiti_option1);
-        reservedList.Add(CardTypes.Motiti_option2);
-        reservedList.Add(CardTypes.MotitiAngry);
-        reservedList.Add(CardTypes.Boulder);
-        reservedList.Add(CardTypes.TonKampon_option1);
-        reservedList.Add(CardTypes.TonKampon_option2);
-        reservedList.Add(CardTypes.IceWall);
-        reservedList.Add(CardTypes.IceWall_option);
-        reservedList.Add(CardTypes.Concede);
-        reservedList.Add(CardTypes.StoneFree);
-        reservedList.Add(CardTypes.Mushroom);
+        List<CardTypes> reservedList = new()
+        {
+            CardTypes.Hatapon,
+            CardTypes.Nutrition,
+            CardTypes.GiveFang,
+            CardTypes.Motiti_option1,
+            CardTypes.Motiti_option2,
+            CardTypes.MotitiAngry,
+            CardTypes.Boulder,
+            CardTypes.TonKampon_option1,
+            CardTypes.TonKampon_option2,
+            CardTypes.IceWall,
+            CardTypes.IceWall_option,
+            CardTypes.Concede,
+            CardTypes.StoneFree,
+            CardTypes.Mushroom,
+            CardTypes.TrentOnFire,
+            CardTypes.Armory_option1,
+            CardTypes.Armory_option2,
+            CardTypes.Horserider,
+            CardTypes.TokenTatepon,
+            CardTypes.SpeedBoost,
+            CardTypes.TurnToStone,
+            CardTypes.Moribu,
+            CardTypes.Grenburr,
+            CardTypes.Wondabarappa,
+            CardTypes.Venomist,
+            CardTypes.KibaForm,
+            CardTypes.BirdForm,
+            //CardTypes.TraitorBoulder,
+        };
 
         return reservedList;
     }
@@ -67,7 +82,6 @@ public class CollectionControl : MonoBehaviour
 
         DeckManager.deck = SaveSystem.LoadDeck();
         DeckManager.runes = SaveSystem.LoadRunes();
-
 
         spearDevotion = 0;
         shieldDevotion = 0;
@@ -116,7 +130,7 @@ public class CollectionControl : MonoBehaviour
             }
         }
 
-        List<int> indices = new List<int>();
+        List<int> indices = new();
 
         int i = 0;
         foreach (CardTypes type in DeckManager.deck)
@@ -125,13 +139,13 @@ public class CollectionControl : MonoBehaviour
             List<Runes> runes = card.GetComponent<CardManager>().GetCardStats().runes;
             //card.GetComponent<CardManager>().DestroyCard();
             Destroy(card);
-            
+
             int tmpSpear = spearDevotion;
             int tmpShield = shieldDevotion;
             int tmpBow = bowDevotion;
 
             bool bad = false;
-            
+
             foreach (Runes rune in runes)
             {
                 if (rune == Runes.Spear)
@@ -161,7 +175,7 @@ public class CollectionControl : MonoBehaviour
             i += 1;
         }
 
-        List<CardTypes> newDeck = new List<CardTypes>();
+        List<CardTypes> newDeck = new();
 
         int ind = 0;
         foreach (CardTypes ct in DeckManager.deck)
@@ -189,14 +203,16 @@ public class CollectionControl : MonoBehaviour
             if (rune == Runes.Spear)
             {
                 runeString += "Sp ";
-            } else if (rune == Runes.Shield)
+            }
+            else if (rune == Runes.Shield)
             {
                 runeString += "Sh ";
-            } else if (rune == Runes.Bow)
+            }
+            else if (rune == Runes.Bow)
             {
                 runeString += "Bo ";
             }
-            else 
+            else
             {
                 runeString += "?? ";
             }

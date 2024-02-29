@@ -32,7 +32,7 @@ public static class SpeedBoost
                 _targetSlot = enemySlots[-_target - 1];
             }
             MinionManager _targetMinion = _targetSlot.GetConnectedMinion();
-            if (_targetMinion.GetCardType() == CardTypes.Hatapon)
+            if (_targetMinion.GetCardType() == CardTypes.Hatapon || !_targetMinion.GetCardStats().canAttack || _targetMinion.GetCardStats().isStatic)
             {
                 return false;
             }
@@ -55,7 +55,7 @@ public static class SpeedBoost
 
             MinionManager targetMinion = targetSlot.GetConnectedMinion();
 
-            targetMinion.SetCanAttack(true);
+            targetMinion.GiveAdditionalAttack();
             yield return null;
         }
 

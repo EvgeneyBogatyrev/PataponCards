@@ -9,7 +9,7 @@ public static class ToriponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "Cannot be a target of an attack.";
+        stats.description = "Can't be attacked by units.";
         stats.name = "Toripon";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);

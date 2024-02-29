@@ -8,17 +8,17 @@ public static class MahoponStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int mahoponTargetDamage = 3;
-        const int mahoponAoEDamage = 2;
-        stats.runes.Add(Runes.Bow);
+        const int mahoponTargetDamage = 2;
+        const int mahoponAoEDamage = 1;
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
 
         stats.power = 2;
-        stats.description = "On play: Deal " + mahoponTargetDamage.ToString() + " damage to target character and " + mahoponAoEDamage.ToString() + " damage to all other characters.";
+        stats.description = "Cycling.\nOn play: Deal " + mahoponTargetDamage.ToString() + " damage to target unit and " + mahoponAoEDamage.ToString() + " damage to all other units.";
         stats.name = "Mahopon";
 
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
+        stats.cycling = true;
 
         static IEnumerator MahoponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

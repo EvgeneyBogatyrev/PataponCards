@@ -10,14 +10,17 @@ public static class BowmunkStats
 
         const int bowmunkHealing = 2;
         stats.power = 2;
-        stats.description = "On play: Summon the boulder artifact with Greatshield.\nAt the end of your turn heal your Hatapon by " + bowmunkHealing.ToString() + ".";
+        stats.description = "On play: Summon a Boulder with Pacifism and Lifelink.\nAt the end of your turn heal your Hatapon by " + bowmunkHealing.ToString() + ".";
         stats.name = "Bowmunk";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
+        stats.descriptionSize = 3;
 
 
         static IEnumerator BowmunkEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
             foreach (BoardManager.Slot slot in friendlySlots)
             {
                 MinionManager connectedMinion = slot.GetConnectedMinion();
@@ -29,12 +32,14 @@ public static class BowmunkStats
                     }
                 }
             }
+            //GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = false;
             yield return null;
         }
         stats.endTurnEvent = BowmunkEndTurn;
 
 
-        stats.hasOnPlay = true;
+        stats.hasOnPlaySpell = true;
 
         static IEnumerator BowmunkRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -56,7 +61,24 @@ public static class BowmunkStats
                 BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
                 CardManager boulderCard = handManager.GenerateCard(CardTypes.Boulder, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
-                boardManager.PlayCard(boulderCard, new Vector3(0f, 0f, 0f), targetSlot, destroy: false, record: false);
+                MinionManager boulder = boardManager.PlayCard(boulderCard, new Vector3(0f, 0f, 0f), targetSlot, destroy: false, record: false);
+
+                /*
+                foreach (BoardManager.Slot sl in friendlySlots)
+                {
+                    MinionManager mn = sl.GetConnectedMinion();
+                    if (mn == null || mn == boulder)
+                    {
+                        continue;
+                    }
+
+                    mn.GetCardStats().lifelinkMeTo = -1;
+                    mn.GetCardStats().lifelinkedTo = new()
+                    {
+                        boulder
+                    };
+                }
+                */
 
                 boulderCard.DestroyCard();
             }

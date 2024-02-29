@@ -8,7 +8,7 @@ public static class HataponStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 20;
-        stats.description = "Protect him at all cost!";
+        stats.description = "Cannot attack and deal damage.\nProtect him at all cost!";
         stats.name = "Hatapon";
         stats.canAttack = false;
         stats.canDealDamage = false;

@@ -16,4 +16,9 @@ public class MainMenuController : MonoBehaviour
     {
         SceneManager.LoadScene("Collection");
     }
+
+    public void Exit()
+    {
+        Application.Quit();
+    }
 }

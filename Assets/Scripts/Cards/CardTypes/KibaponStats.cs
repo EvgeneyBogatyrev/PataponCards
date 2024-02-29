@@ -9,12 +9,12 @@ public static class KibaponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 4;
-        stats.description = "Haste.";
+        stats.description = "Haste (can attack and move as soon as it enters the battlefield).";
         stats.name = "Kibapon";
         stats.hasHaste = true;
         //stats.hasShield = true;
         stats.runes.Add(Runes.Spear);
-        stats.runes.Add(Runes.Spear);
+        //stats.runes.Add(Runes.Spear);
 
         stats.imagePath = "kibapon";
 

@@ -13,15 +13,24 @@ public class BoardManager : MonoBehaviour
         private int index;
         private bool friendly;
         private bool free;
+        private bool cycling;
 
 
-        public Slot(Vector3 position, int _index, bool _friendly)
+        public Slot(Vector3 position, int _index, bool _friendly, bool _cycling=false)
         {
-            slotObject = Instantiate(BoardManager.slotPrefabStatic);
+            if (!_cycling) 
+            {
+                slotObject = Instantiate(BoardManager.slotPrefabStatic);
+            }
+            else
+            {
+                slotObject = Instantiate(BoardManager.cyclePrefabStatic);
+            }
             slotObject.transform.position = position;
             index = _index;
             friendly = _friendly;
             free = true;
+            cycling = _cycling;
             Highlight(false);
         }
 
@@ -29,11 +38,19 @@ public class BoardManager : MonoBehaviour
         {
             if (_active)
             {
+                slotObject.SetActive(true);
                 slotObject.GetComponent<SpriteRenderer>().color = BoardManager.highlightedColorStatic;
             }
             else
             {
-                slotObject.GetComponent<SpriteRenderer>().color = BoardManager.normalColorStatic;
+                if (cycling)
+                {
+                    slotObject.SetActive(false);
+                }
+                else
+                {
+                    slotObject.GetComponent<SpriteRenderer>().color = BoardManager.normalColorStatic;
+                }
             }
         }
 
@@ -49,7 +66,11 @@ public class BoardManager : MonoBehaviour
 
         public Vector3 GetPosition()
         {
-            return slotObject.transform.position;
+            if (!cycling)
+            {
+                return slotObject.transform.position;
+            }
+            return new Vector3(slotObject.transform.position.x + 10f/8f, 0f, 0f); // Fix that! 
         }
 
         public GameObject GetSlotObject()
@@ -81,6 +102,9 @@ public class BoardManager : MonoBehaviour
     public static GameObject slotPrefabStatic;
     public GameObject slotPrefab;
 
+    public static GameObject cyclePrefabStatic;
+    public GameObject cyclePrefab;
+
     public static Color highlightedColorStatic;
     public Color highlightedColor;
 
@@ -91,12 +115,14 @@ public class BoardManager : MonoBehaviour
 
     public List<Slot> friendlySlots = new List<Slot>();
     public List<Slot> enemySlots = new List<Slot>();
+    public Slot cyclingSlot;
 
     public int numberOfSlots = 7;
     public float friendlySlotsPosition = 1f;
     public float enemySlotsPosition = 3f;
     public float leftSlotOffset = 10f;
     public float minionRotation = 0f;
+    public float leftSlotSlide = -5f;
 
     public int randomHash;
     public int opponentHash;
@@ -108,20 +134,24 @@ public class BoardManager : MonoBehaviour
     public CardTypes lastDeadYou = CardTypes.Hatapon;
     public CardTypes lastDeadOpponent = CardTypes.Hatapon;
 
+    public List<CardTypes> playedCards = new();
+    public List<CardTypes> playedCardsOpponent = new();
+
     void Start()
     {
         InitStaticObjects();
         float step = 2 * leftSlotOffset / (numberOfSlots + 1);
         for (int i = 1; i <= numberOfSlots; ++i)
         {
-            Slot newSlot = new Slot(new Vector3(-leftSlotOffset + i * step, friendlySlotsPosition, 1.5f), i - 1, true);            
+            Slot newSlot = new Slot(new Vector3(leftSlotSlide + i * step, friendlySlotsPosition, 1.5f), i - 1, true);            
             friendlySlots.Add(newSlot);
         }
         for (int i = 1; i <= numberOfSlots; ++i)
         {
-            Slot newSlot = new Slot(new Vector3(-leftSlotOffset + i * step, enemySlotsPosition, 1.5f), i - 1, false);
+            Slot newSlot = new Slot(new Vector3(leftSlotSlide + i * step, enemySlotsPosition, 1.5f), i - 1, false);
             enemySlots.Add(newSlot);
         }
+        cyclingSlot = new Slot(new Vector3(leftSlotSlide + numberOfSlots * step + 0.65f * step, friendlySlotsPosition - 5.2f, 1.5f), numberOfSlots, true, _cycling: true);
 
         randomHash = InfoSaver.myHash;
         opponentHash = InfoSaver.opponentHash;
@@ -135,17 +165,31 @@ public class BoardManager : MonoBehaviour
     public void InitStaticObjects()
     {
         slotPrefabStatic = slotPrefab;
+        cyclePrefabStatic = cyclePrefab;
         highlightedColorStatic = highlightedColor;
         normalColorStatic = normalColor;
     }
 
-    public void PlayCard(CardManager card, Vector3 position, Slot slot = null, bool destroy=true, bool record=true)
+    public MinionManager PlayCard(CardManager card, Vector3 position, Slot slot = null, bool destroy=true, bool record=true, bool fromHand=true)
     {
         GameObject newMinion = Instantiate(minionPrefab, position, Quaternion.identity);
         newMinion.transform.rotation = Quaternion.Euler(minionRotation, 0f, 0f);
         newMinion.GetComponent<MinionManager>().CustomizeMinion(card, slot);
 
-        if (card.GetCardStats().hasBattlecry)
+        if (record)
+        {
+            if (!slot.GetFriendly())
+            {
+                playedCardsOpponent.Add(card.GetCardType());
+            }
+            else
+            {
+                playedCards.Add(card.GetCardType());
+            }
+        }
+        
+
+        if (fromHand && card.GetCardStats().hasAfterPlayEvent)
         {
             int index;
             if (!slot.GetFriendly())
@@ -157,8 +201,37 @@ public class BoardManager : MonoBehaviour
                 index = slot.GetIndex() + 1;
             }
 
-            card.GetCardStats().onPlayEvent(index, enemySlots, friendlySlots);
+            Debug.Log("Battlecry");
+
+            StartCoroutine(card.GetCardStats().afterPlayEvent(index, enemySlots, friendlySlots));
         }
+
+        List<Slot> _slots;
+        if (slot.GetFriendly())
+        {
+            _slots = friendlySlots;
+        }
+        else
+        {
+            _slots = enemySlots;
+        }
+
+        foreach (Slot _slot in _slots)
+        {
+            MinionManager _minion = _slot.GetConnectedMinion();
+            if (_minion != null)
+            {
+                if (_minion.GetCardStats().lifelinkMeTo == slot.GetIndex())
+                {
+                    _minion.GetCardStats().lifelinkMeTo = -1;
+                    _minion.GetCardStats().lifelinkedTo = new()
+                    {
+                        newMinion.GetComponent<MinionManager>()
+                    };
+                }
+            }
+        }
+        
 
         if (destroy)
         {
@@ -170,16 +243,70 @@ public class BoardManager : MonoBehaviour
         {
             ServerDataProcesser.instance.PlayCard(card, slot);
         }
+
+        return newMinion.GetComponent<MinionManager>();
     }
 
-    public void PlayCard(CardManager card, Slot slot = null, bool destroy=true, bool record=true)
+    public IEnumerator CycleCard(CardManager card, bool destroy=true, bool record=true)
+    {
+        if (record)
+        {
+            ServerDataProcesser.instance.CycleCard(card);
+        }
+
+        card.SetCardState(CardManager.CardState.Mill);
+        
+        
+        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+        int idx = 0;
+        foreach (Slot slot in friendlySlots)
+        {
+            MinionManager minion = slot.GetConnectedMinion();
+            if (minion != null)
+            {
+                if (minion.GetCardStats().onCycleOtherEvent != null)
+                {
+                    do {
+                        yield return new WaitForSeconds(0.1f);
+                    } while (gameController.actionIsHappening);
+                    StartCoroutine(minion.GetCardStats().onCycleOtherEvent(idx, enemySlots, friendlySlots));
+                    do {
+                        yield return new WaitForSeconds(0.1f);
+                    } while (gameController.actionIsHappening);
+                }
+            }
+            idx += 1;
+        }
+
+        if (destroy)
+        {
+            card.DestroyCard();
+        }
+        
+        yield return null;
+    }
+
+    public MinionManager PlayCard(CardManager card, Slot slot = null, bool destroy=true, bool record=true, bool fromHand=true)
     {     
         GameObject newMinion = Instantiate(minionPrefab, card.transform.position, Quaternion.identity);
         newMinion.transform.rotation = Quaternion.Euler(minionRotation, 0f, 0f);
         newMinion.GetComponent<MinionManager>().CustomizeMinion(card, slot);
 
-        if (card.GetCardStats().hasBattlecry)
+        if (record)
         {
+            if (!slot.GetFriendly())
+            {
+                playedCardsOpponent.Add(card.GetCardType());
+            }
+            else
+            {
+                playedCards.Add(card.GetCardType());
+            }
+        }
+
+        if (fromHand && card.GetCardStats().hasAfterPlayEvent)
+        {
+            Debug.Log("Battlecry (me)");
             int index;
             if (!slot.GetFriendly())
             {
@@ -189,8 +316,34 @@ public class BoardManager : MonoBehaviour
             {
                 index = slot.GetIndex() + 1;
             }
+            Debug.Log(card.GetCardStats().afterPlayEvent);
+            StartCoroutine(card.GetCardStats().afterPlayEvent(index, enemySlots, friendlySlots));
+        }
 
-            card.GetCardStats().onPlayEvent(index, enemySlots, friendlySlots);
+        List<Slot> _slots;
+        if (slot.GetFriendly())
+        {
+            _slots = friendlySlots;
+        }
+        else
+        {
+            _slots = enemySlots;
+        }
+
+        foreach (Slot _slot in _slots)
+        {
+            MinionManager _minion = _slot.GetConnectedMinion();
+            if (_minion != null)
+            {
+                if (_minion.GetCardStats().lifelinkMeTo == slot.GetIndex())
+                {
+                    _minion.GetCardStats().lifelinkMeTo = -1;
+                    _minion.GetCardStats().lifelinkedTo = new()
+                    {
+                        newMinion.GetComponent<MinionManager>()
+                    };
+                }
+            }
         }
 
         if (destroy)
@@ -203,6 +356,7 @@ public class BoardManager : MonoBehaviour
         {
             ServerDataProcesser.instance.PlayCard(card, slot);
         }
+        return newMinion.GetComponent<MinionManager>();
     }
 
     
@@ -238,7 +392,7 @@ public class BoardManager : MonoBehaviour
             Debug.Log("Can't find Hatapon in DealSuddenDeathDamage");
         }
 
-        hatapon.TakePower(amount);
+        hatapon.LoseLife(amount);
     }
 
     public void ClearBoard()
