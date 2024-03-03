@@ -49,7 +49,7 @@ public static class BringThePoisonStats
         stats.spell = Realization;
         stats.numberOfTargets = 0;
 
-        stats.imagePath = "tropical_tailwind";
+        stats.imagePath = "bring_the_poison";
         return stats;
     }
 }

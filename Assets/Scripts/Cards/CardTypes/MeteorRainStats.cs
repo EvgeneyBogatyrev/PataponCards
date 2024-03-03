@@ -41,7 +41,7 @@ public class MeteorRainStats : MonoBehaviour
 
         stats.spell = Realization;
         stats.numberOfTargets = 0;
-        stats.imagePath = "NovaNova";
+        stats.imagePath = "meteor_rain";
         return stats;
     }
 }

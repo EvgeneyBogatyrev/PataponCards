@@ -641,6 +641,7 @@ MonoBehaviour:
   cardScale: 0.6
   cardPrefab: {fileID: 5994425831647166798, guid: 64be9f69a2d598c4ea6a3e37aeb0a698, type: 3}
   cardRepr: {fileID: 2864456557026270458, guid: 713c533c9a64b0948b01aa182e066cd7, type: 3}
+  cardNumberText: {fileID: 1965691610}
   runeObjects:
   - {fileID: 1788132052}
   - {fileID: 647680362}

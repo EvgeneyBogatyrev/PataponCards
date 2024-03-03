@@ -79,7 +79,7 @@ public static class SleepingDustStats
         stats.spell = Realization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "BackToHideout";
+        stats.imagePath = "sleeping_dust";
         return stats;
     }
 }

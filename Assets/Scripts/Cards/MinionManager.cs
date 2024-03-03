@@ -96,7 +96,7 @@ public class MinionManager : MonoBehaviour
         damageObject.SetActive(false);
         //outlineBackAbilitiesObject.SetActive(false);
         //outlineBackObject.SetActive(false);
-        normalBackObject.SetActive(false);
+        //normalBackObject.SetActive(false);
         poisonObject.SetActive(false);
         shieldObject.SetActive(false);
         lifelinkObject.SetActive(false);
@@ -115,11 +115,13 @@ public class MinionManager : MonoBehaviour
             {
                 outlineBackAbilitiesObject.SetActive(can);
                 outlineBackObject.SetActive(false);
+                normalBackObject.SetActive(can);
             }
             else
             {
                 outlineBackObject.SetActive(can);
                 outlineBackAbilitiesObject.SetActive(false);
+                normalBackObject.SetActive(false);
             }
             //normalBackObject.SetActive(!can);
         }
@@ -127,6 +129,7 @@ public class MinionManager : MonoBehaviour
         {
             outlineBackObject.SetActive(false);
             outlineBackAbilitiesObject.SetActive(false);
+            normalBackObject.SetActive(false);
             //normalBackObject.SetActive(false);
         }
     }

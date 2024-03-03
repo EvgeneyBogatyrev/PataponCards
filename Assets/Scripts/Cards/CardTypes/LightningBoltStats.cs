@@ -38,7 +38,7 @@ public static class LightningBoltStats
         stats.spell = FangRealization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "Fang";
+        stats.imagePath = "lightning_bolt";
         return stats;
     }
 }

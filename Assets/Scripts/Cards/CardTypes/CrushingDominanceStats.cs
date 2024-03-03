@@ -10,7 +10,7 @@ public static class BadaDrumStats
 
         const int threshold = 3;
         stats.description = "Gain control of target non-Hatapon unit your opponent controls with power " + threshold.ToString() + " or less.";
-        stats.name = "Bada Drum";
+        stats.name = "Zigoton Drum";
         
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Bow);
@@ -123,7 +123,7 @@ public static class BadaDrumStats
         stats.checkSpellTarget = CheckTarget;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "Fang";
+        stats.imagePath = "bada_drum";
         return stats;
     }
 }

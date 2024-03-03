@@ -8,8 +8,8 @@ public static class BabattaStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.description = "On play: Replace your hand with Babatta Swarms";
-        stats.name = "Babatta";
+        stats.description = "On play: Replace your hand with 'Babatto Swarm' cards";
+        stats.name = "Babatto";
 
         stats.power = 3;
 
@@ -37,7 +37,7 @@ public static class BabattaStats
 
         stats.spell = FangRealization;
 
-        stats.imagePath = "Fang";
+        stats.imagePath = "babatto";
         return stats;
     }
 }
@@ -51,7 +51,7 @@ public static class BabattaSwarmStats
 
         const int damage = 3;
         stats.description = "Deal " + damage.ToString() + " damage.";
-        stats.name = "Babatta Swarm";
+        stats.name = "Babatto Swarm";
 
         stats.isSpell = true;
         static IEnumerator FangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -79,7 +79,7 @@ public static class BabattaSwarmStats
         stats.spell = FangRealization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "Fang";
+        stats.imagePath = "babatto_swarm";
         return stats;
     }
 }

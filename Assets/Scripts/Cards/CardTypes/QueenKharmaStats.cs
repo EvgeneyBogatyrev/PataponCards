@@ -48,7 +48,7 @@ public static class QueenKharmaStats
         stats.spell = Realization;
         stats.numberOfTargets = 0;
 
-        stats.imagePath = "tropical_tailwind";
+        stats.imagePath = "kharma";
         return stats;
     }
 }
