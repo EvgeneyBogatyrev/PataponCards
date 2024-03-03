@@ -22,7 +22,7 @@ public class CardManager : MonoBehaviour
     public delegate IEnumerator OnAttackEvent(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate IEnumerator OnPlayEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate IEnumerator OnCycleOtherEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
-    public delegate void OnDeathEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null, CardStats thisStats = null);
+    public delegate IEnumerator OnDeathEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null, CardStats thisStats = null);
     public delegate bool CheckSpellTarget(int target = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate bool CheckSpellTargets(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public class CardStats
@@ -300,7 +300,7 @@ public class CardManager : MonoBehaviour
         {
             // Check if this card can be cycled
             float distanceToCycle = Mathf.Abs(transform.position.x - boardManager.cyclingSlot.GetPosition().x);
-            if (minDistance == -1f || minDistance > distanceToCycle)
+            if (minDistance == -1f || minDistance > distanceToCycle || (distanceToCycle < 0.8f * minDistance && transform.position.y < 4f))
             {
                 closestSlot = boardManager.cyclingSlot;
             }

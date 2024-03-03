@@ -344,6 +344,10 @@ public class GameController : MonoBehaviour
 
     public void StartTurn(bool friendly, bool hataponJustDied=false)
     {
+        if (friendly)
+        {
+            endTurnButtonObject.SetActive(true);
+        }
         StartCoroutine(IenumStartTurn(friendly, hataponJustDied));
     }
 
@@ -474,6 +478,10 @@ public class GameController : MonoBehaviour
 
     public void EndTurn(bool friendly)
     {
+        if (friendly)
+        {
+            endTurnButtonObject.SetActive(false);
+        }
         StartCoroutine(IenumEndTurn(friendly));
     }
 
@@ -596,7 +604,7 @@ public class GameController : MonoBehaviour
             handManager.StartRoundActions();
             
             gameState.Reset(turnsObject, enemyTurnsObject, nextDmgObject, enemyNextDmgObject);
-
+            LogController.instance.ClearLog();
             StartTurn(!friendlyVictory, hataponJustDied:true);
             yield return null;
         }

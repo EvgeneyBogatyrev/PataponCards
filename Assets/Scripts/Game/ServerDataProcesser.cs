@@ -57,6 +57,7 @@ public class ServerDataProcesser : MonoBehaviour
 
     public void CycleCard(CardManager card)
     {
+        LogController.instance.AddCycleToLog(card.GetCardType(), true);
         int cardIndex = (int)card.GetCardType();
         StartCoroutine(Post("1", "cycle card", cardIndex.ToString(), ""));
     }
@@ -96,6 +97,7 @@ public class ServerDataProcesser : MonoBehaviour
 
     public void CastSpell(CardManager card, List<int> targets)
     {
+        LogController.instance.AddPlayCardToLog(card.GetCardType(), targets, true);
         string targetString = "";
         for (int i = 0; i < targets.Count; ++i)
         {
@@ -112,6 +114,7 @@ public class ServerDataProcesser : MonoBehaviour
 
     public void Attack(int from, int to)
     {
+        LogController.instance.AddAttackToLog(from, to, true);
         StartCoroutine(Post("1", "attack", "", from.ToString() + "," + to.ToString()));
     }
 
@@ -253,6 +256,7 @@ public class ServerDataProcesser : MonoBehaviour
                     newCard = handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1, returnCard:true);
                     CardTypes type = message.cardIndex;
                     boardManager.playedCardsOpponent.Add(type);
+                    LogController.instance.AddPlayCardToLog(type, null, false);
                     int target = message.targets[0];
                     BoardManager.Slot targetSlot;
                     if (target > 0)
@@ -305,6 +309,7 @@ public class ServerDataProcesser : MonoBehaviour
                 case MessageFromServer.Action.Attack:
                     int from = message.targets[0] * (-1);
                     int to = message.targets[1] * (-1);
+                    LogController.instance.AddAttackToLog(from, to, false);
                     MinionManager fromMinion, toMinion;
                     if (from < 0)
                     {
@@ -340,6 +345,7 @@ public class ServerDataProcesser : MonoBehaviour
 
                     spellType = message.cardIndex;
                     boardManager.playedCardsOpponent.Add(spellType);
+                    LogController.instance.AddPlayCardToLog(spellType, message.targets, false);
                     newCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                     
                     if (newCard.GetCardStats().damageToHost == -1 && newCard.GetCardType() != CardTypes.Concede)
@@ -378,6 +384,7 @@ public class ServerDataProcesser : MonoBehaviour
                     boardManager.battlecryTrigger = true;
                     spellType = message.cardIndex;
                     boardManager.playedCardsOpponent.Add(spellType);
+                    LogController.instance.AddPlayCardToLog(spellType, message.targets, false);
                     newCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                     if (newCard.GetCardStats().dummyTarget)
                     {
@@ -447,6 +454,8 @@ public class ServerDataProcesser : MonoBehaviour
                     newCard = handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1, returnCard:true);
                     CardTypes cycleType = message.cardIndex;
                     
+                    LogController.instance.AddCycleToLog(cycleType, false);
+
                     newCard = handManager.GenerateCard(cycleType, newCard).GetComponent<CardManager>();
                     newCard.SetName("Cycling: " + newCard.GetName());
                     newCard.SetNameSize(3);

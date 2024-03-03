@@ -8,66 +8,64 @@ public static class TurnToStoneStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.name = "Turn to stone";
-        stats.description = "Summon the last friendly unit that died this round. Give it Pacifism and Greatshield.";
-        stats.runes.Add(Runes.Shield);
-        stats.runes.Add(Runes.Shield);
+        stats.description = "Target non-Hatapon unit loses all abilities.";
+       
         //stats.runes.Add(Runes.Bow);
         //card.SetNameSize(4);
 
         stats.isSpell = true;
         static IEnumerator TurnToStoneRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
-            BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
-            if (enemySlots[1].GetFriendly())
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
+
+            MinionManager chosenMinion = null;
+            if (targets[0] > 0)
             {
-                if (boardManager.lastDeadOpponent == CardTypes.Hatapon)
-                {
-                    yield break;
-                }
-                HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
-                
-                foreach (BoardManager.Slot slot in friendlySlots)
-                {
-                    if (slot.GetFree())
-                    {
-                        CardManager minionCard = handManager.GenerateCard(boardManager.lastDeadOpponent, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
-                        minionCard.GetCardStats().canAttack = false;
-                        minionCard.GetCardStats().canDealDamage = false;
-                        minionCard.GetCardStats().limitedVision = true;
-                        minionCard.GetCardStats().hasGreatshield = true;
-                        boardManager.PlayCard(minionCard, new Vector3(0f, 0f, 0f), slot, destroy:false, record:false);
-                        minionCard.DestroyCard();
-                        break;
-                    }
-                }
+                chosenMinion = friendlySlots[targets[0] - 1].GetConnectedMinion();
             }
             else
             {
-                if (boardManager.lastDeadYou == CardTypes.Hatapon)
-                {
-                    yield break;
-                }
-                HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
-                foreach (BoardManager.Slot slot in friendlySlots)
-                {
-                    if (slot.GetFree())
-                    {
-                        CardManager minionCard = handManager.GenerateCard(boardManager.lastDeadYou, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
-                        minionCard.GetCardStats().canAttack = false;
-                        minionCard.GetCardStats().canDealDamage = false;
-                        minionCard.GetCardStats().limitedVision = true;
-                        minionCard.GetCardStats().hasGreatshield = true;
-                        boardManager.PlayCard(minionCard, new Vector3(0f, 0f, 0f), slot, destroy:false, record:false);
-                        minionCard.DestroyCard();
-                        break;
-                    }
-                }
+                chosenMinion = enemySlots[-targets[0] - 1].GetConnectedMinion();
             }
+
+            if (chosenMinion != null)
+            {
+                int power = chosenMinion.GetPower();
+                chosenMinion.SetCardStats(new CardManager.CardStats());
+                chosenMinion.SetPower(power);
+                chosenMinion.powerSquare.SetActive(true);
+                chosenMinion.heartObject.SetActive(false);
+            }
+
+            gameController.actionIsHappening = false;
             yield return null;
         }
 
+        static bool CheckTarget(int target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        {
+            if (target > 0)
+            {
+                if (friendlySlots[target - 1].GetConnectedMinion().GetCardType() == CardTypes.Hatapon)
+                {
+                    return false;
+                }
+            }
+
+            if (target < 0)
+            {
+                if (enemySlots[-target - 1].GetConnectedMinion().GetCardType() == CardTypes.Hatapon)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         stats.spell = TurnToStoneRealization;
-        stats.numberOfTargets = 0;
+        stats.checkSpellTarget = CheckTarget;
+        stats.numberOfTargets = 1;
         stats.imagePath = "turnToStone";
 
         return stats;

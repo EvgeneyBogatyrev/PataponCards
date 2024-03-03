@@ -63,7 +63,6 @@ public class QueueProcesser : MonoBehaviour
     private void Awake() 
     { 
         // If there is an instance, and it's not me, delete myself.
-        Debug.Log(instance);
         if (instance != null && instance != this) 
         { 
             Destroy(this); 
@@ -109,10 +108,10 @@ public class QueueProcesser : MonoBehaviour
         StartCoroutine(Post("game_search", hash));
         for (int i = 0; i < 5; ++i)
         {
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(10f);
             StartCoroutine(ObtainData(host:true));
         }
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(10f);
         StartCoroutine(Post("game_found", hash, hash));
         hash = UnityEngine.Random.Range(0, 99999);
         InfoSaver.myHash = hash;

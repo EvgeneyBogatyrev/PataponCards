@@ -94,7 +94,7 @@ public static class DonTheYumiponStats
 
         stats.onCycleOtherEvent = OnCycleOther;
 
-        stats.imagePath = "don_the_yumipon";
+        stats.imagePath = "don_yumipon_final";
         return stats;
     }
 }

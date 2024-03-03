@@ -341,7 +341,7 @@ public class HandManager : MonoBehaviour
     {
         if (!mulliganing)
         {
-            Vector3 center = new Vector3(-1.5f, -3.2f, -0.75f);
+            Vector3 center = new Vector3(-1.2f, -3.2f, -0.75f);
             int numberOfCards = hand.Count;
             float startPoint = center.x - ((numberOfCards - 1) * cardSpace / 2f);
             float startRot = 5f * ((float)(numberOfCards - 1) / 2);
@@ -372,7 +372,7 @@ public class HandManager : MonoBehaviour
 
     private void UpdateHandPositionOpponent()
     {
-        Vector3 center = new Vector3(-1.5f, 7.7f, -0.75f);
+        Vector3 center = new Vector3(-1.2f, 7.7f, -0.75f);
         int numberOfCards = opponentHand.Count;
         float startPoint = center.x - ((numberOfCards - 1) * cardSpace / 2f);
         float startRot = 5f * ((float)(numberOfCards - 1) / 2);

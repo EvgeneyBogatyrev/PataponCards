@@ -14,6 +14,7 @@ public class BoardManager : MonoBehaviour
         private bool friendly;
         private bool free;
         private bool cycling;
+        
 
 
         public Slot(Vector3 position, int _index, bool _friendly, bool _cycling=false)
@@ -151,7 +152,7 @@ public class BoardManager : MonoBehaviour
             Slot newSlot = new Slot(new Vector3(leftSlotSlide + i * step, enemySlotsPosition, 1.5f), i - 1, false);
             enemySlots.Add(newSlot);
         }
-        cyclingSlot = new Slot(new Vector3(leftSlotSlide + numberOfSlots * step + 0.65f * step, friendlySlotsPosition - 5.2f, 1.5f), numberOfSlots, true, _cycling: true);
+        cyclingSlot = new Slot(new Vector3(leftSlotSlide + numberOfSlots * step + 0.35f * step, friendlySlotsPosition - 5.2f, 1.5f), numberOfSlots, true, _cycling: true);
 
         randomHash = InfoSaver.myHash;
         opponentHash = InfoSaver.opponentHash;
@@ -185,6 +186,10 @@ public class BoardManager : MonoBehaviour
             else
             {
                 playedCards.Add(card.GetCardType());
+            }
+            if (!card.GetCardStats().hasOnPlaySpell) 
+            {
+                LogController.instance.AddPlayCardToLog(card.GetCardType(), null, slot.GetFriendly());
             }
         }
         
@@ -301,6 +306,10 @@ public class BoardManager : MonoBehaviour
             else
             {
                 playedCards.Add(card.GetCardType());
+            }
+            if (!card.GetCardStats().hasOnPlaySpell) 
+            {
+                LogController.instance.AddPlayCardToLog(card.GetCardType(), null, slot.GetFriendly());
             }
         }
 

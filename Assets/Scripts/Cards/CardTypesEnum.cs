@@ -58,7 +58,8 @@ public enum CardTypes
     Wep,
     OfferingToKami,
     DarkOne,
-    // ------------------------------
+    AvengingScout,
+    Catapult,
     Fang,
     FuckingIdiot,
     Kacheek,
@@ -66,12 +67,14 @@ public enum CardTypes
     ProfessionalWIthStandards,
     YariponBushwacker,
     TraitorBoulder,
+    ZigotonTroops,
+    TurnToStone,
+    Babatta,
     DeadlyShot,
     GongTheHawkeye,
     Cannasault,
-
+    //------------------------  
     SpeedBoost,
-    TurnToStone,
     Moribu,
     Grenburr,
     Wondabarappa,
@@ -98,7 +101,9 @@ public enum CardTypes
     Horserider,
     KibaForm,
     BirdForm,
-
+    Catapult_option1,
+    Catapult_option2,
+    BabattaSwarm
 };
 
 
@@ -488,6 +493,34 @@ public static class CardTypeToStats
 
             case CardTypes.BirdForm:
                 stats = BirdFormStats.GetStats();
+                break;
+
+            case CardTypes.AvengingScout:
+                stats = AvengingScoutStats.GetStats();
+                break;
+
+            case CardTypes.Catapult:
+                stats = CatapultStats.GetStats();
+                break;
+
+            case CardTypes.Catapult_option1:
+                stats = Catapult_option1Stats.GetStats();
+                break;
+
+            case CardTypes.Catapult_option2:
+                stats = Catapult_option2Stats.GetStats();
+                break;
+
+            case CardTypes.ZigotonTroops:
+                stats = ZigotonStats.GetStats();
+                break;
+
+            case CardTypes.Babatta:
+                stats = BabattaStats.GetStats();
+                break;
+
+            case CardTypes.BabattaSwarm:
+                stats = BabattaSwarmStats.GetStats();
                 break;
 
             default:

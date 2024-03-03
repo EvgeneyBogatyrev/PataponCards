@@ -58,14 +58,15 @@ public class CollectionControl : MonoBehaviour
             CardTypes.Horserider,
             CardTypes.TokenTatepon,
             CardTypes.SpeedBoost,
-            CardTypes.TurnToStone,
             CardTypes.Moribu,
             CardTypes.Grenburr,
             CardTypes.Wondabarappa,
             CardTypes.Venomist,
             CardTypes.KibaForm,
             CardTypes.BirdForm,
-            //CardTypes.TraitorBoulder,
+            CardTypes.Catapult_option1,
+            CardTypes.Catapult_option2,
+            CardTypes.BabattaSwarm,
         };
 
         return reservedList;

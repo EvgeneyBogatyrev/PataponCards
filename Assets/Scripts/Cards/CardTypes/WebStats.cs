@@ -39,8 +39,10 @@ public static class WebStats
             yield return null;
         }
 
-        static void OnDeath(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots, CardManager.CardStats thisStats)
+        static IEnumerator OnDeath(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots, CardManager.CardStats thisStats)
         {
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
             if (friendlySlots[0].GetFriendly())
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
@@ -51,6 +53,8 @@ public static class WebStats
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
                 handManager.DrawCardOpponent();
             }
+            gameController.actionIsHappening = false;
+            yield return null;
         }
 
         stats.spell = OnPlay;

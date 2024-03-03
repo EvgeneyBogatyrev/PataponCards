@@ -842,6 +842,24 @@ public class MinionManager : MonoBehaviour
     {
         connectedSlot.SetFree(true);
         connectedSlot.SetConnectedMinion(null);
+
+        if (cardStats.hasOnDeath)
+        {
+            if (friendly)
+            {
+                StartCoroutine(cardStats.onDeathEvent(connectedSlot.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots, cardStats));
+            }
+            else
+            {
+                StartCoroutine(cardStats.onDeathEvent(-connectedSlot.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots, cardStats));
+            }
+        }
+
+        while (gameController.actionIsHappening)
+        {
+            yield return new WaitForSeconds(0.01f);
+        }
+
         dying = true;
         StartCoroutine(FadeAway());
         while (fading)
@@ -853,17 +871,7 @@ public class MinionManager : MonoBehaviour
         {
             gameController.EndRound(!friendly);
         }
-        if (cardStats.hasOnDeath)
-        {
-            if (friendly)
-            {
-                cardStats.onDeathEvent(connectedSlot.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots, cardStats);
-            }
-            else
-            {
-                cardStats.onDeathEvent(-connectedSlot.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots, cardStats);
-            }
-        }
+        
         yield return null;
     }
 
