@@ -8,7 +8,7 @@ public static class PanThePakaponStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 3;
+        stats.power = 2;
         stats.description = "Cards in your hand have Cycling.";
         stats.name = "Pan the Pakapon";
         stats.runes.Add(Runes.Bow);

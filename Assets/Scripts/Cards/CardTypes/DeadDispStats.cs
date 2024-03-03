@@ -8,7 +8,7 @@ public static class DeadDispStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.description = "Target unit attack another target unit.";
+        stats.description = "Target unit attacks another target unit.";
         stats.name = "Deadly Dispute";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);

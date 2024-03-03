@@ -10,7 +10,7 @@ public static class ZigotonStats
         stats.power = 5;
         stats.description = "";
         stats.name = "Zigoton Troops";
-        stats.nameSize = 3;
+        stats.nameSize = 4;
         stats.imagePath = "zigoton";
         return stats;
     }

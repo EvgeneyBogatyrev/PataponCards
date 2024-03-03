@@ -13,7 +13,7 @@ public static class MahoponStats
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
 
-        stats.power = 2;
+        stats.power = 1;
         stats.description = "Cycling.\nOn play: Deal " + mahoponTargetDamage.ToString() + " damage to target unit and " + mahoponAoEDamage.ToString() + " damage to all other units.";
         stats.name = "Mahopon";
 

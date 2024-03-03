@@ -225,6 +225,10 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private GameObject statsObject;
 
+    [SerializeField]
+    private GameObject turnTimeLeft;
+    
+
     private GameState gameState = new GameState();
 
     public float secondsBetweenAnimations = 0.5f;
@@ -234,16 +238,20 @@ public class GameController : MonoBehaviour
     public List<MinionManager> effectBlockers = new();
 
     private float timeSinceOpponentResponsed = 0f;
-    private readonly float timeSinceOpponentResponsedLimit = 50f;
+    private readonly float timeSinceOpponentResponsedLimit = 120f;
 
     private float pingInterval = 0f;
     private readonly float pingIntervalMax = 25f;
 
     private int concedeTimes = 0;
 
+    private float turnSecondsMax = 90f;
+    private float turnSecondsLeft = 90f;
+
     private void Start()
     {
         endTurnButtonObject.SetActive(false);
+        turnTimeLeft.SetActive(false);
         concedeObject.SetActive(false);
         statsObject.SetActive(false);
         handManager = GameObject.Find("Hand").GetComponent<HandManager>();
@@ -267,12 +275,30 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            pingInterval += Time.deltaTime;
-            
-            if (pingInterval > pingIntervalMax)
+            turnSecondsLeft -= Time.deltaTime;
+            if (turnSecondsLeft < 0f)
             {
-                pingInterval = 0f;
-                //ServerDataProcesser.instance.Ping();
+                foreach (Transform child in turnTimeLeft.transform)
+                {
+                   child.GetComponent<TextMeshPro>().text = "00:00";
+                }
+                EndTurn(true);
+            }
+            else
+            {
+                int seconds = ((int) turnSecondsLeft) % 60;
+                int minutes = ((int) turnSecondsLeft) / 60;
+                string secondsStr = seconds.ToString();
+                if (seconds < 10)
+                {
+                    secondsStr = "0" + secondsStr; 
+                }
+                string strTime = "0" + minutes.ToString() + ":" + secondsStr;
+
+                foreach (Transform child in turnTimeLeft.transform)
+                {
+                   child.GetComponent<TextMeshPro>().text = strTime;
+                }
             }
         }
     }
@@ -324,6 +350,8 @@ public class GameController : MonoBehaviour
             CursorController.cursorState = CursorController.CursorStates.Free;
             gameState.Increment(friendly:true, turnsObject, enemyTurnsObject, nextDmgObject, enemyNextDmgObject);
             boardManager.DealSuddenDeathDamage(friendly:true, gameState.GetSuddenDeathDamage(friendly:true));
+            turnSecondsLeft = turnSecondsMax;
+            turnTimeLeft.SetActive(true);
         }
         else
         {
@@ -347,6 +375,8 @@ public class GameController : MonoBehaviour
         if (friendly)
         {
             endTurnButtonObject.SetActive(true);
+            turnTimeLeft.SetActive(true);
+            turnSecondsLeft = turnSecondsMax;
         }
         StartCoroutine(IenumStartTurn(friendly, hataponJustDied));
     }
@@ -478,16 +508,17 @@ public class GameController : MonoBehaviour
 
     public void EndTurn(bool friendly)
     {
+        playerTurn = false;
         if (friendly)
         {
             endTurnButtonObject.SetActive(false);
+            turnTimeLeft.SetActive(false);
         }
         StartCoroutine(IenumEndTurn(friendly));
     }
 
     private IEnumerator IenumEndTurn(bool friendly)
     {
-        playerTurn = false;
         do {
             yield return new WaitForSeconds(secondsBetweenAnimations);
         } while(actionIsHappening);

@@ -19,6 +19,7 @@ public class MinionManager : MonoBehaviour
     public GameObject heartObject;
     public GameObject normalBackObject;
     public GameObject outlineBackObject;
+    public GameObject outlineBackAbilitiesObject;
     public GameObject poisonObject;
     public GameObject shieldObject;
     public GameObject lifelinkObject;
@@ -93,6 +94,7 @@ public class MinionManager : MonoBehaviour
         gameController = GameObject.Find("GameController").GetComponent<GameController>();
 
         damageObject.SetActive(false);
+        //outlineBackAbilitiesObject.SetActive(false);
         //outlineBackObject.SetActive(false);
         normalBackObject.SetActive(false);
         poisonObject.SetActive(false);
@@ -109,12 +111,22 @@ public class MinionManager : MonoBehaviour
         if (GameController.playerTurn && friendly && !(!cardStats.canAttack && cardStats.limitedVision && !cardStats.isStatic))
         {
             summoningSickness = !can;
-            outlineBackObject.SetActive(can);
+            if (cardStats.isStatic)
+            {
+                outlineBackAbilitiesObject.SetActive(can);
+                outlineBackObject.SetActive(false);
+            }
+            else
+            {
+                outlineBackObject.SetActive(can);
+                outlineBackAbilitiesObject.SetActive(false);
+            }
             //normalBackObject.SetActive(!can);
         }
         else
         {
             outlineBackObject.SetActive(false);
+            outlineBackAbilitiesObject.SetActive(false);
             //normalBackObject.SetActive(false);
         }
     }
@@ -546,11 +558,19 @@ public class MinionManager : MonoBehaviour
                     }
                 }
 
+                if (!GameController.playerTurn)
+                {
+                    state = MinionState.Free;
+                    CursorController.cursorState = CursorController.CursorStates.Free;
+                    arrow.DestroyArrow();
+                    arrow = null;
+                }
+
                 break;
 
             case MinionState.ChooseOption:
 
-                if (Input.GetMouseButtonDown(1))
+                if (Input.GetMouseButtonDown(1) || !GameController.playerTurn)
                 {
                     ReturnToNormalAfterOptions();
                 }
@@ -981,6 +1001,11 @@ public class MinionManager : MonoBehaviour
     public bool GetFriendly()
     {
         return connectedSlot.GetFriendly();
+    }
+
+    public void SetFriendly(bool friendly)
+    {
+        this.friendly = friendly;
     }
 
     public BoardManager.Slot GetSlot()

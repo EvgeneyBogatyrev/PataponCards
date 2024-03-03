@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Linq;
+using TMPro;
 
 public class CollectionControl : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class CollectionControl : MonoBehaviour
     public float cardScale = 0.75f;
     public GameObject cardPrefab;
     public GameObject cardRepr;
+    public GameObject cardNumberText;
     public List<GameObject> runeObjects;
 
     public float xOffset;
@@ -67,6 +69,9 @@ public class CollectionControl : MonoBehaviour
             CardTypes.Catapult_option1,
             CardTypes.Catapult_option2,
             CardTypes.BabattaSwarm,
+            CardTypes.LightningBolt,
+            CardTypes.MeteorRain,
+            CardTypes.SleepingDust,
         };
 
         return reservedList;
@@ -105,6 +110,11 @@ public class CollectionControl : MonoBehaviour
         }
 
         ShowDeck();
+    }
+
+    public void Update()
+    {
+        cardNumberText.GetComponent<TextMeshProUGUI>().text = DeckManager.deck.Count.ToString() + "/24";
     }
 
     public void UpdateRunes()

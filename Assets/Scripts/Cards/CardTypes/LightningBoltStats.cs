@@ -2,15 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class FangStats
+public static class LightningBoltStats
 {
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int fangDamage = 2;
-        stats.description = "Deal " + fangDamage.ToString() + " damage to an enemy unit.";
-        stats.name = "Fang";
+        const int damage = 3;
+        stats.description = "Deal " + damage.ToString() + " damage.";
+        stats.name = "Lightning Bolt";
 
         stats.isSpell = true;
         static IEnumerator FangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -30,22 +30,12 @@ public static class FangStats
             }
 
             MinionManager targetMinion = targetSlot.GetConnectedMinion();
-            targetMinion.ReceiveDamage(fangDamage);
+            targetMinion.ReceiveDamage(damage);
             gameController.actionIsHappening = false;
             yield return null;
         }
 
-        static bool FangCheckTarget(int target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
-        {
-            if (target > 0)
-            {
-                return false;
-            }
-            return true;
-        }
-
         stats.spell = FangRealization;
-        stats.checkSpellTarget = FangCheckTarget;
         stats.numberOfTargets = 1;
 
         stats.imagePath = "Fang";

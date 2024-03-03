@@ -14,7 +14,7 @@ public static class ScoutStats
         stats.imagePath = "scout";
         
         stats.runes.Add(Runes.Bow);
-        stats.runes.Add(Runes.Bow);
+        //stats.runes.Add(Runes.Bow);
 
         static IEnumerator EndTurn(int thisIndex, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

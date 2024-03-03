@@ -247,6 +247,7 @@ public class CardManager : MonoBehaviour
     
     private BoardManager boardManager;
     private HandManager handManager;
+    private GameController gameController;
 
     private Vector3 drawEndPosition;
     private Vector3 playEndPosition;
@@ -262,6 +263,8 @@ public class CardManager : MonoBehaviour
         {
             boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
             handManager = GameObject.Find("Hand").GetComponent<HandManager>();
+            gameController = GameObject.Find("GameController").GetComponent<GameController>();
+
             drawEndPosition = GameObject.Find("DrawnCardDisplay").transform.position;
             playEndPosition = GameObject.Find("PlayedCardPosition").transform.position;
             MillPosition = GameObject.Find("MillPosition").transform.position;
@@ -590,6 +593,11 @@ public class CardManager : MonoBehaviour
                     }
                 }
 
+                if (!GameController.playerTurn)
+                {
+                    ReturnToHand();
+                }
+
                 break;
 
             case CardState.selectingTargets:
@@ -669,6 +677,11 @@ public class CardManager : MonoBehaviour
                 }
 
                 if (Input.GetMouseButtonDown(1))
+                {
+                    ReturnToHand();
+                }
+
+                if (!GameController.playerTurn)
                 {
                     ReturnToHand();
                 }

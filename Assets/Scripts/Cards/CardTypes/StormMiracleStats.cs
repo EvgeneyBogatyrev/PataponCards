@@ -2,37 +2,39 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class HealingScepterStats
+public class StormMiracleStats : MonoBehaviour
 {
     public static CardManager.CardStats GetStats()
     {
+        const int damage = 3;
         CardManager.CardStats stats = new CardManager.CardStats();
-
-        const int healing = 8;
-
-        stats.description = "Restore " + healing.ToString() + " health to your Hatapon.";
-        stats.name = "Healing Scepter";
-
-        stats.nameSize = 4;
-        
+        stats.name = "Storm Miracle";
+        stats.description = "Deal " + damage.ToString() + " damage to all units.";
+        stats.runes.Add(Runes.Spear);
+        stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Bow);
-        stats.runes.Add(Runes.Bow);
+        //stats.legendary = true;
 
         stats.isSpell = true;
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             gameController.actionIsHappening = true;
-            HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-            BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
+            foreach (BoardManager.Slot slot in enemySlots)
+            {
+                MinionManager minion = slot.GetConnectedMinion();
+                if (minion != null)
+                {
+                    minion.ReceiveDamage(damage);
+                }
+            }
 
             foreach (BoardManager.Slot slot in friendlySlots)
             {
                 MinionManager minion = slot.GetConnectedMinion();
-                if (minion != null && minion.GetCardType() == CardTypes.Hatapon)
+                if (minion != null)
                 {
-                    minion.Heal(healing);
-                    break;
+                    minion.ReceiveDamage(damage);
                 }
             }
             gameController.actionIsHappening = false;
@@ -41,8 +43,7 @@ public static class HealingScepterStats
 
         stats.spell = Realization;
         stats.numberOfTargets = 0;
-
-        stats.imagePath = "healing_scepter";
+        stats.imagePath = "NovaNova";
         return stats;
     }
 }

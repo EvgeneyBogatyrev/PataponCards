@@ -10,12 +10,12 @@ public static class GuardiraStats
 
         const int guardiraPower = 1;
 
-        stats.power = 7;
+        stats.power = 8;
         stats.description = "Lifelink.\nAlways deals " + guardiraPower.ToString() + " damage regardless of its power.";
         stats.name = "Guardira";
         stats.fixedPower = guardiraPower;
         stats.runes.Add(Runes.Shield);
-        stats.runes.Add(Runes.Shield);
+        //stats.runes.Add(Runes.Shield);
         stats.hasShield = true;
         //stats.hasOnPlay = true;
 

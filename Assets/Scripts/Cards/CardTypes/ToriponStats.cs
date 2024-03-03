@@ -13,7 +13,7 @@ public static class ToriponStats
         stats.name = "Toripon";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
-        stats.runes.Add(Runes.Spear);
+        //stats.runes.Add(Runes.Spear);
 
         stats.flying = true;
 

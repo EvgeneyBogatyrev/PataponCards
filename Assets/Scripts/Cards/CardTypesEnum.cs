@@ -73,6 +73,11 @@ public enum CardTypes
     DeadlyShot,
     GongTheHawkeye,
     Cannasault,
+    BringThePoison,
+    Piekron,
+    StormMiracle,
+    BadaDrum,
+    QueenKharma,
     //------------------------  
     SpeedBoost,
     Moribu,
@@ -103,7 +108,10 @@ public enum CardTypes
     BirdForm,
     Catapult_option1,
     Catapult_option2,
-    BabattaSwarm
+    BabattaSwarm,
+    LightningBolt,
+    SleepingDust,
+    MeteorRain
 };
 
 
@@ -521,6 +529,38 @@ public static class CardTypeToStats
 
             case CardTypes.BabattaSwarm:
                 stats = BabattaSwarmStats.GetStats();
+                break;
+
+            case CardTypes.BringThePoison:
+                stats = BringThePoisonStats.GetStats();
+                break;
+
+            case CardTypes.Piekron:
+                stats = PiekronStats.GetStats();
+                break;
+
+            case CardTypes.StormMiracle:
+                stats = StormMiracleStats.GetStats();
+                break;
+
+            case CardTypes.BadaDrum:
+                stats = BadaDrumStats.GetStats();
+                break;
+
+            case CardTypes.QueenKharma:
+                stats = QueenKharmaStats.GetStats();
+                break;
+
+            case CardTypes.LightningBolt:
+                stats = LightningBoltStats.GetStats();
+                break;
+
+            case CardTypes.MeteorRain:
+                stats = MeteorRainStats.GetStats();
+                break;
+
+            case CardTypes.SleepingDust:
+                stats = SleepingDustStats.GetStats();
                 break;
 
             default:

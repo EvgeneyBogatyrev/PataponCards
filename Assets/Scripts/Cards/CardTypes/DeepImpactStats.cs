@@ -12,7 +12,7 @@ public static class DeepImpactStats
         stats.name = "Deep Impact";
     
         stats.runes.Add(Runes.Spear);
-        stats.runes.Add(Runes.Spear);
+        //stats.runes.Add(Runes.Spear);
 
         stats.isSpell = true;
         static IEnumerator realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
