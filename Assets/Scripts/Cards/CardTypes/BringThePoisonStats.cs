@@ -8,7 +8,7 @@ public static class BringThePoisonStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int poisonNumber = 3;
+        const int poisonNumber = 2;
         
         stats.description = "Add " + poisonNumber.ToString() + " 'Doom Shroom' cards to your hand.";
         stats.name = "Bring the Poison";

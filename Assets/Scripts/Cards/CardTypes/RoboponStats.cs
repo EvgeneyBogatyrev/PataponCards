@@ -9,7 +9,7 @@ public static class RoboponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 1;
-        stats.description = "End of turn: Gain +X power, where X is your Devotion to Shield.";
+        stats.description = "End of turn: If Robopon didn't attacked or moved, it gains +X power, where X is your Devotion to Shield.";
         stats.name = "Robopon";
         stats.runes.Add(Runes.Shield);
 
@@ -19,16 +19,11 @@ public static class RoboponStats
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             gameController.actionIsHappening = true;
 
-            if (friendlySlots[1].GetFriendly())
+            MinionManager robopon = friendlySlots[index].GetConnectedMinion();
+            if (!robopon.attacked && !robopon.moved)
             {
-                friendlySlots[index].GetConnectedMinion().Heal(DeckManager.GetDeckDevotion(Runes.Shield, false));
+                robopon.Heal(DeckManager.GetDeckDevotion(Runes.Shield, !friendlySlots[1].GetFriendly()));
             }
-            else
-            {
-                friendlySlots[index].GetConnectedMinion().Heal(DeckManager.GetDeckDevotion(Runes.Shield, true));
-            }
-
-            
             gameController.actionIsHappening = false;
             yield return null;
         }

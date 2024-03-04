@@ -16,7 +16,7 @@ public static class PiekronStats
         stats.hasShield = true;
 
         stats.runes.Add(Runes.Spear);
-        stats.runes.Add(Runes.Bow);
+        stats.runes.Add(Runes.Shield);
 
         static IEnumerator YariponEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

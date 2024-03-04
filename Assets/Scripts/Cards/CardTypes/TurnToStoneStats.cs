@@ -32,8 +32,14 @@ public static class TurnToStoneStats
             if (chosenMinion != null)
             {
                 int power = chosenMinion.GetPower();
+                List<Runes> tmpRunes = new List<Runes>();
+                foreach (Runes rune in chosenMinion.GetCardStats().runes)
+                {
+                    tmpRunes.Add(rune);
+                }
                 chosenMinion.SetCardStats(new CardManager.CardStats());
                 chosenMinion.SetPower(power);
+                chosenMinion.GetCardStats().runes = tmpRunes;
                 chosenMinion.powerSquare.SetActive(true);
                 chosenMinion.heartObject.SetActive(false);
             }

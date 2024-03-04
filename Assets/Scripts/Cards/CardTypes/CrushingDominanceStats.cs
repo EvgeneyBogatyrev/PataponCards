@@ -8,7 +8,7 @@ public static class BadaDrumStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int threshold = 3;
+        const int threshold = 2;
         stats.description = "Gain control of target non-Hatapon unit your opponent controls with power " + threshold.ToString() + " or less.";
         stats.name = "Zigoton Drum";
         
@@ -58,12 +58,14 @@ public static class BadaDrumStats
                 }
                 else
                 {
-                    targetMinion.GetSlot().SetFree(true);
-                    targetMinion.GetSlot().SetConnectedMinion(null);
+                    //targetMinion.GetSlot().SetFree(true);
+                    //targetMinion.GetSlot().SetConnectedMinion(null);
                     targetMinion.SetSlot(slotToGo);
-                    slotToGo.SetFree(false);
-                    slotToGo.SetConnectedMinion(targetMinion);
-                    targetMinion.SetFriendly(true);
+                    targetMinion.SetAbilityToAttack(false);
+                    //slotToGo.SetFree(false);
+                    //slotToGo.SetConnectedMinion(targetMinion);
+                    //targetMinion.SetFriendly(!targetMinion.GetFriendly());
+                    Debug.Log(targetMinion.GetFriendly());
                 }
             }
             else
@@ -92,7 +94,8 @@ public static class BadaDrumStats
                     targetMinion.SetSlot(slotToGo);
                     slotToGo.SetFree(false);
                     slotToGo.SetConnectedMinion(targetMinion);
-                    targetMinion.SetFriendly(false);
+                    targetMinion.SetFriendly(!targetMinion.GetFriendly());
+                    Debug.Log("here");
 
                 }
             }

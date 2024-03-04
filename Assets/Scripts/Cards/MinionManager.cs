@@ -54,6 +54,8 @@ public class MinionManager : MonoBehaviour
     public bool dying = false;
     public float startTime = 0f;
     public CardManager previewedCard = null;
+    public bool attacked = false;
+    public bool moved = false;
 
     public void CustomizeMinion(CardManager playedCard, BoardManager.Slot slot)
     {
@@ -108,7 +110,7 @@ public class MinionManager : MonoBehaviour
 
     public void SetAbilityToAttack(bool can=true)
     {
-        if (GameController.playerTurn && friendly && !(!cardStats.canAttack && cardStats.limitedVision && !cardStats.isStatic))
+        if (GameController.playerTurn && GetFriendly() && !(!cardStats.canAttack && cardStats.limitedVision && !cardStats.isStatic))
         {
             summoningSickness = !can;
             if (cardStats.isStatic)
@@ -136,7 +138,7 @@ public class MinionManager : MonoBehaviour
 
     public void GiveAdditionalAttack()
     {
-        if (GameController.playerTurn && friendly && !(!cardStats.canAttack && cardStats.limitedVision && !cardStats.isStatic))
+        if (GameController.playerTurn && GetFriendly() && !(!cardStats.canAttack && cardStats.limitedVision && !cardStats.isStatic))
         {
             additionalAttack = true;
             outlineBackObject.SetActive(true);
@@ -160,7 +162,7 @@ public class MinionManager : MonoBehaviour
         bool found = false;
         foreach (MinionManager minion in cardStats.lifelinkedTo)
         {
-            if (minion != null && minion.GetFriendly() == friendly)
+            if (minion != null && minion.GetFriendly() == GetFriendly())
             {
                 //Debug.Log(minion.GetSlot().GetIndex());
                 minion.ReceiveDamage(damage);
@@ -229,7 +231,7 @@ public class MinionManager : MonoBehaviour
             if (cardStats.onDamageEvent != null)
             {
                 int idx = connectedSlot.GetIndex();
-                if (friendly)
+                if (GetFriendly())
                 {
                     StartCoroutine(cardStats.onDamageEvent(idx, boardManager.enemySlots, boardManager.friendlySlots));
                 }
@@ -285,7 +287,7 @@ public class MinionManager : MonoBehaviour
     {
         if (cardType == CardTypes.Hatapon)
         {
-            if (IsHataponSafe(friendly))
+            if (IsHataponSafe(GetFriendly()))
             {
                 return false;
             }
@@ -352,7 +354,7 @@ public class MinionManager : MonoBehaviour
         {
             case MinionState.Free:
 
-                if (friendly)
+                if (GetFriendly())
                 {
                     if (!mouseOver)
                     {
@@ -459,7 +461,7 @@ public class MinionManager : MonoBehaviour
                                 CursorController.cursorState = CursorController.CursorStates.Free;
                                 arrow.DestroyArrow();
                                 arrow = null;
-                            } else if (!summoningSickness && target != this && target.friendly && (Mathf.Abs(target.GetIndex() - GetIndex()) == 1) && !cardStats.limitedVision)
+                            } else if (!summoningSickness && target != this && target.GetFriendly() && (Mathf.Abs(target.GetIndex() - GetIndex()) == 1) && !cardStats.limitedVision)
                             {
                                 if (!target.cardStats.limitedVision && !target.summoningSickness && !target.cardStats.isStatic)
                                 {
@@ -482,7 +484,7 @@ public class MinionManager : MonoBehaviour
                                     }
                                 }
 
-                                if (!cardStats.canAttack || target == this || target.friendly || target.cardStats.flying || (Mathf.Abs(target.GetIndex() - GetIndex()) > 1 && !cardStats.megaVision) || (!target.cardStats.hasGreatshield && existsGreatshield))
+                                if (!cardStats.canAttack || target == this || target.GetFriendly() || target.cardStats.flying || (Mathf.Abs(target.GetIndex() - GetIndex()) > 1 && !cardStats.megaVision) || (!target.cardStats.hasGreatshield && existsGreatshield))
                                 {
                                     state = MinionState.Free;
                                     CursorController.cursorState = CursorController.CursorStates.Free;
@@ -705,7 +707,7 @@ public class MinionManager : MonoBehaviour
             }
             ServerDataProcesser.instance.Move(connectedSlot.GetIndex() + 1, sign * (slotToMove.GetIndex() + 1));
         }
-
+        moved = true;
         connectedSlot.SetFree(true);
         connectedSlot.SetConnectedMinion(null);
         slotToMove.SetConnectedMinion(this);
@@ -740,6 +742,7 @@ public class MinionManager : MonoBehaviour
             int enemyIndex = -enemy.GetIndex() - 1;
             ServerDataProcesser.instance.Attack(myIndex, enemyIndex);
         }
+        attacked = true;
         attackPosition = enemy.GetSlot().GetPosition();
         attackPosition = new Vector3(attackPosition.x, attackPosition.y, attackPosition.z - 1f);
         StartCoroutine(DoAttack(enemy));
@@ -793,7 +796,7 @@ public class MinionManager : MonoBehaviour
         {
             if (enemy.GetCardType() == CardTypes.Hatapon)
             {
-                if (!IsHataponSafe(!friendly))
+                if (!IsHataponSafe(!GetFriendly()))
                 {
                     if (cardStats.fixedPower == -1)
                     {
@@ -822,7 +825,7 @@ public class MinionManager : MonoBehaviour
         {
             if (GetCardType() == CardTypes.Hatapon)
             {
-                if (!IsHataponSafe(friendly))
+                if (!IsHataponSafe(GetFriendly()))
                 {
                     if (enemy.cardStats.fixedPower == -1)
                     {
@@ -868,7 +871,7 @@ public class MinionManager : MonoBehaviour
 
         if (cardStats.hasOnDeath)
         {
-            if (friendly)
+            if (GetFriendly())
             {
                 StartCoroutine(cardStats.onDeathEvent(connectedSlot.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots, cardStats));
             }
@@ -892,7 +895,7 @@ public class MinionManager : MonoBehaviour
         DestroySelf();
         if (GetCardType() == CardTypes.Hatapon)
         {
-            gameController.EndRound(!friendly);
+            gameController.EndRound(!GetFriendly());
         }
         
         yield return null;
@@ -994,6 +997,8 @@ public class MinionManager : MonoBehaviour
     }
     public void SetCanAttack(bool _can)
     {
+        attacked = false;
+        moved = false;
         SetAbilityToAttack(_can);
     }
     public int GetIndex()
@@ -1046,15 +1051,15 @@ public class MinionManager : MonoBehaviour
             previewedCard = handManager.GenerateCard(cardType).GetComponent<CardManager>();
             previewedCard.SetCardState(CardManager.CardState.hilightOver);
             
-            if (friendly && connectedSlot.GetIndex() > 1)
+            if (GetFriendly() && connectedSlot.GetIndex() > 1)
             {
                 previewedCard.transform.position = this.transform.position + new Vector3(-4f, 3.5f, -6f);
             }
-            else if (friendly && connectedSlot.GetIndex() <= 1)
+            else if (GetFriendly() && connectedSlot.GetIndex() <= 1)
             {
                 previewedCard.transform.position = this.transform.position + new Vector3(3.5f, 3.5f, -6f);
             }
-            else if (!friendly && connectedSlot.GetIndex() > 1)
+            else if (!GetFriendly() && connectedSlot.GetIndex() > 1)
             {
                 previewedCard.transform.position = this.transform.position + new Vector3(-4f, -2.5f, -6f);
             } 

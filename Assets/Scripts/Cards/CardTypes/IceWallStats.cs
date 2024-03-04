@@ -8,7 +8,7 @@ public static class IceWallStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 3;
-        stats.description = "0: Deal 1 damage to this.";
+        stats.description = "Pacifism. Abilities:\n-0: Deal 1 damage to this.";
         stats.name = "Ice Wall";
 
         stats.isStatic = true;
