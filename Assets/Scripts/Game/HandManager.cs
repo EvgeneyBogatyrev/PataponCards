@@ -307,7 +307,8 @@ public class HandManager : MonoBehaviour
 
     public GameObject GenerateCard(CardTypes cardType, CardManager origin=null)
     {
-
+        return GenerateCard(cardType, new Vector3(-10f, -10f, 0f), origin);
+        /*
         GameObject newCard;
         if (origin == null) 
         {
@@ -319,6 +320,7 @@ public class HandManager : MonoBehaviour
         }
         CardGenerator.CustomizeCard(newCard.GetComponent<CardManager>(), cardType);
         return newCard;
+        */
     }
 
     public GameObject GenerateCard(CardTypes cardType, Vector3 positionFrom, CardManager origin=null)

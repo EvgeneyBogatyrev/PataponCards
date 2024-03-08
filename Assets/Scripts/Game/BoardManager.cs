@@ -8,15 +8,13 @@ public class BoardManager : MonoBehaviour
     
     public class Slot
     {
-        private GameObject slotObject;
-        private MinionManager connectedMinion;
-        private int index;
-        private bool friendly;
-        private bool free;
-        private bool cycling;
+        private GameObject slotObject; // game object of this slot
+        private MinionManager connectedMinion; // unit on this slot or null
+        private int index; // index in slot array
+        private bool friendly; // is it in friendly slots or enemy ones
+        private bool free; // true if connectedMinion is null
+        private bool cycling; // true if it is a cycling slot
         
-
-
         public Slot(Vector3 position, int _index, bool _friendly, bool _cycling=false)
         {
             if (!_cycling) 
@@ -37,6 +35,7 @@ public class BoardManager : MonoBehaviour
 
         public void Highlight(bool _active = true)
         {
+            // Make it green if active, otherwise, make it normal
             if (_active)
             {
                 slotObject.SetActive(true);
@@ -67,11 +66,14 @@ public class BoardManager : MonoBehaviour
 
         public Vector3 GetPosition()
         {
+            return slotObject.transform.position;
+            /*
             if (!cycling)
             {
                 return slotObject.transform.position;
             }
             return new Vector3(slotObject.transform.position.x + 10f/8f, 0f, 0f); // Fix that! 
+            */
         }
 
         public GameObject GetSlotObject()
@@ -97,6 +99,7 @@ public class BoardManager : MonoBehaviour
         public void SetConnectedMinion(MinionManager min)
         {
             connectedMinion = min;
+            SetFree(false);
         }
     }
 
@@ -141,6 +144,7 @@ public class BoardManager : MonoBehaviour
     void Start()
     {
         InitStaticObjects();
+        // Generate slots
         float step = 2 * leftSlotOffset / (numberOfSlots + 1);
         for (int i = 1; i <= numberOfSlots; ++i)
         {
@@ -293,6 +297,8 @@ public class BoardManager : MonoBehaviour
 
     public MinionManager PlayCard(CardManager card, Slot slot = null, bool destroy=true, bool record=true, bool fromHand=true)
     {     
+        return PlayCard(card, card.transform.position, slot, destroy, record, fromHand);
+        /*
         GameObject newMinion = Instantiate(minionPrefab, card.transform.position, Quaternion.identity);
         newMinion.transform.rotation = Quaternion.Euler(minionRotation, 0f, 0f);
         newMinion.GetComponent<MinionManager>().CustomizeMinion(card, slot);
@@ -366,6 +372,7 @@ public class BoardManager : MonoBehaviour
             ServerDataProcesser.instance.PlayCard(card, slot);
         }
         return newMinion.GetComponent<MinionManager>();
+        */
     }
 
     

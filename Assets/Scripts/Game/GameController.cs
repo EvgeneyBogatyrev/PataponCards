@@ -308,6 +308,32 @@ public class GameController : MonoBehaviour
         timeSinceOpponentResponsed = 0;
     }
 
+    public bool EffectsAreBlocked()
+    {
+        effectsBlocked = false;
+        effectBlockers = new();
+        foreach (BoardManager.Slot slot in boardManager.friendlySlots)
+        {
+            MinionManager minion = slot.GetConnectedMinion();
+            if (minion != null && minion.GetCardStats().blockEffects)
+            {
+                effectsBlocked = true;
+                effectBlockers.Add(minion);
+            }
+        }
+
+        foreach (BoardManager.Slot slot in boardManager.enemySlots)
+        {
+            MinionManager minion = slot.GetConnectedMinion();
+            if (minion != null && minion.GetCardStats().blockEffects)
+            {
+                effectsBlocked = true;
+                effectBlockers.Add(minion);
+            }
+        }
+        return effectsBlocked;
+    }
+
     public IEnumerator CheckBoardEffects()
     {
         while (true)
@@ -333,7 +359,7 @@ public class GameController : MonoBehaviour
                     effectBlockers.Add(minion);
                 }
             }
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(1f);
         }
     }
 
@@ -367,7 +393,7 @@ public class GameController : MonoBehaviour
             DeckManager.ResetOpponentsDeck();
         }
         StartCoroutine(ServerDataProcesser.instance.ObtainData());
-        StartCoroutine(CheckBoardEffects());
+        //StartCoroutine(CheckBoardEffects());
     }
 
     public void StartTurn(bool friendly, bool hataponJustDied=false)
@@ -416,7 +442,7 @@ public class GameController : MonoBehaviour
                 }
             }
 
-            if (!effectsBlocked)
+            if (!EffectsAreBlocked())
             {
                 foreach (MinionManager minion in order)
                 {
@@ -466,7 +492,7 @@ public class GameController : MonoBehaviour
                 }
             }
 
-            if (!effectsBlocked)
+            if (!EffectsAreBlocked())
             {
                 foreach (MinionManager minion in order)
                 {
@@ -541,7 +567,7 @@ public class GameController : MonoBehaviour
                     minion.SetAbilityToAttack(false);
                 }
             }
-            if (!effectsBlocked)
+            if (!EffectsAreBlocked())
             {
                 foreach (MinionManager minion in order)
                 {
@@ -576,7 +602,7 @@ public class GameController : MonoBehaviour
                     minion.SetState(MinionManager.MinionState.Free);
                 }
             }
-            if (!effectsBlocked)
+            if (!EffectsAreBlocked())
             {
                 foreach (MinionManager minion in order)
                 {
