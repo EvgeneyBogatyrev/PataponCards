@@ -754,8 +754,8 @@ public class CardManager : MonoBehaviour
 
                     if (cardStats.damageToHost <= hostMinion.GetPower()) 
                     {
-                        StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
                         ServerDataProcesser.instance.CastSpell(this, spellTargets);
+                        StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
                         spellTargets = new List<int>();
                         hostMinion.ReturnToNormalAfterOptions();
                         hostMinion.SetCanAttack(false);
