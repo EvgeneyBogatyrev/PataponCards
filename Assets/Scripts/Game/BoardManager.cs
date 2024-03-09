@@ -83,7 +83,7 @@ public class BoardManager : MonoBehaviour
 
         public bool GetFree()
         {
-            return free;
+            return (GetConnectedMinion() == null);
         }
 
         public void SetFree(bool _free)
@@ -99,7 +99,6 @@ public class BoardManager : MonoBehaviour
         public void SetConnectedMinion(MinionManager min)
         {
             connectedMinion = min;
-            SetFree(false);
         }
     }
 
