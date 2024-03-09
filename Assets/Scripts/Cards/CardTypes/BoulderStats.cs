@@ -9,11 +9,9 @@ public static class BoulderStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "Pacifism.\nI wish I could pay taxes, but I don't know how.";
+        stats.description = "Pacifism. Lifelink.\n<i>I wish I could pay taxes, but I don't know how.</i>";
         stats.name = "The Boulder";
-        stats.canAttack = false;
-        stats.canDealDamage = false;
-        stats.limitedVision = true;
+        stats.pacifism = true;
         stats.hasShield = true;
 
         stats.imagePath = "boulder";
