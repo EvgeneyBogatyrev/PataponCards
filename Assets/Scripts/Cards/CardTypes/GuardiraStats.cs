@@ -19,6 +19,8 @@ public static class GuardiraStats
         stats.hasShield = true;
         //stats.hasOnPlay = true;
 
+        stats.additionalRules.Add("Damage prevention effects are still applyed when <i>Guardira's</i> damage is calculated.");
+
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();

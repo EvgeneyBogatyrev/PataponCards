@@ -108,8 +108,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2864456555930751242}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.2255, y: 1.8458, z: 0}
-  m_LocalScale: {x: 2.8308387, y: 0.5083681, z: 0.1}
+  m_LocalPosition: {x: -1.0969, y: 1.8458, z: 0}
+  m_LocalScale: {x: 1.0882194, y: 0.5083681, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2864456557026270341}
@@ -177,7 +177,7 @@ GameObject:
   - component: {fileID: 2527853630785939007}
   - component: {fileID: 7216208239595032048}
   m_Layer: 0
-  m_Name: CardRepr
+  m_Name: CardReprSmallest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -221,8 +221,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.8510857, y: 0.5407655, z: 1}
-  m_Center: {x: -0.22280478, y: 1.846394, z: 0}
+  m_Size: {x: 1.104665, y: 0.5158169, z: 1}
+  m_Center: {x: -1.0960151, y: 1.846394, z: 0}
 --- !u!114 &7216208239595032048
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -406,7 +406,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 8.596114, y: 3.5661361, z: 8.817366, w: 0.9297676}
+  m_margin: {x: 8.487375, y: 3.5661361, z: 10.684295, w: 0.9297676}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   _SortingLayer: 0

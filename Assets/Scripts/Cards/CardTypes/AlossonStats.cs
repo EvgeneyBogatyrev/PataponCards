@@ -11,7 +11,7 @@ public static class AlossonStats
         const int alossonDamage = 1;
         const int alossonMax = 4;
         stats.power = 2;
-        stats.description = "On play: Deal " + alossonDamage.ToString() + 
+        stats.description = "<b>On play:</b> Deal " + alossonDamage.ToString() + 
                             " damage to all units. If at least of them dies, " +
                             "repeat the process (Up to " + alossonMax.ToString() + " times).";
         stats.name = "Alosson";

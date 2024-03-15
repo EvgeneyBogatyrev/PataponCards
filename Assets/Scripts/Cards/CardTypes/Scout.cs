@@ -16,6 +16,9 @@ public static class ScoutStats
         stats.runes.Add(Runes.Bow);
         //stats.runes.Add(Runes.Bow);
 
+        stats.additionalRules.Add("Damage happens even if you didn't draw a card for any reason.");
+
+
         static IEnumerator EndTurn(int thisIndex, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>(); 

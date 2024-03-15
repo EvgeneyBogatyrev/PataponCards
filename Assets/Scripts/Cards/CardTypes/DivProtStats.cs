@@ -19,6 +19,8 @@ public static class DivProtStats
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
 
+        stats.relevantCards.Add(CardTypes.TokenTatepon);
+
         stats.isSpell = true;
         static IEnumerator DivineProtectionRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -88,7 +90,7 @@ public static class TokenTateponStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.description = "";
+        stats.description = "<b>Lifelink</b>";
         stats.name = "Novice Tatepon";
         stats.power = 2;
         stats.hasShield = true;

@@ -13,6 +13,7 @@ public static class RoboponStats
         stats.name = "Robopon";
         stats.runes.Add(Runes.Shield);
 
+        stats.additionalKeywords.Add("Devotion deck");
 
         static IEnumerator RoboponEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

@@ -9,11 +9,13 @@ public static class BirdRiderStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 2;
-        stats.description = "On play: Summon all other copies of Bird Rider from your deck.";
+        stats.description = "<b>On play</b>: Summon all other copies of Bird Rider from your deck.";
         stats.name = "Bird Rider";
 
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
+
+        stats.additionalRules.Add("All copies of <i>'Bird Rider'</i> cards are removed from your library and placed on the battlefield.");
 
         stats.hasOnPlaySpell = true;
 

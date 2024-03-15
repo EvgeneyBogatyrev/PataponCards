@@ -14,6 +14,8 @@ public static class DeepImpactStats
         stats.runes.Add(Runes.Spear);
         //stats.runes.Add(Runes.Spear);
 
+        stats.relevantCards.Add(CardTypes.Horserider);
+
         stats.isSpell = true;
         static IEnumerator realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

@@ -14,6 +14,9 @@ public static class MyamsarStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
+        stats.additionalRules.Add("If a copy would be summoned with 0 or less power, it is not summoned instead.");
+
+
         static IEnumerator MyamsarEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();

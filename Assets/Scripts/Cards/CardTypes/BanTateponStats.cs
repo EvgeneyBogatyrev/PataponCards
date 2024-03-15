@@ -10,7 +10,7 @@ public static class BanTateponStats
         const int banTateponThreshold = 8;
         const int banTateponPower = 2;
         stats.power = 4;
-        stats.description = "On play: If you control a non-Hatapon unit with power " + banTateponThreshold.ToString() + " or greater, fill your board with Tatepons with " + banTateponPower +  " power and Haste, and draw a card.";
+        stats.description = "<b>On play</b>: If you control a non-Hatapon unit with power " + banTateponThreshold.ToString() + " or greater, fill your board with Tatepons with " + banTateponPower +  " power, <b>Lifelink</b> and <b>Haste</b>, and draw a card.";
         stats.name = "Ban Tatepon";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
@@ -20,6 +20,8 @@ public static class BanTateponStats
 
         stats.descriptionSize = 3;
         //stats.nameSize = 4;
+
+        stats.relevantCards.Add(CardTypes.TokenTatepon);
 
         static IEnumerator BanTateponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

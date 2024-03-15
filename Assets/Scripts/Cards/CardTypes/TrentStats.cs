@@ -15,6 +15,8 @@ public static class TrentStats
         stats.limitedVision = true;
         stats.canDealDamage = false;
 
+        stats.relevantCards.Add(CardTypes.TrentOnFire);
+
         stats.runes.Add(Runes.Shield);
 
         static IEnumerator onDamage(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

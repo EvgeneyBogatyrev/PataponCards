@@ -9,7 +9,7 @@ public static class BaloonStats
         CardManager.CardStats stats = new CardManager.CardStats();
         const int baloonDamage = 1;
         stats.power = 2;
-        stats.description = "Can't be attacked by units.\nEnd of turn: Deal " + baloonDamage.ToString() + " damage to the enemy Hatapon.";
+        stats.description = "Can't be attacked by units.\n<b>End of turn</b>: Deal " + baloonDamage.ToString() + " damage to the enemy Hatapon.";
         stats.name = "Hot Air Ballon";
         stats.flying = true;
         stats.runes.Add(Runes.Spear);

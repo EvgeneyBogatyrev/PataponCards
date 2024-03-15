@@ -15,6 +15,8 @@ public static class MyamsarHeroStats
         //stats.runes.Add(Runes.Shield);
 
         //stats.descriptionSize = 3;
+        stats.additionalRules.Add("If attacked unit is destroyed during the resolution of <i>Myamsar</i>'s On attack effect, <i>Myamsar</i> won't receive any damage.");
+        stats.additionalRules.Add("<i>Myamsar</i>'s On attack effect can destroy enemy <i>Hatapon</i>.");
 
         static IEnumerator OnAttack(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

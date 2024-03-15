@@ -79,6 +79,11 @@ public class CardManager : MonoBehaviour
         public int cardsDrawnByThis = 0;
         public List<MinionManager> lifelinkedTo = new();
         public int lifelinkMeTo = -1;
+        public List<string> additionalKeywords = new();
+        public List<string> additionalRules = new();
+        public bool suppressOnPlay = false;
+        public string artistName = "noone (stolen)";
+        public List<CardTypes> relevantCards = new();
 
         public Sprite GetSprite()
         {
@@ -255,6 +260,8 @@ public class CardManager : MonoBehaviour
 
     public List<Arrow> arrowList = null;
     private Arrow curArrow = null;
+
+    public GameObject infoPrefab;
 
     private void Start()
     {
@@ -731,6 +738,10 @@ public class CardManager : MonoBehaviour
                                 collection.ShowDeck();
                             }
                         }
+                    }
+                    else if (mouseOver && Input.GetMouseButtonDown(1))
+                    {
+                        CardInfoController.Create(cardType, infoPrefab);
                     }
                 }
                 break;

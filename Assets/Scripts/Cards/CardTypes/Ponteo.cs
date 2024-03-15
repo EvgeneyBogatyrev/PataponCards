@@ -9,13 +9,15 @@ public static class PonteoStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "On play: Reveal the top of your library until you find a unit with Haste. Draw it and discard the rest.";
+        stats.description = "<b>Haste</b>.\n<b>On play</b>: Reveal the top of your library until you find a unit with <b>Haste</b>. Draw it and discard the rest.";
         stats.name = "Ponteo";
+        stats.descriptionSize = 4;
 
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
         stats.hasOnPlaySpell = true;
+        stats.hasHaste = true;
 
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

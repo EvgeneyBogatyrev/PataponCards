@@ -18,6 +18,9 @@ public static class PanThePakaponStats
 
         stats.giveCyclingToCardsInHand = true;
 
+        stats.additionalKeywords.Add("Cycling");
+
+
 
         stats.imagePath = "pan_the_pakapon";
         return stats;

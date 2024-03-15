@@ -10,11 +10,13 @@ public static class BowmunkStats
 
         const int bowmunkHealing = 2;
         stats.power = 2;
-        stats.description = "On play: Summon a Boulder with Pacifism and Lifelink.\nEnd of turn: Heal your Hatapon by " + bowmunkHealing.ToString() + ".";
+        stats.description = "<b>On play</b>: Summon a Boulder with <b>Pacifism</b> and <b>Lifelink</b>.\n<b>End of turn</b>: Heal your Hatapon by " + bowmunkHealing.ToString() + ".";
         stats.name = "Bowmunk";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
         stats.descriptionSize = 3;
+
+        stats.relevantCards.Add(CardTypes.Boulder);
 
 
         static IEnumerator BowmunkEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

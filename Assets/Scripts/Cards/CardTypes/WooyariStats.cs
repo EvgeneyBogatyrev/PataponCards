@@ -15,6 +15,9 @@ public static class WooyariStats
 
         stats.hasOnPlaySpell = true;
 
+        stats.additionalRules.Add("If a chosen unit doesn't have Lifelink, this effect does nothing.");
+
+
         static IEnumerator DestroboRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();

@@ -16,6 +16,7 @@ public class JamschStats : MonoBehaviour
         stats.description = "On play: Poison all enemy units (Poisoned units receive 1 damage at the end thier controllers' turn).";
         stats.name = "Jamsch";
         
+        stats.additionalKeywords.Add("Poison");
 
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

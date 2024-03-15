@@ -17,6 +17,8 @@ public static class KacheekStats
         stats.connectedCards.Add(CardTypes.GiveFang);
         stats.connectedCards.Add(CardTypes.Nutrition);
 
+        stats.relevantCards.Add(CardTypes.Fang);
+
         stats.imagePath = "kacheek 1";
         return stats;
     }

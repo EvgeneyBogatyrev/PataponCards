@@ -13,6 +13,8 @@ public class CollectionControl : MonoBehaviour
     public float cardScale = 0.75f;
     public GameObject cardPrefab;
     public GameObject cardRepr;
+    public GameObject cardReprSmaller;
+    public GameObject cardReprSmallest;
     public GameObject cardNumberText;
     public List<GameObject> runeObjects;
 
@@ -34,6 +36,9 @@ public class CollectionControl : MonoBehaviour
     private int currentPage;
 
     private List<GameObject> cardList;
+    private int cardShowLimit = 10;
+    private int start_idx = 0;
+    private int deck_max = -1;
 
     public List<CardTypes> GetForbiddenCards()
     {
@@ -115,6 +120,24 @@ public class CollectionControl : MonoBehaviour
     public void Update()
     {
         cardNumberText.GetComponent<TextMeshProUGUI>().text = DeckManager.deck.Count.ToString() + "/24";
+    }
+
+    public void ButtonUp()
+    {
+        if (start_idx > 0)
+        {
+            start_idx -= 1;
+        }
+        ShowDeck();
+    }
+
+    public void ButtonDown()
+    {
+        if (start_idx + cardShowLimit <= deck_max - 1)
+        {
+            start_idx += 1;
+        }
+        ShowDeck();
     }
 
     public void UpdateRunes()
@@ -249,6 +272,21 @@ public class CollectionControl : MonoBehaviour
         return true;
     }
 
+    private int GetUniqueCardsNumber()
+    {
+        int count = 0;
+        CardTypes prevCardType = CardTypes.Hatapon;
+        foreach (CardTypes type in DeckManager.deck)
+        {
+            if (prevCardType != type)
+            {
+                count++;
+            }
+            prevCardType = type;
+        }
+        return count;
+    }
+
     public List<CardTypes> GetPage(int pageNumber)
     {
         var namesCount = Enum.GetNames(typeof(CardTypes)).Length;
@@ -343,40 +381,97 @@ public class CollectionControl : MonoBehaviour
         DeckManager.SortDeck();
         foreach (GameObject obj in cardList)
         {
+            CardReprManager cardReprManager = obj.GetComponent<CardReprManager>();
+            if (cardReprManager.previewedCard != null)
+            {
+                Destroy(cardReprManager.previewedCard.gameObject);
+            }
             Destroy(obj);
         }
 
         cardList = new List<GameObject>();
 
+        int numberOfCards = GetUniqueCardsNumber();
+        int cardsInRow = 8;
+
+        int numberOfRows = (numberOfCards / cardsInRow) + (numberOfCards % cardsInRow > 0 ? 1 : 0);
+
+        GameObject requiredPrefab;
+        int charactersLimit = 100;
+        float shift = 0f;
+        if (numberOfRows == 1)
+        {
+            requiredPrefab = cardRepr;
+        }
+        else if (numberOfRows == 2)
+        {
+            requiredPrefab = cardReprSmaller;
+            charactersLimit = 7;
+            shift = 1.5f;
+        }
+        else
+        {
+            requiredPrefab = cardReprSmallest;
+            charactersLimit = 4;
+            shift = 1.2f;
+        }
+
         float curPosY = deckStartY;
         CardReprManager prevCard = null;
+        CardTypes prevCard_type = CardTypes.Hatapon;
+        
+        int row = 0;
+        int index = 0;
         foreach (CardTypes type in DeckManager.deck)
         {
-            if (prevCard == null || prevCard.type != type)
+            if (prevCard == null || prevCard_type != type)
             {
+                prevCard_type = type;
+            
                 GameObject card = GenerateCard(type);
-                CardReprManager cardReprObj = Instantiate(cardRepr).GetComponent<CardReprManager>();
-                cardReprObj.SetName(card.GetComponent<CardManager>().GetName());
+                CardReprManager cardReprObj = Instantiate(requiredPrefab).GetComponent<CardReprManager>();
+                string cardName = card.GetComponent<CardManager>().GetName();
+
+                if (cardName.Length > charactersLimit)
+                {
+                    cardName = cardName.Substring(0, charactersLimit);
+                    cardName += "...";
+                }
+
+                cardReprObj.SetName(cardName);
                 //card.GetComponent<CardManager>().DestroyCard();
                 Destroy(card);
 
-                cardReprObj.gameObject.transform.position = new Vector3(deckStartX, curPosY, 0f);
+                cardReprObj.gameObject.transform.position = new Vector3(deckStartX + shift * row, curPosY, 0f);
 
                 prevCard = cardReprObj;
 
                 cardReprObj.type = type;
                 cardReprObj.numberOfCopies = 1;
                 cardReprObj.SetVisualNumber();
+                cardReprObj.index = index;
+                index += 1;
 
                 curPosY -= deckCardSpace;
 
                 cardList.Add(cardReprObj.gameObject);
                 cardReprObj.collectionObject = this;
+
+                if (index >= cardsInRow)
+                {
+                    index = 0;
+                    curPosY = deckStartY;
+                    row += 1;
+                }
+                
             }
             else
             {
-                prevCard.numberOfCopies += 1;
-                prevCard.SetVisualNumber();
+                if (prevCard != null)
+                {
+                    prevCard.numberOfCopies += 1;
+                    prevCard.SetVisualNumber();
+                }
             }
         }
     }

@@ -8,7 +8,7 @@ public static class ZigotonStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 5;
-        stats.description = "<b>Bold text</b>\nNormal text\n<i>Italic text</i>";
+        stats.description = "";
         stats.name = "Zigoton Troops";
         stats.nameSize = 4;
         stats.imagePath = "zigoton";

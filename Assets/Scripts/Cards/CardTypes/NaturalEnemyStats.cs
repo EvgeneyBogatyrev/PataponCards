@@ -12,6 +12,8 @@ public static class NaturalEnemyStats
         stats.description = "Destroy target unit with Devotion to Shield.";
         stats.name = "Natural Enemy";
 
+        stats.additionalKeywords.Add("Devotion card");
+
         stats.isSpell = true;
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

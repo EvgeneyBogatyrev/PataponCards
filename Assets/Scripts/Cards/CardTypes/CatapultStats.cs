@@ -13,7 +13,7 @@ public static class CatapultStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 4;
-        stats.description = "Pacifism. Abilities:\n-" + firstCost.ToString() + ": Deal " + catapultDamage.ToString() + " damage to opponent's Hatapon.\n" +
+        stats.description = "<b>Pacifism. Abilities</b>:\n-" + firstCost.ToString() + ": Deal " + catapultDamage.ToString() + " damage to opponent's Hatapon.\n" +
                             "-" + secondCost.ToString() + ": Destroy other friendly non-Hatapon units to gain their power.";
         stats.name = "Catapult";
 
@@ -22,6 +22,7 @@ public static class CatapultStats
         stats.runes.Add(Runes.Spear);
         
         stats.isStatic = true;
+        //stats.pacifism = true;
         stats.connectedCards = new List<CardTypes>
         {
             CardTypes.Catapult_option1,

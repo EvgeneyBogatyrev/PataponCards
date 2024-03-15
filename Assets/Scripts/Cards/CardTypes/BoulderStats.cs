@@ -9,7 +9,7 @@ public static class BoulderStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "Pacifism. Lifelink.\n<i>I wish I could pay taxes, but I don't know how.</i>";
+        stats.description = "<b>Pacifism</b>. <b>Lifelink</b>.\n<i>I wish I could pay taxes, but I don't know how.</i>";
         stats.name = "The Boulder";
         stats.pacifism = true;
         stats.hasShield = true;

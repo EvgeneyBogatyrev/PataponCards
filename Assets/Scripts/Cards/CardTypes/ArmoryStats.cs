@@ -9,7 +9,7 @@ public static class ArmoryStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "Pacifism. Abilities:\n-1: Draw a card, your Hatapon loses 2 life.\n-3: Discard your hand, draw 3 cards.";
+        stats.description = "<b>Pacifism. Abilities:</b>\n-1: Draw a card, your Hatapon loses 2 life.\n-3: Discard your hand, draw 3 cards.";
         stats.name = "Armory";
 
         stats.descriptionSize = 3;
@@ -19,6 +19,7 @@ public static class ArmoryStats
 
 
         stats.isStatic = true;
+        //stats.pacifism = true;
         stats.connectedCards = new List<CardTypes>
         {
             CardTypes.Armory_option1,

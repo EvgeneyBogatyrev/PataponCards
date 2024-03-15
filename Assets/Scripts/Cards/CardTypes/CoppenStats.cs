@@ -9,10 +9,13 @@ public static class CoppenStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "On play: Summon an Ice Wall for your opponent in front of Coppen.";
+        stats.description = "<b>On play</b>: Summon an Ice Wall for your opponent in front of Coppen.";
         stats.name = "Coppen";
         stats.runes.Add(Runes.Bow);
 
+        stats.additionalRules.Add("If a space in from of the <i>Coppen</i> isn't empty, <i>Coppen</i>'s <b>On play</b> effect does nothing.");
+
+        stats.relevantCards.Add(CardTypes.IceWall);
 
         stats.hasOnPlaySpell = true;
 

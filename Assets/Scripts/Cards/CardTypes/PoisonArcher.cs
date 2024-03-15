@@ -15,6 +15,8 @@ public static class PoisonArcherStats
 
         stats.hasOnPlaySpell = true;
 
+        stats.additionalKeywords.Add("Poison");
+
         static IEnumerator OnPlay(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();

@@ -17,6 +17,11 @@ public static class QueenKharmaStats
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Bow);
 
+        stats.relevantCards.Add(CardTypes.LightningBolt);
+        stats.relevantCards.Add(CardTypes.SleepingDust);
+        stats.relevantCards.Add(CardTypes.MeteorRain);
+        stats.relevantCards.Add(CardTypes.BadaDrum);
+
         stats.hasOnPlaySpell = true;
 
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

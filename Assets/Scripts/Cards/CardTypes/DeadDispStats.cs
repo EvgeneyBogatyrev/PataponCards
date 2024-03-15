@@ -14,6 +14,8 @@ public static class DeadDispStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
+        stats.additionalRules.Add("If the first chosen unit has an On attack effect, it will trigger.");
+
         stats.isSpell = true;
         static IEnumerator DeadlyDisputeRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

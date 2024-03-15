@@ -9,7 +9,7 @@ public static class DarkOneStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 1;
-        stats.description = "Start of turn: Discard the top card of your library. If it's a spell, transform into Kiba form. Otherwise, transform into Bird form.";
+        stats.description = "<b>Start of turn</b>: Discard the top card of your library. If it's a spell, transform into Kiba form. Otherwise, transform into Bird form.";
         stats.name = "The Dark One";
 
         stats.descriptionSize = 3;
@@ -17,7 +17,8 @@ public static class DarkOneStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
-        
+        stats.relevantCards.Add(CardTypes.KibaForm);
+        stats.relevantCards.Add(CardTypes.BirdForm);
 
         static IEnumerator Realization(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -121,7 +122,7 @@ public static class KibaFormStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 4;
-        stats.description = "Haste.\nCan attack any enemy unit on the board.";
+        stats.description = "<b>Haste</b>.\nCan attack any enemy unit on the board.";
         stats.name = "Kiba Form";
         stats.megaVision = true;
         stats.hasHaste = true;

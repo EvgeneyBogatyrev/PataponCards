@@ -18,6 +18,9 @@ public static class DonTheYumiponStats
         stats.descriptionSize = 3;
         //stats.nameSize = 5;
 
+        stats.additionalKeywords.Add("Cycling");
+        stats.suppressOnPlay = true;
+
         stats.hasOnPlaySpell = true;
         stats.spell = OnPlay;
 
@@ -95,6 +98,7 @@ public static class DonTheYumiponStats
         stats.onCycleOtherEvent = OnCycleOther;
 
         stats.imagePath = "don_yumipon_final";
+        stats.artistName = "korka123";
         return stats;
     }
 }

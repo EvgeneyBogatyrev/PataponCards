@@ -8,7 +8,7 @@ public static class ConcedeStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.description = "You win this round";
+        stats.description = "<i>You win this round!</i>";
         stats.name = "Opponent concedes";
 
         stats.nameSize = 4;

@@ -12,6 +12,8 @@ public static class DesperadoStats
         stats.description = "Draw X cards where X is your Devotion to Bow. Your Hatapon loses twice as much life.";
         stats.name = "Desperado";
 
+        stats.additionalKeywords.Add("Devotion deck");
+
         stats.isSpell = true;
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

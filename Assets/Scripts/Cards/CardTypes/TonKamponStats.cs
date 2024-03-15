@@ -16,6 +16,9 @@ public static class TonKamponStats
 
         stats.descriptionSize = 4;
 
+        stats.relevantCards.Add(CardTypes.Alldemonium);
+        stats.relevantCards.Add(CardTypes.CronoRiggers);
+
 
         stats.isStatic = true;
         stats.connectedCards = new List<CardTypes>();

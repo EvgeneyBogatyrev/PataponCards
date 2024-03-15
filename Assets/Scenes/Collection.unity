@@ -641,6 +641,8 @@ MonoBehaviour:
   cardScale: 0.6
   cardPrefab: {fileID: 5994425831647166798, guid: 64be9f69a2d598c4ea6a3e37aeb0a698, type: 3}
   cardRepr: {fileID: 2864456557026270458, guid: 713c533c9a64b0948b01aa182e066cd7, type: 3}
+  cardReprSmaller: {fileID: 2864456557026270458, guid: 0eec3033c79434b9fb82d0803f582bb7, type: 3}
+  cardReprSmallest: {fileID: 2864456557026270458, guid: 37d51d70ebafa48b996e53c5c6b4de94, type: 3}
   cardNumberText: {fileID: 1965691610}
   runeObjects:
   - {fileID: 1788132052}
@@ -1752,8 +1754,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -196, y: 62}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -50.7, y: 404.7623}
+  m_SizeDelta: {x: 131.05, y: 42.4754}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1965691612
 MonoBehaviour:
@@ -1802,8 +1804,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 24
+  m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1838,7 +1840,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 3.762272, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0

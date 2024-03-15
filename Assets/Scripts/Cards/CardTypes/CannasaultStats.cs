@@ -9,10 +9,12 @@ public class CannasaultStats : MonoBehaviour
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 4;
-        stats.description = "Haste.\nOn attack: Gain \"End turn and start turn effects can't trigger\" until the start of your next turn.";
+        stats.description = "<b>Haste</b>.\n<b>On attack</b>: Gain \"End turn and start turn effects can't trigger\" until the start of your next turn.";
         stats.name = "Cannasault";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Spear);
+
+        stats.additionalRules.Add("When <i>Cannasault</i> dies, its effect is nullified .");
 
         static IEnumerator OnAttack(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

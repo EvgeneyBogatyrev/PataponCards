@@ -95,7 +95,7 @@ public static class BadaDrumStats
                     slotToGo.SetFree(false);
                     slotToGo.SetConnectedMinion(targetMinion);
                     targetMinion.SetFriendly(!targetMinion.GetFriendly());
-                    Debug.Log("here");
+                    
 
                 }
             }

@@ -8,10 +8,14 @@ public static class BabattaStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.description = "On play: Replace your hand with 'Babatto Swarm' cards";
+        stats.description = "<b>On play</b>: Replace your hand with 'Babatto Swarm' cards";
         stats.name = "Babatto";
 
+        stats.additionalRules.Add("You replace each card in your hand with the <i>'Babatto Swarm'</i> card. Those cards are a completely new set of cards.");
+
         stats.power = 3;
+
+        stats.relevantCards.Add(CardTypes.BabattaSwarm);
 
         stats.hasOnPlaySpell = true;
 

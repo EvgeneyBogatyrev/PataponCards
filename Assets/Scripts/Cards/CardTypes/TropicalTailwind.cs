@@ -19,6 +19,8 @@ public static class TropicalTailwindStats
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
 
+        stats.additionalKeywords.Add("Devotion card");
+
         stats.isSpell = true;
 
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

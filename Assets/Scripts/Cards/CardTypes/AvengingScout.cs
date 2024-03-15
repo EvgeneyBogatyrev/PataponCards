@@ -8,9 +8,11 @@ public static class AvengingScoutStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 2;
-        stats.description = "On death: Deal 1 + X damage to the strongest enemy unit, where X is your Devotion to Spear.";
+        stats.description = "<b>On death:</b> Deal 1 + X damage to the strongest enemy unit, where X is your <b>Devotion to Spear</b>.";
         stats.name = "Avenging Scout";
         stats.runes.Add(Runes.Spear);
+
+        stats.additionalKeywords.Add("Devotion deck");
         
        
         stats.hasOnDeath = true;

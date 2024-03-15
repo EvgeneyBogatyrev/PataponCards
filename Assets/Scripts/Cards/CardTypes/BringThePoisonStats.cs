@@ -18,6 +18,11 @@ public static class BringThePoisonStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Bow);
 
+        stats.additionalKeywords.Add("Poison");
+
+        stats.relevantCards.Add(CardTypes.DoomShroom);
+        stats.relevantCards.Add(CardTypes.Mushroom);
+
         stats.isSpell = true;
 
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
