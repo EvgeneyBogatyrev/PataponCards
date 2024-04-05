@@ -9,7 +9,7 @@ public class Moforumo : MonoBehaviour
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 5;
-        stats.description = "Hexproof (can't be targeted by spells or abilities).";
+        stats.description = "<b>Hexproof</b> (can't be targeted by spells or abilities).";
         stats.name = "Moforumo";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);

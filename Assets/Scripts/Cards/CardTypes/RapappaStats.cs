@@ -9,7 +9,7 @@ public static class MyamsarStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 2;
-        stats.description = "End of turn: Summon a copy of this unit with 1 less power.";
+        stats.description = "<b>End of turn</b>: Summon a copy of this unit with 1 less power.";
         stats.name = "Rapappa";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);

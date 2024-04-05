@@ -9,7 +9,7 @@ public static class YariponBushwackerStats
         CardManager.CardStats stats = new CardManager.CardStats();
         const int destroboDamage = 1;
         stats.power = 2;
-        stats.description = "Haste (can attack and move as soon as it enters the battlefield).\nOn play: Deal " + destroboDamage.ToString() +  " damage.";
+        stats.description = "<b>Haste</b> (can attack and move as soon as it enters the battlefield).\n<b>On play</b>: Deal " + destroboDamage.ToString() +  " damage.";
         stats.name = "Yaripon Bushwacker";
         stats.hasHaste = true;
         //stats.runes.Add(Runes.Shield);

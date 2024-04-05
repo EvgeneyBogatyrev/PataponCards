@@ -9,7 +9,7 @@ public static class DesperadoStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.runes.Add(Runes.Bow);
-        stats.description = "Draw X cards where X is your Devotion to Bow. Your Hatapon loses twice as much life.";
+        stats.description = "Draw X cards where X is your <b>Devotion to Bow</b>. Your Hatapon loses twice as much life.";
         stats.name = "Desperado";
 
         stats.additionalKeywords.Add("Devotion deck");

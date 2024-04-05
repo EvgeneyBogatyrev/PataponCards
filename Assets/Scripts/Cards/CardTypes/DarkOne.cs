@@ -104,7 +104,7 @@ public static class BirdFormStats
         stats.power = 4;
         stats.description = "Can't be attacked by units.";
         stats.name = "Bird Form";
-        //stats.runes.Add(Runes.Spear);
+        stats.runes.Add(Runes.Spear);
         //stats.runes.Add(Runes.Spear);
         //stats.runes.Add(Runes.Spear);
 
@@ -126,8 +126,7 @@ public static class KibaFormStats
         stats.name = "Kiba Form";
         stats.megaVision = true;
         stats.hasHaste = true;
-        //stats.runes.Add(Runes.Spear);
-        //stats.runes.Add(Runes.Spear);
+        stats.runes.Add(Runes.Spear);
         
         stats.imagePath = "kiba_form";
         return stats;

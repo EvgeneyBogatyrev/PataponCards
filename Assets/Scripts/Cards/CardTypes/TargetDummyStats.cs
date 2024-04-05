@@ -9,7 +9,7 @@ public static class TargetDummyStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "Lifelink (your Hatapon is immune to attacks and spell damage).\nHexproof (can't be targeted by spells or abilities).";
+        stats.description = "<b>Lifelink</b>.\n<b>Hexproof</b>.";
         stats.name = "Target Dummy";
         stats.runes.Add(Runes.Shield);
         stats.hexproof = true;

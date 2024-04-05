@@ -11,7 +11,7 @@ public static class YumiponStats
         const int yumiponDamage = 1;
 
         stats.power = 2;
-        stats.description = "On attack: Deal " + yumiponDamage.ToString() + " damage to all enemy units.";
+        stats.description = "<b>On attack</b>: Deal " + yumiponDamage.ToString() + " damage to all enemy units.";
         stats.name = "Yumipon";
         stats.runes.Add(Runes.Bow);
 

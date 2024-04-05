@@ -9,7 +9,7 @@ public static class ScoutStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 2;
-        stats.description = "End of turn: Draw a card. Your Hatapon loses 1 life for each time this ability has triggered.";
+        stats.description = "<b>End of turn</b>: Draw a card. Your Hatapon loses 1 life for each time this ability has triggered.";
         stats.name = "Scout";
         stats.imagePath = "scout";
         

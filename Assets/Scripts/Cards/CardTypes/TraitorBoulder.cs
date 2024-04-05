@@ -9,12 +9,10 @@ public static class TraitorBoulderStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 2;
-        stats.description = "Pacifism.\nOn play: Your opponent takes control of it.";
+        stats.description = "<b>Pacifism.\nOn play</b>: Your opponent takes control of it.";
         stats.name = "The Rock";
 
-        stats.canAttack = false;
-        stats.canDealDamage = false;
-        stats.limitedVision = true;
+        stats.pacifism = true;
         //stats.hasGreatshield = true;
 
         //stats.nameSize = 4;

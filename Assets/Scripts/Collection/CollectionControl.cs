@@ -82,17 +82,40 @@ public class CollectionControl : MonoBehaviour
         return reservedList;
     }
 
-    private void Start()
+    private List<CardTypes> FilterRunes(List<CardTypes> startList, List<Runes> runes)
     {
+        List<CardTypes> newList = new();
+
+        foreach (CardTypes type in startList)
+        {
+            CardManager.CardStats stats = CardTypeToStats.GetCardStats(type);
+            if (bowDevotion < stats.GetDevotion(Runes.Bow)
+                || shieldDevotion < stats.GetDevotion(Runes.Shield)
+                || spearDevotion < stats.GetDevotion(Runes.Spear)
+            )
+            {
+                continue;
+            }
+            newList.Add(type);
+        }
+
+        return newList;
+    }
+
+    private IEnumerator Start()
+    {
+        DeckManager.deck = SaveSystem.LoadDeck();
+        DeckManager.runes = SaveSystem.LoadRunes();
+
+        yield return new WaitForSeconds(0.01f);
+        
+
         cardList = new List<GameObject>();
         currentCards = new List<CardManager>();
         List<CardTypes> cardTypes = GetPage(0);
         currentPage = 0;
         ShowCards(cardTypes);
-        //DeckManager.FillDeck();
-
-        DeckManager.deck = SaveSystem.LoadDeck();
-        DeckManager.runes = SaveSystem.LoadRunes();
+        
 
         spearDevotion = 0;
         shieldDevotion = 0;
@@ -114,12 +137,14 @@ public class CollectionControl : MonoBehaviour
             }
         }
 
+        UpdateRunes();
         ShowDeck();
+        yield return null;
     }
 
     public void Update()
     {
-        cardNumberText.GetComponent<TextMeshProUGUI>().text = DeckManager.deck.Count.ToString() + "/24";
+        cardNumberText.GetComponent<TextMeshPro>().text = DeckManager.deck.Count.ToString() + "/24";
     }
 
     public void ButtonUp()
@@ -254,11 +279,39 @@ public class CollectionControl : MonoBehaviour
 
         //SaveSystem.SaveRunes(DeckManager.runes);
         ShowDeck();
+        foreach (CardManager card in currentCards)
+        {
+            Destroy(card.gameObject);
+        }
+        currentCards = new List<CardManager>();
+        //st = new List<GameObject>();
+        List<CardTypes> cardTypes = GetPage(0);
+        currentPage = 0;
+        ShowCards(cardTypes);
+    }
+
+    private List<CardTypes> GetCollectableCards()
+    {
+        string[] allCards = Enum.GetNames(typeof(CardTypes));
+        List<CardTypes> relevantCards = new();
+        List<CardTypes> reservedList = GetForbiddenCards();
+        foreach (string stringType in allCards)
+        {
+            CardTypes type = (CardTypes)Enum.Parse(typeof(CardTypes), stringType);
+            if (!reservedList.Contains(type))
+            {
+                relevantCards.Add(type);
+            }
+        }
+        return relevantCards;
     }
 
     public bool CheckPage(int pageNumber)
     {
-        var namesCount = Enum.GetNames(typeof(CardTypes)).Length - GetForbiddenCards().Count;
+        List<CardTypes> relevantCards = GetCollectableCards();
+        relevantCards = FilterRunes(relevantCards, DeckManager.runes);
+
+        var namesCount = relevantCards.Count;//Enum.GetNames(typeof(CardTypes)).Length - GetForbiddenCards().Count;
         if (pageNumber < 0)
         {
             return false;
@@ -289,13 +342,20 @@ public class CollectionControl : MonoBehaviour
 
     public List<CardTypes> GetPage(int pageNumber)
     {
-        var namesCount = Enum.GetNames(typeof(CardTypes)).Length;
+        //var namesCount = Enum.GetNames(typeof(CardTypes)).Length;
+        List<CardTypes> relevantCards = GetCollectableCards();
+        relevantCards = FilterRunes(relevantCards, DeckManager.runes);
+        int namesCount = relevantCards.Count;
+
         List<CardTypes> cardList = new List<CardTypes>();
         int startNumber = pageNumber * rows * columns;
         int end = rows * columns;
-        List<CardTypes> reservedList = GetForbiddenCards();
+        //List<CardTypes> reservedList = GetForbiddenCards();
+        
         for (int i = 0; i < end && startNumber + i < namesCount; ++i)
         {
+            cardList.Add(relevantCards[startNumber + i]);
+            /*
             if (reservedList.Contains((CardTypes)(startNumber + i)))
             {
                 end += 1;
@@ -305,6 +365,7 @@ public class CollectionControl : MonoBehaviour
             {
                 cardList.Add((CardTypes)(startNumber + i));
             }
+            */
         }
         return cardList;
     }

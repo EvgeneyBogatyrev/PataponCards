@@ -8,8 +8,8 @@ public static class DestroboStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         const int destroboDamage = 1;
-        stats.power = 2;
-        stats.description = "On play: Choose a unit. If it's not a Hatapon and has no Devotion, destroy it. Otherwise, deal " + destroboDamage.ToString() +  " damage to it.";
+        stats.power = 3;
+        stats.description = "<b>On play</b>: Choose a unit. If it's not a Hatapon and has no <b>Devotion</b>, destroy it. Otherwise, deal " + destroboDamage.ToString() +  " damage to it.";
         stats.name = "Destrobo";
         stats.runes.Add(Runes.Shield);
 

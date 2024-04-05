@@ -11,7 +11,7 @@ public static class DonTheYumiponStats
         const int damage = 2;
 
         stats.power = 2;
-        stats.description = "You can cycle any amount of cards per turn.\nWhenever you cycle a card, deal " + damage.ToString() + " damage to the weakest enemy unit.";
+        stats.description = "You can <b>cycle</b> any number of cards per turn.\nWhenever you <b>cycle</b> a card, deal " + damage.ToString() + " damage to the weakest enemy unit.";
         stats.name = "Don Yumipon";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);

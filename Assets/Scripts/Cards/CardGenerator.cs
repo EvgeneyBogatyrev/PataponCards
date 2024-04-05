@@ -5,7 +5,6 @@ using UnityEngine;
 using System.Linq;
 
 
-//Rewrite this entire piece of sheesh
 public static class CardGenerator
 {
     public static CardManager.CardStats GetCardStats(CardTypes cardType)

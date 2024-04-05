@@ -10,11 +10,9 @@ public static class IdiotStats
 
         const int burusSelfDamage = 1;
         stats.power = 2;
-        stats.description = "Pacifism.\nStart of turn: Draw a card and deal " + burusSelfDamage.ToString() + " damage to Bent Compass.";
+        stats.description = "<b>Pacifism.\nStart of turn</b>: Draw a card and deal " + burusSelfDamage.ToString() + " damage to Bent Compass.";
         stats.name = "Bent Compass";
-        stats.canAttack = false;
-        stats.limitedVision = true;
-        stats.canDealDamage = false;
+        stats.pacifism = true;
 
         static IEnumerator FuckingIdiotStartTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

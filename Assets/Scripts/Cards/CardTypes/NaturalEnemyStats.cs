@@ -9,7 +9,7 @@ public static class NaturalEnemyStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.runes.Add(Runes.Bow);
-        stats.description = "Destroy target unit with Devotion to Shield.";
+        stats.description = "Destroy target unit with <b>Devotion to Shield</b>.";
         stats.name = "Natural Enemy";
 
         stats.additionalKeywords.Add("Devotion card");

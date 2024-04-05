@@ -9,13 +9,13 @@ public static class WooyariStats
         CardManager.CardStats stats = new CardManager.CardStats();
         const int destroboDamage = 1;
         stats.power = 2;
-        stats.description = "On play: Choose a unit. If it has Lifelink, destroy it.";
+        stats.description = "<b>On play</b>: Choose a unit. If it has <b>Lifelink</b>, destroy it.";
         stats.name = "Wooyari";
         stats.runes.Add(Runes.Spear);
 
         stats.hasOnPlaySpell = true;
 
-        stats.additionalRules.Add("If a chosen unit doesn't have Lifelink, this effect does nothing.");
+        stats.additionalRules.Add("If a chosen unit doesn't have <b>Lifelink</b>, this effect does nothing.");
 
 
         static IEnumerator DestroboRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

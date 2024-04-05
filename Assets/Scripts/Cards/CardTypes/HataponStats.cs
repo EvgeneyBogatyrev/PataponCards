@@ -8,7 +8,7 @@ public static class HataponStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 20;
-        stats.description = "Cannot attack and deal damage.\nProtect him at all cost!";
+        stats.description = "Can't attack and deal damage.\nWhen Hatapon dies, you lose this round.\n<i>Protect him at all cost!</i>";
         stats.name = "Hatapon";
         stats.canAttack = false;
         stats.canDealDamage = false;

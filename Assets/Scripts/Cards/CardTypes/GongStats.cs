@@ -11,7 +11,7 @@ public class GongStats : MonoBehaviour
         const int yumiponDamage = 1;
 
         stats.power = 4;
-        stats.description = "Hexproof.\nOn attack: Deal " + yumiponDamage.ToString() + " damage to all enemy units.";
+        stats.description = "<b>Hexproof</b>.\n<b>On attack</b>: Deal " + yumiponDamage.ToString() + " damage to all enemy units.";
         stats.name = "Gong the Hawkeye";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Shield);

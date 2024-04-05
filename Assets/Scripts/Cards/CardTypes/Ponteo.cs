@@ -11,7 +11,7 @@ public static class PonteoStats
         stats.power = 3;
         stats.description = "<b>Haste</b>.\n<b>On play</b>: Reveal the top of your library until you find a unit with <b>Haste</b>. Draw it and discard the rest.";
         stats.name = "Ponteo";
-        stats.descriptionSize = 4;
+        stats.descriptionSize = 3;
 
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);

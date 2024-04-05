@@ -9,11 +9,9 @@ public static class TrentStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 10;
-        stats.description = "Pacifism.\nWhenever this unit takes damage, it transforms into Treant on Fire.";
+        stats.description = "<b>Pacifism</b>.\nWhenever this unit takes damage, it transforms into <i>Treant on Fire</i>.";
         stats.name = "Treant";
-        stats.canAttack = false;
-        stats.limitedVision = true;
-        stats.canDealDamage = false;
+        stats.pacifism = true;
 
         stats.relevantCards.Add(CardTypes.TrentOnFire);
 
@@ -53,8 +51,9 @@ public static class TrentFireStats
 
         const int selfDamage = 1;
         stats.power = 10;
-        stats.description = "End of turn: Deal " + selfDamage.ToString() + " to itself.";
+        stats.description = "<b>End of turn</b>: Deal " + selfDamage.ToString() + " to itself.";
         stats.name = "Treant on Fire";
+        stats.runes.Add(Runes.Shield);
         
         static IEnumerator endTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

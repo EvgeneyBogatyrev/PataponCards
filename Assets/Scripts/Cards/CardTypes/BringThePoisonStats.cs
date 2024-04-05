@@ -18,7 +18,7 @@ public static class BringThePoisonStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Bow);
 
-        stats.additionalKeywords.Add("Poison");
+        //stats.additionalKeywords.Add("Poison");
 
         stats.relevantCards.Add(CardTypes.DoomShroom);
         stats.relevantCards.Add(CardTypes.Mushroom);

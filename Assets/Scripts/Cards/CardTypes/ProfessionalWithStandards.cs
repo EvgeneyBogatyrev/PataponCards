@@ -9,7 +9,7 @@ public static class ProfessionalWithStandards
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 3;
-        stats.description = "Cycling.\nWhenever you Cycle Questing Beast, your Hatapon loses " + beastDamage.ToString() + " life.";
+        stats.description = "<b>Cycling</b>.\nWhenever you Cycle Questing Beast, your Hatapon loses " + beastDamage.ToString() + " life.";
         stats.name = "Questing beast";
 
         static void ProfessionalWIthStandardsDeathrattle(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots, CardManager.CardStats thisStats)

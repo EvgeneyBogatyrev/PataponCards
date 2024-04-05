@@ -33,7 +33,7 @@ public class RuneDropdownManager : MonoBehaviour
 
     private void Update() 
     {
-        if (mouseOver && Input.GetMouseButtonDown(0))
+        if (mouseOver && Input.GetMouseButtonDown(0) && CursorController.cursorState == CursorController.CursorStates.Free)
         {
             if (value == Runes.Spear)
             {

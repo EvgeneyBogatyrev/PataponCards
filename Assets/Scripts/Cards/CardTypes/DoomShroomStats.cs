@@ -9,7 +9,7 @@ public class DoomShroomStats : MonoBehaviour
         CardManager.CardStats stats = new CardManager.CardStats();
 
         const int damage = 2;
-        stats.description = "Deal " + damage.ToString() + " damage to a unit. If that unit dies, summon a Poisonous Mushroom on its place.\nCycling.";
+        stats.description = "Deal " + damage.ToString() + " damage to a unit. If that unit dies, summon a Poisonous Mushroom on its place.\n<b>Cycling</b>.";
         stats.name = "Doom Shroom";
 
         stats.runes.Add(Runes.Bow);

@@ -14,7 +14,7 @@ public class CannasaultStats : MonoBehaviour
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Spear);
 
-        stats.additionalRules.Add("When <i>Cannasault</i> dies, its effect is nullified .");
+        stats.additionalRules.Add("When <i>Cannasault</i> dies or is removed from the battlefield some other way, its effect is immediately nullified.");
 
         static IEnumerator OnAttack(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

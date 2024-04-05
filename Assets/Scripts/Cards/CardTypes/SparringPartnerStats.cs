@@ -9,7 +9,7 @@ public class SparringPartnerStats : MonoBehaviour
         CardManager.CardStats stats = new CardManager.CardStats();
         
         const int gain = 2;
-        stats.description = "On play: Target non-Hatapon unit under your control gains +" + gain.ToString() + " power.";
+        stats.description = "<b>On play</b>: Target non-Hatapon unit under your control gains +" + gain.ToString() + " power.";
         stats.name = "Sparring Partner";
         stats.runes.Add(Runes.Shield);
         stats.power = 3;

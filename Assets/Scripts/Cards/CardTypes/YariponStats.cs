@@ -10,7 +10,7 @@ public static class YariponStats
         const int yariponDamage = 2;
 
         stats.power = 3;
-        stats.description = "End of turn: Deal " + yariponDamage.ToString() + " damage to an enemy unit next to it.";
+        stats.description = "<b>End of turn</b>: Deal " + yariponDamage.ToString() + " damage to an enemy unit next to it.";
         stats.name = "Yaripon";
         stats.imagePath = "yaripon";
         

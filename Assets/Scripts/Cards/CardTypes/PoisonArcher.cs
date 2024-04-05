@@ -8,7 +8,7 @@ public static class PoisonArcherStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         
-        stats.description = "On play: Poison target unit.\nOn attack: Poison attack target.";
+        stats.description = "<b>On play: Poison</b> target unit.\n<b>On attack: Poison</b> attack target.";
         stats.name = "Poison Archer";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);

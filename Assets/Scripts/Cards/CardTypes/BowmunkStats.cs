@@ -48,6 +48,7 @@ public static class BowmunkStats
             BoardManager.Slot thisOne = friendlySlots[targets[0]];
 
             BoardManager.Slot targetSlot = null;
+            int minDistance = -1;
             foreach (BoardManager.Slot slot in friendlySlots)
             {
                 if (slot.GetFree() && slot != thisOne)

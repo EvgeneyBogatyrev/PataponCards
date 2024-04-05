@@ -9,13 +9,13 @@ public static class GanTheYariponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 2;
-        stats.description = "On play: Repeat all End of turn events of cards you played this game.";
+        stats.description = "<b>On play</b>: Repeat all <b>End of turn</b> effents of cards you played this game.";
         stats.name = "Gan Yaripon";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
         stats.additionalKeywords.Add("End of turn");
-        stats.additionalRules.Add("End turn effects are repeated in order they were played.");
+        stats.additionalRules.Add("<b>End of turn</b> effects are repeated in order they were played.");
 
         stats.hasAfterPlayEvent = true;
         //stats.hasOnPlay = true;

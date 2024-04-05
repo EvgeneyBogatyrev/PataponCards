@@ -77,16 +77,9 @@ public class CardInfoManager : MonoBehaviour
     public GameObject cardReprPrefab;
 
 
-    public void Create(CardTypes cardType)
+    private string GetCardTextFromStats(CardManager.CardStats stats)
     {
-        GameObject newCard = Instantiate(cardPrefab, this.gameObject.transform);
-        mainCard = newCard.GetComponent<CardManager>();
-        CardGenerator.CustomizeCard(mainCard, cardType);
-        mainCard.SetCardState(CardManager.CardState.hilightOver);
-
         string cardText = "";
-        CardManager.CardStats stats = mainCard.GetCardStats();
-
         if (!stats.suppressOnPlay && (stats.hasOnPlaySpell || stats.hasAfterPlayEvent))
         {
             cardText += "* " + CardInfoController.GetMechanicDescription("On play") + "\n";
@@ -132,21 +125,24 @@ public class CardInfoManager : MonoBehaviour
         {
             cardText += "* " + CardInfoController.GetMechanicDescription("Haste") + "\n";
         }
-
         foreach (string keyword in stats.additionalKeywords)
         {
             cardText += "* " + CardInfoController.GetMechanicDescription(keyword) + "\n";
         }
+        return cardText;
+    }
 
-        foreach (string rule in stats.additionalRules)
-        {
-            cardText += "* " + rule + "\n";
-        }
+    public void Create(CardTypes cardType)
+    {
+        GameObject newCard = Instantiate(cardPrefab, this.gameObject.transform);
+        mainCard = newCard.GetComponent<CardManager>();
+        CardGenerator.CustomizeCard(mainCard, cardType);
+        mainCard.SetCardState(CardManager.CardState.hilightOver);
 
-        cardText += "\nArt by: " + stats.artistName;
+        CardManager.CardStats stats = mainCard.GetCardStats();
 
-        infoText.GetComponent<TextMeshPro>().text = cardText; 
-
+        string cardText = GetCardTextFromStats(stats);
+        
         float shift = 0.6f;
         int index = 0;
         foreach (CardTypes addCardType in stats.relevantCards)
@@ -156,6 +152,8 @@ public class CardInfoManager : MonoBehaviour
             CardReprManager cardReprObj = Instantiate(cardReprPrefab, this.gameObject.transform).GetComponent<CardReprManager>();
             string cardName = relCard.GetComponent<CardManager>().GetName();
 
+            cardText += GetCardTextFromStats(relCard.GetComponent<CardManager>().GetCardStats());
+
             cardReprObj.SetName(cardName);
             cardReprObj.relevantCard = true;
             cardReprObj.type = addCardType;
@@ -163,12 +161,24 @@ public class CardInfoManager : MonoBehaviour
             
             cardReprObj.gameObject.transform.position = new Vector3(cardReprPosition.transform.position.x, cardReprPosition.transform.position.y - shift * index, 0f);
 
+            cardReprObj.index = index;
+
             index += 1;
 
             relevantCards.Add(cardReprObj.gameObject);
+            
 
             Destroy(relCard);
         } 
+
+        foreach (string rule in stats.additionalRules)
+        {
+            cardText += "* " + rule + "\n";
+        }
+
+        cardText += "\nArt by: " + stats.artistName;
+
+        infoText.GetComponent<TextMeshPro>().text = cardText; 
     }
 
     public void Destroy()
@@ -192,9 +202,10 @@ public class CardInfoManager : MonoBehaviour
 
     public void Update()
     {
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonDown(0))
         {
             Destroy();
+            CursorController.cursorState = CursorController.CursorStates.Free;
         }
     }
 }

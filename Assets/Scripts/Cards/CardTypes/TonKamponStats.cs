@@ -9,7 +9,7 @@ public static class TonKamponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 9;
-        stats.description = "Pacifism. Abilities:\n-3: Add Oharan to your hand.\n-3: Add Alldemonium to your hand.";
+        stats.description = "<b>Pacifism. Abilities</b>:\n-3: Add <i>Oharan</i> to your hand.\n-3: Add <i>Alldemonium</i> to your hand.";
         stats.name = "Ton Kampon";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
@@ -39,7 +39,7 @@ public static class TonKampon_option2Stats
 
         const int TonKamponAlldemoniumHealthCost = 3;
                 
-        stats.description = "-3: Add Alldemonium to your hand.";
+        stats.description = "-3: Add <i>Alldemonium</i> to your hand.";
         stats.name = "Demon Weapon";
         stats.nameSize = 4;
 
@@ -86,7 +86,7 @@ public static class TonKampon_option1Stats
         CardManager.CardStats stats = new CardManager.CardStats();
         const int TonKamponCronoRiggersHealthCost = 3;
                 
-        stats.description = "-3: Add Oharan to your hand.";
+        stats.description = "-3: Add <i>Oharan</i> to your hand.";
         stats.name = "Divine Weapon";
 
         stats.isSpell = true;
@@ -133,14 +133,16 @@ public static class CronoRiggersStats
         CardManager.CardStats stats = new CardManager.CardStats();
         const int cronoRiggersDamageReduction = 2;
         const int threshold = 8;
-        stats.description = "All units under your controll gain +" + cronoRiggersDamageReduction.ToString() + " power. Then, your strongest non-Hatapon unit fights the strongest enemy unit.";
+        stats.description = "All units under your controll gain +" + cronoRiggersDamageReduction.ToString() + " power. Then, your strongest non-Hatapon unit attacks the strongest enemy unit.";
         stats.name = "Oharan";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
         
-        //stats.descriptionSize = 3;
+        stats.descriptionSize = 3;
 
         stats.isSpell = true;
+
+        stats.additionalRules.Add("If the attacking unit has an <b>On attack</b> effect, it will trigger.");
 
         static IEnumerator CronoRiggersRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

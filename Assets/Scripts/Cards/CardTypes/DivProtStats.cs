@@ -11,7 +11,7 @@ public static class DivProtStats
         const int divineProtectionTateponCount = 3;
         const int divineProtectionTateponPower = 2;
 
-        stats.description = "Summon " + divineProtectionTateponCount.ToString() + " Tatepons with " + divineProtectionTateponPower.ToString() + " power and Lifelink.";
+        stats.description = "Summon " + divineProtectionTateponCount.ToString() + " Tatepons with " + divineProtectionTateponPower.ToString() + " power and <b>Lifelink</b>.";
         stats.name = "Divine Protection";
 
         stats.nameSize = 4;
@@ -90,11 +90,11 @@ public static class TokenTateponStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.description = "<b>Lifelink</b>";
+        stats.description = "<b>Lifelink</b>.";
         stats.name = "Novice Tatepon";
         stats.power = 2;
         stats.hasShield = true;
-        //stats.runes.Add(Runes.Shield);
+        stats.runes.Add(Runes.Shield);
 
         //stats.isSpell = true;
         stats.imagePath = "Tatepon";

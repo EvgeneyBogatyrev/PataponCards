@@ -13,7 +13,7 @@ public class JamschStats : MonoBehaviour
         stats.runes.Add(Runes.Bow);
 
         stats.power = 1;
-        stats.description = "On play: Poison all enemy units (Poisoned units receive 1 damage at the end thier controllers' turn).";
+        stats.description = "<b>On play: Poison</b> all enemy units (<b>Poisoned</b> units receive 1 damage at the start their controllers turn).";
         stats.name = "Jamsch";
         
         stats.additionalKeywords.Add("Poison");

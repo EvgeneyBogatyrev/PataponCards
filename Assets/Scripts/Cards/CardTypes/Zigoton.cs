@@ -8,9 +8,10 @@ public static class ZigotonStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 5;
-        stats.description = "";
+        stats.description = "<i>A Zigoton prophecy once said: \"If the Patapons reach Earthend, the Zigoton empire would be destroyed\"</i>";
         stats.name = "Zigoton Troops";
         stats.nameSize = 4;
+        stats.descriptionSize = 4;
         stats.imagePath = "zigoton";
         return stats;
     }

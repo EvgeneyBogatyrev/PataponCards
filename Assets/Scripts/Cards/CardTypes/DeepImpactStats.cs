@@ -8,7 +8,7 @@ public static class DeepImpactStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         const int horsePower = 3;
-        stats.description = "Transform target non-Hatapon unit into the Horserider with " + horsePower.ToString() + " and Haste.";
+        stats.description = "Transform target non-Hatapon unit into the Horserider with " + horsePower.ToString() + " and <b>Haste</b>.";
         stats.name = "Deep Impact";
     
         stats.runes.Add(Runes.Spear);
@@ -100,8 +100,9 @@ public static class HorseriderStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "Haste.";
+        stats.description = "<b>Haste</b>.";
         stats.name = "Horserider";
+        stats.runes.Add(Runes.Spear);
 
         stats.hasHaste = true;
 

@@ -8,15 +8,15 @@ public static class MyamsarHeroStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 3;
-        stats.description = "On attack: Destroy the weakest enemy unit if its power is less than Myamsar's power.";
+        stats.description = "<b>On attack</b>: Destroy the weakest enemy unit if its power is less than Myamsar's power.";
         stats.name = "Myamsar";
         stats.runes.Add(Runes.Shield);
         //stats.runes.Add(Runes.Shield);
         //stats.runes.Add(Runes.Shield);
 
         //stats.descriptionSize = 3;
-        stats.additionalRules.Add("If attacked unit is destroyed during the resolution of <i>Myamsar</i>'s On attack effect, <i>Myamsar</i> won't receive any damage.");
-        stats.additionalRules.Add("<i>Myamsar</i>'s On attack effect can destroy enemy <i>Hatapon</i>.");
+        stats.additionalRules.Add("If attacked unit is destroyed during the resolution of Myamsar's <b>On attack</b> effect, Myamsar won't receive any damage.");
+        stats.additionalRules.Add("Myamsar's On attack effect can destroy enemy Hatapon.");
 
         static IEnumerator OnAttack(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

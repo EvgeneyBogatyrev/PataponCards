@@ -84,6 +84,7 @@ public class CardManager : MonoBehaviour
         public bool suppressOnPlay = false;
         public string artistName = "noone (stolen)";
         public List<CardTypes> relevantCards = new();
+       
 
         public Sprite GetSprite()
         {
@@ -105,6 +106,19 @@ public class CardManager : MonoBehaviour
                 }
             }
             return cycling;
+        }
+
+        public int GetDevotion(Runes kind)
+        {
+            int count = 0;
+            foreach (Runes rune in runes)
+            {
+                if (rune == kind)
+                {
+                    count += 1;
+                }
+            }
+            return count;
         }
 
         public CardStats CopyStats()
@@ -262,6 +276,7 @@ public class CardManager : MonoBehaviour
     private Arrow curArrow = null;
 
     public GameObject infoPrefab;
+     private float secondsHold = 0f;
 
     private void Start()
     {
@@ -697,52 +712,71 @@ public class CardManager : MonoBehaviour
 
             case CardState.display:
                 Scene scene = SceneManager.GetActiveScene();
-                if (scene.name == "Collection")
+                if (scene.name == "Collection" && mouseOver)
                 {
-                    if (mouseOver && Input.GetMouseButtonDown(0))
+                    if (CursorController.cursorState == CursorController.CursorStates.Free)
                     {
-                        if (DeckManager.CheckCardNumber(cardType) && DeckManager.GetDeckSize() + 1 <= DeckManager.minDeckSize)
+                        bool showStats = false;
+                        if (Input.GetMouseButton(0))
                         {
-                            CollectionControl collection = GameObject.Find("Collection").GetComponent<CollectionControl>();
-                            
-                            int tmpSpear = collection.spearDevotion;
-                            int tmpShield = collection.shieldDevotion;
-                            int tmpBow = collection.bowDevotion;
-
-                            bool bad = false;
-                            foreach (Runes rune in cardStats.runes)
+                            secondsHold += Time.deltaTime;
+                            if (secondsHold > 0.5f)
                             {
-                                if (rune == Runes.Spear)
-                                {
-                                    tmpSpear--;
-                                }
-                                else if (rune == Runes.Shield)
-                                {
-                                    tmpShield--;
-                                }
-                                else if (rune == Runes.Bow)
-                                {
-                                    tmpBow--;
-                                }
-
-                                if (tmpBow < 0 || tmpShield < 0 || tmpSpear < 0)
-                                {
-                                    bad = true;
-                                    break;
-                                }
+                                showStats = true;
                             }
-                            
-                            if (DEBUG || !bad)
+                        }
+
+                        if (showStats || Input.GetMouseButtonUp(1))
+                        {
+                            CardInfoController.Create(cardType, infoPrefab);
+                            CursorController.cursorState = CursorController.CursorStates.Select;
+                        }
+                        else if (Input.GetMouseButtonUp(0))
+                        {
+                            secondsHold = 0f;
+                            if (DeckManager.CheckCardNumber(cardType) && DeckManager.GetDeckSize() + 1 <= DeckManager.minDeckSize)
                             {
-                                DeckManager.AddCard(cardType);
-                                collection.ShowDeck();
+                                CollectionControl collection = GameObject.Find("Collection").GetComponent<CollectionControl>();
+                                
+                                int tmpSpear = collection.spearDevotion;
+                                int tmpShield = collection.shieldDevotion;
+                                int tmpBow = collection.bowDevotion;
+
+                                bool bad = false;
+                                foreach (Runes rune in cardStats.runes)
+                                {
+                                    if (rune == Runes.Spear)
+                                    {
+                                        tmpSpear--;
+                                    }
+                                    else if (rune == Runes.Shield)
+                                    {
+                                        tmpShield--;
+                                    }
+                                    else if (rune == Runes.Bow)
+                                    {
+                                        tmpBow--;
+                                    }
+
+                                    if (tmpBow < 0 || tmpShield < 0 || tmpSpear < 0)
+                                    {
+                                        bad = true;
+                                        break;
+                                    }
+                                }
+                                
+                                if (DEBUG || !bad)
+                                {
+                                    DeckManager.AddCard(cardType);
+                                    collection.ShowDeck();
+                                }
                             }
                         }
                     }
-                    else if (mouseOver && Input.GetMouseButtonDown(1))
-                    {
-                        CardInfoController.Create(cardType, infoPrefab);
-                    }
+                }
+                else
+                {
+                    secondsHold = 0f;
                 }
                 break;
 

@@ -22,6 +22,7 @@ public static class BanTateponStats
         //stats.nameSize = 4;
 
         stats.relevantCards.Add(CardTypes.TokenTatepon);
+        stats.additionalKeywords.Add("Haste");
 
         static IEnumerator BanTateponRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

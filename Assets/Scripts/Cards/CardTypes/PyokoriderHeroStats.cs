@@ -10,7 +10,7 @@ public static class PyokoriderHeroStats
         const int pyokoDamage = 3;
 
         stats.power = 3;
-        stats.description = "End of turn: Deal damage equal to this unit's power to the right-most enemy unit.";
+        stats.description = "<b>End of turn</b>: Deal damage equal to this unit's power to the right-most enemy unit.";
         stats.name = "Pyokorider";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);

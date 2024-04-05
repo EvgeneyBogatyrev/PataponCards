@@ -8,15 +8,13 @@ public static class WebStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         const int gain = 2;
-        stats.power = 2;
-        stats.description = "Pacifism.\nOn play: Give all friendly units +" + gain.ToString() + " power.\nOn death: Draw a card.";
+        stats.power = 1;
+        stats.description = "<b>Pacifism.\nOn play</b>: Give all friendly units +" + gain.ToString() + " power.\n<b>On death</b>: Draw a card.";
         stats.name = "Wep";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
-        stats.canAttack = false;
-        stats.canDealDamage = false;
-        stats.limitedVision = true;
+        stats.pacifism = true;
 
         stats.hasOnPlaySpell = true;
         stats.hasOnDeath = true;

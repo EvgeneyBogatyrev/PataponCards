@@ -10,7 +10,7 @@ public static class PiekronStats
         const int yariponDamage = 2;
 
         stats.power = 3;
-        stats.description = "Lifelink.\nEnd of turn: Deal " + yariponDamage.ToString() + " damage to an enemy unit next to it.";
+        stats.description = "<b>Lifelink.\nEnd of turn</b>: Deal " + yariponDamage.ToString() + " damage to an enemy unit next to it.";
         stats.name = "Piekron";
         stats.imagePath = "piekron";
         stats.hasShield = true;

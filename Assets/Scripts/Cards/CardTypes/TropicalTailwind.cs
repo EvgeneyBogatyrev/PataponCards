@@ -11,7 +11,7 @@ public static class TropicalTailwindStats
         const int drawAmount = 2;
         const int powerIncrease = 1;
         
-        stats.description = "Draw " + drawAmount.ToString() + " cards. Your units with Devotion to Bow get +" + powerIncrease.ToString() + " power.";
+        stats.description = "Draw " + drawAmount.ToString() + " cards. Your units with <b>Devotion to Bow</b> get +" + powerIncrease.ToString() + " power.";
         stats.name = "Tropical Tailwind";
 
         stats.nameSize = 4;

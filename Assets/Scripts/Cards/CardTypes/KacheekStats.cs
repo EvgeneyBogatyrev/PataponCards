@@ -9,7 +9,7 @@ public static class KacheekStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 4;
-        stats.description = "Pacifism. Abilities:\n-1: Add Fang to your hand.\n-2: Give your units +1 power.";
+        stats.description = "<b>Pacifism. Abilities</b>:\n-1: Add <i>Fang</i> to your hand.\n-2: Give your units +1 power.";
         stats.name = "Kacheek";
 
         stats.isStatic = true;
@@ -32,7 +32,7 @@ public static class GiveFangStats
 
         const int giveFangHealthCost = 1;
 
-        stats.description = "-1: Add Fang to your hand.";
+        stats.description = "-1: Add <i>Fang</i> to your hand.";
         stats.name = "Bone Weapon";
 
         stats.isSpell = true;

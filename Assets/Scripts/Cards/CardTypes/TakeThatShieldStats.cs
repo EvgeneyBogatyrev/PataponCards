@@ -12,6 +12,7 @@ public static class TakeThatShieldStats
         stats.name = "Take That Shield";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
+        stats.runes.Add(Runes.Shield);
 
         stats.nameSize = 4;
 

@@ -9,7 +9,7 @@ public static class RoboponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 1;
-        stats.description = "End of turn: If Robopon didn't attacked or moved, it gains +X power, where X is your Devotion to Shield.";
+        stats.description = "<b>End of turn:</b> If Robopon didn't attack or move this turn, it gains +X power, where X is your <b>Devotion to Shield</b>.";
         stats.name = "Robopon";
         stats.runes.Add(Runes.Shield);
 

@@ -54,11 +54,14 @@ public class CardReprManager : MonoBehaviour
     }
 
     private void OnMouseOver()
-    {
-        mouseOver = true;
-        if (previewedCard == null)
+    { 
+        if (CursorController.cursorState == CursorController.CursorStates.Free || relevantCard)
         {
-            CardPreview();
+            mouseOver = true;
+            if (previewedCard == null)
+            {
+                CardPreview();
+            }
         }
     }
     private void OnMouseExit()
