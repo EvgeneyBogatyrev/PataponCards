@@ -104,11 +104,16 @@ public class CollectionControl : MonoBehaviour
 
     private IEnumerator Start()
     {
-        DeckManager.deck = SaveSystem.LoadDeck();
-        DeckManager.runes = SaveSystem.LoadRunes();
+        DeckManager.deck = SaveSystem.LoadDeck(DeckLoadManager.deckIndex);
+        DeckManager.runes = SaveSystem.LoadRunes(DeckLoadManager.deckIndex);
 
         yield return new WaitForSeconds(0.01f);
         
+        if (DeckManager.runes.Count == 0)
+        {
+            DeckManager.runes = new List<Runes>{Runes.Spear, Runes.Spear, Runes.Spear};
+        }
+
 
         cardList = new List<GameObject>();
         currentCards = new List<CardManager>();
@@ -429,9 +434,9 @@ public class CollectionControl : MonoBehaviour
 
     public void BackButton()
     {
-        SaveSystem.SaveRunes(DeckManager.runes);
-        SaveSystem.SaveDeck(DeckManager.deck);
-        if (DeckManager.GetDeckSize() == DeckManager.minDeckSize)
+        SaveSystem.SaveRunes(DeckManager.runes, DeckLoadManager.deckIndex);
+        SaveSystem.SaveDeck(DeckManager.deck, DeckLoadManager.deckIndex);
+        if (DeckManager.deck.Count == DeckManager.minDeckSize)
         {
             SceneManager.LoadScene("MainMenu");
         }

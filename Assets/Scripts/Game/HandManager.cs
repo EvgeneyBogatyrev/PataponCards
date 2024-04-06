@@ -34,8 +34,6 @@ public class HandManager : MonoBehaviour
         mulliganing = true;
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
         drawStartPosition = GameObject.Find("DrawFromDeck").transform.position;
-        DeckManager.deck = SaveSystem.LoadDeck();
-        DeckManager.runes = SaveSystem.LoadRunes();
         DeckManager.CopyDeck();
 
         for (int i = 0; i < 7; ++i)

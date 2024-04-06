@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
 
@@ -22,6 +23,11 @@ public class DeckSlotManager : MonoBehaviour
             SetRune(runes[0], rune0);
             SetRune(runes[1], rune1);
             SetRune(runes[2], rune2);
+
+            foreach (Runes r in runes)
+            {
+                Debug.Log(r);
+            }
         }
         else
         {
@@ -54,6 +60,11 @@ public class DeckSlotManager : MonoBehaviour
     private void OnMouseOver()
     {
         mouseOver = true;
+        if (Input.GetMouseButtonUp(0))
+        {
+            DeckLoadManager.deckIndex = this.index;
+            SceneManager.LoadScene(DeckLoadManager.roomToGo);
+        }
     }
     private void OnMouseExit()
     {

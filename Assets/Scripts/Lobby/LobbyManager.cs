@@ -14,6 +14,8 @@ public class LobbyManager : MonoBehaviour
 
     public void Start()
     {
+        DeckManager.deck = SaveSystem.LoadDeck(DeckLoadManager.deckIndex);
+        DeckManager.runes = SaveSystem.LoadRunes(DeckLoadManager.deckIndex);
         InfoSaver.myHash = UnityEngine.Random.Range(0, 9999);
         PrintKey();
     }

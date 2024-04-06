@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+public static class DeckLoadManager
+{
+    public static string roomToGo = "Collection";
+    public static int deckIndex = 0;
+}
+
 public class DecksController : MonoBehaviour
 {
     private int maxDecks = 6;
@@ -25,12 +31,16 @@ public class DecksController : MonoBehaviour
             List<Runes> runes = SaveSystem.LoadRunes(i);
             while (SaveSystem.loading)
             {
+                Debug.Log("Loading");
                 yield return new WaitForSeconds(0.1f);
             }
             if (runes.Count == 0)
             {
-                GameObject _deckSlot = Instantiate(deckSlotPrefab, new Vector3(curX, curY, 0f), Quaternion.identity);
-                _deckSlot.GetComponent<DeckSlotManager>().Customize(null, -1, "New Deck");
+                if (DeckLoadManager.roomToGo == "Collection")
+                {
+                    GameObject _deckSlot = Instantiate(deckSlotPrefab, new Vector3(curX, curY, 0f), Quaternion.identity);
+                    _deckSlot.GetComponent<DeckSlotManager>().Customize(null, i, "New Deck");
+                }
                 break;
             }
             
@@ -43,7 +53,7 @@ public class DecksController : MonoBehaviour
             if (i % 2 == 1)
             {
                 curX = startPositionX;
-                curY += shiftY;
+                curY -= shiftY;
             }
         }
 

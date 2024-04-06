@@ -23,4 +23,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Collection.unity
     guid: 44ad139cd468f1d4fbd37b9378d4449c
+  - enabled: 1
+    path: Assets/Scenes/DeckSelect.unity
+    guid: 45505ee4c9b074e41bc628b65d17e6ab
   m_configObjects: {}

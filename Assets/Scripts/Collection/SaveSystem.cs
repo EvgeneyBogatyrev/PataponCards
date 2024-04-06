@@ -51,7 +51,7 @@ public static class SaveSystem
     public static void SaveRunes(List<Runes> runes, int index=0)
     {
         string newPathRunes = pathRunes;
-        if (index != 0) newPathRunes = index.ToString();
+        if (index != 0) newPathRunes += index.ToString();
         BinaryFormatter formatter = new BinaryFormatter();
         FileStream stream = new FileStream(newPathRunes, FileMode.Create);
 
@@ -63,7 +63,7 @@ public static class SaveSystem
     {
         loading = true;
         string newPathRunes = pathRunes;
-        if (index != 0) newPathRunes = index.ToString();
+        if (index != 0) newPathRunes += index.ToString();
         if (File.Exists(newPathRunes))
         {
             try
