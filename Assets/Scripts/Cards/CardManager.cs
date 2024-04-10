@@ -225,7 +225,8 @@ public class CardManager : MonoBehaviour
         hilightOver,
         Mill,
         toMill,
-        ShuffleIntoDeck
+        ShuffleIntoDeck,
+        alreadyPlayed
     }
 
     public GameObject powerObject;
@@ -276,7 +277,8 @@ public class CardManager : MonoBehaviour
     private Arrow curArrow = null;
 
     public GameObject infoPrefab;
-     private float secondsHold = 0f;
+    private float secondsHold = 0f;
+    private bool cardIsPlayed = false;
 
     private void Start()
     {
@@ -375,13 +377,37 @@ public class CardManager : MonoBehaviour
         }
         if (cardStats.onCycleEvent != null)
         {
-            StartCoroutine(cardStats.onCycleEvent(boardManager.enemySlots, boardManager.friendlySlots));
+            QueueData newEvent = new();
+            newEvent.actionType = QueueData.ActionType.OnCycle;
+            newEvent.hostCard = this;
+
+            newEvent.friendlySlots = boardManager.friendlySlots;
+            newEvent.enemySlots = boardManager.enemySlots;
+
+            GameController.eventQueue.Insert(0, newEvent);
+            // On cycle
+            //StartCoroutine(cardStats.onCycleEvent(boardManager.enemySlots, boardManager.friendlySlots));
         }
+        // Cycle card
         StartCoroutine(boardManager.CycleCard(this));
         handManager.DrawCard();
     }
 
     private void PlayCard(BoardManager.Slot closestSlot=null, bool spell=false)
+    {
+        if (!cardIsPlayed)
+        {
+            cardIsPlayed = true;
+            cardState = CardState.alreadyPlayed;
+        }
+        else
+        {
+            return;
+        }
+        StartCoroutine(IenumPlayCard(closestSlot, spell));
+    }
+
+    private IEnumerator IenumPlayCard(BoardManager.Slot closestSlot=null, bool spell=false)
     {
         boardManager.battlecryTrigger = true;
         handManager.RemoveCard(GetIndexIHand());
@@ -395,7 +421,16 @@ public class CardManager : MonoBehaviour
         if (spell)
         {
             ServerDataProcesser.instance.CastSpell(this, spellTargets);
-            StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
+            // Cast spell
+            QueueData newEvent = new();
+            newEvent.actionType = QueueData.ActionType.CastSpell;
+            newEvent.thisStats = cardStats;
+            newEvent.hostCard = this;
+            newEvent.targets = spellTargets;
+            newEvent.friendlySlots = boardManager.friendlySlots;
+            newEvent.enemySlots = boardManager.enemySlots;
+            GameController.eventQueue.Insert(0, newEvent);
+            //StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
             if (cardStats.dummyTarget)
             {
                 int _old = spellTargets[0];
@@ -412,6 +447,10 @@ public class CardManager : MonoBehaviour
             }
             else
             {
+                while (GameController.eventQueue.Count > 0)
+                {
+                    yield return new WaitForSeconds(0.3f);
+                }
                 boardManager.PlayCard(this, slotToPlay);
             }
         }
@@ -420,6 +459,7 @@ public class CardManager : MonoBehaviour
             boardManager.PlayCard(this, closestSlot);
         }        
         boardManager.battlecryTrigger = false;
+        yield return null;
     }
 
     void Update()
@@ -622,6 +662,12 @@ public class CardManager : MonoBehaviour
 
                 break;
 
+
+            case CardState.alreadyPlayed:
+                // do something that makes card invisible
+                //gameObject.SetActive(false);
+                break;
+
             case CardState.selectingTargets:
 
                 if (cardStats.isSpell)
@@ -782,7 +828,7 @@ public class CardManager : MonoBehaviour
 
             case CardState.asOption:
 
-                if (mouseOver && Input.GetMouseButtonDown(0))
+                if (mouseOver && Input.GetMouseButtonDown(0) && GameController.eventQueue.Count == 0)
                 {
                     spellTargets = new List<int>();
 
@@ -800,7 +846,18 @@ public class CardManager : MonoBehaviour
                     if (cardStats.damageToHost <= hostMinion.GetPower()) 
                     {
                         ServerDataProcesser.instance.CastSpell(this, spellTargets);
-                        StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
+                        
+                        QueueData newEvent = new();
+                        newEvent.actionType = QueueData.ActionType.CastSpell;
+                        newEvent.thisStats = cardStats;
+                        newEvent.hostCard = this;
+                        newEvent.targets = spellTargets;
+                        newEvent.friendlySlots = boardManager.friendlySlots;
+                        newEvent.enemySlots = boardManager.enemySlots;
+                        GameController.eventQueue.Insert(0, newEvent);
+                        
+                        // Cast spell
+                        //StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
                         spellTargets = new List<int>();
                         hostMinion.ReturnToNormalAfterOptions();
                         hostMinion.SetCanAttack(false);
@@ -888,9 +945,9 @@ public class CardManager : MonoBehaviour
 
         GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
 
-        while (gameController.actionIsHappening)
+        while (gameController.actionIsHappening || GameController.eventQueue.Count > 0)
         {
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(0.5f);
         }
 
         Destroy(gameObject);

@@ -41,7 +41,7 @@ public class HandManager : MonoBehaviour
             DrawCard();
         }
 
-        SetNumberOfOpponentsCards(0);
+        SetNumberOfOpponentsCards(7);
         
     }
 
@@ -238,13 +238,10 @@ public class HandManager : MonoBehaviour
         {
             return;
         }
-        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
-        CardTypes cardType = DeckManager.GetTopCard(remove:true);
-        if (cardType != CardTypes.Hatapon)
-        {
-            AddCardToHand(cardType, ephemeral:ephemeral);
-        }
-        gameController.ProcessCardDraw(friendly:true);
+        QueueData newEvent = new();
+        newEvent.actionType = QueueData.ActionType.DrawCard;
+        newEvent.ephemeral = ephemeral;
+        GameController.eventQueue.Insert(0, newEvent); 
     }
 
     public void DrawCardOpponent(bool fromDeck=true, int ephemeral=-1)

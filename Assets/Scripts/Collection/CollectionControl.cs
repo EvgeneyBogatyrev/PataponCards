@@ -434,10 +434,10 @@ public class CollectionControl : MonoBehaviour
 
     public void BackButton()
     {
-        SaveSystem.SaveRunes(DeckManager.runes, DeckLoadManager.deckIndex);
-        SaveSystem.SaveDeck(DeckManager.deck, DeckLoadManager.deckIndex);
         if (DeckManager.deck.Count == DeckManager.minDeckSize)
         {
+            SaveSystem.SaveRunes(DeckManager.runes, DeckLoadManager.deckIndex);
+            SaveSystem.SaveDeck(DeckManager.deck, DeckLoadManager.deckIndex);
             SceneManager.LoadScene("MainMenu");
         }
     }

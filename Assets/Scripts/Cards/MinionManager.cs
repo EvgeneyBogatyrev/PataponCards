@@ -231,14 +231,31 @@ public class MinionManager : MonoBehaviour
             if (cardStats.onDamageEvent != null)
             {
                 int idx = connectedSlot.GetIndex();
+                QueueData newEvent = new();
+                newEvent.actionType = QueueData.ActionType.OnDamage;
+                newEvent.hostUnit = this;
+                newEvent.index = this.GetIndex();
+
                 if (GetFriendly())
                 {
-                    StartCoroutine(cardStats.onDamageEvent(idx, boardManager.enemySlots, boardManager.friendlySlots));
+                    newEvent.friendlySlots = boardManager.friendlySlots;
+                    newEvent.enemySlots = boardManager.enemySlots;
                 }
                 else
                 {
-                    StartCoroutine(cardStats.onDamageEvent(idx, boardManager.friendlySlots, boardManager.enemySlots));
+                    newEvent.friendlySlots = boardManager.enemySlots;
+                    newEvent.enemySlots = boardManager.friendlySlots;
                 }
+                GameController.eventQueue.Insert(0, newEvent);
+                // On damage
+                //if (GetFriendly())
+                //{
+                //    StartCoroutine(cardStats.onDamageEvent(idx, boardManager.enemySlots, boardManager.friendlySlots));
+                //}
+                //else
+                //{
+                //    StartCoroutine(cardStats.onDamageEvent(idx, boardManager.friendlySlots, boardManager.enemySlots));
+                //}
             }
             return false;
         }
@@ -367,14 +384,14 @@ public class MinionManager : MonoBehaviour
                         desiredPosition = new Vector3(connectedSlot.GetPosition().x, connectedSlot.GetPosition().y, connectedSlot.GetPosition().z - 0.2f);
                         desiredScale = selectedScale;
 
-                        if (Input.GetMouseButtonDown(0) && !cardStats.isStatic)
+                        if (Input.GetMouseButtonDown(0) && !cardStats.isStatic && GameController.eventQueue.Count == 0)
                         {
                             state = MinionState.Selected;
                             CursorController.cursorState = CursorController.CursorStates.Hold;
                         }
                         else if (cardStats.isStatic)
                         {
-                            if (Input.GetMouseButtonDown(0))
+                            if (Input.GetMouseButtonDown(0) && GameController.eventQueue.Count == 0)
                             {
                                 state = MinionState.ChooseOption;
                                 CursorController.cursorState = CursorController.CursorStates.ChooseOption;
@@ -441,7 +458,7 @@ public class MinionManager : MonoBehaviour
                     arrow = null;
                 }
 
-                if (Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButtonDown(0)  && GameController.eventQueue.Count == 0)
                 {
                     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                     RaycastHit hit;
@@ -773,8 +790,20 @@ public class MinionManager : MonoBehaviour
                 myIndex,
                 enemyIndex
             };
+
+            QueueData newEvent = new();
+            newEvent.actionType = QueueData.ActionType.OnAttack;
+            newEvent.thisStats = cardStats;
+            newEvent.hostUnit = this;
+            newEvent.targets = targets;
+            newEvent.friendlySlots = friends;
+            newEvent.enemySlots = enemies;
+           
+            GameController.eventQueue.Insert(0, newEvent);
             onAttackActionProgress = true;
-            StartCoroutine(GetCardStats().onAttackEvent(targets, enemies, friends));
+
+            // On attack
+            //StartCoroutine(GetCardStats().onAttackEvent(targets, enemies, friends));
         }
 
         while (onAttackActionProgress)
@@ -866,22 +895,45 @@ public class MinionManager : MonoBehaviour
 
     private IEnumerator Die()
     {
+        if (dying)
+        {
+            yield return null;
+        }
+        dying = true;
         connectedSlot.SetFree(true);
         connectedSlot.SetConnectedMinion(null);
 
         if (cardStats.hasOnDeath)
         {
+            QueueData newEvent = new();
+            newEvent.actionType = QueueData.ActionType.OnDeath;
+            newEvent.thisStats = cardStats;
+            newEvent.hostUnit = this;
+            newEvent.index = this.GetIndex();
+
             if (GetFriendly())
             {
-                StartCoroutine(cardStats.onDeathEvent(connectedSlot.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots, cardStats));
+                newEvent.friendlySlots = boardManager.friendlySlots;
+                newEvent.enemySlots = boardManager.enemySlots;
             }
             else
             {
-                StartCoroutine(cardStats.onDeathEvent(-connectedSlot.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots, cardStats));
+                newEvent.friendlySlots = boardManager.enemySlots;
+                newEvent.enemySlots = boardManager.friendlySlots;
             }
+            GameController.eventQueue.Insert(0, newEvent);
+            // On death
+            //if (GetFriendly())
+            //{
+            //   StartCoroutine(cardStats.onDeathEvent(connectedSlot.GetIndex(), boardManager.enemySlots, boardManager.friendlySlots, cardStats));
+            //}
+            //else
+            //{
+            //    StartCoroutine(cardStats.onDeathEvent(-connectedSlot.GetIndex(), boardManager.friendlySlots, boardManager.enemySlots, cardStats));
+            //}
         }
 
-        while (gameController.actionIsHappening)
+        while (gameController.actionIsHappening || GameController.eventQueue.Count > 0)
         {
             yield return new WaitForSeconds(0.01f);
         }

@@ -209,9 +209,17 @@ public class BoardManager : MonoBehaviour
                 index = slot.GetIndex() + 1;
             }
 
-            Debug.Log("Battlecry");
-
-            StartCoroutine(card.GetCardStats().afterPlayEvent(index, enemySlots, friendlySlots));
+            
+            // Cast spell fake
+            //StartCoroutine(card.GetCardStats().afterPlayEvent(index, enemySlots, friendlySlots));
+            QueueData newEventAfterPlay = new();
+            newEventAfterPlay.actionType = QueueData.ActionType.AfterPlayEffect;
+            newEventAfterPlay.thisStats = card.GetCardStats();
+            newEventAfterPlay.hostCard = card;
+            newEventAfterPlay.index = index;
+            newEventAfterPlay.friendlySlots = friendlySlots;
+            newEventAfterPlay.enemySlots = enemySlots;
+            GameController.eventQueue.Insert(0, newEventAfterPlay);
         }
 
         List<Slot> _slots;
@@ -274,13 +282,32 @@ public class BoardManager : MonoBehaviour
             {
                 if (minion.GetCardStats().onCycleOtherEvent != null)
                 {
+                    QueueData newEvent = new();
+                    newEvent.actionType = QueueData.ActionType.OnCycleOther;
+                    newEvent.hostUnit = minion;
+                    newEvent.index = minion.GetIndex();
+
+                    if (minion.GetFriendly())
+                    {
+                        newEvent.friendlySlots = friendlySlots;
+                        newEvent.enemySlots = enemySlots;
+                    }
+                    else
+                    {
+                        newEvent.friendlySlots = enemySlots;
+                        newEvent.enemySlots = friendlySlots;
+                    }
+                    GameController.eventQueue.Insert(0, newEvent);
+                    /*
                     do {
                         yield return new WaitForSeconds(0.1f);
                     } while (gameController.actionIsHappening);
+                    // On cycle
                     StartCoroutine(minion.GetCardStats().onCycleOtherEvent(idx, enemySlots, friendlySlots));
                     do {
                         yield return new WaitForSeconds(0.1f);
                     } while (gameController.actionIsHappening);
+                    */
                 }
             }
             idx += 1;

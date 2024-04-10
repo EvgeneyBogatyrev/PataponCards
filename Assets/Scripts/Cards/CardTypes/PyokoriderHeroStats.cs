@@ -40,13 +40,30 @@ public static class PyokoriderHeroStats
                 if (connectedMinion != null)
                 {
                     AnimationManager animationManager = GameObject.Find("GameController").GetComponent<AnimationManager>();
+                    
+                    // Main projectile
                     SpearManager spear = animationManager.CreateObject(AnimationManager.Animations.Spear, friendlySlots[index].GetPosition()).GetComponent<SpearManager>();
                     spear.gameObject.transform.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/pyokorider_hero");
                     spear.SetSlotToGo(connectedMinion.GetSlot());
-
                     spear.speed = 20f;
                     spear.rotate = false;
                     spear.constantSpeed = true;
+
+                    List <SpearManager> ghostly = new();
+                    for (int i = 0; i < 3; ++i)
+                    {
+                        yield return new WaitForSeconds(0.03f);
+                        SpearManager ghost = animationManager.CreateObject(AnimationManager.Animations.Spear, friendlySlots[index].GetPosition()).GetComponent<SpearManager>();
+                        ghost.gameObject.transform.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/pyokorider_hero");  
+                        var tmp = ghost.gameObject.transform.GetComponent<SpriteRenderer>().color;
+                        tmp.a = 0.7f - i * 0.2f;
+                        ghost.gameObject.transform.GetComponent<SpriteRenderer>().color = tmp;
+                        ghost.SetSlotToGo(connectedMinion.GetSlot());
+                        ghost.speed = 20f;
+                        ghost.rotate = false;
+                        ghost.constantSpeed = true;
+                        ghostly.Add(ghost);
+                    }
 
                     while (!spear.reachDestination)
                     {
@@ -60,7 +77,11 @@ public static class PyokoriderHeroStats
                         yield return new WaitForSeconds(0.1f);
                     }
 
-                    spear.DestroySelf();                    
+                    spear.DestroySelf(); 
+                    foreach (SpearManager ghost in ghostly)
+                    {
+                        ghost.DestroySelf();
+                    }                   
                     
                 }
                 gameController.actionIsHappening = false;

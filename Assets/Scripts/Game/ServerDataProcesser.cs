@@ -355,7 +355,16 @@ public class ServerDataProcesser : MonoBehaviour
                     
                     newCard.arrowList = null;
                     newCard.spellTargets = message.targets;
-                    StartCoroutine(newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots));
+                    // Cast spell
+                    QueueData newEvent = new();
+                    newEvent.actionType = QueueData.ActionType.CastSpell;
+                    newEvent.thisStats = newCard.GetCardStats();
+                    newEvent.hostCard = newCard;
+                    newEvent.targets = newCard.spellTargets;
+                    newEvent.friendlySlots = boardManager.enemySlots;
+                    newEvent.enemySlots = boardManager.friendlySlots;
+                    GameController.eventQueue.Insert(0, newEvent);
+                    //StartCoroutine(newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots));
                     HandManager.DestroyDisplayedCards();
                     newCard.SetCardState(CardManager.CardState.opponentPlayed);
                     newCard.transform.position = new Vector3(0f, 10f, 0f);
@@ -394,7 +403,16 @@ public class ServerDataProcesser : MonoBehaviour
                     {
                         newCard.spellTargets = message.targets;
                     }
-                    StartCoroutine(newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots));
+                    QueueData _newEvent = new();
+                    _newEvent.actionType = QueueData.ActionType.CastSpell;
+                    _newEvent.thisStats = newCard.GetCardStats();
+                    _newEvent.hostCard = newCard;
+                    _newEvent.targets = message.targets;
+                    _newEvent.friendlySlots = boardManager.enemySlots;
+                    _newEvent.enemySlots = boardManager.friendlySlots;
+                    GameController.eventQueue.Insert(0, _newEvent);
+                    // Cast spell
+                    //StartCoroutine(newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots));
 
                     if (message.creatureTarget > 0)
                     {
@@ -405,6 +423,10 @@ public class ServerDataProcesser : MonoBehaviour
                     {
                         message.creatureTarget = (-1 * message.creatureTarget) - 1;
                         fromSlot = boardManager.friendlySlots[message.creatureTarget];
+                    }
+                    while (GameController.eventQueue.Count > 0)
+                    {
+                        yield return new WaitForSeconds(0.3f);
                     }
                     boardManager.PlayCard(newCard, new Vector3(0f, 10f, 0f), fromSlot, destroy: false, record: false);
 
@@ -466,10 +488,19 @@ public class ServerDataProcesser : MonoBehaviour
 
                     if (newCard.GetCardStats().onCycleEvent != null)
                     {
-                        StartCoroutine(newCard.GetCardStats().onCycleEvent(boardManager.friendlySlots, boardManager.enemySlots));
+                        QueueData __newEvent = new();
+                        __newEvent.actionType = QueueData.ActionType.OnCycle;
+                        __newEvent.hostCard = newCard;
+
+                        __newEvent.friendlySlots = boardManager.enemySlots;
+                        __newEvent.enemySlots = boardManager.friendlySlots;
+
+                        GameController.eventQueue.Insert(0, __newEvent);
+                        // On cycle
+                        //StartCoroutine(newCard.GetCardStats().onCycleEvent(boardManager.friendlySlots, boardManager.enemySlots));
                     }
 
-                    //GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+                    //BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
                     int idx = 0;
                     foreach (BoardManager.Slot slot in boardManager.enemySlots)
                     {
@@ -478,13 +509,32 @@ public class ServerDataProcesser : MonoBehaviour
                         {
                             if (minion.GetCardStats().onCycleOtherEvent != null)
                             {
+                                QueueData newEvent_ = new();
+                                newEvent_.actionType = QueueData.ActionType.OnCycleOther;
+                                newEvent_.hostUnit = minion;
+                                newEvent_.index = minion.GetIndex();
+
+                                if (minion.GetFriendly())
+                                {
+                                    newEvent_.friendlySlots = boardManager.friendlySlots;
+                                    newEvent_.enemySlots = boardManager.enemySlots;
+                                }
+                                else
+                                {
+                                    newEvent_.friendlySlots = boardManager.enemySlots;
+                                    newEvent_.enemySlots = boardManager.friendlySlots;
+                                }
+                                GameController.eventQueue.Insert(0, newEvent_);
+                                /*
                                 do {
                                     yield return new WaitForSeconds(0.1f);
                                 } while (gameController.actionIsHappening);
+                                // On cycle
                                 StartCoroutine(minion.GetCardStats().onCycleOtherEvent(idx, boardManager.friendlySlots, boardManager.enemySlots));
                                 do {
                                     yield return new WaitForSeconds(0.1f);
                                 } while (gameController.actionIsHappening);
+                                */
                             }
                         }
                         idx += 1;
@@ -530,6 +580,11 @@ public class ServerDataProcesser : MonoBehaviour
             if (!gameController.NeedToSync())
             {
                 if (GameController.playerTurn)
+                {
+                    yield return new WaitForSeconds(secondsBetweenServerUpdates);
+                    continue;
+                }
+                else if (GameController.eventQueue.Count > 0)
                 {
                     yield return new WaitForSeconds(secondsBetweenServerUpdates);
                     continue;
