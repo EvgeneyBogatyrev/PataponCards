@@ -447,7 +447,7 @@ public class CardManager : MonoBehaviour
             }
             else
             {
-                while (GameController.eventQueue.Count > 0)
+                while (!GameController.CanPerformActions())
                 {
                     yield return new WaitForSeconds(0.3f);
                 }
@@ -828,7 +828,7 @@ public class CardManager : MonoBehaviour
 
             case CardState.asOption:
 
-                if (mouseOver && Input.GetMouseButtonDown(0) && GameController.eventQueue.Count == 0)
+                if (mouseOver && Input.GetMouseButtonDown(0) && GameController.CanPerformActions())
                 {
                     spellTargets = new List<int>();
 
@@ -943,9 +943,7 @@ public class CardManager : MonoBehaviour
         transform.position = new Vector3(-50f, 0f, 0f);
         cardState = CardState.asOption;
 
-        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
-
-        while (gameController.actionIsHappening || GameController.eventQueue.Count > 0)
+        while (!GameController.CanPerformActions())
         {
             yield return new WaitForSeconds(0.5f);
         }

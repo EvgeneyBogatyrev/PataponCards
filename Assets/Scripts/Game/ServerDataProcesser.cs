@@ -424,7 +424,7 @@ public class ServerDataProcesser : MonoBehaviour
                         message.creatureTarget = (-1 * message.creatureTarget) - 1;
                         fromSlot = boardManager.friendlySlots[message.creatureTarget];
                     }
-                    while (GameController.eventQueue.Count > 0)
+                    while (!GameController.CanPerformActions())
                     {
                         yield return new WaitForSeconds(0.3f);
                     }
@@ -584,7 +584,7 @@ public class ServerDataProcesser : MonoBehaviour
                     yield return new WaitForSeconds(secondsBetweenServerUpdates);
                     continue;
                 }
-                else if (GameController.eventQueue.Count > 0)
+                else if (!GameController.CanPerformActions())
                 {
                     yield return new WaitForSeconds(secondsBetweenServerUpdates);
                     continue;

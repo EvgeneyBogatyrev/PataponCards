@@ -271,6 +271,8 @@ public class HandManager : MonoBehaviour
 
     public IEnumerator AddCardToHandAsync(CardTypes card, int ephemeral=-1)
     {
+        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+        gameController.actionIsHappening = true;
         while (CardIsDrawing)
         {
             yield return new WaitForSeconds(0.1f);
@@ -296,7 +298,7 @@ public class HandManager : MonoBehaviour
             }
         }
         CardIsDrawing = false;
-
+        gameController.actionIsHappening = false;
         yield return null;
     }
 

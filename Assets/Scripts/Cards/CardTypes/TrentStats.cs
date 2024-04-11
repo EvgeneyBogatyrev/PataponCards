@@ -25,13 +25,15 @@ public static class TrentStats
             gameController.actionIsHappening = true;
 
             MinionManager host = friendlySlots[index].GetConnectedMinion();
-            CardManager newCard = handManager.GenerateCard(CardTypes.TrentOnFire, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
-            newCard.SetPower(host.GetPower());
-            BoardManager.Slot slot = host.GetSlot();
-            //host.TakePower(host.GetPower());
-            host.DestroySelf(unattach:true);
-            boardManager.PlayCard(newCard, new Vector3(0f, 0f, 0f), slot, destroy: true, record: false);
-
+            if (host != null)
+            {
+                CardManager newCard = handManager.GenerateCard(CardTypes.TrentOnFire, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                newCard.SetPower(host.GetPower());
+                BoardManager.Slot slot = host.GetSlot();
+                //host.TakePower(host.GetPower());
+                host.DestroySelf(unattach:true);
+                boardManager.PlayCard(newCard, new Vector3(0f, 0f, 0f), slot, destroy: true, record: false);
+            }
             gameController.actionIsHappening = false;
             yield return null;
         }
@@ -59,7 +61,8 @@ public static class TrentFireStats
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>(); 
             gameController.actionIsHappening = true;
-            friendlySlots[index].GetConnectedMinion().ReceiveDamage(selfDamage);
+            MinionManager minion = friendlySlots[index].GetConnectedMinion();
+            if (minion != null) minion.ReceiveDamage(selfDamage);
             gameController.actionIsHappening = false;
             yield return null;
         }

@@ -54,35 +54,45 @@ public class QueueData
         switch (actionType)
         {
             case ActionType.OnDamage:
-                hostUnit.StartCoroutine(hostUnit.GetCardStats().onDamageEvent(index, enemySlots, friendlySlots));
+                if (hostUnit != null)
+                    hostUnit.StartCoroutine(hostUnit.GetCardStats().onDamageEvent(index, enemySlots, friendlySlots));
                 break;
             case ActionType.EndTurn:
-                if (additionalEndTurnIdx == -1)
+                if (hostUnit != null)
                 {
-                    hostUnit.StartCoroutine(hostUnit.GetCardStats().endTurnEvent(index, enemySlots, friendlySlots));
-                }
-                else
-                {
-                    hostUnit.StartCoroutine(hostUnit.GetCardStats().additionalEndTurnEvents[additionalEndTurnIdx](index, enemySlots, friendlySlots));
+                    if (additionalEndTurnIdx == -1)
+                    {
+                        hostUnit.StartCoroutine(hostUnit.GetCardStats().endTurnEvent(index, enemySlots, friendlySlots));
+                    }
+                    else
+                    {
+                        hostUnit.StartCoroutine(hostUnit.GetCardStats().additionalEndTurnEvents[additionalEndTurnIdx](index, enemySlots, friendlySlots));
+                    }
                 }
                 break;
             case ActionType.StartTurn:
-                hostUnit.StartCoroutine(hostUnit.GetCardStats().startTurnEvent(index, enemySlots, friendlySlots));
+                if (hostUnit != null)
+                    hostUnit.StartCoroutine(hostUnit.GetCardStats().startTurnEvent(index, enemySlots, friendlySlots));
                 break;
             case ActionType.OnDeath:
-                hostUnit.StartCoroutine(thisStats.onDeathEvent(index, enemySlots, friendlySlots, thisStats));
+                if (hostUnit != null)
+                    hostUnit.StartCoroutine(thisStats.onDeathEvent(index, enemySlots, friendlySlots, thisStats));
                 break;
             case ActionType.OnAttack:
-                hostUnit.StartCoroutine(thisStats.onAttackEvent(targets, enemySlots, friendlySlots));
+                if (hostUnit != null)
+                    hostUnit.StartCoroutine(thisStats.onAttackEvent(targets, enemySlots, friendlySlots));
                 break;
             case ActionType.OnCycle:
-                hostCard.StartCoroutine(hostCard.GetCardStats().onCycleEvent(enemySlots, friendlySlots));
+                if (hostCard != null)
+                    hostCard.StartCoroutine(hostCard.GetCardStats().onCycleEvent(enemySlots, friendlySlots));
                 break;
             case ActionType.OnCycleOther:
-                hostUnit.StartCoroutine(hostUnit.GetCardStats().onCycleOtherEvent(index, enemySlots, friendlySlots));
+                if (hostUnit != null)
+                    hostUnit.StartCoroutine(hostUnit.GetCardStats().onCycleOtherEvent(index, enemySlots, friendlySlots));
                 break;
             case ActionType.CastSpell:
-                hostCard.StartCoroutine(thisStats.spell(targets, enemySlots, friendlySlots));
+                if (hostCard != null)
+                    hostCard.StartCoroutine(thisStats.spell(targets, enemySlots, friendlySlots));
                 break;
 
             case ActionType.DrawCard:
@@ -98,7 +108,8 @@ public class QueueData
                 break;
 
             case ActionType.AfterPlayEffect:
-                hostCard.StartCoroutine(hostCard.GetCardStats().afterPlayEvent(index, enemySlots, friendlySlots));
+                if (hostCard != null)
+                    hostCard.StartCoroutine(hostCard.GetCardStats().afterPlayEvent(index, enemySlots, friendlySlots));
                 break;
         }
     }
@@ -420,6 +431,16 @@ public class GameController : MonoBehaviour
             }
         
         }
+    }
+
+    public static bool CanPerformActions()
+    {
+        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();   
+        if (gameController.actionIsHappening || GameController.eventQueue.Count > 0)
+        {
+            return false;
+        }
+        return true;
     }
 
     public void ReceivePing()

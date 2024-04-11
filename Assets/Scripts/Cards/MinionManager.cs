@@ -384,14 +384,14 @@ public class MinionManager : MonoBehaviour
                         desiredPosition = new Vector3(connectedSlot.GetPosition().x, connectedSlot.GetPosition().y, connectedSlot.GetPosition().z - 0.2f);
                         desiredScale = selectedScale;
 
-                        if (Input.GetMouseButtonDown(0) && !cardStats.isStatic && GameController.eventQueue.Count == 0)
+                        if (Input.GetMouseButtonDown(0) && !cardStats.isStatic && GameController.CanPerformActions())
                         {
                             state = MinionState.Selected;
                             CursorController.cursorState = CursorController.CursorStates.Hold;
                         }
                         else if (cardStats.isStatic)
                         {
-                            if (Input.GetMouseButtonDown(0) && GameController.eventQueue.Count == 0)
+                            if (Input.GetMouseButtonDown(0) && GameController.CanPerformActions())
                             {
                                 state = MinionState.ChooseOption;
                                 CursorController.cursorState = CursorController.CursorStates.ChooseOption;
@@ -458,7 +458,7 @@ public class MinionManager : MonoBehaviour
                     arrow = null;
                 }
 
-                if (Input.GetMouseButtonDown(0)  && GameController.eventQueue.Count == 0)
+                if (Input.GetMouseButtonDown(0)  && GameController.CanPerformActions())
                 {
                     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                     RaycastHit hit;
@@ -933,7 +933,7 @@ public class MinionManager : MonoBehaviour
             //}
         }
 
-        while (gameController.actionIsHappening || GameController.eventQueue.Count > 0)
+        while (!GameController.CanPerformActions())
         {
             yield return new WaitForSeconds(0.01f);
         }
