@@ -18,21 +18,37 @@ public class JamschStats : MonoBehaviour
         
         stats.additionalKeywords.Add("Poison");
 
-        static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator Realization(int target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             gameController.actionIsHappening = true;
 
+            int index;
+            List<BoardManager.Slot> chooseSlots;
+            List<BoardManager.Slot> oppSlots;
+            if (target > 0)
+            {
+                chooseSlots = friendlySlots;
+                oppSlots = enemySlots;
+                index = target - 1;
+            }
+            else
+            {
+                chooseSlots = enemySlots;
+                oppSlots = friendlySlots;
+                index = -target - 1;
+            }
+
             AnimationManager animationManager = GameObject.Find("GameController").GetComponent<AnimationManager>();
-            Vector3 position = new Vector3(friendlySlots[targets[0]].GetPosition().x, friendlySlots[targets[0]].GetPosition().y, friendlySlots[targets[0]].GetPosition().z - 0.5f);
+            Vector3 position = new Vector3(chooseSlots[index].GetPosition().x,chooseSlots[index].GetPosition().y, chooseSlots[index].GetPosition().z - 0.5f);
             GameObject spores = animationManager.CreateObject(AnimationManager.Animations.Spores, position);
-            if (enemySlots[0].GetFriendly())
+            if (target < 0)
             {
                 spores.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
             }
 
             yield return new WaitForSeconds(1.5f);
-            foreach (BoardManager.Slot slot in enemySlots)
+            foreach (BoardManager.Slot slot in oppSlots)
             {
                 MinionManager minion = slot.GetConnectedMinion();
                 if (minion != null)
@@ -46,10 +62,10 @@ public class JamschStats : MonoBehaviour
             yield return null;
         }
 
-        stats.hasOnPlaySpell = true;
-        stats.spell = Realization;
-        stats.numberOfTargets = 1;
-        stats.dummyTarget = true;
+        stats.hasAfterPlayEvent = true;
+        stats.afterPlayEvent = Realization;
+        //stats.numberOfTargets = 1;
+        //stats.dummyTarget = true;
 
         stats.imagePath = "jamsch";
         return stats;

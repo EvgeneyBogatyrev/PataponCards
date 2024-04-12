@@ -21,16 +21,16 @@ public static class DonTheYumiponStats
         stats.additionalKeywords.Add("Cycling");
         stats.suppressOnPlay = true;
 
-        stats.hasOnPlaySpell = true;
-        stats.spell = OnPlay;
+        stats.hasAfterPlayEvent = true;
+        stats.afterPlayEvent = OnPlay;
 
-        static IEnumerator OnPlay(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator OnPlay(int target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             gameController.actionIsHappening = true;
 
             HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-            if (friendlySlots[1].GetFriendly())
+            if (target > 0)
             {
                 handManager.SetCanCycleCard(true);
             }

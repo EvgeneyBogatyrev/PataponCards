@@ -196,6 +196,7 @@ public class BoardManager : MonoBehaviour
             }
         }
         
+        AudioController.PlaySound(card.GetCardStats().onPlaySound);
 
         if (fromHand && card.GetCardStats().hasAfterPlayEvent)
         {

@@ -17,15 +17,33 @@ public static class BirdRiderStats
 
         stats.additionalRules.Add("All copies of <i>'Bird Rider'</i> cards are removed from your library and placed on the battlefield.");
 
-        stats.hasOnPlaySpell = true;
+        stats.hasAfterPlayEvent = true;
 
-        static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator Realization(int target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
-            BoardManager.Slot thisOne = friendlySlots[targets[0]];
+            gameController.actionIsHappening = true;
+
+            int index;
+            List<BoardManager.Slot> chooseSlots;
+            List<BoardManager.Slot> oppSlots;
+            if (target > 0)
+            {
+                chooseSlots = friendlySlots;
+                oppSlots = enemySlots;
+                index = target - 1;
+            }
+            else
+            {
+                chooseSlots = enemySlots;
+                oppSlots = friendlySlots;
+                index = -target - 1;
+            }
+
+            BoardManager.Slot thisOne = chooseSlots[index];
 
             int summonNumber = 0;
-            if (friendlySlots[0].GetFriendly())
+            if (chooseSlots[0].GetFriendly())
             {
                 while (DeckManager.RemoveCardFromDeck(CardTypes.BirdRider))
                 {
@@ -44,7 +62,7 @@ public static class BirdRiderStats
             for (int _ = 0; _ < summonNumber; _ ++)
             {
                 BoardManager.Slot targetSlot = null;
-                foreach (BoardManager.Slot slot in friendlySlots)
+                foreach (BoardManager.Slot slot in chooseSlots)
                 {
                     if (slot.GetFree() && slot != thisOne)
                     {
@@ -66,12 +84,13 @@ public static class BirdRiderStats
             }
 
             gameController.UpdateDecks();
+            gameController.actionIsHappening = false;
             yield return null;
         }
 
-        stats.spell = Realization;
-        stats.numberOfTargets = 1;
-        stats.dummyTarget = true;
+        stats.afterPlayEvent = Realization;
+        //stats.numberOfTargets = 1;
+        //stats.dummyTarget = true;
 
         stats.imagePath = "bird_rider";
         return stats;

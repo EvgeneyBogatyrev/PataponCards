@@ -403,6 +403,11 @@ public class ServerDataProcesser : MonoBehaviour
                     {
                         newCard.spellTargets = message.targets;
                     }
+                    HandManager.DestroyDisplayedCards();
+                    newCard.SetCardState(CardManager.CardState.opponentPlayed);
+                    newCard.transform.position = new Vector3(0f, 10f, 0f);
+                    newCard.destroyTimer = HandManager.cardDestroyTimer;
+
                     QueueData _newEvent = new();
                     _newEvent.actionType = QueueData.ActionType.CastSpell;
                     _newEvent.thisStats = newCard.GetCardStats();
@@ -424,16 +429,19 @@ public class ServerDataProcesser : MonoBehaviour
                         message.creatureTarget = (-1 * message.creatureTarget) - 1;
                         fromSlot = boardManager.friendlySlots[message.creatureTarget];
                     }
+
+                    CardManager playedCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                    playedCard.transform.position = fromSlot.GetPosition();
+                    playedCard.SetCardState(CardManager.CardState.alreadyPlayed);
                     while (!GameController.CanPerformActions())
                     {
                         yield return new WaitForSeconds(0.3f);
                     }
-                    boardManager.PlayCard(newCard, new Vector3(0f, 10f, 0f), fromSlot, destroy: false, record: false);
+                    
+                    boardManager.PlayCard(newCard, fromSlot.GetPosition(), fromSlot, destroy: false, record: false);
+                    playedCard.DestroyCard();
 
-                    HandManager.DestroyDisplayedCards();
-                    newCard.SetCardState(CardManager.CardState.opponentPlayed);
-                    newCard.transform.position = new Vector3(0f, 10f, 0f);
-                    newCard.destroyTimer = HandManager.cardDestroyTimer;
+                    
 
                     boardManager.battlecryTrigger = false;
                     

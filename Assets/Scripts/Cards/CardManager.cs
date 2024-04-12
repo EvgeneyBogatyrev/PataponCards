@@ -84,6 +84,7 @@ public class CardManager : MonoBehaviour
         public bool suppressOnPlay = false;
         public string artistName = "noone (stolen)";
         public List<CardTypes> relevantCards = new();
+        public string onPlaySound = null;
        
 
         public Sprite GetSprite()
@@ -233,6 +234,7 @@ public class CardManager : MonoBehaviour
     public GameObject powerSquare;
     public GameObject imageObject;
     public GameObject nameObject;
+    public GameObject backObject;
     public GameObject descriptionObject;
     public GameObject nameOutline;
     public GameObject heartObject;
@@ -664,8 +666,16 @@ public class CardManager : MonoBehaviour
 
 
             case CardState.alreadyPlayed:
-                // do something that makes card invisible
-                //gameObject.SetActive(false);
+                descriptionObject.SetActive(false);
+                backObject.SetActive(false);
+                nameObject.SetActive(false);
+                nameOutline.SetActive(false);
+                foreach (GameObject rune_ in runeObjects)
+                {
+                    rune_.SetActive(false);
+                }
+                transform.localScale = new Vector3(normalScale, normalScale, 1f);
+                transform.position = new Vector3(transform.position.x, transform.position.y, 1f);
                 break;
 
             case CardState.selectingTargets:

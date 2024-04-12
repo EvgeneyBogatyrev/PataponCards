@@ -17,29 +17,46 @@ public static class CoppenStats
 
         stats.relevantCards.Add(CardTypes.IceWall);
 
-        stats.hasOnPlaySpell = true;
+        stats.hasAfterPlayEvent = true;
 
-        static IEnumerator CoppenRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static IEnumerator CoppenRealization(int target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
-            int index = targets[0];
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
+            int index;
+            List<BoardManager.Slot> chooseSlots;
+            List<BoardManager.Slot> oppSlots;
+            if (target > 0)
+            {
+                chooseSlots = friendlySlots;
+                oppSlots = enemySlots;
+                index = target - 1;
+            }
+            else
+            {
+                chooseSlots = enemySlots;
+                oppSlots = friendlySlots;
+                index = -target - 1;
+            }
             BoardManager.Slot slot;
-            slot = enemySlots[index];
+            slot = oppSlots[index];
             if (slot.GetFree())
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
                 BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
                 CardManager iceWallCard = handManager.GenerateCard(CardTypes.IceWall, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
-                boardManager.PlayCard(iceWallCard, new Vector3(0f, 0f, 0f), slot, destroy:false, record:false);
+                boardManager.PlayCard(iceWallCard,chooseSlots[index].GetPosition(), slot, destroy:false, record:false);
                 
                 iceWallCard.DestroyCard();
             }
+            gameController.actionIsHappening = false;
             yield return null;                            
         }
 
-        stats.spell = CoppenRealization;
-        stats.dummyTarget = true;
-        stats.numberOfTargets = 1;
+        stats.afterPlayEvent = CoppenRealization;
+        //stats.dummyTarget = true;
+        //stats.numberOfTargets = 1;
 
         stats.imagePath = "coppen";
 

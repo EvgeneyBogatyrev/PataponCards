@@ -871,6 +871,7 @@ MonoBehaviour:
   powerSquare: {fileID: 5530159759695480062}
   imageObject: {fileID: 1442201721585535090}
   nameObject: {fileID: 4415239894889282456}
+  backObject: {fileID: 1440503415341412286}
   descriptionObject: {fileID: 3884493843359157706}
   nameOutline: {fileID: 4730262944400581865}
   heartObject: {fileID: 7535924436688532914}
@@ -1098,6 +1099,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5d3dae03624998c429f472fad0f8d6d4, type: 3}
+--- !u!1 &1440503415341412286 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 5d3dae03624998c429f472fad0f8d6d4, type: 3}
+  m_PrefabInstance: {fileID: 2250915705491051247}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1780719098982380804 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 5d3dae03624998c429f472fad0f8d6d4, type: 3}
