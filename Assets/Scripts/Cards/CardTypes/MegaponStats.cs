@@ -39,6 +39,9 @@ public static class MegaponStats
                 string imagePath = "Images/megapon_large";
                 soundMain.gameObject.transform.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(imagePath);
                 soundMain.SetSlotToGo(selectedSlot);
+                soundMain.rotate = false;
+                soundMain.speed = 20f;
+                soundMain.bounce = true;
                 if (enemySlots[0].GetFriendly())
                 {
                     soundMain.isEnemy = true;
@@ -89,6 +92,10 @@ public static class MegaponStats
                     string imagePath = "Images/megapon_small";
                     soundSmall.gameObject.transform.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(imagePath);
                     soundSmall.SetSlotToGo(selectedSlot);
+                    soundSmall.rotate = false;
+                    soundSmall.speed = 20f;
+                    soundSmall.bounce = true;
+
                     if (enemySlots[0].GetFriendly())
                     {
                         soundSmall.isEnemy = true;

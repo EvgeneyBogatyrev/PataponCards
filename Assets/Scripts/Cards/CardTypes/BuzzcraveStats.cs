@@ -19,6 +19,8 @@ public static class BuzzcraveStats
         stats.additionalRules.Add("<i>Buzzcrave</i> can attack any unit on the board unless it's not a legal target for attack. Damage prevention still applies.");
 
         stats.imagePath = "buzzcrave";
+        stats.onPlaySound = "buzzcrave_on_play";
+        stats.onDeathSound = "dark_hero_death";
         return stats;
     }
 }

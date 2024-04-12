@@ -85,6 +85,7 @@ public class CardManager : MonoBehaviour
         public string artistName = "noone (stolen)";
         public List<CardTypes> relevantCards = new();
         public string onPlaySound = null;
+        public string onDeathSound = null;
        
 
         public Sprite GetSprite()
@@ -208,6 +209,8 @@ public class CardManager : MonoBehaviour
 
             newStats.nameSize = this.nameSize;
             newStats.descriptionSize = this.descriptionSize;
+            newStats.onPlaySound = this.onPlaySound;
+            newStats.onDeathSound = this.onDeathSound;
 
             return newStats;
         }

@@ -19,6 +19,16 @@ public class SpearManager : MonoBehaviour
     public Vector3 startPosition;
 
     public bool outOfScreen = false;
+    public bool bounce = false;
+
+
+    void Start()
+    {
+        if (bounce)
+        {
+            StartCoroutine(Bounce());
+        }
+    }
 
     public void SetSlotToGo(BoardManager.Slot slot)
     {
@@ -51,7 +61,7 @@ public class SpearManager : MonoBehaviour
             return Quaternion.Euler(0.0f, 0.0f, 0.0f);
         }
         Vector3 directionVector = (to - from);
-        
+
         Vector2 direction = new Vector2(directionVector.x, directionVector.y).normalized;
 
         float angle = Vector2.Angle(direction, new Vector2(1f, 0f));
@@ -62,7 +72,7 @@ public class SpearManager : MonoBehaviour
         }
 
         return Quaternion.Euler(0.0f, 0.0f, angle);
-        
+
     }
 
     void Update()
@@ -70,7 +80,7 @@ public class SpearManager : MonoBehaviour
         Vector3 targetPosition = slotToGo.GetSlotObject().transform.position;
         if (!constantSpeed)
         {
-            transform.position += (targetPosition - transform.position).normalized *  Time.deltaTime * speed;
+            transform.position += (targetPosition - transform.position).normalized * Time.deltaTime * speed;
             transform.position = new Vector3(transform.position.x, transform.position.y, zLevel);
 
             if (!rotationSet)
@@ -97,5 +107,18 @@ public class SpearManager : MonoBehaviour
         outOfScreen = true;
     }
 
-    
+    private IEnumerator Bounce()
+    {
+        float startTime = Time.time;
+        while (Time.time - startTime < 0.5f)
+        {
+            float scale = 1f + Mathf.PingPong((Time.time - startTime) * 2f, 1.5f - 1f);
+            transform.localScale = new Vector3(scale, scale, 1f);
+            yield return new WaitForSeconds(0.005f);
+        }
+        transform.localScale = new Vector3(1f, 1f, 1f);
+        yield return null;
+    }
+
+
 }

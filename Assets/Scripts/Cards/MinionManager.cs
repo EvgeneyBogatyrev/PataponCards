@@ -903,6 +903,10 @@ public class MinionManager : MonoBehaviour
         connectedSlot.SetFree(true);
         connectedSlot.SetConnectedMinion(null);
 
+        Debug.Log("On death");
+        Debug.Log(cardStats.onDeathSound);
+        AudioController.PlaySound(GetCardStats().onDeathSound);
+
         if (cardStats.hasOnDeath)
         {
             QueueData newEvent = new();
