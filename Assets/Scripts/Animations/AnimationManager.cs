@@ -7,11 +7,13 @@ public class AnimationManager : MonoBehaviour
     public enum Animations 
     {
         Spear,
-        Spores
+        Spores,
+        NovaNova
     }
 
     public GameObject spearPrefab;
     public GameObject sporesPrefab;
+    public GameObject novaNovaPrefab;
 
     public GameObject CreateObject(Animations type, Vector3 position)
     {
@@ -25,6 +27,11 @@ public class AnimationManager : MonoBehaviour
 
             case Animations.Spores:
                 gameObject = Instantiate(sporesPrefab);
+                gameObject.transform.position = position;
+                break;
+
+            case Animations.NovaNova:
+                gameObject = Instantiate(novaNovaPrefab);
                 gameObject.transform.position = position;
                 break;
 

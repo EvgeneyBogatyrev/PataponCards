@@ -18,6 +18,8 @@ public class JamschStats : MonoBehaviour
         
         stats.additionalKeywords.Add("Poison");
 
+        stats.onPlaySound = "jamsch_on_play";
+
         static IEnumerator Realization(int target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
@@ -67,7 +69,8 @@ public class JamschStats : MonoBehaviour
         //stats.numberOfTargets = 1;
         //stats.dummyTarget = true;
 
-        stats.imagePath = "jamsch";
+        stats.imagePath = "jamsch_final";
+        stats.artistName = "korka123";
         return stats;
     }
 }

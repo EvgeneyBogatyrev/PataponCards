@@ -56,6 +56,7 @@ public static class TropicalTailwindStats
                     if (devotionToBow > 0f)
                     {
                         minion.Heal(powerIncrease);
+                        minion.tailwindTimer = 3f;
                     }
                 }
             }

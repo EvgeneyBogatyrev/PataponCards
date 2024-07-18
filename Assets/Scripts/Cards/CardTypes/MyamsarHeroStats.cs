@@ -64,6 +64,7 @@ public static class MyamsarHeroStats
                         yield return new WaitForSeconds(0.03f);
                     }
 
+                    weakestEnemy.circleMyamsarObject.SetActive(true);
                     weakestEnemy.DestroyMinion();
                 }
 

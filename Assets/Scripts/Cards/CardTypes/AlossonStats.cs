@@ -17,7 +17,9 @@ public static class AlossonStats
         stats.name = "Alosson";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
-        stats.imagePath = "alosson";
+        stats.imagePath = "alosson_final";
+        stats.onPlaySound = "alosson_on_play";
+        stats.artistName = "korka123";
 
         stats.hasAfterPlayEvent = true;
         stats.afterPlayEvent = AlossonRealization;
@@ -31,6 +33,7 @@ public static class AlossonStats
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             gameController.actionIsHappening = true;
+            yield return new WaitForSeconds(2f);
             int index;
             List<BoardManager.Slot> chooseSlots;
             if (target > 0)
@@ -45,6 +48,7 @@ public static class AlossonStats
             }
             for (int limit = 0; limit < alossonMax; ++limit)
             {
+                AudioController.PlaySound("hero_combo_" + (limit % 4).ToString());
                 AnimationManager animationManager = GameObject.Find("GameController").GetComponent<AnimationManager>();
                 List<SpearManager> spearArray = new List<SpearManager>();
 
@@ -132,10 +136,12 @@ public static class AlossonStats
                     yield return new WaitForSeconds(0.1f);
                 }
                 
+                
                 if (!someoneDied)
                 {
                     break;
-                }      
+                } 
+                yield return new WaitForSeconds(1.8f);     
             }
             gameController.actionIsHappening = false;
             yield return null;

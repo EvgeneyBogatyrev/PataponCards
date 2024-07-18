@@ -17,6 +17,11 @@ public class NovaNovaStats : MonoBehaviour
         stats.isSpell = true;
         static IEnumerator NovaNovaRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            AnimationManager animationManager = GameObject.Find("GameController").GetComponent<AnimationManager>();
+            Vector3 position = new Vector3(0f, 0f, - 0.5f);
+            GameObject explosion = animationManager.CreateObject(AnimationManager.Animations.NovaNova, position);
+
+            yield return new WaitForSeconds(1.5f);
             int healthLoss = 0;
             foreach (BoardManager.Slot slot in enemySlots)
             {
@@ -47,6 +52,8 @@ public class NovaNovaStats : MonoBehaviour
                 }
             }
 
+            yield return new WaitForSeconds(2f);
+            Destroy(explosion);
             yield return null;
         }
 

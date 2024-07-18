@@ -8,6 +8,7 @@ using TMPro;
 
 public class CollectionControl : MonoBehaviour
 {
+    private bool DEBUG = false;
     public int rows = 2;
     public int columns = 3;
     public float cardScale = 0.75f;
@@ -89,10 +90,10 @@ public class CollectionControl : MonoBehaviour
         foreach (CardTypes type in startList)
         {
             CardManager.CardStats stats = CardTypeToStats.GetCardStats(type);
-            if (bowDevotion < stats.GetDevotion(Runes.Bow)
+            if (!DEBUG && (bowDevotion < stats.GetDevotion(Runes.Bow)
                 || shieldDevotion < stats.GetDevotion(Runes.Shield)
                 || spearDevotion < stats.GetDevotion(Runes.Spear)
-            )
+            ))
             {
                 continue;
             }

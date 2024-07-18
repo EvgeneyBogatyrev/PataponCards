@@ -9,8 +9,8 @@ using System.Collections;
 
 public class CheckVersionModule : MonoBehaviour
 {
-    public static string version = "0.1.0";
-    public static bool isAndroid = true;
+    public static string version = "0.1.4";
+    public static bool isAndroid = false;
     private static string versionURL = "https://drive.google.com/uc?export=download&id=1ZQlz7Hmznk7C3k86EeZOC-ze4vnhegXc";
     private static string updateLinkAndroid = "https://drive.google.com/file/d/1kLOOJkdYZliRuFSI3tz49I33RoRP044t/view?usp=sharing";
     private static string updateLinkWindows = "https://drive.google.com/file/d/1Li4SWGsv-LirtbKLJ50_n2pc9HNHyQWc/view?usp=sharing";

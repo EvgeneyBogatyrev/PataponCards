@@ -26,6 +26,8 @@ public class MinionManager : MonoBehaviour
     public GameObject lifelinkObjectHatapon;
     public GameObject hexproofObject;
     public GameObject endTurnObject;
+    public GameObject tailwindObject;
+    public GameObject circleMyamsarObject;
     public GameObject onAttackObject;
     public float normalScale;
     public float selectedScale;
@@ -56,6 +58,8 @@ public class MinionManager : MonoBehaviour
     public CardManager previewedCard = null;
     public bool attacked = false;
     public bool moved = false;
+
+    public float tailwindTimer = 0f;
 
     public void CustomizeMinion(CardManager playedCard, BoardManager.Slot slot)
     {
@@ -104,6 +108,8 @@ public class MinionManager : MonoBehaviour
         lifelinkObject.SetActive(false);
         hexproofObject.SetActive(false);
         endTurnObject.SetActive(false);
+        tailwindObject.SetActive(false);
+        circleMyamsarObject.SetActive(false);
 
         startTime = Time.time;
     }
@@ -371,7 +377,7 @@ public class MinionManager : MonoBehaviour
         {
             case MinionState.Free:
 
-                if (GetFriendly())
+                if (GetFriendly() && !dying)
                 {
                     if (!mouseOver)
                     {
@@ -684,6 +690,20 @@ public class MinionManager : MonoBehaviour
         if (hataponLifelinkActive != lifelinkObjectHatapon.activeSelf)
         {
             lifelinkObjectHatapon.SetActive(hataponLifelinkActive);
+        }
+
+        //tailwind
+
+        if (tailwindTimer > 0f)
+        {
+            tailwindTimer -= Time.deltaTime;
+            tailwindObject.SetActive(true);
+            tailwindObject.transform.eulerAngles = new Vector3(0f, 0f, tailwindObject.transform.eulerAngles.z + 5f);
+            Debug.Log(tailwindTimer);
+        }
+        else
+        {
+            tailwindObject.SetActive(false);
         }
 
 
