@@ -58,6 +58,8 @@ public class MinionManager : MonoBehaviour
     public CardManager previewedCard = null;
     public bool attacked = false;
     public bool moved = false;
+    public ShakeScreen _shakeScreen;
+    public bool alreadyShake = false;
 
     public float tailwindTimer = 0f;
 
@@ -98,6 +100,7 @@ public class MinionManager : MonoBehaviour
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
         handManager = GameObject.Find("Hand").GetComponent<HandManager>();
         gameController = GameObject.Find("GameController").GetComponent<GameController>();
+        _shakeScreen = GameObject.Find("Main Camera").GetComponent<ShakeScreen>();
 
         damageObject.SetActive(false);
         //outlineBackAbilitiesObject.SetActive(false);
@@ -621,6 +624,30 @@ public class MinionManager : MonoBehaviour
                 attacking = false;
             }
 
+            if (length < 0.2 && !alreadyShake)
+            {
+                alreadyShake = true;
+                // Shake screen
+                float shakeStrength = 0f;
+                if (this.GetPower() <= 2)
+                {
+                    shakeStrength = 0f;
+                }
+                else if (this.GetPower() <= 6)
+                {
+                    shakeStrength = 1f;
+                }
+                else if (this.GetPower() <= 9)
+                {
+                    shakeStrength = 2f;
+                }
+                else
+                {
+                    shakeStrength = 3f;
+                }
+                _shakeScreen.shakeTheScreen(shakeStrength);
+            }
+
         }
         else if (!onAttackActionProgress)
         {
@@ -1076,6 +1103,10 @@ public class MinionManager : MonoBehaviour
         attacked = false;
         moved = false;
         SetAbilityToAttack(_can);
+        if (_can)
+        {
+            alreadyShake = false;
+        }
     }
     public int GetIndex()
     {

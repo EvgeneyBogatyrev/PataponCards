@@ -16,8 +16,8 @@ public class AudioController : MonoBehaviour
 
     public static void PlaySound(string soundName)
     {
-        Debug.Log("Sound");
-        Debug.Log(soundName);
+        //Debug.Log("Sound");
+        //Debug.Log(soundName);
         if (soundName != null)
         {
             AudioClip clip = Resources.Load<AudioClip>("Sounds/" + soundName);
