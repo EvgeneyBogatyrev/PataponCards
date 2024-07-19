@@ -141,7 +141,7 @@ public static class TropicalTailwindStats
         stats.spell = Realization;
         stats.numberOfTargets = 0;
 
-        stats.imagePath = "tropical_tailwind";
+        stats.imagePath = "tropical-tailwind";
         return stats;
     }
 }

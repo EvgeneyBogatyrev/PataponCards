@@ -78,7 +78,7 @@ public static class MyamsarHeroStats
 
         stats.onAttackEvent = OnAttack;
 
-        stats.imagePath = "myamsar";
+        stats.imagePath = "myamsar-tmp";
 
         return stats;
     }
