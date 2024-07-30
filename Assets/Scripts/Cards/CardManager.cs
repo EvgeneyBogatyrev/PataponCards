@@ -230,7 +230,8 @@ public class CardManager : MonoBehaviour
         Mill,
         toMill,
         ShuffleIntoDeck,
-        alreadyPlayed
+        alreadyPlayed,
+        IntroFalling,
     }
 
     public GameObject powerObject;
@@ -941,6 +942,10 @@ public class CardManager : MonoBehaviour
                 transform.localScale = new Vector3(selectedScale, selectedScale, 1f);
                 //transform.position = Vector3.Lerp(transform.position, positionInHand, 15f * Time.deltaTime);
                 //transform.rotation = Quaternion.Euler(180f, 0, curRotation);
+                break;
+
+            case CardState.IntroFalling:
+                transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - 0.1f);
                 break;
         
         }

@@ -30,6 +30,8 @@ public class LogController : MonoBehaviour
     private List<LogMessage> log = null;
     private const int logLimit = 8;
     private List<GameObject> logVis = new();
+    public float logStep = 1.2f;
+    public float logBottom = -2.2f;
     
     private void Awake() 
     { 
@@ -99,7 +101,7 @@ public class LogController : MonoBehaviour
             }
             logRepr.Customize(message.card, message.friendly);
             logRepr.index = i;
-            logRepr.transform.position = new Vector3(transform.position.x, -3.4f+ i * 1.2f, transform.position.z);
+            logRepr.transform.position = new Vector3(transform.position.x, logBottom + i * logStep, transform.position.z);
             logVis.Add(logRepr.gameObject);
             logRepr.targets = message.targets;
             

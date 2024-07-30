@@ -887,7 +887,7 @@ MonoBehaviour:
   normalScale: 0.6
   selectedScale: 0.85
   selectedZ: -3
-  selectedY: -1.68
+  selectedY: -1.8
   hostMinion: {fileID: 0}
   destroyTimer: 0
   spellTargets: 
