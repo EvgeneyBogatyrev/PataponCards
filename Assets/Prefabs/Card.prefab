@@ -892,6 +892,8 @@ MonoBehaviour:
   destroyTimer: 0
   spellTargets: 
   infoPrefab: {fileID: 5994425831647166798, guid: 19917fc2feadb49ffb5216ba603b713e, type: 3}
+  rotationFromPack: 180
+  rotationFromPackSpeed: 250
 --- !u!65 &6333292515029613451
 BoxCollider:
   m_ObjectHideFlags: 0

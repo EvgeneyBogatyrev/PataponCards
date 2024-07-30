@@ -231,7 +231,7 @@ public class CardManager : MonoBehaviour
         toMill,
         ShuffleIntoDeck,
         alreadyPlayed,
-        IntroFalling,
+        openedFromPack,
     }
 
     public GameObject powerObject;
@@ -285,6 +285,9 @@ public class CardManager : MonoBehaviour
     public GameObject infoPrefab;
     private float secondsHold = 0f;
     private bool cardIsPlayed = false;
+
+    public float rotationFromPack = 180f;
+    public float rotationFromPackSpeed = 25f;
 
     private void Start()
     {
@@ -944,8 +947,14 @@ public class CardManager : MonoBehaviour
                 //transform.rotation = Quaternion.Euler(180f, 0, curRotation);
                 break;
 
-            case CardState.IntroFalling:
-                transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - 0.1f);
+            case CardState.openedFromPack:
+                transform.localScale = new Vector3(selectedScale, selectedScale, 1f);
+                transform.rotation = Quaternion.Euler(0, rotationFromPack, 0);
+                rotationFromPack -= rotationFromPackSpeed * Time.deltaTime;
+                if (rotationFromPack <= 0f)
+                {
+                    rotationFromPack = 0f;
+                }
                 break;
         
         }
