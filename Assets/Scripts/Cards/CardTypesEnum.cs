@@ -1,3 +1,7 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
 public enum CardTypes
 {
     Yumipon,
@@ -567,5 +571,53 @@ public static class CardTypeToStats
                 break;
         }
         return stats;
+    }
+}
+
+public static class FilterCardTypes
+{
+    public static List<CardTypes> GetGoodArtCards()
+    {
+        return new List<CardTypes>()
+        {
+            CardTypes.DonTheYumipon,
+            CardTypes.Alosson,
+            CardTypes.Jamsch,
+            CardTypes.Buzzcrave,
+            CardTypes.NovaNova,
+            CardTypes.MyamsarHero,
+            CardTypes.TropicalTailwind,
+            CardTypes.GanTheYaripon,
+            CardTypes.Trent,
+            CardTypes.GongTheHawkeye,
+            CardTypes.Piekron,
+            CardTypes.FuckingIdiot,
+            CardTypes.Cannasault,
+        };
+    }
+
+    public static List<CardTypes> GetShitSet()
+    {
+        return new List<CardTypes>()
+        {
+            CardTypes.DeepImpact,
+            CardTypes.HealingScepter,
+            CardTypes.Kacheek,
+            CardTypes.HuntingSpirit,
+            CardTypes.NaturalEnemy,
+            CardTypes.Alldemonium,
+            CardTypes.Yumipon,
+            CardTypes.AvengingScout,
+            CardTypes.Fang,
+            CardTypes.Desperado,
+            CardTypes.Bowmunk,
+            CardTypes.Concede,
+            CardTypes.Moribu,
+        };
+    }
+
+    public static CardTypes SelectCardFromList(List<CardTypes> cardList)
+    {
+        return cardList[Random.Range(0, cardList.Count)];
     }
 }
