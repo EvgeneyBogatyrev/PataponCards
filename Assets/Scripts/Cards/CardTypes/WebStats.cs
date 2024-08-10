@@ -7,7 +7,7 @@ public static class WebStats
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-        const int gain = 2;
+        const int gain = 3;
         stats.power = 1;
         stats.description = "<b>Pacifism.\nOn play</b>: Give all friendly units +" + gain.ToString() + " power.\n<b>On death</b>: Draw a card.";
         stats.name = "Wep";

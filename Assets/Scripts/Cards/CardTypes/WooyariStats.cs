@@ -8,7 +8,7 @@ public static class WooyariStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         const int destroboDamage = 1;
-        stats.power = 2;
+        stats.power = 3;
         stats.description = "<b>On play</b>: Choose a unit. If it has <b>Lifelink</b>, destroy it.";
         stats.name = "Wooyari";
         stats.runes.Add(Runes.Spear);

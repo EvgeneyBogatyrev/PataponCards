@@ -6,9 +6,10 @@ public class NovaNovaStats : MonoBehaviour
 {
     public static CardManager.CardStats GetStats()
     {
+        const int _healthLoss = 2;
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.name = "Nova Nova";
-        stats.description = "Destroy all non-Hatapon units. Deal 3 damage to your Hatapon for each unit destroyed this way.";
+        stats.description = "Destroy all non-Hatapon units. Deal " + _healthLoss.ToString() + " damage to your Hatapon for each unit destroyed this way.";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
@@ -17,9 +18,11 @@ public class NovaNovaStats : MonoBehaviour
         stats.isSpell = true;
         static IEnumerator NovaNovaRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
-            AnimationManager animationManager = GameObject.Find("GameController").GetComponent<AnimationManager>();
-            Vector3 position = new Vector3(0f, 0f, - 0.5f);
-            GameObject explosion = animationManager.CreateObject(AnimationManager.Animations.NovaNova, position);
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
+            //AnimationManager animationManager = GameObject.Find("GameController").GetComponent<AnimationManager>();
+            //Vector3 position = new Vector3(0f, 0f, - 0.5f);
+            //GameObject explosion = animationManager.CreateObject(AnimationManager.Animations.NovaNova, position);
 
             yield return new WaitForSeconds(1.5f);
             int healthLoss = 0;
@@ -29,7 +32,7 @@ public class NovaNovaStats : MonoBehaviour
                 if (minion != null && minion.GetCardType() != CardTypes.Hatapon)
                 {
                     minion.DestroyMinion();
-                    healthLoss += 3;
+                    healthLoss += _healthLoss;
                 }
             }
 
@@ -39,7 +42,7 @@ public class NovaNovaStats : MonoBehaviour
                 if (minion != null && minion.GetCardType() != CardTypes.Hatapon)
                 {
                     minion.DestroyMinion();
-                    healthLoss += 3;
+                    healthLoss += _healthLoss;
                 }
             }
             
@@ -52,9 +55,11 @@ public class NovaNovaStats : MonoBehaviour
                 }
             }
 
-            yield return new WaitForSeconds(2f);
-            Destroy(explosion);
+            gameController.actionIsHappening = true;
+            //yield return new WaitForSeconds(2f);
+            //Destroy(explosion);
             yield return null;
+            
         }
 
         stats.spell = NovaNovaRealization;

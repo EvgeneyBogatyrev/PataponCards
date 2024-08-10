@@ -9,7 +9,7 @@ public class SparringPartnerStats : MonoBehaviour
         CardManager.CardStats stats = new CardManager.CardStats();
         
         const int gain = 2;
-        stats.description = "<b>On play</b>: Target non-Hatapon unit under your control gains +" + gain.ToString() + " power.";
+        stats.description = "<b>On play</b>: Target non-Hatapon unit under your control gains +" + gain.ToString() + " power and <b>Lifelink</b>.";
         stats.name = "Sparring Partner";
         stats.runes.Add(Runes.Shield);
         stats.power = 3;
@@ -59,6 +59,7 @@ public class SparringPartnerStats : MonoBehaviour
             MinionManager targetMinion = targetSlot.GetConnectedMinion();
 
             CardManager.CardStats stats = targetMinion.GetCardStats();
+            stats.hasShield = true;
             targetMinion.SetCardStats(stats);
             
 

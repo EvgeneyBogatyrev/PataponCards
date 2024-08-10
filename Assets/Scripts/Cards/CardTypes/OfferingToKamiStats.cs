@@ -8,7 +8,7 @@ public static class OfferingToKamiStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int buff = 1;
+        const int buff = 3;
         stats.description = "Destroy a friendly unit. Your units gain +" + buff.ToString() + " power.";
         stats.name = "Offering to Kami";
         stats.nameSize = 5;

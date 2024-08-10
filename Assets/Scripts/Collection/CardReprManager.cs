@@ -50,6 +50,7 @@ public class CardReprManager : MonoBehaviour
     {
         GameObject newCard = Instantiate(cardPrefab);
         CardGenerator.CustomizeCard(newCard.GetComponent<CardManager>(), cardType);
+        newCard.GetComponent<CardManager>().numberOfCardsObject.SetActive(false);
         return newCard;
     }
 

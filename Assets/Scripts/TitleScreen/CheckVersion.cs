@@ -31,10 +31,10 @@ public class CheckVersionModule : MonoBehaviour
         //client.DownloadFileCompleted += new AsyncCompletedEventHandler(DownloadGameCompletedCallback);
         //client.DownloadFileAsync(new Uri(versionURL), Path.Combine(rootPath, "version.txt"));
         string onlineVersion = client.DownloadString(new Uri(versionURL));
-        yield return new WaitForSeconds(2f);
         if (version == onlineVersion)
         {
             textbox.GetComponent<TextMeshProUGUI>().text = "Your version is up-to-date!";
+            yield return new WaitForSeconds(2f);
             SceneManager.LoadScene("MainMenu");
         }
         else

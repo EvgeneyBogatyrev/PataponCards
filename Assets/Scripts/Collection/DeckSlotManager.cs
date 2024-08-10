@@ -11,6 +11,7 @@ public class DeckSlotManager : MonoBehaviour
     public GameObject rune0;
     public GameObject rune1;
     public GameObject rune2;
+    public GameObject deckCountObject;
     
 
     private int index;
@@ -23,11 +24,6 @@ public class DeckSlotManager : MonoBehaviour
             SetRune(runes[0], rune0);
             SetRune(runes[1], rune1);
             SetRune(runes[2], rune2);
-
-            foreach (Runes r in runes)
-            {
-                Debug.Log(r);
-            }
         }
         else
         {
@@ -39,6 +35,9 @@ public class DeckSlotManager : MonoBehaviour
         deckNameObject.GetComponent<TextMeshPro>().text = deckName;
 
         this.index = index;
+        List<CardTypes> thisDeck = SaveSystem.LoadDeck(this.index);
+        int count = thisDeck.Count;
+        deckCountObject.GetComponent<TextMeshPro>().text = count.ToString() + "/24";
     }
 
     private void SetRune(Runes rune, GameObject runeObject)
@@ -62,8 +61,12 @@ public class DeckSlotManager : MonoBehaviour
         mouseOver = true;
         if (Input.GetMouseButtonUp(0))
         {
-            DeckLoadManager.deckIndex = this.index;
-            SceneManager.LoadScene(DeckLoadManager.roomToGo);
+            List<CardTypes> thisDeck = SaveSystem.LoadDeck(this.index);
+            if (thisDeck.Count == 24 || DeckLoadManager.roomToGo == "Collection")
+            {
+                DeckLoadManager.deckIndex = this.index;
+                SceneManager.LoadScene(DeckLoadManager.roomToGo);
+            }
         }
     }
     private void OnMouseExit()

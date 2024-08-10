@@ -8,7 +8,7 @@ public static class CoppenStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 3;
+        stats.power = 4;
         stats.description = "<b>On play</b>: Summon an Ice Wall for your opponent in front of Coppen.";
         stats.name = "Coppen";
         stats.runes.Add(Runes.Bow);

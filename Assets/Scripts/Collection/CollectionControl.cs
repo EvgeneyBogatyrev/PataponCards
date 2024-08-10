@@ -11,7 +11,7 @@ public class CollectionControl : MonoBehaviour
     private bool DEBUG = false;
     public int rows = 2;
     public int columns = 3;
-    public float cardScale = 0.75f;
+    public float cardScale = 0.5f;
     public GameObject cardPrefab;
     public GameObject cardRepr;
     public GameObject cardReprSmaller;
@@ -314,7 +314,8 @@ public class CollectionControl : MonoBehaviour
 
     public bool CheckPage(int pageNumber)
     {
-        List<CardTypes> relevantCards = GetCollectableCards();
+        //List<CardTypes> relevantCards = GetCollectableCards();
+        List<CardTypes> relevantCards = new List<CardTypes>(DeckManager.collection.Keys);
         relevantCards = FilterRunes(relevantCards, DeckManager.runes);
 
         var namesCount = relevantCards.Count;//Enum.GetNames(typeof(CardTypes)).Length - GetForbiddenCards().Count;
@@ -348,30 +349,19 @@ public class CollectionControl : MonoBehaviour
 
     public List<CardTypes> GetPage(int pageNumber)
     {
-        //var namesCount = Enum.GetNames(typeof(CardTypes)).Length;
-        List<CardTypes> relevantCards = GetCollectableCards();
+        //List<CardTypes> relevantCards = GetCollectableCards();
+        List<CardTypes> relevantCards = new List<CardTypes>(DeckManager.collection.Keys);
+        Debug.Log(relevantCards.Count);
         relevantCards = FilterRunes(relevantCards, DeckManager.runes);
         int namesCount = relevantCards.Count;
 
         List<CardTypes> cardList = new List<CardTypes>();
         int startNumber = pageNumber * rows * columns;
         int end = rows * columns;
-        //List<CardTypes> reservedList = GetForbiddenCards();
         
         for (int i = 0; i < end && startNumber + i < namesCount; ++i)
         {
             cardList.Add(relevantCards[startNumber + i]);
-            /*
-            if (reservedList.Contains((CardTypes)(startNumber + i)))
-            {
-                end += 1;
-                continue;
-            }
-            else
-            {
-                cardList.Add((CardTypes)(startNumber + i));
-            }
-            */
         }
         return cardList;
     }
@@ -393,6 +383,7 @@ public class CollectionControl : MonoBehaviour
                 card.SetDisplay();
                 card.transform.position = new Vector3(xOffset + j * cardSpaceX, yOffset + (rows - i - 1) * cardSpaceY, 0f);
                 card.transform.localScale = new Vector3(cardScale, cardScale, 1f);
+                card.SetNumberOfCopies(DeckManager.collection[cardTypes[index]]);
                 currentCards.Add(card);
             }
         }
@@ -402,6 +393,7 @@ public class CollectionControl : MonoBehaviour
     {
         GameObject newCard = Instantiate(cardPrefab);
         CardGenerator.CustomizeCard(newCard.GetComponent<CardManager>(), cardType);
+        newCard.transform.localScale = new Vector3(cardScale, cardScale, 1f);
         return newCard;
     }
 
@@ -435,7 +427,7 @@ public class CollectionControl : MonoBehaviour
 
     public void BackButton()
     {
-        if (DeckManager.deck.Count == DeckManager.minDeckSize)
+        if (true || DeckManager.deck.Count == DeckManager.minDeckSize)
         {
             SaveSystem.SaveRunes(DeckManager.runes, DeckLoadManager.deckIndex);
             SaveSystem.SaveDeck(DeckManager.deck, DeckLoadManager.deckIndex);

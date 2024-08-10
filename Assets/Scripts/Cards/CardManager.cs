@@ -242,6 +242,8 @@ public class CardManager : MonoBehaviour
     public GameObject descriptionObject;
     public GameObject nameOutline;
     public GameObject heartObject;
+    public GameObject numberOfCardsObject;
+    public GameObject numberOfCardsText;
     public List<GameObject> runeObjects;
 
     public Material spearMaterial;
@@ -289,6 +291,8 @@ public class CardManager : MonoBehaviour
     public float rotationFromPack = 180f;
     public float rotationFromPackSpeed = 25f;
 
+    public int numberOfCopies = 0;
+
     private void Start()
     {
         Scene scene = SceneManager.GetActiveScene();
@@ -301,6 +305,11 @@ public class CardManager : MonoBehaviour
             drawEndPosition = GameObject.Find("DrawnCardDisplay").transform.position;
             playEndPosition = GameObject.Find("PlayedCardPosition").transform.position;
             MillPosition = GameObject.Find("MillPosition").transform.position;
+            numberOfCardsObject.SetActive(false);
+        }
+        else if (scene.name == "OpenChest")
+        {
+            numberOfCardsText.GetComponent<TextMeshPro>().text = "1x";
         }
     }
 
@@ -775,6 +784,10 @@ public class CardManager : MonoBehaviour
 
             case CardState.display:
                 Scene scene = SceneManager.GetActiveScene();
+                if (scene.name == "Collection")
+                {
+                    transform.localScale = new Vector3(0.5f, 0.5f, 1f);
+                }
                 if (scene.name == "Collection" && mouseOver)
                 {
                     if (CursorController.cursorState == CursorController.CursorStates.Free)
@@ -806,6 +819,12 @@ public class CardManager : MonoBehaviour
                                 int tmpBow = collection.bowDevotion;
 
                                 bool bad = false;
+                                if (DeckManager.GetCardQty(cardType) >= DeckManager.collection[cardType])
+                                {
+                                    bad = true;
+                                }
+
+
                                 foreach (Runes rune in cardStats.runes)
                                 {
                                     if (rune == Runes.Spear)
@@ -1069,6 +1088,15 @@ public class CardManager : MonoBehaviour
     public string GetName()
     {
         return cardName;
+    }
+    public int GetNumberOfCopies()
+    {
+        return this.numberOfCopies;
+    }
+    public void SetNumberOfCopies(int number)
+    {
+        this.numberOfCopies = number;
+        numberOfCardsText.GetComponent<TextMeshPro>().text = number.ToString() + "x";
     }
     public void SetDescription(string description)
     {

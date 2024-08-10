@@ -8,7 +8,7 @@ public static class LightningBoltStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int damage = 3;
+        const int damage = 2;
         stats.description = "Deal " + damage.ToString() + " damage.";
         stats.name = "Lightning Bolt";
 

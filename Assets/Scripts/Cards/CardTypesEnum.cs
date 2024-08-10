@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using System.Linq;
 
 public enum CardTypes
 {
@@ -598,26 +601,105 @@ public static class FilterCardTypes
 
     public static List<CardTypes> GetShitSet()
     {
-        return new List<CardTypes>()
-        {
-            CardTypes.DeepImpact,
-            CardTypes.HealingScepter,
-            CardTypes.Kacheek,
-            CardTypes.HuntingSpirit,
-            CardTypes.NaturalEnemy,
-            CardTypes.Alldemonium,
-            CardTypes.Yumipon,
-            CardTypes.AvengingScout,
-            CardTypes.Fang,
-            CardTypes.Desperado,
-            CardTypes.Bowmunk,
-            CardTypes.Concede,
-            CardTypes.Moribu,
-        };
+        List<CardTypes> zeroDevotion = GetCardsWithTotalDevotion(0);
+        List<CardTypes> oneDevotion = GetCardsWithTotalDevotion(1);
+        List<CardTypes> twoDevotion = GetCardsWithTotalDevotion(2);
+
+        List<CardTypes> smallDevotion = zeroDevotion.Concat(oneDevotion).ToList();
+
+        return smallDevotion.Concat(smallDevotion).Concat(twoDevotion).ToList();
+    }
+
+    public static List<CardTypes> GetGoodSet()
+    {
+        List<CardTypes> zeroDevotion = GetCardsWithTotalDevotion(0);
+        List<CardTypes> oneDevotion = GetCardsWithTotalDevotion(1);
+        List<CardTypes> twoDevotion = GetCardsWithTotalDevotion(2);
+        List<CardTypes> threeDevotion = GetCardsWithTotalDevotion(3);
+
+        List<CardTypes> smallDevotion = zeroDevotion.Concat(oneDevotion).Concat(twoDevotion).ToList();
+        return smallDevotion.Concat(smallDevotion).Concat(threeDevotion).ToList();
+
     }
 
     public static CardTypes SelectCardFromList(List<CardTypes> cardList)
     {
-        return cardList[Random.Range(0, cardList.Count)];
+        return cardList[UnityEngine.Random.Range(0, cardList.Count)];
+    }
+
+    private static List<CardTypes> GetCardsWithTotalDevotion(int totalDevotion)
+    {
+        List<CardTypes> newList = new();
+
+        foreach (CardTypes type in GetCollectableCards())
+        {
+            CardManager.CardStats stats = CardTypeToStats.GetCardStats(type);
+            int devotionSum = stats.GetDevotion(Runes.Bow) + stats.GetDevotion(Runes.Shield) + stats.GetDevotion(Runes.Spear);
+            if (devotionSum != totalDevotion)
+            {
+                continue;
+            }
+            newList.Add(type);
+        }
+
+        return newList;
+    }
+
+    private static List<CardTypes> GetCollectableCards()
+    {
+        string[] allCards = Enum.GetNames(typeof(CardTypes));
+        List<CardTypes> relevantCards = new();
+        List<CardTypes> reservedList = GetForbiddenCards();
+        foreach (string stringType in allCards)
+        {
+            CardTypes type = (CardTypes)Enum.Parse(typeof(CardTypes), stringType);
+            if (!reservedList.Contains(type))
+            {
+                relevantCards.Add(type);
+            }
+        }
+        return relevantCards;
+    }
+
+    public static List<CardTypes> GetForbiddenCards()
+    {
+        // Cards that are not collectable and should not be displayed
+        List<CardTypes> reservedList = new()
+        {
+            CardTypes.Hatapon,
+            CardTypes.Nutrition,
+            CardTypes.GiveFang,
+            CardTypes.Motiti_option1,
+            CardTypes.Motiti_option2,
+            CardTypes.MotitiAngry,
+            CardTypes.Boulder,
+            CardTypes.TonKampon_option1,
+            CardTypes.TonKampon_option2,
+            CardTypes.IceWall,
+            CardTypes.IceWall_option,
+            CardTypes.Concede,
+            CardTypes.StoneFree,
+            CardTypes.Mushroom,
+            CardTypes.TrentOnFire,
+            CardTypes.Armory_option1,
+            CardTypes.Armory_option2,
+            CardTypes.Horserider,
+            CardTypes.TokenTatepon,
+            CardTypes.SpeedBoost,
+            CardTypes.Moribu,
+            CardTypes.Grenburr,
+            CardTypes.Wondabarappa,
+            CardTypes.Venomist,
+            CardTypes.KibaForm,
+            CardTypes.BirdForm,
+            CardTypes.Catapult_option1,
+            CardTypes.Catapult_option2,
+            CardTypes.BabattaSwarm,
+            CardTypes.LightningBolt,
+            CardTypes.MeteorRain,
+            CardTypes.SleepingDust,
+        };
+
+        return reservedList;
     }
 }

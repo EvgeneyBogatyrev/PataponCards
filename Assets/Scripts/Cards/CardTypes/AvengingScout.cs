@@ -7,8 +7,8 @@ public static class AvengingScoutStats
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-        stats.power = 2;
-        stats.description = "<b>On death:</b> Deal 1 + X damage to the strongest enemy unit, where X is your <b>Devotion to Spear</b>.";
+        stats.power = 4;
+        stats.description = "<b>On death:</b> Deal X damage to the strongest enemy unit, where X is your <b>Devotion to Spear</b>.";
         stats.name = "Avenging Scout";
         stats.runes.Add(Runes.Spear);
 
@@ -37,7 +37,7 @@ public static class AvengingScoutStats
             {
                 bool enemy = enemySlots[1].GetFriendly();
                 int devotion = DeckManager.GetDeckDevotion(Runes.Spear, enemy);
-                selectedMinion.ReceiveDamage(1 + devotion);
+                selectedMinion.ReceiveDamage(devotion);
             }
             gameController.actionIsHappening = false;
             yield return null;

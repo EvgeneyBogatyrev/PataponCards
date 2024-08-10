@@ -8,7 +8,7 @@ public static class DeepImpactStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         const int horsePower = 3;
-        stats.description = "Transform target non-Hatapon unit into the Horserider with " + horsePower.ToString() + " and <b>Haste</b>.";
+        stats.description = "Transform target non-Hatapon unit into the Horserider with " + horsePower.ToString() + " and <b>Haste</b>.\n Draw a card.";
         stats.name = "Deep Impact";
     
         stats.runes.Add(Runes.Spear);
@@ -57,6 +57,17 @@ public static class DeepImpactStats
             //host.TakePower(host.GetPower());
             targetSlot.GetConnectedMinion().DestroySelf(unattach:true);
             boardManager.PlayCard(newCard, new Vector3(0f, 0f, 0f), slot, destroy: true, record: false);
+
+            if (friendlySlots[1].GetFriendly())
+            {
+                //HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
+                handManager.DrawCard();
+            }
+            else
+            {
+                //HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
+                handManager.DrawCardOpponent();
+            }
             
             gameController.actionIsHappening = false;
             yield return null;

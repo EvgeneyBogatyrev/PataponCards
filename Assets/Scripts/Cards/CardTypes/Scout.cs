@@ -9,7 +9,7 @@ public static class ScoutStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 2;
-        stats.description = "<b>End of turn</b>: Draw a card. Your Hatapon loses 1 life for each time this ability has triggered.";
+        stats.description = "<b>End of turn</b>: Draw a card. Your Hatapon loses 1 life.";
         stats.name = "Scout";
         stats.imagePath = "scout";
         
@@ -53,7 +53,7 @@ public static class ScoutStats
                 MinionManager minion_ = slot.GetConnectedMinion();
                 if (minion_ != null && minion_.GetCardType() == CardTypes.Hatapon)
                 {
-                    minion_.DealDamageToThis(cardsDrawn);
+                    minion_.DealDamageToThis(1);
                     break;
                 }
             }

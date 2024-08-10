@@ -10,8 +10,8 @@ public static class YumiponStats
 
         const int yumiponDamage = 1;
 
-        stats.power = 2;
-        stats.description = "<b>On attack</b>: Deal " + yumiponDamage.ToString() + " damage to all enemy units.";
+        stats.power = 1;
+        stats.description = "<b>End of turn</b>: Deal " + yumiponDamage.ToString() + " damage to all enemy units.";
         stats.name = "Yumipon";
         stats.runes.Add(Runes.Bow);
 
@@ -130,10 +130,10 @@ public static class YumiponStats
             gameController.actionIsHappening = false;
             yield return null;
         }
-        //stats.endTurnEvent = YumiponEndTurn;
-        stats.onAttackEvent = YumiponOnAttack;
+        stats.endTurnEvent = YumiponEndTurn;
+        //stats.onAttackEvent = YumiponOnAttack;
 
-        stats.imagePath = "yumipon";
+        stats.imagePath = "yumipon_hq";
         return stats;
     }
 }

@@ -8,9 +8,9 @@ public class DeadlyShotStats : MonoBehaviour
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int threshold = 4;
+        const int threshold = 5;
 
-        stats.description = "Destroy target non-Hatapon unit with power " + threshold.ToString() + " or greater.";
+        stats.description = "Destroy target non-Hatapon unit with power " + threshold.ToString() + " or less.";
         stats.name = "Deadly Shot";
 
         stats.runes.Add(Runes.Spear);
@@ -97,7 +97,7 @@ public class DeadlyShotStats : MonoBehaviour
             {
                 return false;
             }
-            if (targetMinion.GetPower() < threshold)
+            if (targetMinion.GetPower() > threshold)
             {
                 return false;
             }

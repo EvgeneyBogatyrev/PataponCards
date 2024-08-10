@@ -7,7 +7,7 @@ public static class DestroboStats
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-        const int destroboDamage = 1;
+        const int destroboDamage = 2;
         stats.power = 3;
         stats.description = "<b>On play</b>: Choose a unit. If it's not a Hatapon and has no <b>Devotion</b>, destroy it. Otherwise, deal " + destroboDamage.ToString() +  " damage to it.";
         stats.name = "Destrobo";

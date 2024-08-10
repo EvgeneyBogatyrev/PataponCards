@@ -8,7 +8,7 @@ public static class TakeThatShieldStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         const int takeThatShieldGain = 3;
-        stats.description = "Target non-Hatapon unit under your control gains +" + takeThatShieldGain.ToString() + " power. Heal your Hatapon by that unit's power.";
+        stats.description = "Target non-Hatapon unit under your control gains +" + takeThatShieldGain.ToString() + " power and <b>Lifelink</b>. Heal your Hatapon by that unit's power.";
         stats.name = "Take That Shield";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
@@ -66,6 +66,7 @@ public static class TakeThatShieldStats
                 if (minion != null && minion.GetCardType() == CardTypes.Hatapon)
                 {
                     minion.Heal(targetMinion.GetPower());
+                    minion.GetCardStats().hasShield = true;
                 }
             }
 

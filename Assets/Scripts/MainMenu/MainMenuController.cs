@@ -5,6 +5,13 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuController : MonoBehaviour
 {
+    public void Start()
+    {
+        if (DeckManager.collection == null)
+        {
+            DeckManager.collection = SaveSystem.LoadCollection();
+        }
+    }
     public void PlayButton()
     {
         if (SaveSystem.LoadRunes(0).Count > 0)

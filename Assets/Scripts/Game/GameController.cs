@@ -10,6 +10,7 @@ public class InfoSaver
     // Saves info between scenes
     public static int myHash;
     public static int opponentHash;
+    public static bool victory = false;
 }
 
 public class QueueData
@@ -884,7 +885,8 @@ public class GameController : MonoBehaviour
     {
         boardManager.ClearBoard();
         yield return new WaitForSeconds(3f);
-        SceneManager.LoadScene("MainMenu");
+        InfoSaver.victory = friendlyVictory;
+        SceneManager.LoadScene("OpenChest");
         yield return null;
     }
 
@@ -899,7 +901,8 @@ public class GameController : MonoBehaviour
         if (CheckGameEnd())
         {
             yield return new WaitForSeconds(3f);
-            SceneManager.LoadScene("MainMenu");
+            InfoSaver.victory = friendlyVictory;
+            SceneManager.LoadScene("OpenChest");
             yield return null;
         }
         else

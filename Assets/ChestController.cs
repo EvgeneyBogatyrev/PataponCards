@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using System.Linq;
 
 public enum ChestType
 {
@@ -16,6 +19,7 @@ public class ChestController : MonoBehaviour
     private CardManager reward = null;
     public GameObject hat;
     private GameObject card;
+    private bool UILocked = false;
 
     public bool mainChest = true;
 
@@ -49,8 +53,16 @@ public class ChestController : MonoBehaviour
             CardManager card = cardObject.GetComponent<CardManager>();
             card.SetCardState(CardManager.CardState.openedFromPack);
 
-            CardGenerator.CustomizeCard(card, FilterCardTypes.SelectCardFromList(FilterCardTypes.GetShitSet()));
+            if (InfoSaver.victory)
+            {
+                CardGenerator.CustomizeCard(card, FilterCardTypes.SelectCardFromList(FilterCardTypes.GetGoodSet()));
+            }
+            else
+            {
+                CardGenerator.CustomizeCard(card, FilterCardTypes.SelectCardFromList(FilterCardTypes.GetShitSet()));
+            }
             reward = card;
+            UILocked = true;
         }
 
         if (opened && hat != null)
@@ -74,6 +86,32 @@ public class ChestController : MonoBehaviour
             if (card != null)
             {
                 card.transform.position = new Vector3(transform.position.x + (designatedX - transform.position.x) * Time.deltaTime * 10f, transform.position.y, transform.position.z);
+            }
+        }
+
+        if (UILocked)
+        {
+            if (Input.GetMouseButtonUp(0) || Input.GetKeyUp(KeyCode.Space))
+            {
+                UILocked = false;
+            }
+        }
+
+        if (opened && reward != null && !UILocked)
+        {
+            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+            {
+                CardTypes rewardType = reward.GetCardType();
+                if (DeckManager.collection.ContainsKey(rewardType))
+                {
+                    DeckManager.collection[rewardType] += 1;
+                }
+                else
+                {
+                    DeckManager.collection.Add(reward.GetCardType(), 1);
+                }
+                SaveSystem.SaveCollection(DeckManager.collection);
+                SceneManager.LoadScene("MainMenu");
             }
         }
     }

@@ -26,4 +26,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/DeckSelect.unity
     guid: 45505ee4c9b074e41bc628b65d17e6ab
+  - enabled: 1
+    path: Assets/Scenes/OpenChest.unity
+    guid: d6eef06d6717c4682b15e9dde9d300d5
   m_configObjects: {}

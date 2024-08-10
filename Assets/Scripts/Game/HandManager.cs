@@ -24,6 +24,7 @@ public class HandManager : MonoBehaviour
     private Vector3 drawStartPosition;
 
     private bool CardIsDrawing = false;
+    public bool cardsAreDrawing = false;
 
     public static float cardDestroyTimer = 4.5f;
 
@@ -175,6 +176,10 @@ public class HandManager : MonoBehaviour
         {
             return;
         }
+        if (GameController.eventQueue.Count > 0)
+        {
+            return;
+        }
         cardMulligan -= 1;
         
         foreach (CardManager card in hand)
@@ -201,6 +206,10 @@ public class HandManager : MonoBehaviour
     public void KeepHandButton()
     {
         if (CardIsDrawing)
+        {
+            return;
+        }
+        if (GameController.eventQueue.Count > 0)
         {
             return;
         }

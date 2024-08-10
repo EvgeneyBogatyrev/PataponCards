@@ -136,6 +136,7 @@ public class CardInfoManager : MonoBehaviour
     {
         GameObject newCard = Instantiate(cardPrefab, this.gameObject.transform);
         mainCard = newCard.GetComponent<CardManager>();
+        mainCard.numberOfCardsObject.SetActive(false);
         CardGenerator.CustomizeCard(mainCard, cardType);
         mainCard.SetCardState(CardManager.CardState.hilightOver);
 

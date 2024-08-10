@@ -137,7 +137,7 @@ public static class PoisonArcherStats
         stats.spell = OnPlay;
         stats.onAttackEvent = onAttack;
         stats.numberOfTargets = 1;
-
+        stats.power = 3;
 
         stats.imagePath = "poison_bow";
 

@@ -21,7 +21,6 @@ public class DecksController : MonoBehaviour
     public float shiftX = 1f;
     public float shiftY = 1f;
 
-
     public IEnumerator Start()
     {
         float curX = startPositionX;
@@ -40,6 +39,7 @@ public class DecksController : MonoBehaviour
                 {
                     GameObject _deckSlot = Instantiate(deckSlotPrefab, new Vector3(curX, curY, 0f), Quaternion.identity);
                     _deckSlot.GetComponent<DeckSlotManager>().Customize(null, i, "New Deck");
+                    _deckSlot.GetComponent<DeckSlotManager>().deckCountObject.SetActive(false);
                 }
                 break;
             }

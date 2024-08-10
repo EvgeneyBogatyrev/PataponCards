@@ -5,7 +5,7 @@ using UnityEngine;
 
 public static class CatapultStats
 {
-    const int catapultDamage = 2;
+    const int catapultDamage = 3;
     const int firstCost = 1;
     const int secondCost = 0;
     public static CardManager.CardStats GetStats()

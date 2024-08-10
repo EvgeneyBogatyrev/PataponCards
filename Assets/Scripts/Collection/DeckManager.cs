@@ -13,6 +13,8 @@ public class DeckManager : MonoBehaviour
     public static List<Runes> runes;
     public static List<Runes> opponentRunes = new();
 
+    public static Dictionary<CardTypes, int> collection = null;
+
     public const int minDeckSize = 24;
     public const int maxCopy = 3;
 
@@ -205,7 +207,6 @@ public class DeckManager : MonoBehaviour
         deck.Add(card);
         SortDeck();
     }
-
 
     public static int GetPlayDeckSize()
     {

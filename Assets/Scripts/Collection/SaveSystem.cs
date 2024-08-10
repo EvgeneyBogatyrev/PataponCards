@@ -9,7 +9,62 @@ public static class SaveSystem
 
     private static string pathDeck = Application.persistentDataPath + "/deck.dec";
     private static string pathRunes = Application.persistentDataPath + "/runes.run";
+    private static string pathCollection = Application.persistentDataPath + "/collection.col";
     public static bool loading = false;
+
+    public static Dictionary<CardTypes, int> GetStarterCollection()
+    {
+        Dictionary<CardTypes, int> tmpCollection = new Dictionary<CardTypes, int>();
+        tmpCollection.Add(CardTypes.Yumipon, 2);
+        tmpCollection.Add(CardTypes.Rantan, 2);
+        tmpCollection.Add(CardTypes.Tatepon, 2);
+        tmpCollection.Add(CardTypes.Dekapon, 2);
+        tmpCollection.Add(CardTypes.Kibapon, 2);
+        tmpCollection.Add(CardTypes.Fang, 2);
+        tmpCollection.Add(CardTypes.YariponBushwacker, 2);
+        tmpCollection.Add(CardTypes.ZigotonTroops, 2);
+        tmpCollection.Add(CardTypes.Guardira, 2);
+        tmpCollection.Add(CardTypes.Motiti, 2);
+        tmpCollection.Add(CardTypes.Yaripon, 2);
+        tmpCollection.Add(CardTypes.Alldemonium, 2);
+        tmpCollection.Add(CardTypes.HuntingSpirit, 2);
+        tmpCollection.Add(CardTypes.FuckingIdiot, 2);
+        tmpCollection.Add(CardTypes.Myamsar, 2);
+        tmpCollection.Add(CardTypes.Kacheek, 2);
+
+        return tmpCollection;
+    }
+
+    public static List<CardTypes> GetDefaultDeck()
+    {
+        return new List<CardTypes>() {
+            CardTypes.Yumipon,
+            CardTypes.Yumipon,
+            CardTypes.Rantan,
+            CardTypes.Rantan,
+            CardTypes.Tatepon,
+            CardTypes.Tatepon,
+            CardTypes.Dekapon,
+            CardTypes.Dekapon,
+            CardTypes.Guardira,
+            CardTypes.Guardira,
+            CardTypes.Alldemonium,
+            CardTypes.Alldemonium,
+            CardTypes.Kibapon,
+            CardTypes.Kibapon,
+            CardTypes.HuntingSpirit,
+            CardTypes.HuntingSpirit,
+            CardTypes.Fang,
+            CardTypes.Fang,
+            CardTypes.Motiti,
+            CardTypes.Motiti,
+            CardTypes.YariponBushwacker,
+            CardTypes.YariponBushwacker,
+            CardTypes.ZigotonTroops,
+            CardTypes.ZigotonTroops
+        };
+    }
+
     public static void SaveDeck(List<CardTypes> deck, int index=0)
     {
         string newPathDeck = pathDeck;
@@ -35,16 +90,40 @@ public static class SaveSystem
                 List<CardTypes> deck = formatter.Deserialize(stream) as List<CardTypes>;
                 stream.Close();
 
+                Dictionary<CardTypes, int> deckStats = new Dictionary<CardTypes, int>();
+                foreach (CardTypes deckItem in deck)
+                {
+                    if (deckStats.ContainsKey(deckItem))
+                    {
+                        deckStats[deckItem] += 1;
+                    }
+                    else
+                    {
+                        deckStats[deckItem] = 1;
+                    }
+                }
+
+                foreach (CardTypes deckItem in deck)
+                {
+                    if (DeckManager.collection[deckItem] < deckStats[deckItem])
+                    {
+                        for (int i = 0; i < deckStats[deckItem]; ++i)
+                        {
+                            deck.Remove(deckItem);
+                        }
+                    }
+                }
+
                 return deck;
             }
             catch
             {
-                return new List<CardTypes>();
+                return GetDefaultDeck();
             }
         }
         else
         {
-            return new List<CardTypes>();
+            return GetDefaultDeck();
         }
     }
 
@@ -79,13 +158,47 @@ public static class SaveSystem
             catch
             {
                 loading = false;
-                return new List<Runes>();
+                return new List<Runes>() {Runes.Spear, Runes.Shield, Runes.Bow};
             }
         }
         else
         {
             loading = false;
-            return new List<Runes>();
+            return new List<Runes>() {Runes.Spear, Runes.Shield, Runes.Bow};
+        }
+    }
+
+    public static void SaveCollection(Dictionary<CardTypes, int> collection)
+    {
+        BinaryFormatter formatter = new BinaryFormatter();
+        FileStream stream = new FileStream(pathCollection, FileMode.Create);
+
+        formatter.Serialize(stream, collection);
+        stream.Close();
+    }
+
+    public static Dictionary<CardTypes, int> LoadCollection()
+    {
+        if (File.Exists(pathCollection))
+        {
+            try
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                FileStream stream = new FileStream(pathCollection, FileMode.Open);
+
+                Dictionary<CardTypes, int> collection = formatter.Deserialize(stream) as Dictionary<CardTypes, int>;
+                stream.Close();
+
+                return collection;
+            }
+            catch
+            {
+                return GetStarterCollection();
+            }
+        }
+        else
+        { 
+            return GetStarterCollection();
         }
     }
 }

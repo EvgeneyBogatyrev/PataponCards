@@ -53,7 +53,7 @@ public static class BabattaSwarmStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int damage = 3;
+        const int damage = 4;
         stats.description = "Deal " + damage.ToString() + " damage.";
         stats.name = "Babatto Swarm";
 
