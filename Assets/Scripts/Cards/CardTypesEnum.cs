@@ -622,6 +622,17 @@ public static class FilterCardTypes
 
     }
 
+    public static List<CardTypes> GetDefaultSet()
+    {
+        List<CardTypes> zeroDevotion = GetCardsWithTotalDevotion(0);
+        List<CardTypes> oneDevotion = GetCardsWithTotalDevotion(1);
+        List<CardTypes> twoDevotion = GetCardsWithTotalDevotion(2);
+        List<CardTypes> threeDevotion = GetCardsWithTotalDevotion(3);
+
+        return zeroDevotion.Concat(oneDevotion).Concat(twoDevotion).Concat(threeDevotion).ToList();
+
+    }
+
     public static CardTypes SelectCardFromList(List<CardTypes> cardList)
     {
         return cardList[UnityEngine.Random.Range(0, cardList.Count)];

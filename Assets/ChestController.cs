@@ -53,14 +53,8 @@ public class ChestController : MonoBehaviour
             CardManager card = cardObject.GetComponent<CardManager>();
             card.SetCardState(CardManager.CardState.openedFromPack);
 
-            if (InfoSaver.victory)
-            {
-                CardGenerator.CustomizeCard(card, FilterCardTypes.SelectCardFromList(FilterCardTypes.GetGoodSet()));
-            }
-            else
-            {
-                CardGenerator.CustomizeCard(card, FilterCardTypes.SelectCardFromList(FilterCardTypes.GetShitSet()));
-            }
+            CardGenerator.CustomizeCard(card, FilterCardTypes.SelectCardFromList(FilterCardTypes.GetDefaultSet()));
+            
             reward = card;
             UILocked = true;
         }
@@ -111,7 +105,16 @@ public class ChestController : MonoBehaviour
                     DeckManager.collection.Add(reward.GetCardType(), 1);
                 }
                 SaveSystem.SaveCollection(DeckManager.collection);
-                SceneManager.LoadScene("MainMenu");
+                
+                InfoSaver.chests -= 1;
+                if (InfoSaver.chests <= 0)
+                {
+                    SceneManager.LoadScene("MainMenu");
+                }
+                else
+                {
+                    SceneManager.LoadScene("OpenChest");
+                }
             }
         }
     }

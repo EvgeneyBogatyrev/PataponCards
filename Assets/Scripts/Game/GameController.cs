@@ -11,6 +11,7 @@ public class InfoSaver
     public static int myHash;
     public static int opponentHash;
     public static bool victory = false;
+    public static int chests = 0;
 }
 
 public class QueueData
@@ -886,6 +887,14 @@ public class GameController : MonoBehaviour
         boardManager.ClearBoard();
         yield return new WaitForSeconds(3f);
         InfoSaver.victory = friendlyVictory;
+        if (friendlyVictory)
+        {
+            InfoSaver.chests = 3;
+        }
+        else
+        {
+            InfoSaver.chests = 1;
+        }
         SceneManager.LoadScene("OpenChest");
         yield return null;
     }
@@ -902,6 +911,14 @@ public class GameController : MonoBehaviour
         {
             yield return new WaitForSeconds(3f);
             InfoSaver.victory = friendlyVictory;
+            if (friendlyVictory)
+            {
+                InfoSaver.chests = 3;
+            }
+            else
+            {
+                InfoSaver.chests = 1;
+            }
             SceneManager.LoadScene("OpenChest");
             yield return null;
         }
