@@ -76,6 +76,30 @@ public static class SaveSystem
         stream.Close();
     }
 
+    public static void DeleteDeck(int index, int maxdecks=6)
+    {
+        for (int i = index; i < maxdecks; ++i)
+        {
+            if (i == 5)
+            {
+                SaveDeck(new List<CardTypes>(), i);
+                SaveRunes(new List<Runes>(), i);
+                break;
+            }
+
+            List<Runes> runes = SaveSystem.LoadRunes(i + 1);
+            if (runes.Count == 0)
+            {
+                SaveDeck(new List<CardTypes>(), i);
+                SaveRunes(new List<Runes>(), i);
+                break;
+            }
+
+            SaveDeck(LoadDeck(i + 1), i);
+            SaveRunes(LoadRunes(i + 1), i);
+        }
+    }
+
     public static List<CardTypes> LoadDeck(int index=0)
     {
         string newPathDeck = pathDeck;
@@ -103,15 +127,18 @@ public static class SaveSystem
                     }
                 }
 
+
                 foreach (CardTypes deckItem in deck)
                 {
                     if (DeckManager.collection[deckItem] < deckStats[deckItem])
                     {
-                        for (int i = 0; i < deckStats[deckItem]; ++i)
-                        {
-                            deck.Remove(deckItem);
-                        }
+                        deck.Remove(deckItem);
                     }
+                }
+
+                if (deck.Count == 0)
+                {
+                    return GetDefaultDeck();
                 }
 
                 return deck;
@@ -153,6 +180,10 @@ public static class SaveSystem
                 List<Runes> runes = formatter.Deserialize(stream) as List<Runes>;
                 stream.Close();
                 loading = false;
+                if (LoadDeck(index).Count == 0)
+                {
+                    return new List<Runes>() {Runes.Spear, Runes.Shield, Runes.Bow};
+                }
                 return runes;
             }
             catch

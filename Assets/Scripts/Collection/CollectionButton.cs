@@ -11,14 +11,25 @@ public class CollectionButton : MonoBehaviour
 
     public int status = -1;
 
+    private float holdTime = 0f;
+    private float holdTimeMax = 1.5f;
+
+    private float startScaleX;
+    private float startScaleY;
+
     private void Start() 
     {
         collection = GameObject.Find("Collection").GetComponent<CollectionControl>();
+        startScaleX = transform.localScale.x;
+        startScaleY = transform.localScale.y;
     }
     private void Update() 
     {
-        if (mouseOver && Input.GetMouseButtonDown(0))
+        if (mouseOver && Input.GetMouseButton(0))
         {
+            holdTime += Time.deltaTime;
+            float scale = 1f - holdTime / holdTimeMax * 0.5f;
+            transform.localScale = new Vector3(startScaleX * scale, startScaleY * scale, 1f);
             switch (status)
             {
                 case 0:
@@ -32,10 +43,22 @@ public class CollectionButton : MonoBehaviour
                 case 2:
                     collection.BackButton();
                     break;
+
+                case 3:
+                    if (holdTime > holdTimeMax) 
+                    {
+                        collection.DeleteButton();
+                    }
+                    break;
                 
                 default:
                     break;
             }
+        }
+        else
+        {
+            holdTime = 0f;
+            transform.localScale = new Vector3(startScaleX, startScaleY, 1f);
         }
     }
 

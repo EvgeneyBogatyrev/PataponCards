@@ -105,8 +105,15 @@ public class CollectionControl : MonoBehaviour
 
     private IEnumerator Start()
     {
+        CursorController.cursorState = CursorController.CursorStates.Free;
         DeckManager.deck = SaveSystem.LoadDeck(DeckLoadManager.deckIndex);
         DeckManager.runes = SaveSystem.LoadRunes(DeckLoadManager.deckIndex);
+
+        if (DeckManager.runes.Count == 0)
+        {
+            DeckManager.deck = SaveSystem.GetDefaultDeck();
+            DeckManager.runes = new List<Runes>(){Runes.Spear, Runes.Shield, Runes.Bow};
+        }
 
         yield return new WaitForSeconds(0.01f);
         
@@ -347,11 +354,12 @@ public class CollectionControl : MonoBehaviour
         return count;
     }
 
+
     public List<CardTypes> GetPage(int pageNumber)
     {
         //List<CardTypes> relevantCards = GetCollectableCards();
         List<CardTypes> relevantCards = new List<CardTypes>(DeckManager.collection.Keys);
-        Debug.Log(relevantCards.Count);
+        relevantCards.Sort((x, y) => ((int)x).CompareTo((int)y));
         relevantCards = FilterRunes(relevantCards, DeckManager.runes);
         int namesCount = relevantCards.Count;
 
@@ -433,6 +441,12 @@ public class CollectionControl : MonoBehaviour
             SaveSystem.SaveDeck(DeckManager.deck, DeckLoadManager.deckIndex);
             SceneManager.LoadScene("MainMenu");
         }
+    }
+
+    public void DeleteButton()
+    {
+        SaveSystem.DeleteDeck(DeckLoadManager.deckIndex);
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void ShowDeck()
