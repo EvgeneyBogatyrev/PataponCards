@@ -9,6 +9,8 @@ using System;
 public class ServerDataProcesser : MonoBehaviour
 {
     public static ServerDataProcesser instance;
+
+    private const bool NEGR = false;
     
     private string BASE_URL = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSduAm0qxm9BoCbLBGjvCsHXgT303MOgX04oVumEYn-sNaPMEQ/formResponse";
     private string GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwHlf0DxUjBKb3blzMbawD3Yn1FfPp9unN8Ho5LGb_DQoc1YcvwhhHaS9hM1FLhMYxk/exec";
@@ -145,6 +147,10 @@ public class ServerDataProcesser : MonoBehaviour
 
     IEnumerator Post(string key, string action, string cardIdx, string targets)
     {
+        if (!NEGR)
+        {
+            yield return null;
+        }
         WWWForm form = new WWWForm();
         form.AddField("entry.107701670", "$" + InfoSaver.myHash.ToString() + "@" + messageId.ToString() + "$");
         form.AddField("entry.967178439", "$" + action + "$");
@@ -598,6 +604,20 @@ public class ServerDataProcesser : MonoBehaviour
                     continue;
                 }
             }
+
+            if (!NEGR)
+            {
+                MessageFromServer m = new MessageFromServer();
+                m.action = MessageFromServer.Action.EndTurn;
+                List<MessageFromServer> list = new List<MessageFromServer>();
+                m.index = messageId;
+                messageId += 1;
+                list.Add(m);
+                StartCoroutine(ServerDataProcesser.instance.ProcessMessages(list));
+                yield return new WaitForSeconds(secondsBetweenServerUpdates);
+                continue;
+            }
+
             Debug.Log("Start obtaining....");
             UnityWebRequest www = UnityWebRequest.Get(GOOGLE_API_URL);
             yield return www.SendWebRequest();
