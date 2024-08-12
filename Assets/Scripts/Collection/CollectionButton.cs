@@ -25,11 +25,25 @@ public class CollectionButton : MonoBehaviour
     }
     private void Update() 
     {
-        if (mouseOver && Input.GetMouseButton(0))
+        if (status == 3 && mouseOver && Input.GetMouseButton(0))
         {
             holdTime += Time.deltaTime;
             float scale = 1f - holdTime / holdTimeMax * 0.5f;
             transform.localScale = new Vector3(startScaleX * scale, startScaleY * scale, 1f);
+           
+            if (holdTime > holdTimeMax) 
+            {
+                collection.DeleteButton();
+            }
+        }
+        else
+        {
+            holdTime = 0f;
+            transform.localScale = new Vector3(startScaleX, startScaleY, 1f);
+        }
+
+        if (mouseOver && Input.GetMouseButtonDown(0))
+        {
             switch (status)
             {
                 case 0:
@@ -43,22 +57,10 @@ public class CollectionButton : MonoBehaviour
                 case 2:
                     collection.BackButton();
                     break;
-
-                case 3:
-                    if (holdTime > holdTimeMax) 
-                    {
-                        collection.DeleteButton();
-                    }
-                    break;
                 
                 default:
                     break;
             }
-        }
-        else
-        {
-            holdTime = 0f;
-            transform.localScale = new Vector3(startScaleX, startScaleY, 1f);
         }
     }
 

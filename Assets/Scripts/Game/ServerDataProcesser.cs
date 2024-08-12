@@ -607,12 +607,31 @@ public class ServerDataProcesser : MonoBehaviour
 
             if (!NEGR)
             {
+                if (GameController.playerTurn)
+                {
+                    yield return new WaitForSeconds(secondsBetweenServerUpdates);
+                    continue;
+                }
+                List<MessageFromServer> list = new List<MessageFromServer>();
+                Bot bot = new Bot();
+                List<Bot.BotMove> moves = bot.GetBotMoves(boardManager.friendlySlots, boardManager.enemySlots);
+                foreach (Bot.BotMove move in moves)
+                {
+                    MessageFromServer _m = new MessageFromServer();
+                    _m.action = MessageFromServer.Action.PlayCard;
+                    _m.index = messageId;
+                    messageId += 1;
+                    _m.targets = new List<int>() {move.cellNumber};
+                    _m.cardIndex = move.playCard;
+                    list.Add(_m);
+                }
+
                 MessageFromServer m = new MessageFromServer();
                 m.action = MessageFromServer.Action.EndTurn;
-                List<MessageFromServer> list = new List<MessageFromServer>();
                 m.index = messageId;
                 messageId += 1;
                 list.Add(m);
+
                 StartCoroutine(ServerDataProcesser.instance.ProcessMessages(list));
                 yield return new WaitForSeconds(secondsBetweenServerUpdates);
                 continue;

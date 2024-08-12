@@ -198,6 +198,7 @@ public class BoardManager : MonoBehaviour
         
         AudioController.PlaySound(card.GetCardStats().onPlaySound);
 
+        slot.SetConnectedMinion(newMinion.GetComponent<MinionManager>());
         if (fromHand && card.GetCardStats().hasAfterPlayEvent)
         {
             int index;
