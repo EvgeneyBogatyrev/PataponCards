@@ -232,6 +232,7 @@ public class CardManager : MonoBehaviour
         ShuffleIntoDeck,
         alreadyPlayed,
         openedFromPack,
+        GoToDeck
     }
 
     public GameObject powerObject;
@@ -244,6 +245,8 @@ public class CardManager : MonoBehaviour
     public GameObject heartObject;
     public GameObject numberOfCardsObject;
     public GameObject numberOfCardsText;
+    public GameObject cardPrefab;
+    public GameObject lockObject;
     public List<GameObject> runeObjects;
 
     public Material spearMaterial;
@@ -311,6 +314,7 @@ public class CardManager : MonoBehaviour
         {
             numberOfCardsText.GetComponent<TextMeshPro>().text = "1x";
         }
+        lockObject.SetActive(false);
     }
 
     private BoardManager.Slot SelectClosestSlot()
@@ -783,6 +787,19 @@ public class CardManager : MonoBehaviour
                 break;
 
             case CardState.display:
+                int limitInDeck = DeckManager.collection[cardType];
+                if (limitInDeck > 3)
+                {
+                    limitInDeck = 3;
+                }
+                if (DeckManager.GetCardQty(this.cardType) < limitInDeck)
+                {
+                    lockObject.SetActive(false);
+                }
+                else
+                {
+                    lockObject.SetActive(true);
+                }
                 Scene scene = SceneManager.GetActiveScene();
                 if (scene.name == "Collection")
                 {
@@ -851,6 +868,10 @@ public class CardManager : MonoBehaviour
                                 {
                                     DeckManager.AddCard(cardType);
                                     collection.ShowDeck();
+                                    CardManager collectionCard = GameObject.Instantiate(cardPrefab).GetComponent<CardManager>();
+                                    collectionCard.transform.position = this.transform.position;
+                                    collectionCard.transform.rotation = this.transform.rotation;
+                                    collectionCard.SetCardState(CardState.GoToDeck);
                                 }
                             }
                         }
@@ -902,6 +923,20 @@ public class CardManager : MonoBehaviour
 
                 transform.localScale = new Vector3(0.8f, 0.8f, 1f);
 
+                break;
+
+            case CardState.GoToDeck:
+                Vector3 goToPosition = new Vector3(6f, 2f, -10f);
+                transform.position = Vector3.Lerp(transform.position, goToPosition, 15f * Time.deltaTime);
+                Vector3 _targetLocalScale = new Vector3(0.2f, 0.2f, 0.2f);
+
+                transform.localScale = Vector3.Lerp(transform.localScale, _targetLocalScale, 3.5f * Time.deltaTime);
+
+                if ((transform.position - goToPosition).magnitude < 0.1f)
+                {
+                    Destroy(gameObject);
+                }
+            
                 break;
 
             case CardState.opponentPlayed:

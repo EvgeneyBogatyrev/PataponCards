@@ -54,7 +54,7 @@ public class EndTurnButton : MonoBehaviour
         if (concedeMode)
         {
             gameObject.GetComponent<TextMeshPro>().text = "CONCEDE";
-            float scale = 1f - concedeTimer / concedeTimerMax * 0.5f;
+            float scale = 1f + concedeTimer / concedeTimerMax * 0.5f;
             transform.localScale = new Vector3(startScaleX * scale, startScaleY * scale, 1f);
         }
         else

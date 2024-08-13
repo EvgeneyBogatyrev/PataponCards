@@ -7,7 +7,7 @@ public class CollectionButton : MonoBehaviour
 {
     private CollectionControl collection;
     
-    private bool mouseOver = false;
+    public bool mouseOver = false;
 
     public int status = -1;
 
@@ -28,7 +28,7 @@ public class CollectionButton : MonoBehaviour
         if (status == 3 && mouseOver && Input.GetMouseButton(0))
         {
             holdTime += Time.deltaTime;
-            float scale = 1f - holdTime / holdTimeMax * 0.5f;
+            float scale = 1f + holdTime / holdTimeMax * 0.5f;
             transform.localScale = new Vector3(startScaleX * scale, startScaleY * scale, 1f);
            
             if (holdTime > holdTimeMax) 

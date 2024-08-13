@@ -41,6 +41,9 @@ public class CollectionControl : MonoBehaviour
     private int start_idx = 0;
     private int deck_max = -1;
 
+    public GameObject leftArrow;
+    public GameObject rightArrow;
+
     public List<CardTypes> GetForbiddenCards()
     {
         // Cards that are not collectable and should not be displayed
@@ -301,6 +304,7 @@ public class CollectionControl : MonoBehaviour
         List<CardTypes> cardTypes = GetPage(0);
         currentPage = 0;
         ShowCards(cardTypes);
+        CheckButtons(currentPage);
     }
 
     private List<CardTypes> GetCollectableCards()
@@ -416,6 +420,29 @@ public class CollectionControl : MonoBehaviour
             }
             currentCards = new List<CardManager>();
             ShowCards(GetPage(currentPage));
+            CheckButtons(currentPage + 0);
+        }
+    }
+
+    private void CheckButtons(int pageNumber)
+    {
+        if (CheckPage(pageNumber - 1))
+        {
+            leftArrow.SetActive(true);
+        }
+        else
+        {
+            leftArrow.GetComponent<CollectionButton>().mouseOver = false;
+            leftArrow.SetActive(false);
+        }
+        if (CheckPage(pageNumber + 1))
+        {
+            rightArrow.SetActive(true);
+        }
+        else
+        {
+            rightArrow.GetComponent<CollectionButton>().mouseOver = false;
+            rightArrow.SetActive(false);
         }
     }
 
@@ -430,6 +457,7 @@ public class CollectionControl : MonoBehaviour
             }
             currentCards = new List<CardManager>();
             ShowCards(GetPage(currentPage));
+            CheckButtons(currentPage + 0);
         }
     }
 
