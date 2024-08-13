@@ -69,9 +69,16 @@ public class DeckManager : MonoBehaviour
         return count;
     }
 
-    public static List<int> GetEncodedDeck()
+    public static List<int> GetEncodedDeck(bool runes=false)
     {
         List<int> hashDeck = new();
+        if (runes)
+        {
+            for (int i = 0; i < 3; ++i)
+            {
+                hashDeck.Add(i); // Fix this!
+            }
+        }
         foreach (CardTypes type in playDeck)
         {
             hashDeck.Add((int) type);

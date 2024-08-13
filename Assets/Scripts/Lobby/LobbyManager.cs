@@ -24,6 +24,7 @@ public class LobbyManager : MonoBehaviour
     {
         int hash = Int32.Parse(inputField.GetComponent<TMP_InputField>().text);
         InfoSaver.opponentHash = hash;
+        InfoSaver.NEGR = true;
         SceneManager.LoadScene("Game");
     }
 
@@ -42,11 +43,13 @@ public class LobbyManager : MonoBehaviour
     public void PalyYourself()
     {
         InfoSaver.opponentHash = InfoSaver.myHash;
+        InfoSaver.NEGR = false;
         SceneManager.LoadScene("Game");
     }
 
     public void PlayOnline()
     {
+        InfoSaver.NEGR = true;
         SceneManager.LoadScene("FindGame");
     }
 

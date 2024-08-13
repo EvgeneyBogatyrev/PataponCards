@@ -9,8 +9,6 @@ using System;
 public class ServerDataProcesser : MonoBehaviour
 {
     public static ServerDataProcesser instance;
-
-    private const bool NEGR = false;
     
     private string BASE_URL = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSduAm0qxm9BoCbLBGjvCsHXgT303MOgX04oVumEYn-sNaPMEQ/formResponse";
     private string GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwHlf0DxUjBKb3blzMbawD3Yn1FfPp9unN8Ho5LGb_DQoc1YcvwhhHaS9hM1FLhMYxk/exec";
@@ -21,6 +19,7 @@ public class ServerDataProcesser : MonoBehaviour
     public List<MessageFromServer> doneActions = new List<MessageFromServer>();
     public List<MessageFromServer> messagesFromServer;
     public float secondsBetweenServerUpdates = 5f;
+    public Bot bot = null;
     
     private void Awake() 
     { 
@@ -38,6 +37,7 @@ public class ServerDataProcesser : MonoBehaviour
 
     private void Start() 
     {
+        bot = new Bot();
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
     }
 
@@ -147,7 +147,7 @@ public class ServerDataProcesser : MonoBehaviour
 
     IEnumerator Post(string key, string action, string cardIdx, string targets)
     {
-        if (!NEGR)
+        if (!InfoSaver.NEGR)
         {
             yield return null;
         }
@@ -335,6 +335,7 @@ public class ServerDataProcesser : MonoBehaviour
                         toMinion =boardManager.friendlySlots[to - 1].GetConnectedMinion();
                     }
                     fromMinion.Attack(toMinion);
+                    fromMinion.SetCanAttack(false);
                     break;
                 case MessageFromServer.Action.CastSpell:
                     if (newCard != null)
@@ -605,35 +606,57 @@ public class ServerDataProcesser : MonoBehaviour
                 }
             }
 
-            if (!NEGR)
+            if (!InfoSaver.NEGR)
             {
-                if (GameController.playerTurn)
+                Debug.Log(GameController.playerTurn);
+                if (GameController.playerTurn || gameController.actionIsHappening)
                 {
+                    Debug.Log("Skipping....");
                     yield return new WaitForSeconds(secondsBetweenServerUpdates);
                     continue;
                 }
                 List<MessageFromServer> list = new List<MessageFromServer>();
-                Bot bot = new Bot();
-                List<Bot.BotMove> moves = bot.GetBotMoves(boardManager.friendlySlots, boardManager.enemySlots);
-                foreach (Bot.BotMove move in moves)
+                Bot.BotMove move = bot.GetNextMove(boardManager.friendlySlots, boardManager.enemySlots);
+                if (move == null)
                 {
-                    MessageFromServer _m = new MessageFromServer();
+                    yield return new WaitForSeconds(secondsBetweenServerUpdates);
+                    continue;
+                }
+                
+                MessageFromServer _m = new MessageFromServer();
+                if (move.deck != null)
+                {
+                    _m.action = MessageFromServer.Action.SendDeck;
+                    _m.targets = move.deck;
+                }
+                else if (move.playCard != CardTypes.Hatapon)
+                {
                     _m.action = MessageFromServer.Action.PlayCard;
-                    _m.index = messageId;
-                    messageId += 1;
                     _m.targets = new List<int>() {move.cellNumber};
                     _m.cardIndex = move.playCard;
-                    list.Add(_m);
+                }
+                else if (move.endTurn)
+                {
+                    _m.action = MessageFromServer.Action.EndTurn;
+                }
+                else if (move.attackCell != -1)
+                {
+                    _m.action = MessageFromServer.Action.Attack;
+                    _m.targets = new List<int>() {move.cellNumber, move.attackCell};
+                }
+                else
+                {
+                    _m.action = MessageFromServer.Action.Move;
+                    _m.targets = new List<int>() {move.cellNumber, move.moveCell};
                 }
 
-                MessageFromServer m = new MessageFromServer();
-                m.action = MessageFromServer.Action.EndTurn;
-                m.index = messageId;
+                _m.index = messageId;
                 messageId += 1;
-                list.Add(m);
+
+                list.Add(_m);
 
                 StartCoroutine(ServerDataProcesser.instance.ProcessMessages(list));
-                yield return new WaitForSeconds(secondsBetweenServerUpdates);
+                yield return new WaitForSeconds(secondsBetweenServerUpdates / 3f);
                 continue;
             }
 

@@ -1098,10 +1098,21 @@ public class MinionManager : MonoBehaviour
     {
         return (!summoningSickness || additionalAttack);
     }
+
+    public bool GetCanAttackBot()
+    {
+        return !moved && (!summoningSickness || additionalAttack) && cardStats.canAttack && cardStats.canDealDamage;
+    }
+
+    public bool GetCanMoveBot()
+    {
+        return !attacked && !moved && !summoningSickness && !cardStats.limitedVision && !cardStats.pacifism;
+    }
     public void SetCanAttack(bool _can)
     {
         attacked = false;
         moved = false;
+        summoningSickness = !_can;
         SetAbilityToAttack(_can);
         if (_can)
         {

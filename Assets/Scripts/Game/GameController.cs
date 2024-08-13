@@ -12,6 +12,7 @@ public class InfoSaver
     public static int opponentHash;
     public static bool victory = false;
     public static int chests = 0;
+    public static bool NEGR = true;
 }
 
 public class QueueData
@@ -106,7 +107,6 @@ public class QueueData
                     handManager.AddCardToHand(cardType, ephemeral:ephemeral);
                 }
                 gameController.ProcessCardDraw(friendly:true);
-                Debug.Log("Here here");
                 break;
 
             case ActionType.AfterPlayEffect:
@@ -546,6 +546,14 @@ public class GameController : MonoBehaviour
             turnTimeLeft.SetActive(true);
             turnSecondsLeft = turnSecondsMax;
         }
+        else
+        {
+            if (ServerDataProcesser.instance.bot != null)
+            {
+                ServerDataProcesser.instance.bot.botActive = true;  
+                ServerDataProcesser.instance.bot.cardPlayed = false;  
+            }
+        }
         StartCoroutine(IenumStartTurn(friendly, hataponJustDied));
     }
 
@@ -732,7 +740,7 @@ public class GameController : MonoBehaviour
 
     public void EndTurn(bool friendly)
     {
-        playerTurn = false;
+        GameController.playerTurn = !friendly;
         if (friendly)
         {
             endTurnButtonObject.SetActive(false);
