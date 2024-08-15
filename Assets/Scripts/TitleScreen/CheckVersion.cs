@@ -9,7 +9,7 @@ using System.Collections;
 
 public class CheckVersionModule : MonoBehaviour
 {
-    public static string version = "0.1.7";
+    public static string version = "0.1.8";
     public static bool isAndroid = false;
     private static string versionURL = "https://drive.google.com/uc?export=download&id=1ZQlz7Hmznk7C3k86EeZOC-ze4vnhegXc";
     private static string updateLinkAndroid = "https://drive.google.com/file/d/1kLOOJkdYZliRuFSI3tz49I33RoRP044t/view?usp=sharing";

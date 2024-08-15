@@ -795,7 +795,9 @@ public class MinionManager : MonoBehaviour
         connectedSlot = slotToMove;
 
         this.SetAbilityToAttack(false);
+        this.SetCanAttack(false);
         other.SetAbilityToAttack(false);
+        other.SetCanAttack(false);
     }
 
     public void Attack(MinionManager enemy, bool record = false)

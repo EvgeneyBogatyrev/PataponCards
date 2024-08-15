@@ -9,15 +9,16 @@ public static class TonKamponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 9;
-        stats.description = "<b>Pacifism. Abilities</b>:\n-3: Add <i>Oharan</i> to your hand.\n-3: Add <i>Alldemonium</i> to your hand.";
+        stats.description = "<b>Pacifism. Abilities</b>:\n-4: Add a random weapon to your hand.\n-5: Double the power of another weakest non-Hatapon unit you controll.";
         stats.name = "Ton Kampon";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
 
-        stats.descriptionSize = 4;
+        stats.descriptionSize = 3;
 
         stats.relevantCards.Add(CardTypes.Alldemonium);
         stats.relevantCards.Add(CardTypes.CronoRiggers);
+        stats.relevantCards.Add(CardTypes.TakeThatShield);
 
 
         stats.isStatic = true;
@@ -37,15 +38,18 @@ public static class TonKampon_option2Stats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int TonKamponAlldemoniumHealthCost = 3;
+        const int TonKamponAlldemoniumHealthCost = 5;
                 
-        stats.description = "-3: Add <i>Alldemonium</i> to your hand.";
-        stats.name = "Demon Weapon";
+        stats.description = "-5: Double the power of another weakest non-Hatapon unit you controll.";
+        stats.name = "Craft an Alloy";
         stats.nameSize = 4;
 
         stats.isSpell = true;
         static IEnumerator TonKampon_option2Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.actionIsHappening = true;
+
             MinionManager host;
             if (targets[0] < 0)
             {
@@ -57,23 +61,30 @@ public static class TonKampon_option2Stats
             }
 
             host.LoseLife(TonKamponAlldemoniumHealthCost);
-            if (!enemySlots[0].GetFriendly())
+            
+
+            MinionManager weakMinion = null;
+            foreach (BoardManager.Slot slot in friendlySlots)
             {
-                HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.AddCardToHand(CardTypes.Alldemonium);
+                MinionManager minion = slot.GetConnectedMinion();
+                if (minion != null && minion != host)
+                {
+                    if ((weakMinion == null || minion.GetPower() < weakMinion.GetPower()) && minion.GetCardType() != CardTypes.Hatapon)
+                    {
+                        weakMinion = minion;
+                    }
+                }
             }
-            else
-            {
-                HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.DrawCardOpponent(fromDeck:false);
-            }
+            weakMinion.Heal(weakMinion.GetPower());
+
+            gameController.actionIsHappening = false;
             yield return null;
         }
         stats.spell = TonKampon_option2Realization;
         stats.numberOfTargets = 0;
         stats.damageToHost = TonKamponAlldemoniumHealthCost;
 
-        stats.imagePath = "alldemonium";
+        stats.imagePath = "ton_kampon";
 
         return stats;
     }
@@ -84,14 +95,17 @@ public static class TonKampon_option1Stats
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-        const int TonKamponCronoRiggersHealthCost = 3;
+        const int TonKamponCronoRiggersHealthCost = 4;
                 
-        stats.description = "-3: Add <i>Oharan</i> to your hand.";
-        stats.name = "Divine Weapon";
+        stats.description = "-4: Add random weapon to your hand.";
+        stats.name = "Craft a Weapon";
+        stats.nameSize = 4;
 
         stats.isSpell = true;
         static IEnumerator TonKampon_option1Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            List<CardTypes> drop = new List<CardTypes>(){CardTypes.CronoRiggers, CardTypes.Alldemonium, CardTypes.TakeThatShield};
+
             MinionManager host;
             if (targets[0] < 0)
             {
@@ -106,7 +120,7 @@ public static class TonKampon_option1Stats
             if (!enemySlots[0].GetFriendly())
             {
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.AddCardToHand(CardTypes.CronoRiggers);
+                handManager.AddCardToHand(drop[UnityEngine.Random.Range(0, drop.Count)]);
             }
             else
             {
@@ -119,7 +133,7 @@ public static class TonKampon_option1Stats
         stats.spell = TonKampon_option1Realization;
         stats.numberOfTargets = 0;
         stats.damageToHost = TonKamponCronoRiggersHealthCost;
-        stats.imagePath = "oharan";
+        stats.imagePath = "ton_kampon";
 
         return stats;
     }
@@ -157,7 +171,7 @@ public static class CronoRiggersStats
                 if (minion != null)
                 {
                     minion.Heal(cronoRiggersDamageReduction);
-                    if ((attackMinion == null || minion.GetPower() >= attackMinion.GetPower()) && minion.GetCardType() != CardTypes.Hatapon && minion.GetCardStats().canDealDamage)
+                    if ((attackMinion == null || minion.GetPower() > attackMinion.GetPower()) && minion.GetCardType() != CardTypes.Hatapon && minion.GetCardStats().canDealDamage)
                     {
                         attackMinion = minion;
                     }

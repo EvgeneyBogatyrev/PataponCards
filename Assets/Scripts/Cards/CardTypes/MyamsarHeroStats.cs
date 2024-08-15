@@ -66,6 +66,7 @@ public static class MyamsarHeroStats
 
                     weakestEnemy.circleMyamsarObject.SetActive(true);
                     weakestEnemy.DestroyMinion();
+                    weakestEnemy.SetPower(0);
                 }
 
                

@@ -8,8 +8,8 @@ public static class KacheekStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 3;
-        stats.description = "<b>Pacifism. Abilities</b>:\n-1: Add <i>Fang</i> to your hand.\n-2: Give your units +1 power.";
+        stats.power = 5;
+        stats.description = "<b>Pacifism. Abilities</b>:\n-2: Add <i>Fang</i> to your hand.\n-3: Give your units +1 power.";
         stats.name = "Kacheek";
 
         stats.isStatic = true;
@@ -31,9 +31,9 @@ public static class GiveFangStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int giveFangHealthCost = 1;
+        const int giveFangHealthCost = 2;
 
-        stats.description = "-1: Add <i>Fang</i> to your hand.";
+        stats.description = "-2: Add <i>Fang</i> to your hand.";
         stats.name = "Bone Weapon";
 
         stats.isSpell = true;
@@ -80,9 +80,9 @@ public static class NutritionStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         const int nutritionHeal = 1;
-        const int nutritionHealthCost = 2;
+        const int nutritionHealthCost = 3;
 
-        stats.description = "-2: Give your units +" + nutritionHeal.ToString() + " power.";
+        stats.description = "-3: Give your units +" + nutritionHeal.ToString() + " power.";
         stats.name = "Nutrition";
 
         stats.isSpell = true;

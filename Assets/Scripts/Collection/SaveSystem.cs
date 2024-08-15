@@ -220,6 +220,9 @@ public static class SaveSystem
                 Dictionary<CardTypes, int> collection = formatter.Deserialize(stream) as Dictionary<CardTypes, int>;
                 stream.Close();
 
+                collection[CardTypes.TonKampon] = 3;
+                collection[CardTypes.DeadlyDispute] = 3;
+
                 return collection;
             }
             catch

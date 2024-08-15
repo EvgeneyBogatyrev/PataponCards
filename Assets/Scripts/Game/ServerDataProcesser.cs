@@ -642,11 +642,16 @@ public class ServerDataProcesser : MonoBehaviour
                 else if (move.attackCell != -1)
                 {
                     _m.action = MessageFromServer.Action.Attack;
-                    _m.targets = new List<int>() {move.cellNumber, move.attackCell};
+                    _m.targets = new List<int>() {move.cellNumber, -move.attackCell};
+                }
+                else if (!move.exchange)
+                {
+                    _m.action = MessageFromServer.Action.Move;
+                    _m.targets = new List<int>() {move.cellNumber, move.moveCell};
                 }
                 else
                 {
-                    _m.action = MessageFromServer.Action.Move;
+                    _m.action = MessageFromServer.Action.Exchange;
                     _m.targets = new List<int>() {move.cellNumber, move.moveCell};
                 }
 
