@@ -41,7 +41,7 @@ public class DeadlyShotStats : MonoBehaviour
                     
                 // Main projectile
                 SpearManager spear = animationManager.CreateObject(AnimationManager.Animations.Spear, friendlySlots[3].GetPosition()).GetComponent<SpearManager>();
-                spear.gameObject.transform.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/pyokorider_hero");
+                spear.gameObject.transform.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/cannonball_aligned_medium");
                 spear.SetSlotToGo(targetMinion.GetSlot());
                 spear.speed = 20f;
                 spear.rotate = false;
@@ -52,7 +52,7 @@ public class DeadlyShotStats : MonoBehaviour
                 {
                     yield return new WaitForSeconds(0.03f);
                     SpearManager ghost = animationManager.CreateObject(AnimationManager.Animations.Spear, friendlySlots[3].GetPosition()).GetComponent<SpearManager>();
-                    ghost.gameObject.transform.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/pyokorider_hero");  
+                    ghost.gameObject.transform.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/cannonball_aligned_medium");  
                     var tmp = ghost.gameObject.transform.GetComponent<SpriteRenderer>().color;
                     tmp.a = 0.7f - i * 0.2f;
                     ghost.gameObject.transform.GetComponent<SpriteRenderer>().color = tmp;

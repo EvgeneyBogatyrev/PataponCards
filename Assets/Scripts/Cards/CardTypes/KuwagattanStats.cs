@@ -19,6 +19,8 @@ public class KuwagattanStats : MonoBehaviour
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             gameController.actionIsHappening = true;
+            ShakeScreen _shakeScreen = GameObject.Find("Main Camera").GetComponent<ShakeScreen>();
+
             int thisIndex = targets[0];
             BoardManager.Slot thisSlot;
             bool enemy;
@@ -38,16 +40,18 @@ public class KuwagattanStats : MonoBehaviour
             MinionManager minion = thisSlot.GetConnectedMinion();
             if (minion != null)
             { 
-                float angle = 0f;
+                /*float angle = 0f;
                 while (angle <= 360f)
                 {
                     minion.transform.eulerAngles = new Vector3(0f, 0f, angle);
                     angle += 10f;
                     yield return new WaitForSeconds(0.02f);
-                }
+                }*/
                 
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
                 handManager.DiscardHand(!enemy);
+                _shakeScreen.shakeTheScreen(10);
+                yield return new WaitForSeconds(1f);
                 minion.onAttackActionProgress = false;
             }
             gameController.actionIsHappening = false;

@@ -19,10 +19,11 @@ public static class PanThePakaponStats
         stats.giveCyclingToCardsInHand = true;
 
         stats.additionalKeywords.Add("Cycling");
+         stats.artistName = "Pavel Shpagin (Poki)";
 
 
 
-        stats.imagePath = "pan_the_pakapon";
+        stats.imagePath = "pan_pakapon";
         return stats;
     }
 }

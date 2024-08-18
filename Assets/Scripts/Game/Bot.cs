@@ -19,37 +19,110 @@ public class Bot
     }
 
     public bool botActive = false;
+    public int botLevel = 2;
 
     private bool deckSend = false;
     public bool cardPlayed = false;
 
-    public List<CardTypes> botDeck = new List<CardTypes>()
+    public List<CardTypes> botDeck = null;
+
+    private void InitDeck()
     {
-        CardTypes.Tatepon,
-        CardTypes.Tatepon,
-        CardTypes.Tatepon,
-        CardTypes.MyamsarHero,
-        CardTypes.MyamsarHero,
-        CardTypes.MyamsarHero,
-        CardTypes.Dekapon,
-        CardTypes.Dekapon,
-        CardTypes.Dekapon,
-        CardTypes.ZigotonTroops,
-        CardTypes.ZigotonTroops,
-        CardTypes.ZigotonTroops,
-        CardTypes.Yaripon,
-        CardTypes.Yaripon,
-        CardTypes.Yaripon,
-        CardTypes.Yumipon,
-        CardTypes.Yumipon,
-        CardTypes.Yumipon,
-        CardTypes.GongTheHawkeye,
-        CardTypes.GongTheHawkeye,
-        CardTypes.GongTheHawkeye,
-        CardTypes.FuckingIdiot,
-        CardTypes.FuckingIdiot,
-        CardTypes.FuckingIdiot,
-    };
+        if (botDeck != null)
+        {
+            return;
+        }
+        if (botLevel == 2)
+        {
+            botDeck = new List<CardTypes>()
+            {
+                CardTypes.Tatepon,
+                CardTypes.Tatepon,
+                CardTypes.Tatepon,
+                CardTypes.MyamsarHero,
+                CardTypes.MyamsarHero,
+                CardTypes.MyamsarHero,
+                CardTypes.Dekapon,
+                CardTypes.Dekapon,
+                CardTypes.Kuwagattan,
+                CardTypes.Kuwagattan,
+                CardTypes.Moforumo,
+                CardTypes.Piekron,
+                CardTypes.Piekron,
+                CardTypes.Piekron,
+                CardTypes.Yaripon,
+                CardTypes.Yaripon,
+                CardTypes.Yumipon,
+                CardTypes.Yumipon,
+                CardTypes.Yumipon,
+                CardTypes.GongTheHawkeye,
+                CardTypes.GongTheHawkeye,
+                CardTypes.GongTheHawkeye,
+                CardTypes.FuckingIdiot,
+                CardTypes.FuckingIdiot,
+            };
+        }
+        else if (botLevel == 1)
+        {
+            botDeck = new List<CardTypes>()
+            {
+                CardTypes.Tatepon,
+                CardTypes.Tatepon,
+                CardTypes.Tatepon,
+                CardTypes.TargetDummy,
+                CardTypes.TargetDummy,
+                CardTypes.TargetDummy,
+                CardTypes.Guardira,
+                CardTypes.Guardira,
+                CardTypes.Dekapon,
+                CardTypes.Moforumo,
+                CardTypes.PanThePakapon,
+                CardTypes.ZigotonTroops,
+                CardTypes.ZigotonTroops,
+                CardTypes.Yaripon,
+                CardTypes.Yaripon,
+                CardTypes.Yaripon,
+                CardTypes.Yumipon,
+                CardTypes.Yumipon,
+                CardTypes.Yumipon,
+                CardTypes.FuckingIdiot,
+                CardTypes.FuckingIdiot,
+                CardTypes.MyamsarHero,
+                CardTypes.MyamsarHero,
+                CardTypes.GongTheHawkeye,
+            };
+        }
+        else if (botLevel <= 0)
+        {
+            botDeck = new List<CardTypes>()
+            {
+                CardTypes.Tatepon,
+                CardTypes.Tatepon,
+                CardTypes.Tatepon,
+                CardTypes.TargetDummy,
+                CardTypes.TargetDummy,
+                CardTypes.TargetDummy,
+                CardTypes.Guardira,
+                CardTypes.Guardira,
+                CardTypes.Guardira,
+                CardTypes.TraitorBoulder,
+                CardTypes.TraitorBoulder,
+                CardTypes.PanThePakapon,
+                CardTypes.PanThePakapon,
+                CardTypes.PanThePakapon,
+                CardTypes.Yaripon,
+                CardTypes.Yaripon,
+                CardTypes.Yaripon,
+                CardTypes.Yumipon,
+                CardTypes.Yumipon,
+                CardTypes.FuckingIdiot,
+                CardTypes.FuckingIdiot,
+                CardTypes.FuckingIdiot,
+                CardTypes.MyamsarHero,
+                CardTypes.MyamsarHero,
+            };
+        }
+    }
 
     public List<CardTypes> botHand = new List<CardTypes>();
 
@@ -82,7 +155,7 @@ public class Bot
         BoardManager.Slot selectedSlot = null;
         BoardManager.Slot targetSlot = null;
 
-        if (cardToPlay == CardTypes.Yumipon || cardToPlay == CardTypes.FuckingIdiot)
+        if (botLevel >= 2 && (cardToPlay == CardTypes.Yumipon || cardToPlay == CardTypes.FuckingIdiot))
         {
             foreach (BoardManager.Slot _slot in selectedSlots)
             {
@@ -95,7 +168,7 @@ public class Bot
             return selectedSlot;
         }
 
-        if (CheckLifelink(playerSlots))
+        if (CheckLifelink(playerSlots) && botLevel >= 1)
         {
             foreach(BoardManager.Slot _slot in playerSlots)
             {
@@ -107,13 +180,14 @@ public class Bot
         }
         else
         {
-            foreach(BoardManager.Slot _slot in playerSlots)
+            /*foreach(BoardManager.Slot _slot in playerSlots)
             {
                 if (!_slot.GetFree() && _slot.GetConnectedMinion().GetCardStats().endTurnEvent != null)
                 {
                     targetSlot = _slot;
                 }
             }
+            */
             if (targetSlot == null)
             {
                 targetSlot = FindSlotWithCard(playerSlots, CardTypes.Hatapon);
@@ -139,15 +213,20 @@ public class Bot
     {
         float score = 0f;
 
-        if (enemyMinion.GetCardStats().hasShield)
+        if (enemyMinion.GetCardStats().hasShield && botLevel >= 1)
         {
-            score += 0.25f;
+            score += 0.15f;
         }
-        if (enemyMinion.GetCardStats().endTurnEvent != null)
+        if (enemyMinion.GetCardStats().endTurnEvent != null && botLevel >= 2)
         {
             score += 0.35f;
         }
-        if (enemyMinion.GetCardStats().hasOnDeath)
+        if (enemyMinion.GetCardStats().hasOnDeath && botLevel >= 2)
+        {
+            score -= 10f;
+        }
+
+        if (myMinion.GetCardType() == CardTypes.Yaripon || myMinion.GetCardType() == CardTypes.Yumipon)
         {
             score -= 10f;
         }
@@ -160,7 +239,7 @@ public class Bot
                 {
                     return 100f;
                 }
-                return score - (enemyMinion.GetPower() - myMinion.GetPower() + 1) / 20f;
+                return score + myMinion.GetPower() / (enemyMinion.GetPower() - myMinion.GetPower());
             }
             else
             {
@@ -172,7 +251,7 @@ public class Bot
             return score - (enemyMinion.GetPower() - myMinion.GetPower() + 1) / 20f;
         }
         
-        return score - 2 * (enemyMinion.GetPower() - myMinion.GetPower() + 1) / 20f;
+        return score - (enemyMinion.GetPower() - myMinion.GetPower()) / 5f;
     }
 
     public float EvaluateMoveUnit(BoardManager.Slot slotFrom, BoardManager.Slot slotTo, List<BoardManager.Slot> playerSlots)
@@ -180,19 +259,13 @@ public class Bot
         if (slotFrom.GetConnectedMinion().GetCardType() == CardTypes.Hatapon)
         {
             float value = 0f;
-            Debug.Log($"Slot index: {slotTo.GetIndex()}");
             for (int i = slotTo.GetIndex() - 1; i <= slotTo.GetIndex() + 1; ++i)
             {
-                Debug.Log($"checking index: {i}");
                 if (i >= 0 && i <= 6 && !playerSlots[i].GetFree())
                 {
-                    if (playerSlots[i].GetConnectedMinion().GetCardStats().canDealDamage)
+                    if (playerSlots[i].GetConnectedMinion().GetCardStats().canDealDamage && botLevel >= 1)
                     {
                         value -= playerSlots[i].GetConnectedMinion().GetPower();
-                    }
-                    else
-                    {
-                        //value += 0.05f * playerSlots[i].GetConnectedMinion().GetPower();
                     }
                 }
             }
@@ -278,6 +351,8 @@ public class Bot
             return null;
         }
 
+        InitDeck();
+
         HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
         for (int i = 0; i < handManager.GetNumberOfOpponentsCards() - botHand.Count; ++i)
         {
@@ -300,6 +375,16 @@ public class Bot
             BotMove deckMove = new BotMove();
             deckMove.deck = DeckManager.GetEncodedDeck(runes:true);
             return deckMove;
+        }
+
+        Debug.Log($"Bot level={botLevel}");
+        if (botLevel < 0)
+        {
+            // End Turn
+            BotMove endTurnMove = new BotMove();
+            endTurnMove.endTurn = true;
+            botActive = false;
+            return endTurnMove;
         }
 
         //Attack
@@ -455,94 +540,4 @@ public class Bot
         botDeck.Remove(returnValue);
         return returnValue;
     }
-
-    public List<BotMove> GetBotMoves(List<BoardManager.Slot> playerSlots, List<BoardManager.Slot> botSlots)
-    {
-        if (!botActive)
-        {
-            return null;
-        }
-
-        HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-        List<BotMove> moves = new List<BotMove>();
-
-        for (int i = 0; i < handManager.GetNumberOfOpponentsCards() - botHand.Count; ++i)
-        {
-            CardTypes newCard = DrawCard();
-            if (newCard == CardTypes.Hatapon)
-            {
-                break;
-            }
-            botHand.Add(newCard);
-        }
-
-        // Send Deck
-        if (!deckSend)
-        {
-            deckSend = true;
-            BotMove deckMove = new BotMove();
-            deckMove.deck = DeckManager.GetEncodedDeck(runes:true);
-            moves.Add(deckMove);
-        }
-
-        // Play card
-        if (handManager.GetNumberOfOpponentsCards() > 0 && botHand.Count > 0)
-        {
-            List<BoardManager.Slot> freeSlots = new List<BoardManager.Slot>();
-            foreach (BoardManager.Slot slot in botSlots)
-            {
-                if (slot.GetFree())
-                {
-                    freeSlots.Add(slot);
-                }
-            }
-
-            if (freeSlots.Count > 0)
-            {
-                BoardManager.Slot slotToPlay = freeSlots[UnityEngine.Random.Range(0, freeSlots.Count)];
-                CardTypes plyedCard = botHand[UnityEngine.Random.Range(0, botHand.Count)];
-                botHand.Remove(plyedCard);
-                BotMove move = new BotMove();
-                move.playCard = plyedCard;
-                move.cellNumber = slotToPlay.GetIndex() + 1;
-                moves.Add(move);
-            }
-        }
-
-        //Attack
-        foreach (BoardManager.Slot slot in botSlots)
-        {
-            if (!slot.GetFree())
-            {
-                int slotIdx = slot.GetIndex();
-                MinionManager minion = slot.GetConnectedMinion();
-                if (minion.GetCanAttackBot())
-                {
-                    List<int> attackPositions = new List<int>();
-                    if (!playerSlots[slotIdx].GetFree() && !playerSlots[slotIdx].GetConnectedMinion().GetCardStats().flying)
-                    {
-                        attackPositions.Add(-(slotIdx + 1));
-                    }
-                    if (slotIdx > 0 && !playerSlots[slotIdx - 1].GetFree() && !playerSlots[slotIdx].GetConnectedMinion().GetCardStats().flying)
-                    {
-                        attackPositions.Add(-slotIdx);
-                    }
-                    if (slotIdx < 6 && !playerSlots[slotIdx + 1].GetFree() && !playerSlots[slotIdx].GetConnectedMinion().GetCardStats().flying)
-                    {
-                        attackPositions.Add(-(slotIdx + 2));
-                    }
-                    if (attackPositions.Count > 0)
-                    {
-                        int attackTarget = attackPositions[UnityEngine.Random.Range(0, attackPositions.Count - 1)];
-                        BotMove __move = new BotMove();
-                        __move.attackCell = attackTarget;
-                        __move.cellNumber = slotIdx + 1;
-                        moves.Add(__move);
-                    }
-                }
-            }
-        }
-        botActive = false;
-        return moves;
-    } 
 }

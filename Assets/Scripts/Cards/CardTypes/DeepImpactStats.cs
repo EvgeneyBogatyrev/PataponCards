@@ -9,7 +9,8 @@ public static class DeepImpactStats
 
         const int horsePower = 3;
         stats.description = "Transform target non-Hatapon unit into the Horserider with " + horsePower.ToString() + " and <b>Haste</b>.\n Draw a card.";
-        stats.name = "Deep Impact";
+        stats.name = "Bullgam the Bully";
+        stats.nameSize = 4;
     
         stats.runes.Add(Runes.Spear);
         //stats.runes.Add(Runes.Spear);
@@ -98,7 +99,8 @@ public static class DeepImpactStats
         stats.spell = realization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "deepImpact";
+        stats.imagePath = "Bullgam_the_Bully";
+        stats.artistName = "Pavel Shpagin (Poki)";
         return stats;
     }
 }
@@ -117,7 +119,8 @@ public static class HorseriderStats
 
         stats.hasHaste = true;
 
-        stats.imagePath = "horserider";
+        stats.imagePath = "kiba_art";
+        stats.artistName = "Pavel Shpagin (Poki)";
         return stats;
     }
 }

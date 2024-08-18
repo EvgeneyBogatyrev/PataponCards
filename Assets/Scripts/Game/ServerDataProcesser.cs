@@ -38,6 +38,7 @@ public class ServerDataProcesser : MonoBehaviour
     private void Start() 
     {
         bot = new Bot();
+        bot.botLevel = InfoSaver.botLevel;
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
     }
 
@@ -147,7 +148,7 @@ public class ServerDataProcesser : MonoBehaviour
 
     IEnumerator Post(string key, string action, string cardIdx, string targets)
     {
-        if (!InfoSaver.NEGR)
+        if (!InfoSaver.onlineBattle)
         {
             yield return null;
         }
@@ -606,12 +607,10 @@ public class ServerDataProcesser : MonoBehaviour
                 }
             }
 
-            if (!InfoSaver.NEGR)
+            if (!InfoSaver.onlineBattle)
             {
-                Debug.Log(GameController.playerTurn);
                 if (GameController.playerTurn || gameController.actionIsHappening)
                 {
-                    Debug.Log("Skipping....");
                     yield return new WaitForSeconds(secondsBetweenServerUpdates);
                     continue;
                 }

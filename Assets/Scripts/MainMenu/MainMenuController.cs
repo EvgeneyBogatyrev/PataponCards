@@ -10,6 +10,11 @@ public class MainMenuController : MonoBehaviour
         if (DeckManager.collection == null)
         {
             DeckManager.collection = SaveSystem.LoadCollection();
+            List<bool> botStats = SaveSystem.LoadBotStats();
+            for (int i = 0; i < botStats.Count; ++i)
+            {
+                InfoSaver.botDefeated[i] = botStats[i];
+            }
         }
     }
     public void PlayButton()

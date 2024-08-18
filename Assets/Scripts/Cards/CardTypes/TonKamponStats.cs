@@ -26,6 +26,8 @@ public static class TonKamponStats
         stats.connectedCards.Add(CardTypes.TonKampon_option1);
         stats.connectedCards.Add(CardTypes.TonKampon_option2);
 
+        stats.pacifism = true;
+
         stats.imagePath = "ton_kampon";
 
         return stats;
@@ -290,6 +292,7 @@ public static class AlldemoniumStats
         stats.numberOfTargets = 1;
 
         stats.imagePath = "alldemonium";
+        stats.artistName = "Pavel Shpagin (Poki)";
 
         return stats;
     }

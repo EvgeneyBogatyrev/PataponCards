@@ -16,7 +16,8 @@ public static class KibaponStats
         stats.runes.Add(Runes.Spear);
         //stats.runes.Add(Runes.Spear);
 
-        stats.imagePath = "kibapon";
+        stats.imagePath = "kiba_art";
+         stats.artistName = "Pavel Shpagin (Poki)";
 
         return stats;
     }

@@ -17,6 +17,8 @@ public static class MochichiStats
         stats.connectedCards.Add(CardTypes.Motiti_option1);
         stats.connectedCards.Add(CardTypes.Motiti_option2);
 
+        stats.pacifism = true;
+
         stats.relevantCards.Add(CardTypes.MotitiAngry);
 
         stats.imagePath = "motiti";

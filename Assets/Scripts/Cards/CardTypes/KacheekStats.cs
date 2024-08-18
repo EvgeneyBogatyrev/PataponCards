@@ -19,6 +19,8 @@ public static class KacheekStats
 
         stats.relevantCards.Add(CardTypes.Fang);
 
+        stats.pacifism = true;
+
         stats.imagePath = "kacheek 1";
         stats.onPlaySound = "kacheek";
         return stats;

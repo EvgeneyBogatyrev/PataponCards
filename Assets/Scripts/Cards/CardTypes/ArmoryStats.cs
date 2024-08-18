@@ -19,7 +19,7 @@ public static class ArmoryStats
 
 
         stats.isStatic = true;
-        //stats.pacifism = true;
+        stats.pacifism = true;
         stats.connectedCards = new List<CardTypes>
         {
             CardTypes.Armory_option1,

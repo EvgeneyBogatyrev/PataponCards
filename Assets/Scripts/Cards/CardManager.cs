@@ -82,7 +82,7 @@ public class CardManager : MonoBehaviour
         public List<string> additionalKeywords = new();
         public List<string> additionalRules = new();
         public bool suppressOnPlay = false;
-        public string artistName = "noone (stolen)";
+        public string artistName = "Screenshot from the game";
         public List<CardTypes> relevantCards = new();
         public string onPlaySound = null;
         public string onDeathSound = null;

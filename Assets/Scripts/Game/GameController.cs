@@ -12,7 +12,9 @@ public class InfoSaver
     public static int opponentHash;
     public static bool victory = false;
     public static int chests = 0;
-    public static bool NEGR = true;
+    public static bool onlineBattle = true;
+    public static int botLevel = 0;
+    public static bool[] botDefeated = new bool[4] { false, false, false, false};
 }
 
 public class QueueData
@@ -461,6 +463,7 @@ public class GameController : MonoBehaviour
             {
                 effectsBlocked = true;
                 effectBlockers.Add(minion);
+                minion.circleMyamsarObject.SetActive(true);
             }
         }
 
@@ -471,6 +474,7 @@ public class GameController : MonoBehaviour
             {
                 effectsBlocked = true;
                 effectBlockers.Add(minion);
+                minion.circleMyamsarObject.SetActive(true);
             }
         }
         return effectsBlocked;
@@ -489,6 +493,7 @@ public class GameController : MonoBehaviour
                 {
                     effectsBlocked = true;
                     effectBlockers.Add(minion);
+                    minion.circleMyamsarObject.SetActive(true);
                 }
             }
 
@@ -499,6 +504,7 @@ public class GameController : MonoBehaviour
                 {
                     effectsBlocked = true;
                     effectBlockers.Add(minion);
+                    minion.circleMyamsarObject.SetActive(true);
                 }
             }
             yield return new WaitForSeconds(1f);
@@ -890,20 +896,67 @@ public class GameController : MonoBehaviour
         StartCoroutine(OnEndRound(friendly));
     }
 
+    private void SetNumberOfChests(bool friendlyVictory)
+    {
+        InfoSaver.victory = friendlyVictory;
+        if (friendlyVictory)
+        {
+            if (InfoSaver.onlineBattle)
+            {
+                InfoSaver.chests = 3;
+            }
+            else
+            {
+                if (!InfoSaver.botDefeated[InfoSaver.botLevel + 1])
+                {
+                    InfoSaver.chests = 10;
+                    InfoSaver.botDefeated[InfoSaver.botLevel + 1] = true;
+                    List<bool> botStats = new List<bool>();
+                    for (int i = 0; i < InfoSaver.botDefeated.Length; ++i)
+                    {
+                        botStats.Add(InfoSaver.botDefeated[i]);
+                    }
+                    SaveSystem.SaveBotStats(botStats);
+                }
+                else
+                {
+                    if (InfoSaver.botLevel == 2)
+                    {
+                        InfoSaver.chests = 1;
+                    }
+                    else
+                    {
+                        InfoSaver.chests = 0;
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (InfoSaver.onlineBattle)
+            {
+                InfoSaver.chests = 1;
+            }
+            else
+            {
+                InfoSaver.chests = 0;
+            }
+        }
+    }
+
     public IEnumerator EndGame(bool friendlyVictory)
     {
         boardManager.ClearBoard();
         yield return new WaitForSeconds(3f);
-        InfoSaver.victory = friendlyVictory;
-        if (friendlyVictory)
+        SetNumberOfChests(friendlyVictory);
+        if (InfoSaver.chests > 0)
         {
-            InfoSaver.chests = 3;
+            SceneManager.LoadScene("OpenChest");
         }
         else
         {
-            InfoSaver.chests = 1;
+            SceneManager.LoadScene("MainMenu");
         }
-        SceneManager.LoadScene("OpenChest");
         yield return null;
     }
 
@@ -918,16 +971,16 @@ public class GameController : MonoBehaviour
         if (CheckGameEnd())
         {
             yield return new WaitForSeconds(3f);
-            InfoSaver.victory = friendlyVictory;
-            if (friendlyVictory)
+            SetNumberOfChests(friendlyVictory);
+            if (InfoSaver.chests > 0)
             {
-                InfoSaver.chests = 3;
+                SceneManager.LoadScene("OpenChest");
             }
             else
             {
-                InfoSaver.chests = 1;
+                SceneManager.LoadScene("MainMenu");
             }
-            SceneManager.LoadScene("OpenChest");
+            
             yield return null;
         }
         else

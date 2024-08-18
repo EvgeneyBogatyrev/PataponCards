@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+using System;
 
 public static class SaveSystem
 {
@@ -10,6 +11,7 @@ public static class SaveSystem
     private static string pathDeck = Application.persistentDataPath + "/deck.dec";
     private static string pathRunes = Application.persistentDataPath + "/runes.run";
     private static string pathCollection = Application.persistentDataPath + "/collection.col";
+    private static string pathBotStats = Application.persistentDataPath + "/bot.bot";
     public static bool loading = false;
 
     public static Dictionary<CardTypes, int> GetStarterCollection()
@@ -220,8 +222,10 @@ public static class SaveSystem
                 Dictionary<CardTypes, int> collection = formatter.Deserialize(stream) as Dictionary<CardTypes, int>;
                 stream.Close();
 
-                collection[CardTypes.TonKampon] = 3;
-                collection[CardTypes.DeadlyDispute] = 3;
+                foreach (CardTypes cardType in GetCollectableCards())
+                {
+                    collection[cardType] = 3;
+                }
 
                 return collection;
             }
@@ -234,5 +238,99 @@ public static class SaveSystem
         { 
             return GetStarterCollection();
         }
+    }
+
+    public static void SaveBotStats(List<bool> stats)
+    {
+        BinaryFormatter formatter = new BinaryFormatter();
+        FileStream stream = new FileStream(pathBotStats, FileMode.Create);
+
+        formatter.Serialize(stream, stats);
+        stream.Close();
+    }
+
+    public static List<bool> LoadBotStats()
+    {
+        loading = true;
+        if (File.Exists(pathBotStats))
+        {
+            try
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                FileStream stream = new FileStream(pathBotStats, FileMode.Open);
+
+                List<bool> stats = formatter.Deserialize(stream) as List<bool>;
+                stream.Close();
+                return stats;
+            }
+            catch
+            {
+                loading = false;
+                return new List<bool>() {false, false, false, false};
+            }
+        }
+        else
+        {
+            loading = false;
+            return new List<bool>() {false, false, false, false};
+        }
+    }
+
+    private static List<CardTypes> GetCollectableCards()
+    {
+        string[] allCards = Enum.GetNames(typeof(CardTypes));
+        List<CardTypes> relevantCards = new();
+        List<CardTypes> reservedList = GetForbiddenCards();
+        foreach (string stringType in allCards)
+        {
+            CardTypes type = (CardTypes)Enum.Parse(typeof(CardTypes), stringType);
+            if (!reservedList.Contains(type))
+            {
+                relevantCards.Add(type);
+            }
+        }
+        return relevantCards;
+    }
+
+    public static List<CardTypes> GetForbiddenCards()
+    {
+        // Cards that are not collectable and should not be displayed
+        List<CardTypes> reservedList = new()
+        {
+            CardTypes.Hatapon,
+            CardTypes.Nutrition,
+            CardTypes.GiveFang,
+            CardTypes.Motiti_option1,
+            CardTypes.Motiti_option2,
+            CardTypes.MotitiAngry,
+            CardTypes.Boulder,
+            CardTypes.TonKampon_option1,
+            CardTypes.TonKampon_option2,
+            CardTypes.IceWall,
+            CardTypes.IceWall_option,
+            CardTypes.Concede,
+            CardTypes.StoneFree,
+            CardTypes.Mushroom,
+            CardTypes.TrentOnFire,
+            CardTypes.Armory_option1,
+            CardTypes.Armory_option2,
+            CardTypes.Horserider,
+            CardTypes.TokenTatepon,
+            CardTypes.SpeedBoost,
+            CardTypes.Moribu,
+            CardTypes.Grenburr,
+            CardTypes.Wondabarappa,
+            CardTypes.Venomist,
+            CardTypes.KibaForm,
+            CardTypes.BirdForm,
+            CardTypes.Catapult_option1,
+            CardTypes.Catapult_option2,
+            CardTypes.BabattaSwarm,
+            CardTypes.LightningBolt,
+            CardTypes.MeteorRain,
+            CardTypes.SleepingDust,
+        };
+
+        return reservedList;
     }
 }

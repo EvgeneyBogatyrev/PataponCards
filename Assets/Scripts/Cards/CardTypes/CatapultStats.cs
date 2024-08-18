@@ -22,7 +22,7 @@ public static class CatapultStats
         stats.runes.Add(Runes.Spear);
         
         stats.isStatic = true;
-        //stats.pacifism = true;
+        stats.pacifism = true;
         stats.connectedCards = new List<CardTypes>
         {
             CardTypes.Catapult_option1,
@@ -37,7 +37,7 @@ public static class CatapultStats
 
 public static class Catapult_option1Stats
 {
-    const int catapultDamage = 2;
+    const int catapultDamage = 3;
     const int firstCost = 1;
     const int secondCost = 0;
     public static CardManager.CardStats GetStats()

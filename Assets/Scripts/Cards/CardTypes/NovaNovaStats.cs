@@ -24,7 +24,7 @@ public class NovaNovaStats : MonoBehaviour
             //Vector3 position = new Vector3(0f, 0f, - 0.5f);
             //GameObject explosion = animationManager.CreateObject(AnimationManager.Animations.NovaNova, position);
 
-            yield return new WaitForSeconds(1.5f);
+            //yield return new WaitForSeconds(1.5f);
             int healthLoss = 0;
             foreach (BoardManager.Slot slot in enemySlots)
             {
@@ -55,7 +55,7 @@ public class NovaNovaStats : MonoBehaviour
                 }
             }
 
-            gameController.actionIsHappening = true;
+            gameController.actionIsHappening = false;
             //yield return new WaitForSeconds(2f);
             //Destroy(explosion);
             yield return null;

@@ -46,6 +46,7 @@ public class CannasaultStats : MonoBehaviour
                 
                 minion.GetCardStats().blockEffects = true;
                 minion.onAttackActionProgress = false;
+                minion.circleMyamsarObject.SetActive(true);
             }
             gameController.actionIsHappening = false;
             yield return null;
@@ -57,6 +58,7 @@ public class CannasaultStats : MonoBehaviour
             if (minion != null)
             {
                 minion.GetCardStats().blockEffects = false;
+                minion.circleMyamsarObject.SetActive(false);
             }
             yield return null;
         }

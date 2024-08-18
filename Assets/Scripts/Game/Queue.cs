@@ -106,7 +106,7 @@ public class QueueProcesser : MonoBehaviour
     public IEnumerator HostTheGame()
     {
         StartCoroutine(Post("game_search", hash));
-        for (int i = 0; i < UnityEngine.Random.Range(3, 6); ++i)
+        for (int i = 0; i < UnityEngine.Random.Range(4, 8); ++i)
         {
             yield return new WaitForSeconds(10f);
             StartCoroutine(ObtainData(host:true));

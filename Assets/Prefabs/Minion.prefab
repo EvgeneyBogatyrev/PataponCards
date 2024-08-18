@@ -339,6 +339,8 @@ MonoBehaviour:
   previewedCard: {fileID: 0}
   attacked: 0
   moved: 0
+  _shakeScreen: {fileID: 0}
+  alreadyShake: 0
   tailwindTimer: 0
 --- !u!65 &3826434527599374660
 BoxCollider:
