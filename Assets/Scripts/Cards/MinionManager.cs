@@ -391,9 +391,10 @@ public class MinionManager : MonoBehaviour
                     else if (CursorController.cursorState == CursorController.CursorStates.Free && (!summoningSickness || additionalAttack))
                     {
                         desiredPosition = new Vector3(connectedSlot.GetPosition().x, connectedSlot.GetPosition().y, connectedSlot.GetPosition().z - 0.2f);
-                        desiredScale = selectedScale;
+                        if (GetCanAttackBot() || GetCanMoveBot() || cardStats.isStatic)
+                            desiredScale = selectedScale;
 
-                        if (Input.GetMouseButtonDown(0) && !cardStats.isStatic && GameController.CanPerformActions())
+                        if (Input.GetMouseButtonDown(0) && !cardStats.isStatic && GameController.CanPerformActions() && (GetCanAttackBot() || GetCanMoveBot()))
                         {
                             state = MinionState.Selected;
                             CursorController.cursorState = CursorController.CursorStates.Hold;

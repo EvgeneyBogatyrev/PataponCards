@@ -224,7 +224,7 @@ public static class SaveSystem
 
                 foreach (CardTypes cardType in GetCollectableCards())
                 {
-                    collection[cardType] = 3;
+                    collection[cardType] = 999;
                 }
 
                 return collection;
