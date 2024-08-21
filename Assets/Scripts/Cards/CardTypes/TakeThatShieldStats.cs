@@ -7,7 +7,7 @@ public static class TakeThatShieldStats
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-        const int takeThatShieldGain = 3;
+        const int takeThatShieldGain = 1;
         stats.description = "Target non-Hatapon unit under your control gains +" + takeThatShieldGain.ToString() + " power and <b>Lifelink</b>. Heal your Hatapon by that unit's power.";
         stats.name = "Bacteon Greatshield";
         stats.runes.Add(Runes.Shield);

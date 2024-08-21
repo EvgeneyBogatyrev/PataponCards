@@ -60,7 +60,8 @@ public class DoomShroomStats : MonoBehaviour
         stats.spell = realization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "doom_shroom";
+        stats.imagePath = "doom-shroom";
+        stats.artistName = "Pavel Shpagin (Poki)";
         return stats;
     }
 }

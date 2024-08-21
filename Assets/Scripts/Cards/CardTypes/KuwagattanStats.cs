@@ -9,11 +9,13 @@ public class KuwagattanStats : MonoBehaviour
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 11;
-        stats.description = "<b>On attack</b>: Discard your hand.";
+        stats.description = "<b>Hexproof.</b>\n<b>On attack</b>: Discard your hand.";
         stats.name = "Kuwagattan";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
+
+        stats.hexproof = true;
 
         static IEnumerator OnAttack(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

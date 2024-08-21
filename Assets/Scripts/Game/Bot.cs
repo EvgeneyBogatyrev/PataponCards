@@ -346,7 +346,7 @@ public class Bot
 
     public BotMove GetNextMove(List<BoardManager.Slot> playerSlots, List<BoardManager.Slot> botSlots)
     {
-        if (!botActive)
+        if (!botActive || GameController.eventQueue.Count != 0)
         {
             return null;
         }

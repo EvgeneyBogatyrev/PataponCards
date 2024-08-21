@@ -8,7 +8,7 @@ public class DeadlyShotStats : MonoBehaviour
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int threshold = 5;
+        const int threshold = 8;
 
         stats.description = "Destroy target non-Hatapon unit with power " + threshold.ToString() + " or less.";
         stats.name = "Deadly Shot";

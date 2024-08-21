@@ -329,6 +329,10 @@ public static class SaveSystem
             CardTypes.LightningBolt,
             CardTypes.MeteorRain,
             CardTypes.SleepingDust,
+            CardTypes.Megapon,
+            CardTypes.SparringPartner,
+            CardTypes.AvengingScout,
+            CardTypes.NaturalEnemy,
         };
 
         return reservedList;
