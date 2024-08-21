@@ -95,7 +95,7 @@ public static class PonteoStats
         stats.numberOfTargets = 0;
         //stats.dummyTarget = true;
 
-        stats.imagePath = "ponteo";
+        stats.imagePath = "ponteo_hq";
         return stats;
     }
 }

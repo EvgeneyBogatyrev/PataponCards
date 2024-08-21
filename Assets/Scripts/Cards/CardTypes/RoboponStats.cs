@@ -31,7 +31,7 @@ public static class RoboponStats
 
         stats.endTurnEvent = RoboponEndTurn;
 
-        stats.imagePath = "robopon";
+        stats.imagePath = "robopon_hq";
         return stats;
     }
 }

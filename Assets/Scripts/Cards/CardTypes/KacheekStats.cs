@@ -21,7 +21,7 @@ public static class KacheekStats
 
         stats.pacifism = true;
 
-        stats.imagePath = "kacheek 1";
+        stats.imagePath = "kacheek_hq";
         stats.onPlaySound = "kacheek";
         return stats;
     }
@@ -36,7 +36,7 @@ public static class GiveFangStats
         const int giveFangHealthCost = 2;
 
         stats.description = "-2: Add <i>Fang</i> to your hand.";
-        stats.name = "Bone Weapon";
+        stats.name = "Drop Fang";
 
         stats.isSpell = true;
         static IEnumerator GiveFangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -69,7 +69,7 @@ public static class GiveFangStats
         stats.numberOfTargets = 0;
         stats.damageToHost = giveFangHealthCost;
 
-        stats.imagePath = "Fang";
+        stats.imagePath = "fang_hq";
         return stats;
     }
 }
@@ -117,7 +117,7 @@ public static class NutritionStats
         stats.numberOfTargets = 0;
         stats.damageToHost = nutritionHealthCost;
 
-        stats.imagePath = "Meat";
+        stats.imagePath = "nutrition_hq";
         return stats;
     }
 }

@@ -60,7 +60,7 @@ public static class MahoponStats
         stats.numberOfTargets = 1;
 
 
-        stats.imagePath = "mahopon";
+        stats.imagePath = "mahopon_hq";
         return stats;
     }
 }

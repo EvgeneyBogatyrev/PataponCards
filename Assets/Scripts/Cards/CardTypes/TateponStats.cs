@@ -11,7 +11,7 @@ public static class TateponStats
         stats.description = "<b>Lifelink</b> (your Hatapon is immune to attacks and spell damage).";
         stats.name = "Tatepon";
         stats.runes.Add(Runes.Shield);
-        stats.imagePath = "tatepon";
+        stats.imagePath = "tatepon_hq";
         stats.hasShield = true;
 
         //stats.hasOnPlay = true;

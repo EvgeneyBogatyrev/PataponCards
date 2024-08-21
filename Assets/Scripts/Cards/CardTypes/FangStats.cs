@@ -48,7 +48,7 @@ public static class FangStats
         stats.checkSpellTarget = FangCheckTarget;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "Fang";
+        stats.imagePath = "fang_hq";
         return stats;
     }
 }

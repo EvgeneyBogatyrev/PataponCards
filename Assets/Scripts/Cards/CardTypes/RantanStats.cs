@@ -8,7 +8,7 @@ public class RantanStats : MonoBehaviour
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int heal = 4;
+        const int heal = 6;
         const int lesserHeal = 2;
 
         stats.runes.Add(Runes.Bow);
@@ -58,7 +58,7 @@ public class RantanStats : MonoBehaviour
         stats.descriptionSize = 3;
         stats.cycling = true;
 
-        stats.imagePath = "rantan";
+        stats.imagePath = "rantan_hq";
         return stats;
     }
 }

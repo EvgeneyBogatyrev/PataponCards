@@ -56,7 +56,7 @@ public static class PyokoriderStats
         //stats.startTurnEvent = PyokoriderStartTurn;
         stats.hasHaste = true;
 
-        stats.imagePath = "ladodon";
+        stats.imagePath = "ladodon_hq";
         return stats;
     }
 }

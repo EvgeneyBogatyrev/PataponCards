@@ -58,7 +58,7 @@ public static class MyamsarStats
         }
         stats.endTurnEvent = MyamsarEndTurn;
 
-        stats.imagePath = "rapappa";
+        stats.imagePath = "rapatta_hq";
         return stats;
     }
 }

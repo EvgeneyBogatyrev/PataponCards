@@ -126,13 +126,13 @@ public class MinionManager : MonoBehaviour
             {
                 outlineBackAbilitiesObject.SetActive(can);
                 outlineBackObject.SetActive(false);
-                normalBackObject.SetActive(can);
+                //normalBackObject.SetActive(can);
             }
             else
             {
                 outlineBackObject.SetActive(can);
                 outlineBackAbilitiesObject.SetActive(false);
-                normalBackObject.SetActive(false);
+                //normalBackObject.SetActive(false);
             }
             //normalBackObject.SetActive(!can);
         }
@@ -140,7 +140,7 @@ public class MinionManager : MonoBehaviour
         {
             outlineBackObject.SetActive(false);
             outlineBackAbilitiesObject.SetActive(false);
-            normalBackObject.SetActive(false);
+            //normalBackObject.SetActive(false);
             //normalBackObject.SetActive(false);
         }
     }

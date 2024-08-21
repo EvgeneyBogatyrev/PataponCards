@@ -97,7 +97,7 @@ public static class TokenTateponStats
         stats.runes.Add(Runes.Shield);
 
         //stats.isSpell = true;
-        stats.imagePath = "Tatepon";
+        stats.imagePath = "tatepon_hq";
         return stats;
     }
 }

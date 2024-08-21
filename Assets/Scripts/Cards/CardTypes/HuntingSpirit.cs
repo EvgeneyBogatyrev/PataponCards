@@ -49,7 +49,7 @@ public static class HuntingSpiritStats
         
         stats.spell = Realization;
 
-        stats.imagePath = "hunting_spirit";
+        stats.imagePath = "hunting_spirit_hq";
         return stats;
     }
 }

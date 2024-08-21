@@ -17,7 +17,7 @@ public static class ToriponStats
 
         stats.flying = true;
 
-        stats.imagePath = "toripon";
+        stats.imagePath = "toripon_hq";
         return stats;
     }
 }

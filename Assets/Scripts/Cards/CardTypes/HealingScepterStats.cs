@@ -8,7 +8,7 @@ public static class HealingScepterStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int healing = 8;
+        const int healing = 10;
 
         stats.description = "Restore " + healing.ToString() + " health to your Hatapon.";
         stats.name = "Healing Scepter";
@@ -42,7 +42,7 @@ public static class HealingScepterStats
         stats.spell = Realization;
         stats.numberOfTargets = 0;
 
-        stats.imagePath = "healing_scepter";
+        stats.imagePath = "healing_scepter_hq";
         return stats;
     }
 }

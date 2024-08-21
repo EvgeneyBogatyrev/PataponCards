@@ -8,7 +8,7 @@ public static class BuruchStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 9;
-        stats.description = "<b>On play</b>: Destroy two target friendly unit.";
+        stats.description = "<b>On play</b>: Destroy target friendly unit.";
         stats.name = "Buruch";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
@@ -54,18 +54,21 @@ public static class BuruchStats
 
         static bool BuruchCheckTargets(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            /*
             if (targets[0] == targets[1])
             {
                 return false;
             }
+            return true;
+            */
             return true;
         }
 
         stats.spell = BuruchRealization;
         stats.checkSpellTarget = BuruchCheckTarget;
         stats.checkSpellTargets = BuruchCheckTargets;
-        stats.numberOfTargets = 2;
-        stats.imagePath = "Buruch";
+        stats.numberOfTargets = 1;
+        stats.imagePath = "buruch_hq";
 
         return stats;
     }

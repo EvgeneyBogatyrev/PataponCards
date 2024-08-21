@@ -205,7 +205,7 @@ public static class CronoRiggersStats
 
         stats.spell = CronoRiggersRealization;
         
-        stats.imagePath = "oharan";
+        stats.imagePath = "oharan_hq";
 
         return stats;
     }
