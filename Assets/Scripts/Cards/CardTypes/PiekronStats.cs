@@ -50,6 +50,7 @@ public static class PiekronStats
             yield return null;
         }
         stats.endTurnEvent = YariponEndTurn;
+        stats.artistName = "Official render";
 
         return stats;
     }

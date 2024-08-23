@@ -69,7 +69,7 @@ public static class TrentFireStats
 
         stats.endTurnEvent = endTurn;
 
-        stats.imagePath = "treant_fire";
+        stats.imagePath = "treant_on_fire_hq";
         return stats;
     }
 }

@@ -59,7 +59,7 @@ public static class CoppenStats
         //stats.numberOfTargets = 1;
 
         stats.imagePath = "coppen";
-
+        stats.artistName = "Official render";
         return stats;
     }
 }

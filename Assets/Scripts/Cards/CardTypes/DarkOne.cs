@@ -89,7 +89,7 @@ public static class DarkOneStats
 
         stats.startTurnEvent = Realization;
        
-        stats.imagePath = "the_dark_one 1";
+        stats.imagePath = "dark_one_hq";
         return stats;
     }
 }
@@ -110,7 +110,7 @@ public static class BirdFormStats
 
         stats.flying = true;
 
-        stats.imagePath = "bird_form";
+        stats.imagePath = "bird_form_hq";
         return stats;
     }
 }

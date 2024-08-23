@@ -110,6 +110,7 @@ public class DeadlyShotStats : MonoBehaviour
         stats.numberOfTargets = 1;
 
         stats.imagePath = "deadly_shot";
+        stats.artistName = "Official render";
         return stats;
     }
 }

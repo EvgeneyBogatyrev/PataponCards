@@ -9,8 +9,10 @@ public static class DesperadoStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.runes.Add(Runes.Bow);
-        stats.description = "Draw X cards where X is your <b>Devotion to Bow</b>. Your Hatapon loses twice as much life.";
-        stats.name = "Desperado";
+        stats.description = "Draw X cards where X is your <b>Devotion to Bow</b>. Your Hatapon loses that much life.";
+        stats.name = "Rest at the Campfire";
+
+        stats.nameSize = 4;
 
         stats.additionalKeywords.Add("Devotion deck");
 
@@ -29,7 +31,7 @@ public static class DesperadoStats
                 MinionManager minion = slot.GetConnectedMinion();
                 if (minion != null && minion.GetCardType() == CardTypes.Hatapon)
                 {
-                    minion.DealDamageToThis(devotion * 2);
+                    minion.DealDamageToThis(devotion);
                     break;
                 }
             }
@@ -55,7 +57,8 @@ public static class DesperadoStats
 
         stats.spell = Realization;
 
-        stats.imagePath = "desperado";
+        stats.imagePath = "rest_in_hideout_hq";
+        stats.artistName = "Yaroslav Shahov";
         return stats;
     }
 }

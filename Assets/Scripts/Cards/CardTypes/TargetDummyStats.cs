@@ -10,7 +10,8 @@ public static class TargetDummyStats
 
         stats.power = 3;
         stats.description = "<b>Lifelink</b>.\n<b>Hexproof</b>.";
-        stats.name = "Target Dummy";
+        stats.name = "Nomen The Shieldbearer";
+        stats.nameSize = 3;
         stats.runes.Add(Runes.Shield);
         stats.hexproof = true;
         stats.hasShield = true;
@@ -58,7 +59,8 @@ public static class TargetDummyStats
         //stats.dummyTarget = true;
 
 
-        stats.imagePath = "target_dummy";
+        stats.imagePath = "nomen";
+        stats.artistName = "Official render";
         return stats;
     }
 }

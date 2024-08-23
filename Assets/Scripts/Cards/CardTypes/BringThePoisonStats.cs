@@ -54,7 +54,7 @@ public static class BringThePoisonStats
         stats.spell = Realization;
         stats.numberOfTargets = 0;
 
-        stats.imagePath = "bring_the_poison";
+        stats.imagePath = "bring_the_poison_hq";
         return stats;
     }
 }

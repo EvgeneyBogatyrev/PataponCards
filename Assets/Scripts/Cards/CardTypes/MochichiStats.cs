@@ -21,7 +21,7 @@ public static class MochichiStats
 
         stats.relevantCards.Add(CardTypes.MotitiAngry);
 
-        stats.imagePath = "motiti";
+        stats.imagePath = "motiti_hq";
         return stats;
     }
 }
@@ -60,7 +60,7 @@ public static class MochiAccumStats
         stats.numberOfTargets = 0;
         stats.damageToHost = motiti1HealthCost;
 
-        stats.imagePath = "motiti";
+        stats.imagePath = "motiti_hq";
         return stats;
     }
 }
@@ -106,7 +106,7 @@ public static class MochiciCounterStats
         stats.numberOfTargets = 0;
         stats.damageToHost = motiti2HealthCost;
 
-        stats.imagePath = "MotitiAngry";
+        stats.imagePath = "motiti_angry_hq";
         return stats;
     }
 }
@@ -123,7 +123,7 @@ public static class MochichiAngryStats
 
         stats.hasHaste = true;
 
-        stats.imagePath = "MotitiAngry";
+        stats.imagePath = "motiti_angry_hq";
         return stats;
     }
 }

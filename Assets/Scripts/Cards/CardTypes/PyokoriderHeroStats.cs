@@ -93,6 +93,7 @@ public static class PyokoriderHeroStats
         stats.endTurnEvent = PyokoriderHeroEndTurn;
 
         stats.imagePath = "pyokorider_hero";
+        stats.artistName = "Official render";
 
         return stats;
     }

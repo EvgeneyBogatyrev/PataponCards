@@ -10,8 +10,8 @@ public static class ScoutStats
 
         stats.power = 2;
         stats.description = "<b>End of turn</b>: Draw a card. Your Hatapon loses 1 life.";
-        stats.name = "Scout";
-        stats.imagePath = "scout";
+        stats.name = "Megapon";
+        stats.imagePath = "Megapon";
         
         stats.runes.Add(Runes.Bow);
         //stats.runes.Add(Runes.Bow);
@@ -23,6 +23,7 @@ public static class ScoutStats
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>(); 
             gameController.actionIsHappening = true;
+            AnimationManager animationManager = GameObject.Find("GameController").GetComponent<AnimationManager>();
 
             int cardsDrawn = 0;
 
@@ -53,6 +54,24 @@ public static class ScoutStats
                 MinionManager minion_ = slot.GetConnectedMinion();
                 if (minion_ != null && minion_.GetCardType() == CardTypes.Hatapon)
                 {
+                    SpearManager soundMain = animationManager.CreateObject(AnimationManager.Animations.Spear, thisSlot.GetPosition()).GetComponent<SpearManager>();
+                    string imagePath = "Images/megapon_large";
+                    soundMain.gameObject.transform.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(imagePath);
+                    soundMain.SetSlotToGo(slot);
+                    soundMain.rotate = false;
+                    soundMain.speed = 20f;
+                    soundMain.bounce = true;
+                    if (enemySlots[0].GetFriendly())
+                    {
+                        soundMain.isEnemy = true;
+                    }
+
+                    while (!soundMain.reachDestination)
+                    {
+                        yield return new WaitForSeconds(0.1f);
+                    }
+
+                    soundMain.DestroySelf();
                     minion_.DealDamageToThis(1);
                     break;
                 }
@@ -62,6 +81,7 @@ public static class ScoutStats
             yield return null;
         }
         stats.endTurnEvent = EndTurn;
+        stats.artistName = "Official render";
 
         return stats;
     }

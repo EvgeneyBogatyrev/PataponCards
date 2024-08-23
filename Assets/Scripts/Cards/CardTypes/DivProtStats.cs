@@ -78,7 +78,8 @@ public static class DivProtStats
         stats.spell = DivineProtectionRealization;
         stats.numberOfTargets = 0;
 
-        stats.imagePath = "DivineProtection";
+        stats.imagePath = "divine";
+        stats.artistName = "Official render";
         return stats;
     }
 }

@@ -49,6 +49,7 @@ public static class FangStats
         stats.numberOfTargets = 1;
 
         stats.imagePath = "fang_hq";
+        stats.artistName = "Official render";
         return stats;
     }
 }

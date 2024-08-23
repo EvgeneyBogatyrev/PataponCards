@@ -70,6 +70,7 @@ public class CannasaultStats : MonoBehaviour
         stats.hasHaste = true;
 
         stats.imagePath = "cannasault";
+        stats.artistName = "Official render";
         return stats;
     }
 }

@@ -436,6 +436,16 @@ public class BoardManager : MonoBehaviour
             Debug.Log("Can't find Hatapon in DealSuddenDeathDamage");
         }
 
+        HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>(); 
+
+        LogController.instance.AddPlayCardToLog(CardTypes.Fatique, new List<int>(), friendly);
+        CardManager newCard = handManager.GenerateCard(CardTypes.Fatique, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                    
+        HandManager.DestroyDisplayedCards();
+        newCard.SetCardState(CardManager.CardState.opponentPlayed);
+        newCard.transform.position = new Vector3(0f, 10f, 0f);
+        newCard.destroyTimer = HandManager.cardDestroyTimer;
+
         hatapon.LoseLife(amount);
     }
 

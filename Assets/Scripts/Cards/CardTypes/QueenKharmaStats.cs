@@ -53,7 +53,7 @@ public static class QueenKharmaStats
         stats.spell = Realization;
         stats.numberOfTargets = 0;
 
-        stats.imagePath = "kharma";
+        stats.imagePath = "kharma_hq";
         return stats;
     }
 }

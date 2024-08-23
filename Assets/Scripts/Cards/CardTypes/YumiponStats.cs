@@ -134,6 +134,7 @@ public static class YumiponStats
         //stats.onAttackEvent = YumiponOnAttack;
 
         stats.imagePath = "yumipon_hq";
+        stats.artistName = "Official render";
         return stats;
     }
 }

@@ -39,6 +39,7 @@ public static class BaloonStats
         stats.endTurnEvent = BaloonEndTurn;
 
         stats.imagePath = "hot_air_ballon";
+        stats.artistName = "Unused game assets";
         return stats;
     }
 }

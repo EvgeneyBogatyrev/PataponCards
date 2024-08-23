@@ -48,6 +48,7 @@ public static class YariponStats
             yield return null;
         }
         stats.endTurnEvent = YariponEndTurn;
+        stats.artistName = "Official render";
 
         return stats;
     }

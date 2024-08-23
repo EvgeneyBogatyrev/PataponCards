@@ -10,7 +10,7 @@ public static class YariponBushwackerStats
         const int destroboDamage = 1;
         stats.power = 2;
         stats.description = "<b>Haste</b> (can attack and move as soon as it enters the battlefield).\n<b>On play</b>: Deal " + destroboDamage.ToString() +  " damage.";
-        stats.name = "Yaripon Bushwacker";
+        stats.name = "Fah Zakpon";
         stats.hasHaste = true;
         //stats.runes.Add(Runes.Shield);
         stats.nameSize = 4;
@@ -45,7 +45,8 @@ public static class YariponBushwackerStats
         stats.spell = DestroboRealization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "bushwacker";        
+        stats.imagePath = "fah";
+        stats.artistName = "Official render";        
         return stats;
     }
 }

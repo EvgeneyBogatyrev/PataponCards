@@ -139,7 +139,8 @@ public static class PoisonArcherStats
         stats.numberOfTargets = 1;
         stats.power = 3;
 
-        stats.imagePath = "poison_bow";
+        stats.imagePath = "poison_archer_hq";
+        stats.artistName = "Official render";
 
         return stats;
     }

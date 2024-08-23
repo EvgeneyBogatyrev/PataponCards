@@ -163,6 +163,7 @@ public class GongStats : MonoBehaviour
         stats.onAttackEvent = YumiponOnAttack;
 
         stats.imagePath = "gong_the_hawkeye";
+        stats.artistName = "Official render";
         return stats;
     }
 }

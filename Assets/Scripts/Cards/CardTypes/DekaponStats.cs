@@ -14,7 +14,7 @@ public static class DekaponStats
         stats.limitedVision = true;
         stats.runes.Add(Runes.Shield);
 
-        stats.imagePath = "dekapon";
+        stats.imagePath = "dekapon_hq";
         return stats;
     }
 }

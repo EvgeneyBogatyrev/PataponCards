@@ -18,21 +18,24 @@ public static class SaveSystem
     {
         Dictionary<CardTypes, int> tmpCollection = new Dictionary<CardTypes, int>();
         tmpCollection.Add(CardTypes.Yumipon, 2);
-        tmpCollection.Add(CardTypes.Rantan, 2);
+        tmpCollection.Add(CardTypes.Scout, 2);
         tmpCollection.Add(CardTypes.Tatepon, 2);
         tmpCollection.Add(CardTypes.Dekapon, 2);
         tmpCollection.Add(CardTypes.Kibapon, 2);
         tmpCollection.Add(CardTypes.Fang, 2);
         tmpCollection.Add(CardTypes.YariponBushwacker, 2);
         tmpCollection.Add(CardTypes.ZigotonTroops, 2);
-        tmpCollection.Add(CardTypes.Guardira, 2);
-        tmpCollection.Add(CardTypes.Motiti, 2);
+        tmpCollection.Add(CardTypes.Kacheek, 2);
         tmpCollection.Add(CardTypes.Yaripon, 2);
         tmpCollection.Add(CardTypes.Alldemonium, 2);
         tmpCollection.Add(CardTypes.HuntingSpirit, 2);
         tmpCollection.Add(CardTypes.FuckingIdiot, 2);
-        tmpCollection.Add(CardTypes.Myamsar, 2);
-        tmpCollection.Add(CardTypes.Kacheek, 2);
+        // ------------------------------------------
+        
+        tmpCollection.Add(CardTypes.Motiti, 2);
+        tmpCollection.Add(CardTypes.DeepImpact, 2);
+        tmpCollection.Add(CardTypes.MyamsarHero, 2);
+        tmpCollection.Add(CardTypes.Rantan, 2);
 
         return tmpCollection;
     }
@@ -42,14 +45,14 @@ public static class SaveSystem
         return new List<CardTypes>() {
             CardTypes.Yumipon,
             CardTypes.Yumipon,
-            CardTypes.Rantan,
-            CardTypes.Rantan,
+            CardTypes.Scout,
+            CardTypes.Scout,
             CardTypes.Tatepon,
             CardTypes.Tatepon,
             CardTypes.Dekapon,
             CardTypes.Dekapon,
-            CardTypes.Guardira,
-            CardTypes.Guardira,
+            CardTypes.Yaripon,
+            CardTypes.Yaripon,
             CardTypes.Alldemonium,
             CardTypes.Alldemonium,
             CardTypes.Kibapon,
@@ -58,8 +61,8 @@ public static class SaveSystem
             CardTypes.HuntingSpirit,
             CardTypes.Fang,
             CardTypes.Fang,
-            CardTypes.Motiti,
-            CardTypes.Motiti,
+            CardTypes.Kacheek,
+            CardTypes.Kacheek,
             CardTypes.YariponBushwacker,
             CardTypes.YariponBushwacker,
             CardTypes.ZigotonTroops,
@@ -222,10 +225,18 @@ public static class SaveSystem
                 Dictionary<CardTypes, int> collection = formatter.Deserialize(stream) as Dictionary<CardTypes, int>;
                 stream.Close();
 
+                /*
                 foreach (CardTypes cardType in GetCollectableCards())
                 {
-                    collection[cardType] = 999;
+                    //collection[cardType] = 3;
+                    collection.Remove(cardType);
                 }
+                foreach (CardTypes cardType in GetForbiddenCards())
+                {
+                    collection.Remove(cardType);
+                }
+                */
+            
 
                 return collection;
             }
@@ -333,6 +344,7 @@ public static class SaveSystem
             CardTypes.SparringPartner,
             CardTypes.AvengingScout,
             CardTypes.NaturalEnemy,
+            CardTypes.Fatique,
         };
 
         return reservedList;

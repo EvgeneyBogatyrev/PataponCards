@@ -92,7 +92,8 @@ public static class BowmunkStats
         stats.numberOfTargets = 1;
         stats.dummyTarget = true;
 
-        stats.imagePath = "bowmunk";
+        stats.imagePath = "bowmunk_hq";
+        stats.artistName = "Official render";
         return stats;
     }
 }

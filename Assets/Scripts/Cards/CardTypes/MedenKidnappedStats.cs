@@ -96,7 +96,7 @@ public class MedenKidnappedStats : MonoBehaviour
         stats.spell = realization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "meden_kidnapped";
+        stats.imagePath = "meden_kidnapped_hq";
         return stats;
     }
 }

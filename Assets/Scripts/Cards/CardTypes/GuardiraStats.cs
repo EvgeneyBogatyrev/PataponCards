@@ -61,7 +61,8 @@ public static class GuardiraStats
         //stats.numberOfTargets = 2;
         //stats.dummyTarget = true;
 
-        stats.imagePath = "Guardira";
+        stats.imagePath = "Guardira-Chin";
+        stats.artistName = "Official render";
         return stats;
     }
 }

@@ -740,6 +740,14 @@ public class GameController : MonoBehaviour
         if (!friendly && !hataponJustDied)
         {
             ServerDataProcesser.instance.EndTurn();
+            foreach (BoardManager.Slot slot in boardManager.friendlySlots)
+            {
+                if (!slot.GetFree())
+                {
+                    slot.GetConnectedMinion().SetAbilityToAttack(false);
+                }
+            }
+
         }
         yield return null;
     }

@@ -29,7 +29,7 @@ public static class CatapultStats
             CardTypes.Catapult_option2
         };
 
-        stats.imagePath = "catapult";
+        stats.imagePath = "catapult_hq";
 
         return stats;
     }
@@ -80,7 +80,7 @@ public static class Catapult_option1Stats
         stats.numberOfTargets = 0;
         stats.damageToHost = firstCost;
 
-        stats.imagePath = "catapult";
+        stats.imagePath = "catapult_attack_hq";
 
         return stats;
     }
@@ -134,7 +134,7 @@ public static class Catapult_option2Stats
         stats.spell = Realization;
         stats.numberOfTargets = 0;
         stats.damageToHost = secondCost;
-        stats.imagePath = "catapult";
+        stats.imagePath = "catapult_reload_hq";
 
         return stats;
     }

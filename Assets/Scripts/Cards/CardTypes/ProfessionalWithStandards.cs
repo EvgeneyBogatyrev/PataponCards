@@ -49,7 +49,7 @@ public static class ProfessionalWithStandards
         stats.cycling = true;
 
         stats.imagePath = "questing_beast";
-
+        stats.artistName = "Unused game assets";
         return stats;
     }
 }

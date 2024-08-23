@@ -18,6 +18,7 @@ public static class ToriponStats
         stats.flying = true;
 
         stats.imagePath = "toripon_hq";
+        stats.artistName = "Official render";
         return stats;
     }
 }

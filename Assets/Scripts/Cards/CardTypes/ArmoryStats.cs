@@ -26,7 +26,7 @@ public static class ArmoryStats
             CardTypes.Armory_option2
         };
 
-        stats.imagePath = "armory";
+        stats.imagePath = "armory_hq";
 
         return stats;
     }
@@ -88,7 +88,7 @@ public static class Armory_option1Stats
         stats.numberOfTargets = 0;
         stats.damageToHost = cost;
 
-        stats.imagePath = "armory";
+        stats.imagePath = "armory_hq";
 
         return stats;
     }
@@ -146,7 +146,7 @@ public static class Armory_option2Stats
         stats.spell = Realization;
         stats.numberOfTargets = 0;
         stats.damageToHost = cost;
-        stats.imagePath = "armory";
+        stats.imagePath = "armory_hq";
 
         return stats;
     }

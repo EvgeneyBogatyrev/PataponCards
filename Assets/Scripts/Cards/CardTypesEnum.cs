@@ -118,7 +118,8 @@ public enum CardTypes
     BabattaSwarm,
     LightningBolt,
     SleepingDust,
-    MeteorRain
+    MeteorRain,
+    Fatique
 };
 
 
@@ -570,6 +571,10 @@ public static class CardTypeToStats
                 stats = SleepingDustStats.GetStats();
                 break;
 
+            case CardTypes.Fatique:
+                stats = FatiqueStats.GetStats();
+                break;
+
             default:
                 break;
         }
@@ -713,6 +718,7 @@ public static class FilterCardTypes
             CardTypes.SparringPartner,
             CardTypes.AvengingScout,
             CardTypes.NaturalEnemy,
+            CardTypes.Fatique,
         };
 
         return reservedList;

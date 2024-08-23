@@ -43,7 +43,7 @@ public class StormMiracleStats : MonoBehaviour
 
         stats.spell = Realization;
         stats.numberOfTargets = 0;
-        stats.imagePath = "StormMiracle";
+        stats.imagePath = "storm_miracle_hq";
         return stats;
     }
 }

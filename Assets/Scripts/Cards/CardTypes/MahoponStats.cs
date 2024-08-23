@@ -61,6 +61,7 @@ public static class MahoponStats
 
 
         stats.imagePath = "mahopon_hq";
+        stats.artistName = "Official render";
         return stats;
     }
 }

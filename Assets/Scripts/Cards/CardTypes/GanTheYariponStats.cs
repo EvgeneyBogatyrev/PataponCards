@@ -95,6 +95,7 @@ public static class GanTheYariponStats
         //stats.onPlayEvent = MegaponBattlecry;
 
         stats.imagePath = "gan_yaripon";
+        stats.artistName = "Fabierex2000 on DeviantArt";
         return stats;
     }
 }

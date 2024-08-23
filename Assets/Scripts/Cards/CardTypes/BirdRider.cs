@@ -93,6 +93,7 @@ public static class BirdRiderStats
         //stats.dummyTarget = true;
 
         stats.imagePath = "bird_rider";
+        stats.artistName = "Unused game assets";
         return stats;
     }
 }

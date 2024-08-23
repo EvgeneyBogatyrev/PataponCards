@@ -33,6 +33,7 @@ public static class IdiotStats
         stats.startTurnEvent = FuckingIdiotStartTurn;
 
         stats.imagePath = "bent_compass";
+        stats.artistName = "Official render";
         return stats;
     }
 }

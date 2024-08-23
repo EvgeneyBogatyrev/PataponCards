@@ -35,7 +35,7 @@ public static class CardInfoController
             case "End of turn":
                 return "<b>End of turn</b> effect triggers at the end of your turn.";
             case "Start of turn":
-                return "<b>Start of turn</b> effect triggers at the end of your turn.";
+                return "<b>Start of turn</b> effect triggers at the start of your turn.";
             case "On death":
                 return "<b>On death</b> effect triggers when this unit is destroyed.";
             case "On attack":
@@ -110,7 +110,7 @@ public class CardInfoManager : MonoBehaviour
         }
         if (stats.isStatic)
         {
-            cardText += "* " + CardInfoController.GetMechanicDescription("Pacifism") + "\n";
+            //cardText += "* " + CardInfoController.GetMechanicDescription("Pacifism") + "\n";
             cardText += "* " + CardInfoController.GetMechanicDescription("Abilities") + "\n";
         }
         if (stats.hasShield)

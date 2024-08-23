@@ -55,6 +55,7 @@ public static class DeadDispStats
         stats.numberOfTargets = 2;
 
         stats.imagePath = "deadly_dispute";
+        stats.artistName = "https://se.pinterest.com/pin/399976010647174132/";
         return stats;
     }
 }

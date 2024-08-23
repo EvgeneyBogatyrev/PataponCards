@@ -239,7 +239,7 @@ public class Bot
                 {
                     return 100f;
                 }
-                return score + myMinion.GetPower() / (enemyMinion.GetPower() - myMinion.GetPower());
+                return score + myMinion.GetPower() / (enemyMinion.GetPower() - myMinion.GetPower() + 0.1f);
             }
             else
             {

@@ -75,7 +75,7 @@ public class KuwagattanStats : MonoBehaviour
         //stats.descriptionSize = 3;
         //stats.hasHaste = true;
 
-        stats.imagePath = "kuwagattan";
+        stats.imagePath = "kuwagattan_hq";
         return stats;
     }
 }

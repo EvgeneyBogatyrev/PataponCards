@@ -85,6 +85,7 @@ public class CollectionControl : MonoBehaviour
             CardTypes.SparringPartner,
             CardTypes.AvengingScout,
             CardTypes.NaturalEnemy,
+            CardTypes.Fatique,
         };
 
         return reservedList;

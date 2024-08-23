@@ -23,6 +23,7 @@ public static class KacheekStats
 
         stats.imagePath = "kacheek_hq";
         stats.onPlaySound = "kacheek";
+        stats.artistName = "Official render";
         return stats;
     }
 }

@@ -78,6 +78,7 @@ public static class BanTateponStats
         stats.numberOfTargets = 1;
         stats.dummyTarget = true;
         stats.imagePath = "banTatepon";
+        stats.artistName = "Fabierex2000 on DeviantArt";
 
         return stats;
     }
