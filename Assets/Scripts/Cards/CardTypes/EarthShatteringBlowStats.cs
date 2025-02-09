@@ -8,7 +8,7 @@ public static class EarthShatteringBlowStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int smallDamage = 2;
+        const int smallDamage = 3;
         const int bigDamage = 7;
         const int threshold = 8;
         stats.description = "Deal " + smallDamage.ToString() + " damage to an enemy non-Hatapon unit. If you controll a non-Hatapon unit with power " + threshold.ToString() + " or greater, deal " + bigDamage.ToString() + " damage to this unit instead.";

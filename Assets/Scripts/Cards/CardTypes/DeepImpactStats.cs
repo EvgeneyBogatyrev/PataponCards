@@ -8,9 +8,10 @@ public static class DeepImpactStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         const int horsePower = 3;
-        stats.description = "Transform target non-Hatapon unit into the Horserider with " + horsePower.ToString() + " and <b>Haste</b>.\n Draw a card.";
+        stats.description = "Transform target non-Hatapon unit into the Horserider with " + horsePower.ToString() + " and <b>Haste</b>.\nIf it was your unit, draw a card.";
         stats.name = "Bullgam the Bully";
         stats.nameSize = 4;
+        stats.descriptionSize = 3;
     
         stats.runes.Add(Runes.Spear);
         //stats.runes.Add(Runes.Spear);
@@ -59,12 +60,12 @@ public static class DeepImpactStats
             targetSlot.GetConnectedMinion().DestroySelf(unattach:true);
             boardManager.PlayCard(newCard, new Vector3(0f, 0f, 0f), slot, destroy: true, record: false);
 
-            if (friendlySlots[1].GetFriendly())
+            if (!opp && target > 0)
             {
                 //HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
                 handManager.DrawCard();
             }
-            else
+            else if (opp && target < 0)
             {
                 //HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
                 handManager.DrawCardOpponent();

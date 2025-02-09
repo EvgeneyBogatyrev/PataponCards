@@ -8,7 +8,7 @@ public class MedenKidnappedStats : MonoBehaviour
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.description = "Put target non-Hatapon unit on top of your deck.";
+        stats.description = "Put target non-Hatapon unit on top of your deck. Your opponent draws a card.";
         stats.name = "Meden Kidnapped";
         stats.nameSize = 5;
 
@@ -56,7 +56,7 @@ public class MedenKidnappedStats : MonoBehaviour
             targetMinion.GetSlot().SetFree(true);
             targetMinion.DestroySelf();
 
-            /*
+            
             if (opp)
             {
                 handManager.DrawCard();
@@ -65,7 +65,7 @@ public class MedenKidnappedStats : MonoBehaviour
             {
                 handManager.DrawCardOpponent();
             }
-            */
+            
             
             gameController.actionIsHappening = false;
             yield return null;

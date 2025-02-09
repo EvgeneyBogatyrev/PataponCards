@@ -86,7 +86,8 @@ public class CardManager : MonoBehaviour
         public List<CardTypes> relevantCards = new();
         public string onPlaySound = null;
         public string onDeathSound = null;
-       
+
+        public int firstTurnToPlay = 0;
 
         public Sprite GetSprite()
         {
@@ -417,6 +418,10 @@ public class CardManager : MonoBehaviour
 
     private void PlayCard(BoardManager.Slot closestSlot=null, bool spell=false)
     {
+        if (this.cardStats.firstTurnToPlay >= gameController.gameState.friendlyTurnNumber)
+        {
+            return;
+        }
         if (!cardIsPlayed)
         {
             cardIsPlayed = true;

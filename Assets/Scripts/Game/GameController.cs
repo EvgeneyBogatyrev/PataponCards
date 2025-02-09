@@ -336,7 +336,7 @@ public class GameController : MonoBehaviour
     private GameObject turnTimeLeft;
     
 
-    private GameState gameState = new GameState();
+    public GameState gameState = new GameState();
 
     public float secondsBetweenAnimations = 0.5f;
     public bool actionIsHappening = false;

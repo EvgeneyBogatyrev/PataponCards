@@ -225,17 +225,17 @@ public static class SaveSystem
                 Dictionary<CardTypes, int> collection = formatter.Deserialize(stream) as Dictionary<CardTypes, int>;
                 stream.Close();
 
-                /*
+                
                 foreach (CardTypes cardType in GetCollectableCards())
                 {
-                    //collection[cardType] = 3;
-                    collection.Remove(cardType);
+                    collection[cardType] = 3;
+                    //collection.Remove(cardType);
                 }
                 foreach (CardTypes cardType in GetForbiddenCards())
                 {
                     collection.Remove(cardType);
                 }
-                */
+                
             
 
                 return collection;

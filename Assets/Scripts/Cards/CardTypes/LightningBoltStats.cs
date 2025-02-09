@@ -9,7 +9,7 @@ public static class LightningBoltStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         const int damage = 2;
-        stats.description = "Deal " + damage.ToString() + " damage.";
+        stats.description = "Deal " + damage.ToString() + " damage to a unit.";
         stats.name = "Lightning Bolt";
 
         stats.isSpell = true;
