@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 using UnityEngine.Assertions;
+using Networking;
 
 public class InfoSaver
 {
@@ -347,6 +348,26 @@ public class GameController : MonoBehaviour
     private float timeSinceOpponentResponsed = 0f;
     private readonly float timeSinceOpponentResponsedLimit = 120f;
 
+    // Set by ServerDataProcesser when an opponent action can't be applied safely. Freezes
+    // input via CanPerformActions() and shows a banner instead of crashing or corrupting state.
+    public bool desyncDetected = false;
+    private string desyncReason = "";
+
+    private float gapUnresolvedSeconds = 0f;
+    private const float GapBannerDelaySeconds = 5f;
+    private const float GapHaltDelaySeconds = 45f;
+
+    public void HaltForDesync(string reason)
+    {
+        if (desyncDetected)
+        {
+            return;
+        }
+        desyncDetected = true;
+        desyncReason = reason;
+        Debug.LogError("Match halted: " + reason);
+    }
+
     private float pingInterval = 0f;
     private readonly float pingIntervalMax = 25f;
 
@@ -371,11 +392,40 @@ public class GameController : MonoBehaviour
 
     private void Update()
     {
+        if (desyncDetected)
+        {
+            return;
+        }
+
+        if (InfoSaver.onlineBattle && ServerDataProcesser.instance != null)
+        {
+            if (ServerDataProcesser.instance.HasUnresolvedGap)
+            {
+                gapUnresolvedSeconds += Time.deltaTime;
+                if (gapUnresolvedSeconds >= GapHaltDelaySeconds && FirebaseDb.IsConnected)
+                {
+                    // We can reach Firebase fine, so the missing action is very likely stuck
+                    // because the opponent's own client crashed/closed, not a transient blip.
+                    HaltForDesync("Your opponent's move never arrived - their connection may have been lost.");
+                    return;
+                }
+            }
+            else
+            {
+                gapUnresolvedSeconds = 0f;
+            }
+        }
+
         if (!playerTurn)
         {
-            timeSinceOpponentResponsed += Time.deltaTime;
-            //Debug.Log(timeSinceOpponentResponsed);
-            //Debug.Log(timeSinceOpponentResponsedLimit);
+            // Only a genuinely idle opponent should burn down this timer - not our own dropped
+            // connection, and not a delivery in progress that we can still see arriving.
+            bool opponentConnectionHealthy = !InfoSaver.onlineBattle || (FirebaseDb.IsConnected &&
+                !(ServerDataProcesser.instance != null && ServerDataProcesser.instance.HasUnresolvedGap));
+            if (opponentConnectionHealthy)
+            {
+                timeSinceOpponentResponsed += Time.deltaTime;
+            }
 
             if (timeSinceOpponentResponsed >= timeSinceOpponentResponsedLimit)
             {
@@ -414,6 +464,61 @@ public class GameController : MonoBehaviour
         }
     }
 
+    // Plain IMGUI overlay - deliberately not scene-authored UI, so it needs no Canvas/TMP
+    // wiring and carries no risk of touching the existing .unity scene.
+    private void OnGUI()
+    {
+        if (!InfoSaver.onlineBattle)
+        {
+            return;
+        }
+
+        if (desyncDetected)
+        {
+            DrawBanner(new Color(0.6f, 0.1f, 0.1f, 0.9f), "Match halted: " + desyncReason);
+            float width = 220f;
+            Rect buttonRect = new Rect((Screen.width - width) / 2f, 70f, width, 40f);
+            if (GUI.Button(buttonRect, "Return to Main Menu"))
+            {
+                CleanUpOnlineMatch();
+                SceneManager.LoadScene("MainMenu");
+            }
+            return;
+        }
+
+        if (!FirebaseDb.IsConnected)
+        {
+            DrawBanner(new Color(0.6f, 0.5f, 0.0f, 0.9f), "Connection lost - reconnecting...");
+            return;
+        }
+
+        if (ServerDataProcesser.instance != null && ServerDataProcesser.instance.HasUnresolvedGap
+            && gapUnresolvedSeconds > GapBannerDelaySeconds)
+        {
+            DrawBanner(new Color(0.2f, 0.2f, 0.6f, 0.85f), "Waiting for opponent's move...");
+        }
+    }
+
+    private void DrawBanner(Color color, string message)
+    {
+        float width = Mathf.Min(500f, Screen.width - 40f);
+        Rect rect = new Rect((Screen.width - width) / 2f, 10f, width, 50f);
+
+        Color previousColor = GUI.color;
+        GUI.color = color;
+        GUI.Box(rect, "");
+        GUI.color = Color.white;
+
+        GUIStyle style = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 16,
+            fontStyle = FontStyle.Bold
+        };
+        GUI.Label(rect, message, style);
+        GUI.color = previousColor;
+    }
+
     private IEnumerator QueueProcess()
     {
         while (true)
@@ -439,8 +544,8 @@ public class GameController : MonoBehaviour
 
     public static bool CanPerformActions()
     {
-        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();   
-        if (gameController.actionIsHappening || GameController.eventQueue.Count > 0)
+        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+        if (gameController.actionIsHappening || GameController.eventQueue.Count > 0 || gameController.desyncDetected)
         {
             return false;
         }
@@ -952,11 +1057,21 @@ public class GameController : MonoBehaviour
         }
     }
 
+    private void CleanUpOnlineMatch()
+    {
+        if (InfoSaver.onlineBattle)
+        {
+            // Best-effort cleanup - don't let a slow/failed delete strand the player here.
+            StartCoroutine(FirebaseDb.Delete("matches/" + ServerDataProcesser.MatchId()));
+        }
+    }
+
     public IEnumerator EndGame(bool friendlyVictory)
     {
         boardManager.ClearBoard();
         yield return new WaitForSeconds(3f);
         SetNumberOfChests(friendlyVictory);
+        CleanUpOnlineMatch();
         if (InfoSaver.chests > 0)
         {
             SceneManager.LoadScene("OpenChest");
@@ -980,6 +1095,7 @@ public class GameController : MonoBehaviour
         {
             yield return new WaitForSeconds(3f);
             SetNumberOfChests(friendlyVictory);
+            CleanUpOnlineMatch();
             if (InfoSaver.chests > 0)
             {
                 SceneManager.LoadScene("OpenChest");
@@ -988,7 +1104,7 @@ public class GameController : MonoBehaviour
             {
                 SceneManager.LoadScene("MainMenu");
             }
-            
+
             yield return null;
         }
         else
