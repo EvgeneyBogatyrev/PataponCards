@@ -59,9 +59,9 @@ public class EndTurnButton : MonoBehaviour
         }
         else
         {
-            gameObject.GetComponent<TextMeshPro>().text = "End Turn";
+            gameObject.GetComponent<TextMeshPro>().text = GameController.playerTurn ? "End Turn" : "Opponent's turn";
         }
-        
+
     }
 
     private IEnumerator Bounce()

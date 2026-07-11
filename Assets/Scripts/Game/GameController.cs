@@ -16,6 +16,9 @@ public class InfoSaver
     public static bool onlineBattle = true;
     public static int botLevel = 0;
     public static bool[] botDefeated = new bool[4] { false, false, false, false};
+
+    // Scene to return to once the Account scene finishes a sign-in/sign-up.
+    public static string sceneAfterLogin = "Lobby";
 }
 
 public class QueueData
@@ -140,6 +143,7 @@ public class MessageFromServer
         Discard,
         SendDeck,
         Ping,
+        ConcedeMatch,
     }
 
     public Action GetAction(string s)
@@ -199,6 +203,10 @@ public class MessageFromServer
         if (s == "ping")
         {
             return Action.Ping;
+        }
+        if (s == "concede match")
+        {
+            return Action.ConcedeMatch;
         }
         return Action.EndTurn;
     }
@@ -335,7 +343,12 @@ public class GameController : MonoBehaviour
 
     [SerializeField]
     private GameObject turnTimeLeft;
-    
+
+    [SerializeField]
+    private GameObject myNicknameText;
+    [SerializeField]
+    private GameObject opponentNicknameText;
+
 
     public GameState gameState = new GameState();
 
@@ -375,8 +388,12 @@ public class GameController : MonoBehaviour
 
     private float turnSecondsMax = 90f;
     private float turnSecondsLeft = 90f;
+    // Our own estimate of the opponent's remaining turn time - not authoritative, just mirrors
+    // the same turnSecondsMax countdown starting whenever their turn begins. Shown on the same
+    // turnTimeLeft display as our own countdown, whichever is currently relevant.
+    private float enemyTurnSecondsLeft = 90f;
 
-    public static List<QueueData> eventQueue = new(); 
+    public static List<QueueData> eventQueue = new();
 
     private void Start()
     {
@@ -387,8 +404,23 @@ public class GameController : MonoBehaviour
         handManager = GameObject.Find("Hand").GetComponent<HandManager>();
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
+        if (myNicknameText != null)
+        {
+            myNicknameText.GetComponent<TextMeshProUGUI>().text = PlayerProfile.Nickname;
+        }
+        if (opponentNicknameText != null)
+        {
+            opponentNicknameText.GetComponent<TextMeshProUGUI>().text = InfoSaver.onlineBattle ? "Opponent" : "Bot";
+        }
+
         StartCoroutine(QueueProcess());
     }
+
+    // The End Turn button stays visible and clickable the whole match now (it used to be
+    // deactivated during the opponent's turn, which also hid the ability to concede then).
+    // Its label swap ("Opponent's turn") and the long-press-to-concede timer both live in
+    // EndTurnButton.cs, which owns that GameObject's TextMeshPro directly - GameController.Concede()
+    // itself decides round-concede vs match-concede based on whose turn it is.
 
     private void Update()
     {
@@ -399,6 +431,15 @@ public class GameController : MonoBehaviour
 
         if (InfoSaver.onlineBattle && ServerDataProcesser.instance != null)
         {
+            if (opponentNicknameText != null)
+            {
+                TextMeshProUGUI opponentNicknameLabel = opponentNicknameText.GetComponent<TextMeshProUGUI>();
+                if (opponentNicknameLabel.text != ServerDataProcesser.instance.OpponentNickname)
+                {
+                    opponentNicknameLabel.text = ServerDataProcesser.instance.OpponentNickname;
+                }
+            }
+
             if (ServerDataProcesser.instance.HasUnresolvedGap)
             {
                 gapUnresolvedSeconds += Time.deltaTime;
@@ -433,6 +474,15 @@ public class GameController : MonoBehaviour
                 Debug.Log("Your opponent left");
                 StartCoroutine(EndGame(true));
             }
+
+            // This is only our own estimate (their end-of-turn message may lag a little behind
+            // it) - clamp at zero rather than counting into negative time.
+            enemyTurnSecondsLeft = Mathf.Max(0f, enemyTurnSecondsLeft - Time.deltaTime);
+            string enemyStrTime = FormatTurnTime(enemyTurnSecondsLeft);
+            foreach (Transform child in turnTimeLeft.transform)
+            {
+                child.GetComponent<TextMeshPro>().text = enemyStrTime;
+            }
         }
         else
         {
@@ -447,15 +497,7 @@ public class GameController : MonoBehaviour
             }
             else
             {
-                int seconds = ((int) turnSecondsLeft) % 60;
-                int minutes = ((int) turnSecondsLeft) / 60;
-                string secondsStr = seconds.ToString();
-                if (seconds < 10)
-                {
-                    secondsStr = "0" + secondsStr; 
-                }
-                string strTime = "0" + minutes.ToString() + ":" + secondsStr;
-
+                string strTime = FormatTurnTime(turnSecondsLeft);
                 foreach (Transform child in turnTimeLeft.transform)
                 {
                    child.GetComponent<TextMeshPro>().text = strTime;
@@ -464,10 +506,41 @@ public class GameController : MonoBehaviour
         }
     }
 
+    private static string FormatTurnTime(float secondsLeft)
+    {
+        int seconds = ((int)secondsLeft) % 60;
+        int minutes = ((int)secondsLeft) / 60;
+        string secondsStr = seconds.ToString();
+        if (seconds < 10)
+        {
+            secondsStr = "0" + secondsStr;
+        }
+        return "0" + minutes.ToString() + ":" + secondsStr;
+    }
+
     // Plain IMGUI overlay - deliberately not scene-authored UI, so it needs no Canvas/TMP
     // wiring and carries no risk of touching the existing .unity scene.
     private void OnGUI()
     {
+        // Not gated on InfoSaver.onlineBattle - a "concede the whole match" confirmation makes
+        // just as much sense against a bot/local opponent as it does online.
+        if (pendingMatchConcedeConfirmation)
+        {
+            DrawBanner(new Color(0.6f, 0.1f, 0.1f, 0.9f), "Concede the ENTIRE MATCH (not just this round)?");
+            float width = 220f;
+            Rect yesRect = new Rect(Screen.width / 2f - width - 10f, 70f, width, 40f);
+            Rect noRect = new Rect(Screen.width / 2f + 10f, 70f, width, 40f);
+            if (GUI.Button(yesRect, "Yes, concede match"))
+            {
+                ConcedeMatch();
+            }
+            if (GUI.Button(noRect, "Cancel"))
+            {
+                CancelMatchConcede();
+            }
+            return;
+        }
+
         if (!InfoSaver.onlineBattle)
         {
             return;
@@ -619,6 +692,7 @@ public class GameController : MonoBehaviour
     public void StartGame()
     {
         endTurnButtonObject.SetActive(true);
+        turnTimeLeft.SetActive(true);
         concedeObject.SetActive(true);
         statsObject.SetActive(true);
         if (InfoSaver.opponentHash <= InfoSaver.myHash)
@@ -630,7 +704,6 @@ public class GameController : MonoBehaviour
             gameState.Increment(friendly:true, turnsObject, enemyTurnsObject, nextDmgObject, enemyNextDmgObject);
             boardManager.DealSuddenDeathDamage(friendly:true, gameState.GetSuddenDeathDamage(friendly:true));
             turnSecondsLeft = turnSecondsMax;
-            turnTimeLeft.SetActive(true);
         }
         else
         {
@@ -640,6 +713,7 @@ public class GameController : MonoBehaviour
             CursorController.cursorState = CursorController.CursorStates.EnemyTurn;
             gameState.Increment(friendly:false, turnsObject, enemyTurnsObject, nextDmgObject, enemyNextDmgObject);
             boardManager.DealSuddenDeathDamage(friendly:false, gameState.GetSuddenDeathDamage(friendly:false));
+            enemyTurnSecondsLeft = turnSecondsMax;
         }
         if (gameState.StartOfTheGame())
         {
@@ -649,23 +723,35 @@ public class GameController : MonoBehaviour
         //StartCoroutine(CheckBoardEffects());
     }
 
+    private Coroutine startTurnRoutine;
+    private Coroutine endTurnRoutine;
+
     public void StartTurn(bool friendly, bool hataponJustDied=false)
     {
         if (friendly)
         {
-            endTurnButtonObject.SetActive(true);
-            turnTimeLeft.SetActive(true);
             turnSecondsLeft = turnSecondsMax;
         }
         else
         {
             if (ServerDataProcesser.instance.bot != null)
             {
-                ServerDataProcesser.instance.bot.botActive = true;  
-                ServerDataProcesser.instance.bot.cardPlayed = false;  
+                ServerDataProcesser.instance.bot.botActive = true;
+                ServerDataProcesser.instance.bot.cardPlayed = false;
             }
+            enemyTurnSecondsLeft = turnSecondsMax;
         }
-        StartCoroutine(IenumStartTurn(friendly, hataponJustDied));
+
+        // A concede can trigger a round transition (-> StartTurn) while the opponent's own
+        // IenumStartTurn from their still-in-progress turn is mid-flight - if that stale
+        // coroutine resumes afterward, it re-applies SetCanAttack(true) (turning the ready
+        // outline on) to whatever minion now occupies that board slot, which by then is the
+        // NEW round's Hatapon. Stopping it here means it never reaches that point.
+        if (startTurnRoutine != null)
+        {
+            StopCoroutine(startTurnRoutine);
+        }
+        startTurnRoutine = StartCoroutine(IenumStartTurn(friendly, hataponJustDied));
     }
 
     IEnumerator IenumStartTurn(bool friendly, bool hataponJustDied=false)
@@ -860,12 +946,12 @@ public class GameController : MonoBehaviour
     public void EndTurn(bool friendly)
     {
         GameController.playerTurn = !friendly;
-        if (friendly)
+
+        if (endTurnRoutine != null)
         {
-            endTurnButtonObject.SetActive(false);
-            turnTimeLeft.SetActive(false);
+            StopCoroutine(endTurnRoutine);
         }
-        StartCoroutine(IenumEndTurn(friendly));
+        endTurnRoutine = StartCoroutine(IenumEndTurn(friendly));
     }
 
     private IEnumerator IenumEndTurn(bool friendly)
@@ -1210,7 +1296,26 @@ public class GameController : MonoBehaviour
 
     public void Concede()
     {
-        if (concedeTimes < 3 && playerTurn && CursorController.cursorState == CursorController.CursorStates.Free)
+        // Free (my turn, idle) or EnemyTurn (their turn, idle) are both fine - only reject
+        // while mid-interaction with something else (Hold/Select/ChooseOption).
+        bool cursorAllowsConcede = CursorController.cursorState == CursorController.CursorStates.Free ||
+            CursorController.cursorState == CursorController.CursorStates.EnemyTurn;
+        if (!cursorAllowsConcede)
+        {
+            return;
+        }
+
+        // Any caller (End Turn long-press, a dedicated Concede button, etc.) routes through here,
+        // so the own-turn-vs-opponent's-turn split can't be bypassed by wiring some other button
+        // straight to this method - conceding mid-opponent-turn always needs the match-concede
+        // confirmation instead of the round-concede path below.
+        if (!playerTurn)
+        {
+            RequestMatchConcedeConfirmation();
+            return;
+        }
+
+        if (concedeTimes < 3)
         {
             concedeTimes += 1;
             CardManager concedeCard = handManager.GenerateCard(CardTypes.Concede, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
@@ -1218,5 +1323,35 @@ public class GameController : MonoBehaviour
             ServerDataProcesser.instance.CastSpell(concedeCard, new List<int>());
             concedeCard.DestroyCard();
         }
+    }
+
+    // Conceding on the opponent's turn ends the whole match (not just the round) - there's no
+    // continuing round for an in-flight opponent action to race against, unlike a normal round
+    // concede. Requires confirmation first (see the OnGUI prompt) since the stakes are higher.
+    public bool pendingMatchConcedeConfirmation = false;
+
+    public void RequestMatchConcedeConfirmation()
+    {
+        bool cursorAllowsConcede = CursorController.cursorState == CursorController.CursorStates.Free ||
+            CursorController.cursorState == CursorController.CursorStates.EnemyTurn;
+        if (cursorAllowsConcede)
+        {
+            pendingMatchConcedeConfirmation = true;
+        }
+    }
+
+    public void CancelMatchConcede()
+    {
+        pendingMatchConcedeConfirmation = false;
+    }
+
+    public void ConcedeMatch()
+    {
+        pendingMatchConcedeConfirmation = false;
+        if (InfoSaver.onlineBattle)
+        {
+            ServerDataProcesser.instance.ConcedeMatch();
+        }
+        StartCoroutine(EndGame(false));
     }
 }

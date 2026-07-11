@@ -38,7 +38,10 @@ public class CheckVersionModule : MonoBehaviour
         {
             textbox.GetComponent<TextMeshProUGUI>().text = "Welcome back!";
             yield return new WaitForSeconds(1f);
-            SceneManager.LoadScene("MainMenu");
+            // Login is mandatory - Account always runs first and hands off to MainMenu once
+            // signed in (see AccountController.OnAuthResult).
+            InfoSaver.sceneAfterLogin = "MainMenu";
+            SceneManager.LoadScene("Account");
         }
         else
         {

@@ -60,15 +60,19 @@ public static class DeepImpactStats
             targetSlot.GetConnectedMinion().DestroySelf(unattach:true);
             boardManager.PlayCard(newCard, new Vector3(0f, 0f, 0f), slot, destroy: true, record: false);
 
-            if (!opp && target > 0)
+            // Target sign is always relative to the caster (target > 0 = caster's own unit),
+            // regardless of which client is processing this - so "caster drew a card" is always
+            // target > 0; only which hand (mine or the opponent's) receiving it depends on opp.
+            if (target > 0)
             {
-                //HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.DrawCard();
-            }
-            else if (opp && target < 0)
-            {
-                //HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.DrawCardOpponent();
+                if (!opp)
+                {
+                    handManager.DrawCard();
+                }
+                else
+                {
+                    handManager.DrawCardOpponent();
+                }
             }
             
             gameController.actionIsHappening = false;

@@ -107,6 +107,7 @@ namespace Networking
                     FirebaseConfig.IdToken = null;
                     FirebaseConfig.RefreshToken = null;
                     FirebaseConfig.Uid = null;
+                    FirebaseConfig.AccountEmail = null;
                     FirebaseConfig.PersistAuth();
                     yield break;
                 }

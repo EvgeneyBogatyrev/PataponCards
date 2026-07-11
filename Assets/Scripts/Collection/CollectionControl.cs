@@ -470,8 +470,7 @@ public class CollectionControl : MonoBehaviour
     {
         if (true || DeckManager.deck.Count == DeckManager.minDeckSize)
         {
-            SaveSystem.SaveRunes(DeckManager.runes, DeckLoadManager.deckIndex);
-            SaveSystem.SaveDeck(DeckManager.deck, DeckLoadManager.deckIndex);
+            SaveSystem.SaveDeckAndRunes(DeckManager.deck, DeckManager.runes, DeckLoadManager.deckIndex);
             SceneManager.LoadScene("MainMenu");
         }
     }

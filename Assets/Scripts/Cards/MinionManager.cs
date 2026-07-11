@@ -130,6 +130,9 @@ public class MinionManager : MonoBehaviour
             }
             else
             {
+                // This outline means "has an available action this turn" (move or attack), not
+                // specifically "can attack" - Hatapon can't attack but can still move, so it
+                // should show it at turn start and lose it once it moves, same as any other unit.
                 outlineBackObject.SetActive(can);
                 outlineBackAbilitiesObject.SetActive(false);
                 //normalBackObject.SetActive(false);

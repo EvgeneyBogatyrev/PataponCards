@@ -42,6 +42,25 @@ public class ServerDataProcesser : MonoBehaviour
         if (InfoSaver.onlineBattle)
         {
             StartCoroutine(RegisterInMatch());
+            StartCoroutine(FetchOpponentNickname());
+        }
+    }
+
+    // "Opponent" until FetchOpponentNickname resolves - shown as a placeholder in the meantime.
+    public string OpponentNickname = "Opponent";
+
+    private IEnumerator FetchOpponentNickname()
+    {
+        while (true)
+        {
+            JToken token = null;
+            yield return FirebaseDb.Get("matches/" + MatchId() + "/nicknames/" + InfoSaver.opponentHash, t => token = t);
+            if (token != null && token.Type != JTokenType.Null)
+            {
+                OpponentNickname = token.ToString();
+                yield break;
+            }
+            yield return new WaitForSeconds(2f);
         }
     }
 
@@ -67,6 +86,9 @@ public class ServerDataProcesser : MonoBehaviour
     {
         yield return FirebaseDb.EnsureSignedIn();
         yield return FirebaseDb.Put("matches/" + MatchId() + "/players/" + FirebaseConfig.Uid, true);
+        // Keyed by matchmaking hash (not uid) so the opponent can look it up without needing to
+        // resolve our Firebase identity - they already know our hash from matchmaking.
+        yield return FirebaseDb.Put("matches/" + MatchId() + "/nicknames/" + InfoSaver.myHash, PlayerProfile.Nickname);
         matchRegistered = true;
     }
 
@@ -172,6 +194,14 @@ public class ServerDataProcesser : MonoBehaviour
     public void Ping()
     {
         StartCoroutine(Post("1", "ping", UnityEngine.Random.Range(0, 99999).ToString(), ""));
+    }
+
+    // Conceding on the opponent's turn ends the whole match immediately (not just the round) -
+    // there's no "next round" left afterward, so there's nothing for an in-flight opponent
+    // action to race against.
+    public void ConcedeMatch()
+    {
+        StartCoroutine(Post("1", "concede match", "", ""));
     }
 
     IEnumerator Post(string key, string action, string cardIdx, string targets)
@@ -452,7 +482,12 @@ public class ServerDataProcesser : MonoBehaviour
                         toMinion =boardManager.friendlySlots[to - 1].GetConnectedMinion();
                     }
                     fromMinion.Attack(toMinion);
-                    fromMinion.SetCanAttack(false);
+                    // Not SetCanAttack(false) - that resets attacked/moved as a side effect,
+                    // which would silently erase the attacked=true this same Attack() call just
+                    // set (e.g. breaking Robopon's "didn't attack this turn" end-of-turn check
+                    // on the receiving client only). The local attack flow in MinionManager.cs
+                    // uses SetAbilityToAttack(false) for exactly this reason - match it here.
+                    fromMinion.SetAbilityToAttack(false);
                     break;
                 case MessageFromServer.Action.CastSpell:
                     if (newCard != null)
@@ -615,6 +650,12 @@ public class ServerDataProcesser : MonoBehaviour
 
                 case MessageFromServer.Action.Ping:
                     break;
+
+                case MessageFromServer.Action.ConcedeMatch:
+                    // The opponent conceded the whole match (they triggered this on their own
+                    // turn's opposite side, i.e. during ours) - we win outright, no more rounds.
+                    gameController.StartCoroutine(gameController.EndGame(true));
+                    break;
             }
             }
             catch (Exception ex)
@@ -652,18 +693,16 @@ public class ServerDataProcesser : MonoBehaviour
                 continue;
             }
 
-            if (!gameController.NeedToSync())
+            // Deliberately does NOT skip fetching just because it's our own turn: the opponent
+            // is now allowed to concede on any turn (not just theirs), and skipping fetches
+            // during our turn would leave that concede unprocessed until our turn ends - by
+            // which point our own further actions and their concede could land out of order
+            // next round. CanPerformActions() still paces fetching while an animation/event is
+            // actively resolving.
+            if (!gameController.NeedToSync() && !GameController.CanPerformActions())
             {
-                if (GameController.playerTurn)
-                {
-                    yield return new WaitForSeconds(secondsBetweenServerUpdates);
-                    continue;
-                }
-                else if (!GameController.CanPerformActions())
-                {
-                    yield return new WaitForSeconds(secondsBetweenServerUpdates);
-                    continue;
-                }
+                yield return new WaitForSeconds(secondsBetweenServerUpdates);
+                continue;
             }
 
             if (!InfoSaver.onlineBattle)

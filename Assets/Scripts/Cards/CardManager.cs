@@ -1034,6 +1034,20 @@ public class CardManager : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
+        // Arrow instances create their own independent GameObjects (arrow head + trail balls)
+        // at the scene root rather than as children of this card, so destroying the card alone
+        // never cleans them up - every destruction path must do it here, since not every caller
+        // of DestroyCard() remembers to clear arrowList itself first.
+        if (arrowList != null)
+        {
+            foreach (Arrow arrow in arrowList)
+            {
+                arrow.DestroyArrow();
+            }
+            curArrow = null;
+            arrowList = null;
+        }
+
         Destroy(gameObject);
 
         yield return null;

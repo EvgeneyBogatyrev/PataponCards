@@ -4,14 +4,20 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using System;
+using Networking;
 
 public static class SaveSystem
 {
 
-    private static string pathDeck = Application.persistentDataPath + "/deck.dec";
-    private static string pathRunes = Application.persistentDataPath + "/runes.run";
-    private static string pathCollection = Application.persistentDataPath + "/collection.col";
-    private static string pathBotStats = Application.persistentDataPath + "/bot.bot";
+    // Scoped by the signed-in account's uid (not just the device) - otherwise two accounts on
+    // the same device/machine (e.g. two ParrelSync clones, which share the same
+    // Application.persistentDataPath since they share company/product name) would read and
+    // write the exact same physical files and appear to "share" a collection.
+    private static string AccountFileSuffix => string.IsNullOrEmpty(FirebaseConfig.Uid) ? "guest" : FirebaseConfig.Uid;
+    private static string pathDeck => Application.persistentDataPath + "/deck_" + AccountFileSuffix + ".dec";
+    private static string pathRunes => Application.persistentDataPath + "/runes_" + AccountFileSuffix + ".run";
+    private static string pathCollection => Application.persistentDataPath + "/collection_" + AccountFileSuffix + ".col";
+    private static string pathBotStats => Application.persistentDataPath + "/bot_" + AccountFileSuffix + ".bot";
     public static bool loading = false;
 
     public static Dictionary<CardTypes, int> GetStarterCollection()
@@ -70,7 +76,7 @@ public static class SaveSystem
         };
     }
 
-    public static void SaveDeck(List<CardTypes> deck, int index=0)
+    public static void SaveDeck(List<CardTypes> deck, int index=0, bool mirrorToCloud=true)
     {
         string newPathDeck = pathDeck;
         if (index != 0) newPathDeck += index.ToString();
@@ -79,6 +85,23 @@ public static class SaveSystem
 
         formatter.Serialize(stream, deck);
         stream.Close();
+
+        if (mirrorToCloud)
+        {
+            CloudSave.MirrorDeck(index, deck, LoadRunes(index));
+        }
+    }
+
+    // Saves both halves of a deck slot and mirrors to the cloud exactly once, with the fully
+    // up-to-date deck+runes together - calling SaveDeck/SaveRunes separately would each fire
+    // their own independent cloud write, and since those race over the network with no
+    // ordering guarantee, a briefly-stale one (paired with the other half's old value) can land
+    // after the fresher one and corrupt the cloud copy.
+    public static void SaveDeckAndRunes(List<CardTypes> deck, List<Runes> runes, int index=0)
+    {
+        SaveDeck(deck, index, mirrorToCloud:false);
+        SaveRunes(runes, index, mirrorToCloud:false);
+        CloudSave.MirrorDeck(index, deck, runes);
     }
 
     public static void DeleteDeck(int index, int maxdecks=6)
@@ -87,21 +110,18 @@ public static class SaveSystem
         {
             if (i == 5)
             {
-                SaveDeck(new List<CardTypes>(), i);
-                SaveRunes(new List<Runes>(), i);
+                SaveDeckAndRunes(new List<CardTypes>(), new List<Runes>(), i);
                 break;
             }
 
             List<Runes> runes = SaveSystem.LoadRunes(i + 1);
             if (runes.Count == 0)
             {
-                SaveDeck(new List<CardTypes>(), i);
-                SaveRunes(new List<Runes>(), i);
+                SaveDeckAndRunes(new List<CardTypes>(), new List<Runes>(), i);
                 break;
             }
 
-            SaveDeck(LoadDeck(i + 1), i);
-            SaveRunes(LoadRunes(i + 1), i);
+            SaveDeckAndRunes(LoadDeck(i + 1), LoadRunes(i + 1), i);
         }
     }
 
@@ -133,13 +153,21 @@ public static class SaveSystem
                 }
 
 
+                // Build a new list rather than removing from "deck" while a foreach is iterating
+                // it - List<T>'s enumerator throws InvalidOperationException the moment a
+                // Remove() happens mid-iteration, and since that gets silently swallowed by the
+                // catch below, ANY deck that ever needed trimming (e.g. the player's collection
+                // legitimately has fewer copies of a card than the deck uses) would silently
+                // revert to the default starter deck instead of just dropping that one card.
+                List<CardTypes> validatedDeck = new List<CardTypes>();
                 foreach (CardTypes deckItem in deck)
                 {
-                    if (DeckManager.collection[deckItem] < deckStats[deckItem])
+                    if (DeckManager.collection[deckItem] >= deckStats[deckItem])
                     {
-                        deck.Remove(deckItem);
+                        validatedDeck.Add(deckItem);
                     }
                 }
+                deck = validatedDeck;
 
                 if (deck.Count == 0)
                 {
@@ -159,7 +187,7 @@ public static class SaveSystem
         }
     }
 
-    public static void SaveRunes(List<Runes> runes, int index=0)
+    public static void SaveRunes(List<Runes> runes, int index=0, bool mirrorToCloud=true)
     {
         string newPathRunes = pathRunes;
         if (index != 0) newPathRunes += index.ToString();
@@ -168,6 +196,11 @@ public static class SaveSystem
 
         formatter.Serialize(stream, runes);
         stream.Close();
+
+        if (mirrorToCloud)
+        {
+            CloudSave.MirrorDeck(index, LoadDeck(index), runes);
+        }
     }
 
     public static List<Runes> LoadRunes(int index=0)
@@ -211,6 +244,8 @@ public static class SaveSystem
 
         formatter.Serialize(stream, collection);
         stream.Close();
+
+        CloudSave.MirrorCollection(collection);
     }
 
     public static Dictionary<CardTypes, int> LoadCollection()
@@ -228,7 +263,7 @@ public static class SaveSystem
                 
                 foreach (CardTypes cardType in GetCollectableCards())
                 {
-                    collection[cardType] = 3;
+                    //collection[cardType] = 3;
                     //collection.Remove(cardType);
                 }
                 foreach (CardTypes cardType in GetForbiddenCards())
@@ -258,6 +293,8 @@ public static class SaveSystem
 
         formatter.Serialize(stream, stats);
         stream.Close();
+
+        CloudSave.MirrorBotStats(stats);
     }
 
     public static List<bool> LoadBotStats()

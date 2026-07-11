@@ -77,7 +77,10 @@ public static class TonKampon_option2Stats
                     }
                 }
             }
-            weakMinion.Heal(weakMinion.GetPower());
+            if (weakMinion != null)
+            {
+                weakMinion.Heal(weakMinion.GetPower());
+            }
 
             gameController.actionIsHappening = false;
             yield return null;

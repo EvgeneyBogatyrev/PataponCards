@@ -17,7 +17,12 @@ namespace Networking
         public static string Uid;
         public static double TokenExpiresAtUnixSeconds;
 
+        // Empty/null = guest (anonymous only). Set once FirebaseAuth.SignUp/SignIn succeeds -
+        // this is what gates "play online" and what turns on SaveSystem's cloud mirroring.
+        public static string AccountEmail;
+
         public static bool IsSignedIn => !string.IsNullOrEmpty(IdToken);
+        public static bool HasAccount => !string.IsNullOrEmpty(AccountEmail);
 
         public static bool TokenNeedsRefresh()
         {
@@ -36,6 +41,7 @@ namespace Networking
 
         private const string RefreshTokenPrefsKey = "Firebase_RefreshToken";
         private const string UidPrefsKey = "Firebase_Uid";
+        private const string AccountEmailPrefsKey = "Firebase_AccountEmail";
 
         // Firebase refresh tokens don't expire on their own - reusing one across app/Editor
         // restarts avoids minting a brand-new anonymous user every launch, which is both the
@@ -51,6 +57,7 @@ namespace Networking
             {
                 RefreshToken = PlayerPrefs.GetString(RefreshTokenPrefsKey);
                 Uid = PlayerPrefs.GetString(UidPrefsKey, "");
+                AccountEmail = PlayerPrefs.GetString(AccountEmailPrefsKey, "");
             }
         }
 
@@ -58,6 +65,7 @@ namespace Networking
         {
             PlayerPrefs.SetString(RefreshTokenPrefsKey, RefreshToken ?? "");
             PlayerPrefs.SetString(UidPrefsKey, Uid ?? "");
+            PlayerPrefs.SetString(AccountEmailPrefsKey, AccountEmail ?? "");
             PlayerPrefs.Save();
         }
     }

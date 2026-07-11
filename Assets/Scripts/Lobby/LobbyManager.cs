@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
+using Networking;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -12,8 +13,18 @@ public class LobbyManager : MonoBehaviour
     public GameObject regenerateButton;
     public GameObject playButton;
 
-    public void Start()
+    public IEnumerator Start()
     {
+        // Re-pull from Firebase (the authoritative record) right before a match can start, so
+        // local file tampering (editing collection.col/deck.dec directly to grant cards/decks
+        // never actually earned) gets overwritten instead of silently trusted - this is the
+        // last stop before a deck gets loaded and sent to an opponent.
+        if (FirebaseConfig.HasAccount)
+        {
+            yield return CloudSave.DownloadCloudToLocal();
+            DeckManager.collection = SaveSystem.LoadCollection();
+        }
+
         DeckManager.deck = SaveSystem.LoadDeck(DeckLoadManager.deckIndex);
         DeckManager.runes = SaveSystem.LoadRunes(DeckLoadManager.deckIndex);
         InfoSaver.myHash = UnityEngine.Random.Range(0, 9999);
@@ -22,6 +33,13 @@ public class LobbyManager : MonoBehaviour
 
     public void PlayGameButton()
     {
+        if (!FirebaseConfig.HasAccount)
+        {
+            InfoSaver.sceneAfterLogin = "Lobby";
+            SceneManager.LoadScene("Account");
+            return;
+        }
+
         int hash = Int32.Parse(inputField.GetComponent<TMP_InputField>().text);
         InfoSaver.opponentHash = hash;
         InfoSaver.onlineBattle = true;
@@ -49,6 +67,13 @@ public class LobbyManager : MonoBehaviour
 
     public void PlayOnline()
     {
+        if (!FirebaseConfig.HasAccount)
+        {
+            InfoSaver.sceneAfterLogin = "Lobby";
+            SceneManager.LoadScene("Account");
+            return;
+        }
+
         InfoSaver.onlineBattle = true;
         SceneManager.LoadScene("FindGame");
     }

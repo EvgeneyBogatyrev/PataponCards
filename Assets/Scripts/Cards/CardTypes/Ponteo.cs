@@ -21,7 +21,20 @@ public static class PonteoStats
 
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            // Hand off to a coroutine hosted on GameController (a persistent object) instead of
+            // running the mill loop directly here: this coroutine is started on the temporary
+            // spell-hosting card, which self-destructs after HandManager.cardDestroyTimer (4.5s)
+            // regardless of whether the effect is done - milling through several non-Haste
+            // cards (1s wait each) can easily take longer than that, and losing that race would
+            // silently kill this coroutine mid-effect, leaving actionIsHappening stuck true and
+            // freezing the match.
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.StartCoroutine(MillUntilHaste(gameController, friendlySlots));
+            yield return null;
+        }
+
+        static IEnumerator MillUntilHaste(GameController gameController, List<BoardManager.Slot> friendlySlots)
+        {
             HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
             gameController.actionIsHappening = true;
 

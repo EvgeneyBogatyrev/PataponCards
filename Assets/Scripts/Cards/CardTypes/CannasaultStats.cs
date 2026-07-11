@@ -9,7 +9,7 @@ public class CannasaultStats : MonoBehaviour
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 4;
-        stats.description = "<b>Haste</b>.\n<b>On attack</b>: Gain \"End turn and start turn effects can't trigger\" until the start of your next turn.";
+        stats.description = "<b>On attack</b>: Gain \"End turn and start turn effects can't trigger\" until the start of your next turn.";
         stats.name = "Cannasault";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Spear);
@@ -67,7 +67,7 @@ public class CannasaultStats : MonoBehaviour
         stats.startTurnEvent = StartTurn;
 
         stats.descriptionSize = 3;
-        stats.hasHaste = true;
+        //stats.hasHaste = true;
 
         stats.imagePath = "cannasault";
         stats.artistName = "Official render";
