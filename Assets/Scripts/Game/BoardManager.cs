@@ -99,6 +99,7 @@ public class BoardManager : MonoBehaviour
         public void SetConnectedMinion(MinionManager min)
         {
             connectedMinion = min;
+            SetFree(min == null);
         }
     }
 

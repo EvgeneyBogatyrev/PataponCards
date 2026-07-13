@@ -789,7 +789,7 @@ public class ServerDataProcesser : MonoBehaviour
                     currentMessage.index = entry["index"]?.Value<int>() ?? 0;
                     currentMessage.action = currentMessage.GetAction(entry["action"]?.Value<string>() ?? "");
 
-                    if (currentMessage.action != MessageFromServer.Action.EndTurn && currentMessage.action != MessageFromServer.Action.Attack && currentMessage.action != MessageFromServer.Action.Move && currentMessage.action != MessageFromServer.Action.Exchange && currentMessage.action != MessageFromServer.Action.NumberOfCards && currentMessage.action != MessageFromServer.Action.SendDeck)
+                    if (currentMessage.action != MessageFromServer.Action.EndTurn && currentMessage.action != MessageFromServer.Action.Attack && currentMessage.action != MessageFromServer.Action.Move && currentMessage.action != MessageFromServer.Action.Exchange && currentMessage.action != MessageFromServer.Action.NumberOfCards && currentMessage.action != MessageFromServer.Action.SendDeck && currentMessage.action != MessageFromServer.Action.ConcedeMatch)
                     {
                         currentMessage.cardIndex = (CardTypes)Int32.Parse(entry["cardIdx"]?.Value<string>() ?? "0");
                     }

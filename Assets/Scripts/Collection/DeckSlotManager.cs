@@ -12,10 +12,27 @@ public class DeckSlotManager : MonoBehaviour
     public GameObject rune1;
     public GameObject rune2;
     public GameObject deckCountObject;
-    
+    public UITheme uiTheme;
 
     private int index;
     private bool mouseOver = false;
+    private SpriteRenderer background;
+
+    private void Start()
+    {
+        background = GetComponent<SpriteRenderer>();
+    }
+
+    // A plain hover highlight on the slot's own backdrop, if it has one - this object's other
+    // sprites (rune0-2) carry rune identity art, so they're left alone (see RuneDropdownManager
+    // for the same reasoning).
+    private void Update()
+    {
+        if (background != null && uiTheme != null)
+        {
+            background.color = mouseOver ? Color.Lerp(Color.white, uiTheme.primaryHover, 0.2f) : Color.white;
+        }
+    }
 
     public void Customize(List<Runes> runes, int index, string deckName="")
     {

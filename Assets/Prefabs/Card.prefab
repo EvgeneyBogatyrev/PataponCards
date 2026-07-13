@@ -1231,6 +1231,8 @@ MonoBehaviour:
   - {fileID: 468661270526791737}
   - {fileID: 8638902238078364517}
   - {fileID: 2221809403485526050}
+  uiTheme: {fileID: 11400000, guid: 1079f9e4c0505b2499b933743137d146, type: 2}
+  runeBlockedOutline: {fileID: 0}
   spearMaterial: {fileID: 2100000, guid: 874f937b3d3f1824cadcd0b0cd7d2e75, type: 2}
   shieldMaterial: {fileID: 2100000, guid: 59b13edc08a527e409b95382a0019c9b, type: 2}
   bowMaterial: {fileID: 2100000, guid: 7425f72f272b8a44d86ca67d6d509024, type: 2}

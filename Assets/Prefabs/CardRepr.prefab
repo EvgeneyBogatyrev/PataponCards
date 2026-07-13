@@ -239,7 +239,9 @@ MonoBehaviour:
   type: 0
   numberOfCopiesObject: {fileID: 7383323273392899475}
   numberOfCopies: 0
+  relevantCard: 0
   collectionObject: {fileID: 0}
+  uiTheme: {fileID: 11400000, guid: 1079f9e4c0505b2499b933743137d146, type: 2}
   previewedCard: {fileID: 0}
   cardPrefab: {fileID: 5994425831647166798, guid: 64be9f69a2d598c4ea6a3e37aeb0a698, type: 3}
   index: 0

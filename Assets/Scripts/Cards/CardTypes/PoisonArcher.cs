@@ -137,7 +137,7 @@ public static class PoisonArcherStats
         stats.spell = OnPlay;
         stats.onAttackEvent = onAttack;
         stats.numberOfTargets = 1;
-        stats.power = 3;
+        stats.power = 2;
 
         stats.imagePath = "poison_archer_hq";
         stats.artistName = "Official render";

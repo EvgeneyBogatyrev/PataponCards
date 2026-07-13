@@ -16,6 +16,7 @@ public static class TrentStats
         stats.relevantCards.Add(CardTypes.TrentOnFire);
 
         stats.runes.Add(Runes.Shield);
+        //stats.runes.Add(Runes.Shield);
 
         static IEnumerator onDamage(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -55,7 +56,7 @@ public static class TrentFireStats
         stats.power = 10;
         stats.description = "<b>End of turn</b>: Deal " + selfDamage.ToString() + " to itself.";
         stats.name = "Treant on Fire";
-        stats.runes.Add(Runes.Shield);
+        //stats.runes.Add(Runes.Shield);
         
         static IEnumerator endTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

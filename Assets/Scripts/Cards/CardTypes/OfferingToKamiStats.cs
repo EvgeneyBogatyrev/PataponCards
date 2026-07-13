@@ -8,8 +8,8 @@ public static class OfferingToKamiStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        const int buff = 3;
-        stats.description = "Destroy a friendly unit. Your units gain +" + buff.ToString() + " power.";
+        const int buff = 2;
+        stats.description = "Destroy a friendly non-Hatapon unit. Your units gain +" + buff.ToString() + " power.";
         stats.name = "Offering to Kami";
         stats.nameSize = 5;
 
@@ -51,6 +51,10 @@ public static class OfferingToKamiStats
         static bool FangCheckTarget(int target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             if (target < 0)
+            {
+                return false;
+            }
+            if (friendlySlots[target - 1].GetConnectedMinion().GetCardType() == CardTypes.Hatapon)
             {
                 return false;
             }

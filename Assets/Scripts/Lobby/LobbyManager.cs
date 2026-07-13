@@ -27,6 +27,17 @@ public class LobbyManager : MonoBehaviour
 
         DeckManager.deck = SaveSystem.LoadDeck(DeckLoadManager.deckIndex);
         DeckManager.runes = SaveSystem.LoadRunes(DeckLoadManager.deckIndex);
+
+        // A friend challenge already negotiated myHash/opponentHash/onlineBattle over Firebase
+        // before landing here (via DeckSelect) - skip generating a new random key and showing
+        // the normal Play Online/manual-entry UI, and just go straight into the match.
+        if (InfoSaver.challengeAccepted)
+        {
+            InfoSaver.challengeAccepted = false;
+            SceneManager.LoadScene("Game");
+            yield break;
+        }
+
         InfoSaver.myHash = UnityEngine.Random.Range(0, 9999);
         PrintKey();
     }

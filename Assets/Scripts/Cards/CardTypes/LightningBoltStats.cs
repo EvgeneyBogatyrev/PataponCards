@@ -10,7 +10,7 @@ public static class LightningBoltStats
 
         const int damage = 2;
         stats.description = "Deal " + damage.ToString() + " damage to a unit.";
-        stats.name = "Lightning Bolt";
+        stats.name = "Shock";
 
         stats.isSpell = true;
         static IEnumerator FangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

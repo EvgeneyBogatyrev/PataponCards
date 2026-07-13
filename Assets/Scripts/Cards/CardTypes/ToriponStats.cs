@@ -12,7 +12,7 @@ public static class ToriponStats
         stats.description = "Can't be attacked by units.";
         stats.name = "Toripon";
         stats.runes.Add(Runes.Spear);
-        stats.runes.Add(Runes.Spear);
+        //stats.runes.Add(Runes.Spear);
         //stats.runes.Add(Runes.Spear);
 
         stats.flying = true;

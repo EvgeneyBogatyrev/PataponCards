@@ -119,9 +119,15 @@ public class MinionManager : MonoBehaviour
 
     public void SetAbilityToAttack(bool can=true)
     {
+        // summoningSickness must always update regardless of whose turn/minion this is - a bot
+        // or network-opponent minion that attacks still needs to be marked as having acted, or
+        // GetCanAttackBot()/local re-checks keep seeing it as fresh and it can act again
+        // immediately (this previously stayed gated below, so only the local player's own
+        // minions on their own turn ever actually got flagged - enemy/bot minions never did).
+        summoningSickness = !can;
+
         if (GameController.playerTurn && GetFriendly() && !(!cardStats.canAttack && cardStats.limitedVision && !cardStats.isStatic))
         {
-            summoningSickness = !can;
             if (cardStats.isStatic)
             {
                 outlineBackAbilitiesObject.SetActive(can);
@@ -873,8 +879,17 @@ public class MinionManager : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
         }
 
+        // An onAttackEvent (e.g. Myamsar) waited for above can destroy `enemy` itself, if the
+        // unit it targets (e.g. "weakest enemy") happens to be the same one this attack is
+        // against - by the time we resume here, enemy may already be gone. A destroyed unit
+        // deals no damage and takes none, so skip this whole exchange rather than touching it.
+        if (enemy == null)
+        {
+            yield return null;
+        }
+
         int enemyPower = enemy.GetPower();
-        if (cardStats.canDealDamage && !cardStats.isStatic) 
+        if (cardStats.canDealDamage && !cardStats.isStatic)
         {
             if (enemy.GetCardType() == CardTypes.Hatapon)
             {
@@ -901,6 +916,13 @@ public class MinionManager : MonoBehaviour
                     enemy.ReceiveDamage(cardStats.fixedPower);
                 }
             }
+        }
+
+        if (enemy == null)
+        {
+            // The damage just dealt above may itself have destroyed enemy (e.g. lethal damage
+            // triggering its own Die()) - the counter-damage exchange below needs the same guard.
+            yield return null;
         }
 
         if (enemy.GetCardStats().canDealDamage && !enemy.cardStats.isStatic)

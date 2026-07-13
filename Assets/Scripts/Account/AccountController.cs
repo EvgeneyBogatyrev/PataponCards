@@ -38,6 +38,31 @@ public class AccountController : MonoBehaviour
         SceneManager.LoadScene("CreateAccount");
     }
 
+    // Reuses the same email field as Sign In - type your email, press this instead of Sign In.
+    public void ForgotPasswordButton()
+    {
+        if (busy)
+        {
+            return;
+        }
+
+        string email = emailField.GetComponent<TMP_InputField>().text.Trim();
+        if (string.IsNullOrEmpty(email))
+        {
+            ShowError("Enter your email above, then press Forgot Password.");
+            return;
+        }
+
+        SetBusy(true);
+        StartCoroutine(FirebaseAuth.SendPasswordResetEmail(email, OnPasswordResetResult));
+    }
+
+    private void OnPasswordResetResult(bool success, string error)
+    {
+        SetBusy(false);
+        ShowError(success ? "Password reset email sent - check your inbox." : error);
+    }
+
     public void BackButton()
     {
         // Login is mandatory everywhere now - there's no unauthenticated screen left to

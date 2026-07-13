@@ -12,7 +12,7 @@ public static class YariponBushwackerStats
         stats.description = "<b>Haste</b> (can attack and move as soon as it enters the battlefield).\n<b>On play</b>: Deal " + destroboDamage.ToString() +  " damage.";
         stats.name = "Fah Zakpon";
         stats.hasHaste = true;
-        //stats.runes.Add(Runes.Shield);
+        stats.runes.Add(Runes.Spear);
         stats.nameSize = 4;
         stats.hasOnPlaySpell = true;
 

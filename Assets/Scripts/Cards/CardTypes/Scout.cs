@@ -8,13 +8,13 @@ public static class ScoutStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 2;
-        stats.description = "<b>End of turn</b>: Draw a card. Your Hatapon loses 1 life.";
+        stats.power = 1;
+        stats.description = "<b>End of turn</b>: Draw a card. Your Hatapon loses 2 life.";
         stats.name = "Megapon";
         stats.imagePath = "Megapon";
         
         stats.runes.Add(Runes.Bow);
-        //stats.runes.Add(Runes.Bow);
+        stats.runes.Add(Runes.Bow);
 
         stats.additionalRules.Add("Damage happens even if you didn't draw a card for any reason.");
 
@@ -72,7 +72,7 @@ public static class ScoutStats
                     }
 
                     soundMain.DestroySelf();
-                    minion_.DealDamageToThis(1);
+                    minion_.DealDamageToThis(2);
                     break;
                 }
             }

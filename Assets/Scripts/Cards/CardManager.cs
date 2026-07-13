@@ -74,6 +74,10 @@ public class CardManager : MonoBehaviour
         public bool hexproof = false;
         public bool cycling = false;
         public bool blockEffects = false;
+        // While a minion with this is alive on either side, GameController.SpellsAreBlocked()
+        // returns true and neither player can cast spells (cycling and hasOnPlaySpell minions
+        // are unaffected - see Slogturtle).
+        public bool blockSpells = false;
         public int ephemeral = -1;
         public bool giveCyclingToCardsInHand = false;
         public int cardsDrawnByThis = 0;
@@ -155,6 +159,7 @@ public class CardManager : MonoBehaviour
                 onCycleOtherEvent = this.onCycleOtherEvent,
                 onAttackEvent = this.onAttackEvent,
                 blockEffects = this.blockEffects,
+                blockSpells = this.blockSpells,
                 ephemeral = this.ephemeral,
                 onDamageEvent = this.onDamageEvent,
                 giveCyclingToCardsInHand = this.giveCyclingToCardsInHand,
@@ -250,6 +255,13 @@ public class CardManager : MonoBehaviour
     public GameObject lockObject;
     public List<GameObject> runeObjects;
 
+    // Optional - drag the project's single UITheme asset here to color the rune-blocked tint on
+    // backObject (see SetPlaceabilityIndicators). Falls back to a hardcoded gray if unassigned.
+    public UITheme uiTheme;
+    private CollectionControl collectionControl;
+    private Color backObjectDefaultColor;
+    private bool backObjectDefaultColorCaptured = false;
+
     public Material spearMaterial;
     public Material shieldMaterial;
     public Material bowMaterial;
@@ -276,6 +288,17 @@ public class CardManager : MonoBehaviour
     public List<int> spellTargets;
     private BoardManager.Slot slotToPlay;
     private float curRotation;
+
+    // Set/cleared by GameController.QueueData.ApplyEffect() around a hasOnPlaySpell card's spell
+    // coroutine - lets that ability optionally redirect where its own card ends up (see Aiton)
+    // before BoardManager.PlayCard actually places it, without changing the stats.spell delegate
+    // signature every other card already relies on. Most abilities never touch this.
+    public static CardManager CurrentlyResolvingOnPlayCard = null;
+
+    public void SetSlotToPlay(BoardManager.Slot slot)
+    {
+        slotToPlay = slot;
+    }
     
     private BoardManager boardManager;
     private HandManager handManager;
@@ -316,6 +339,12 @@ public class CardManager : MonoBehaviour
             numberOfCardsText.GetComponent<TextMeshPro>().text = "1x";
         }
         lockObject.SetActive(false);
+
+        GameObject collectionObj = GameObject.Find("Collection");
+        if (collectionObj != null)
+        {
+            collectionControl = collectionObj.GetComponent<CollectionControl>();
+        }
     }
 
     private BoardManager.Slot SelectClosestSlot()
@@ -645,7 +674,13 @@ public class CardManager : MonoBehaviour
                     {
                         if (cardStats.HaveCycling() && distanceToCycle < 2f)
                         {
+                            // Cycling isn't casting - a card that blocks spells (e.g. Slogturtle)
+                            // still allows cycling.
                             CycleProcedure();
+                        }
+                        else if (gameController.SpellsAreBlocked())
+                        {
+                            ReturnToHand();
                         }
                         else if (cardStats.numberOfTargets == 0 && transform.position.y > 2f)
                         {
@@ -728,7 +763,13 @@ public class CardManager : MonoBehaviour
 
                 if (spellTargets.Count >= cardStats.numberOfTargets)
                 {
-                    if (cardStats.checkSpellTargets(spellTargets, boardManager.enemySlots, boardManager.friendlySlots))
+                    // isSpell only, not hasOnPlaySpell - a card that blocks spells (e.g.
+                    // Slogturtle) doesn't stop minions with on-play triggers from being played.
+                    if (cardStats.isSpell && gameController.SpellsAreBlocked())
+                    {
+                        ReturnToHand();
+                    }
+                    else if (cardStats.checkSpellTargets(spellTargets, boardManager.enemySlots, boardManager.friendlySlots))
                     {
                         PlayCard(closestSlot:slotToPlay, spell:true);
                     }
@@ -792,18 +833,23 @@ public class CardManager : MonoBehaviour
                 break;
 
             case CardState.display:
-                int limitInDeck = DeckManager.collection[cardType];
-                if (limitInDeck > 3)
+                // lockObject now reflects BOTH reasons a card can't be added (copy/deck-limit,
+                // same as before, and rune mismatch) - backObject additionally tints gray for the
+                // rune-mismatch case specifically, so the two reasons stay visually distinguishable.
+                // Recomputed every frame this card is on display, so it stays correct as the
+                // player edits runes without any external refresh call.
+                if (collectionControl != null)
                 {
-                    limitInDeck = 3;
-                }
-                if (DeckManager.GetCardQty(this.cardType) < limitInDeck)
-                {
-                    lockObject.SetActive(false);
+                    SetPlaceabilityIndicators(collectionControl.GetPlaceability(cardType));
                 }
                 else
                 {
-                    lockObject.SetActive(true);
+                    int limitInDeck = DeckManager.collection[cardType];
+                    if (limitInDeck > 3)
+                    {
+                        limitInDeck = 3;
+                    }
+                    lockObject.SetActive(DeckManager.GetCardQty(this.cardType) >= limitInDeck);
                 }
                 Scene scene = SceneManager.GetActiveScene();
                 if (scene.name == "Collection")
@@ -835,40 +881,8 @@ public class CardManager : MonoBehaviour
                             if (DeckManager.CheckCardNumber(cardType) && DeckManager.GetDeckSize() + 1 <= DeckManager.minDeckSize)
                             {
                                 CollectionControl collection = GameObject.Find("Collection").GetComponent<CollectionControl>();
-                                
-                                int tmpSpear = collection.spearDevotion;
-                                int tmpShield = collection.shieldDevotion;
-                                int tmpBow = collection.bowDevotion;
+                                bool bad = collection.GetPlaceability(cardType) != CollectionControl.CardPlaceability.Placeable;
 
-                                bool bad = false;
-                                if (DeckManager.GetCardQty(cardType) >= DeckManager.collection[cardType])
-                                {
-                                    bad = true;
-                                }
-
-
-                                foreach (Runes rune in cardStats.runes)
-                                {
-                                    if (rune == Runes.Spear)
-                                    {
-                                        tmpSpear--;
-                                    }
-                                    else if (rune == Runes.Shield)
-                                    {
-                                        tmpShield--;
-                                    }
-                                    else if (rune == Runes.Bow)
-                                    {
-                                        tmpBow--;
-                                    }
-
-                                    if (tmpBow < 0 || tmpShield < 0 || tmpSpear < 0)
-                                    {
-                                        bad = true;
-                                        break;
-                                    }
-                                }
-                                
                                 if (DEBUG || !bad)
                                 {
                                     DeckManager.AddCard(cardType);
@@ -1156,6 +1170,36 @@ public class CardManager : MonoBehaviour
     {
         cardDescription = description;
         descriptionObject.GetComponent<TextMeshPro>().text = description;
+    }
+
+    // Collection/deck-builder grid only. lockObject shows for either blocked reason (copy/deck-
+    // limit or rune mismatch, unchanged from before). For the rune-mismatch case specifically,
+    // retint backObject - the semi-transparent gray backing every card already has (normally used
+    // to dim alreadyPlayed cards in-game, always visible/full-card-sized in the Collection grid)
+    // - instead of a separate overlay object. No new prefab wiring needed, and it avoids the
+    // transparent-art-bleed problem a direct imageObject tint had (tinting a sprite's RGB doesn't
+    // add opacity to its already-transparent pixels, so it never actually masked anything).
+    public void SetPlaceabilityIndicators(CollectionControl.CardPlaceability placeability)
+    {
+        lockObject.SetActive(placeability != CollectionControl.CardPlaceability.Placeable);
+
+        if (backObject == null)
+        {
+            return;
+        }
+        SpriteRenderer backRenderer = backObject.GetComponent<SpriteRenderer>();
+        if (backRenderer == null)
+        {
+            return;
+        }
+        if (!backObjectDefaultColorCaptured)
+        {
+            backObjectDefaultColor = backRenderer.color;
+            backObjectDefaultColorCaptured = true;
+        }
+        backRenderer.color = placeability == CollectionControl.CardPlaceability.BlockedByRunes
+            ? (uiTheme != null ? uiTheme.cardBlockedByRunes : new Color(0.2f, 0.2f, 0.2f, 0.85f))
+            : backObjectDefaultColor;
     }
     public void SetPositionInHand(Vector3 newPosition)
     {

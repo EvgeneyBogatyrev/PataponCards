@@ -12,11 +12,26 @@ public class CardReprManager : MonoBehaviour
     public bool relevantCard = false;
 
     public CollectionControl collectionObject;
+    public UITheme uiTheme;
+    private SpriteRenderer background;
+    private bool alternateRow;
 
     private bool mouseOver;
     public CardManager previewedCard = null;
     public GameObject cardPrefab;
     public int index = 0;
+
+    private void Start()
+    {
+        background = GetComponent<SpriteRenderer>();
+    }
+
+    // Called by CollectionControl.ShowDeck() with the row/column position so adjacent rows read
+    // as distinct bands instead of a flat wall of identical rows.
+    public void SetRowIndex(int position)
+    {
+        alternateRow = position % 2 == 1;
+    }
 
     public void SetName(string name)
     {
@@ -43,6 +58,12 @@ public class CardReprManager : MonoBehaviour
             SetVisualNumber();
             DeckManager.RemoveCard(type);
             collectionObject.ShowDeck();
+        }
+
+        if (background != null && uiTheme != null)
+        {
+            Color baseColor = alternateRow ? new Color(0.92f, 0.92f, 0.92f, 1f) : Color.white;
+            background.color = mouseOver ? Color.Lerp(baseColor, uiTheme.primaryHover, 0.3f) : baseColor;
         }
     }
 

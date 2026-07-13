@@ -13,6 +13,8 @@ namespace Networking
     {
         private const string SignUpUrl = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=";
         private const string SignInUrl = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=";
+        private const string SendOobCodeUrl = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=";
+        public const int MaxNicknameLength = 20;
 
         // Creates a brand-new email/password account (a fresh uid, distinct from whatever
         // anonymous session was active - some Firebase projects reject the alternative
@@ -22,6 +24,28 @@ namespace Networking
         // signed-in user on this same device (see CloudSave.SeedFreshAccount).
         public static IEnumerator SignUp(string email, string password, string nickname, Action<bool, string> onResult)
         {
+            if (string.IsNullOrWhiteSpace(nickname))
+            {
+                onResult?.Invoke(false, "Please enter a nickname.");
+                yield break;
+            }
+            if (nickname.Trim().Length > MaxNicknameLength)
+            {
+                onResult?.Invoke(false, "Nickname must be " + MaxNicknameLength + " characters or fewer.");
+                yield break;
+            }
+
+            // Checked before accounts:signUp runs, so a taken nickname never creates an orphaned
+            // account the player has to abandon and can't easily delete themselves.
+            string nicknameKey = NicknameKey(nickname);
+            JToken existingOwner = null;
+            yield return FirebaseDb.Get("nicknameIndex/" + nicknameKey, token => existingOwner = token);
+            if (existingOwner != null && existingOwner.Type != JTokenType.Null)
+            {
+                onResult?.Invoke(false, "That nickname is taken - try another.");
+                yield break;
+            }
+
             JObject body = new JObject
             {
                 ["email"] = email,
@@ -47,8 +71,27 @@ namespace Networking
             }
 
             yield return FirebaseDb.Put("users/" + FirebaseConfig.Uid + "/profile/nickname", nickname);
+            // Reserved once, never edited afterward (no rename feature exists) - written after
+            // the account exists so FirebaseConfig.Uid is populated, matching the profile write above.
+            yield return FirebaseDb.Put("nicknameIndex/" + nicknameKey, FirebaseConfig.Uid);
             yield return CloudSave.SeedFreshAccount();
             onResult?.Invoke(true, null);
+        }
+
+        // Firebase RTDB keys can't contain '.', '#', '$', '[', ']', or '/' - strip anything not
+        // safe, alongside lowercasing so lookups are case-insensitive. Public - FirebaseFriends
+        // uses the same key when resolving a typed nickname to a uid.
+        public static string NicknameKey(string nickname)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in nickname.Trim().ToLowerInvariant())
+            {
+                if (c != '.' && c != '#' && c != '$' && c != '[' && c != ']' && c != '/')
+                {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString();
         }
 
         public static IEnumerator SignIn(string email, string password, Action<bool, string> onResult)
@@ -89,6 +132,22 @@ namespace Networking
             }
 
             onResult?.Invoke(true, null);
+        }
+
+        // Doesn't need a signed-in session - Firebase emails a reset link straight to the
+        // account's address, no idToken/uid touched here at all.
+        public static IEnumerator SendPasswordResetEmail(string email, Action<bool, string> onResult)
+        {
+            JObject body = new JObject
+            {
+                ["requestType"] = "PASSWORD_RESET",
+                ["email"] = email
+            };
+
+            yield return Send(SendOobCodeUrl + FirebaseConfig.ApiKey, body, (success, response, error) =>
+            {
+                onResult?.Invoke(success, error);
+            });
         }
 
         private static void ApplyAuthResponse(JObject response, string email)

@@ -9,6 +9,14 @@ public class MainMenuController : MonoBehaviour
 {
     public GameObject nicknameText;
 
+    // Only one of these is ever meaningfully non-null/non-"pending" at a time in practice (you
+    // can't have an unanswered incoming challenge and an outgoing one simultaneously in this
+    // simple model), but both are tracked independently since they come from separate polls.
+    private FirebaseChallenge.IncomingChallenge pendingIncomingChallenge;
+    private string outgoingChallengeStatus; // null | "pending" | "declined"
+    private string outgoingChallengeNickname;
+    private bool respondingToChallenge = false;
+
     public IEnumerator Start()
     {
         if (nicknameText != null)
@@ -32,11 +40,165 @@ public class MainMenuController : MonoBehaviour
                 InfoSaver.botDefeated[i] = botStats[i];
             }
         }
+
+        // Deliberately NOT inside the block above - DeckManager.collection is a static field that
+        // can outlive a single Play session (or just be stale from before a new card was added),
+        // so this re-grants and re-saves every time MainMenu loads rather than only once, keeping
+        // developer accounts current without needing a full domain reload to pick up new cards.
+        if (DeveloperAccounts.IsDeveloper(FirebaseConfig.AccountEmail))
+        {
+            SaveSystem.GrantAllCollectableCards(DeckManager.collection);
+            SaveSystem.SaveCollection(DeckManager.collection);
+        }
+
+        StartCoroutine(PollChallenges());
     }
+
+    // Marks this account as challengeable while actually sitting on this screen - fires an
+    // immediate presence write on the transition rather than waiting for the next ~20s
+    // heartbeat tick (see PresenceHeartbeat.SetOnMainMenu).
+    private void OnEnable()
+    {
+        PresenceHeartbeat.SetOnMainMenu(true);
+    }
+
+    private void OnDisable()
+    {
+        PresenceHeartbeat.SetOnMainMenu(false);
+    }
+
+    // Polls for both directions of a challenge every ~2s while this screen is up - the one place
+    // in this feature background polling is justified, since a challenge needs to actually pop
+    // up promptly, unlike friend requests (checked on-demand when the panel opens).
+    private IEnumerator PollChallenges()
+    {
+        while (true)
+        {
+            if (FirebaseConfig.HasAccount && !respondingToChallenge)
+            {
+                // Once a banner is showing, stop re-polling incoming so it doesn't get silently
+                // replaced/cleared out from under the player while they're deciding.
+                if (pendingIncomingChallenge == null)
+                {
+                    yield return FirebaseChallenge.PollIncomingChallenge(challenge => pendingIncomingChallenge = challenge);
+                }
+
+                yield return FirebaseChallenge.PollOutgoingChallenge((status, toNickname, toHash) =>
+                {
+                    outgoingChallengeStatus = status;
+                    outgoingChallengeNickname = toNickname;
+                    if (status == "accepted")
+                    {
+                        InfoSaver.opponentHash = toHash;
+                        InfoSaver.onlineBattle = true;
+                        InfoSaver.challengeAccepted = true;
+                        DeckLoadManager.roomToGo = "Lobby";
+                        SceneManager.LoadScene("DeckSelect");
+                    }
+                });
+            }
+            yield return new WaitForSeconds(2f);
+        }
+    }
+
+    private void OnGUI()
+    {
+        if (pendingIncomingChallenge != null)
+        {
+            ConfirmationBanner.Draw(new Color(0.2f, 0.4f, 0.2f, 0.95f),
+                "Accept a challenge from " + pendingIncomingChallenge.FromNickname + "?",
+                "Yes", "No", AcceptChallenge, DeclineChallenge);
+            return;
+        }
+
+        // "Busy" is reported synchronously by FriendsPanelController right when Challenge is
+        // clicked (SendChallenge never writes a Firebase record in that case, so it never shows
+        // up here) - only "pending"/"declined" are ever actually polled from outgoingChallenge.
+        if (outgoingChallengeStatus == "pending")
+        {
+            DrawWaitingBanner("Waiting for " + outgoingChallengeNickname + " to accept...");
+        }
+        else if (outgoingChallengeStatus == "declined")
+        {
+            DrawWaitingBanner(outgoingChallengeNickname + " declined your challenge.");
+        }
+    }
+
+    // Same visual technique as ConfirmationBanner.Draw/GameController's info banners (opaque
+    // white texture tinted by GUI.color, centered bold label) but with a single Cancel/dismiss
+    // button instead of a Yes/No pair.
+    private void DrawWaitingBanner(string message)
+    {
+        float width = Mathf.Min(500f, Screen.width - 40f);
+        Rect messageRect = new Rect((Screen.width - width) / 2f, 10f, width, 50f);
+
+        Color previousColor = GUI.color;
+        GUI.color = new Color(0.2f, 0.2f, 0.6f, 0.95f);
+        GUI.DrawTexture(messageRect, Texture2D.whiteTexture);
+        GUI.color = Color.white;
+
+        GUIStyle style = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 16,
+            fontStyle = FontStyle.Bold
+        };
+        style.normal.textColor = Color.white;
+        GUI.Label(messageRect, message, style);
+        GUI.color = previousColor;
+
+        float buttonWidth = 220f;
+        Rect dismissRect = new Rect((Screen.width - buttonWidth) / 2f, 70f, buttonWidth, 40f);
+        if (GUI.Button(dismissRect, "Dismiss"))
+        {
+            CancelOutgoingChallenge();
+        }
+    }
+
+    private void AcceptChallenge()
+    {
+        if (respondingToChallenge)
+        {
+            return;
+        }
+        respondingToChallenge = true;
+        StartCoroutine(FirebaseChallenge.RespondToChallenge(true, (success, error) =>
+        {
+            respondingToChallenge = false;
+            pendingIncomingChallenge = null;
+            if (success)
+            {
+                DeckLoadManager.roomToGo = "Lobby";
+                SceneManager.LoadScene("DeckSelect");
+            }
+        }));
+    }
+
+    private void DeclineChallenge()
+    {
+        if (respondingToChallenge)
+        {
+            return;
+        }
+        respondingToChallenge = true;
+        StartCoroutine(FirebaseChallenge.RespondToChallenge(false, (success, error) =>
+        {
+            respondingToChallenge = false;
+            pendingIncomingChallenge = null;
+        }));
+    }
+
+    private void CancelOutgoingChallenge()
+    {
+        outgoingChallengeStatus = null;
+        CoroutineRunner.Run(FirebaseChallenge.CancelOutgoingChallenge());
+    }
+
     public void PlayButton()
     {
         if (SaveSystem.LoadRunes(0).Count > 0)
         {
+            CancelOutgoingChallenge();
             DeckLoadManager.roomToGo = "Lobby";
             SceneManager.LoadScene("DeckSelect");
         }
@@ -44,10 +206,9 @@ public class MainMenuController : MonoBehaviour
 
     public void CollectionButton()
     {
-        //SceneManager.LoadScene("Collection");
+        CancelOutgoingChallenge();
         DeckLoadManager.roomToGo = "Collection";
         SceneManager.LoadScene("DeckSelect");
-        
     }
 
     public void Patahell()
@@ -57,6 +218,7 @@ public class MainMenuController : MonoBehaviour
 
     public void Exit()
     {
+        CancelOutgoingChallenge();
         Application.Quit();
     }
 }

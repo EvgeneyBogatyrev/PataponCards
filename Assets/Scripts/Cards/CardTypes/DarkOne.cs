@@ -8,8 +8,8 @@ public static class DarkOneStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 2;
-        stats.description = "<b>Start of turn</b>: Discard the top card of your library. If it's a spell, transform into Kiba form. Otherwise, transform into Bird form.";
+        stats.power = 3;
+        stats.description = "<b>Start of turn</b>: Discard the top card of your library. If it is a spell, transform into Kiba form. Otherwise, transform into Bird form.";
         stats.name = "The Dark One";
 
         stats.descriptionSize = 3;
@@ -102,11 +102,9 @@ public static class BirdFormStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 4;
-        stats.description = "Can't be attacked by units.";
+        stats.description = "Cannot be attacked by units.";
         stats.name = "Bird Form";
         stats.runes.Add(Runes.Spear);
-        //stats.runes.Add(Runes.Spear);
-        //stats.runes.Add(Runes.Spear);
 
         stats.flying = true;
 

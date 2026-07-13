@@ -12,7 +12,6 @@ public static class TakeThatShieldStats
         stats.name = "Bacteon Greatshield";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
-        stats.runes.Add(Runes.Shield);
 
         stats.nameSize = 4;
 

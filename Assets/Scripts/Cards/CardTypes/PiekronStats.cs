@@ -7,7 +7,7 @@ public static class PiekronStats
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-        const int yariponDamage = 2;
+        const int yariponDamage = 1;
 
         stats.power = 3;
         stats.description = "<b>Lifelink.\nEnd of turn</b>: Deal " + yariponDamage.ToString() + " damage to an enemy unit next to it.";
@@ -15,6 +15,7 @@ public static class PiekronStats
         stats.imagePath = "piekron";
         stats.hasShield = true;
 
+        stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Shield);
 

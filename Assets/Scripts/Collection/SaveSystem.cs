@@ -237,6 +237,17 @@ public static class SaveSystem
         }
     }
 
+    // Used only for developer/test accounts (see DeveloperAccounts.cs) - sets every collectable
+    // card to 3 copies, mutating the given dictionary in place. Normal accounts get their real
+    // saved collection from LoadCollection() instead, with no such override.
+    public static void GrantAllCollectableCards(Dictionary<CardTypes, int> collection)
+    {
+        foreach (CardTypes cardType in GetCollectableCards())
+        {
+            collection[cardType] = 3;
+        }
+    }
+
     public static void SaveCollection(Dictionary<CardTypes, int> collection)
     {
         BinaryFormatter formatter = new BinaryFormatter();
@@ -260,18 +271,10 @@ public static class SaveSystem
                 Dictionary<CardTypes, int> collection = formatter.Deserialize(stream) as Dictionary<CardTypes, int>;
                 stream.Close();
 
-                
-                foreach (CardTypes cardType in GetCollectableCards())
-                {
-                    //collection[cardType] = 3;
-                    //collection.Remove(cardType);
-                }
                 foreach (CardTypes cardType in GetForbiddenCards())
                 {
                     collection.Remove(cardType);
                 }
-                
-            
 
                 return collection;
             }
@@ -365,10 +368,10 @@ public static class SaveSystem
             CardTypes.Horserider,
             CardTypes.TokenTatepon,
             CardTypes.SpeedBoost,
-            CardTypes.Moribu,
-            CardTypes.Grenburr,
+            //CardTypes.Moribu,
+            //CardTypes.Grenburr,
             CardTypes.Wondabarappa,
-            CardTypes.Venomist,
+            //CardTypes.Venomist,
             CardTypes.KibaForm,
             CardTypes.BirdForm,
             CardTypes.Catapult_option1,
@@ -378,9 +381,9 @@ public static class SaveSystem
             CardTypes.MeteorRain,
             CardTypes.SleepingDust,
             CardTypes.Megapon,
-            CardTypes.SparringPartner,
-            CardTypes.AvengingScout,
-            CardTypes.NaturalEnemy,
+            //CardTypes.SparringPartner,
+            //CardTypes.AvengingScout,
+            //CardTypes.NaturalEnemy,
             CardTypes.Fatique,
         };
 

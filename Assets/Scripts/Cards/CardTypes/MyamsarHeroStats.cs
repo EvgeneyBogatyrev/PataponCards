@@ -11,7 +11,7 @@ public static class MyamsarHeroStats
         stats.description = "<b>On attack</b>: Destroy the weakest enemy unit if its power is less than Myamsar's power.";
         stats.name = "Myamsar";
         stats.runes.Add(Runes.Shield);
-        //stats.runes.Add(Runes.Shield);
+        stats.runes.Add(Runes.Shield);
         //stats.runes.Add(Runes.Shield);
 
         //stats.descriptionSize = 3;

@@ -335,6 +335,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11dbab8fab0f5844ca082d44c9a73e2c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uiTheme: {fileID: 11400000, guid: 1079f9e4c0505b2499b933743137d146, type: 2}
 --- !u!1 &1399603747
 GameObject:
   m_ObjectHideFlags: 0

@@ -221,11 +221,12 @@ public static class AlldemoniumStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         const int alldemonuimGain = 5;
-        const int alldemonuimDamage = 1;
+        const int alldemonuimDamage = 2;
         stats.description = "Target non-Hatapon character under your controll gains +" + alldemonuimGain.ToString() + " power, but recieves " + alldemonuimDamage.ToString() + " damage at the end of your turn.";
         stats.name = "Alldemonium Shield";
         stats.nameSize = 3;
         stats.runes.Add(Runes.Shield);
+        //stats.runes.Add(Runes.Shield);
 
         stats.isSpell = true;
 

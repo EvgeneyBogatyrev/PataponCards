@@ -19,6 +19,12 @@ public class InfoSaver
 
     // Scene to return to once the Account scene finishes a sign-in/sign-up.
     public static string sceneAfterLogin = "Lobby";
+
+    // Set by FirebaseChallenge once a friend challenge's hash pairing is established (myHash/
+    // opponentHash/onlineBattle already set at that point) - read once by LobbyManager.Start()
+    // to skip its own random hash generation and jump straight to the Game scene instead of
+    // showing the normal Play Online/manual-key UI.
+    public static bool challengeAccepted = false;
 }
 
 public class QueueData
@@ -101,7 +107,15 @@ public class QueueData
                 break;
             case ActionType.CastSpell:
                 if (hostCard != null)
+                {
+                    // Brackets the ability's synchronous portion (everything before its first
+                    // yield, which StartCoroutine runs immediately/inline) so a hasOnPlaySpell
+                    // ability can optionally redirect where its own card ends up - see Aiton and
+                    // CardManager.CurrentlyResolvingOnPlayCard/SetSlotToPlay.
+                    CardManager.CurrentlyResolvingOnPlayCard = hostCard;
                     hostCard.StartCoroutine(thisStats.spell(targets, enemySlots, friendlySlots));
+                    CardManager.CurrentlyResolvingOnPlayCard = null;
+                }
                 break;
 
             case ActionType.DrawCard:
@@ -318,8 +332,12 @@ public class GameController : MonoBehaviour
 
     [SerializeField]
     private GameObject scoreObject;
-    
-    
+    // "Round X of 3" - purely derived from gameState.friendlyWins/enemyWins (best-of-3, see
+    // CheckGameEnd), not its own tracked state. Optional - left null-safe so this doesn't need a
+    // scene change to keep working.
+    [SerializeField]
+    private GameObject roundObject;
+
     [SerializeField]
     private GameObject turnsObject;
     [SerializeField]
@@ -417,10 +435,10 @@ public class GameController : MonoBehaviour
     }
 
     // The End Turn button stays visible and clickable the whole match now (it used to be
-    // deactivated during the opponent's turn, which also hid the ability to concede then).
-    // Its label swap ("Opponent's turn") and the long-press-to-concede timer both live in
-    // EndTurnButton.cs, which owns that GameObject's TextMeshPro directly - GameController.Concede()
-    // itself decides round-concede vs match-concede based on whose turn it is.
+    // deactivated during the opponent's turn, which also hid the ability to concede then) - its
+    // label swap ("Opponent's turn") lives in EndTurnButton.cs. Conceding is a separate button
+    // (ConcedeButton.cs) that opens a confirmation via RequestConcedeConfirmation(), which itself
+    // decides round-concede vs match-concede based on whose turn it is.
 
     private void Update()
     {
@@ -522,22 +540,20 @@ public class GameController : MonoBehaviour
     // wiring and carries no risk of touching the existing .unity scene.
     private void OnGUI()
     {
-        // Not gated on InfoSaver.onlineBattle - a "concede the whole match" confirmation makes
-        // just as much sense against a bot/local opponent as it does online.
+        // Not gated on InfoSaver.onlineBattle - concede confirmations make just as much sense
+        // against a bot/local opponent as they do online.
+        if (pendingRoundConcedeConfirmation)
+        {
+            ConfirmationBanner.Draw(new Color(0.6f, 0.1f, 0.1f, 0.9f), "Concede this round?",
+                "Yes, concede round", "Cancel", ConcedeRound, CancelRoundConcede,
+                "Concede match instead", ConcedeMatchFromRoundPrompt);
+            return;
+        }
+
         if (pendingMatchConcedeConfirmation)
         {
-            DrawBanner(new Color(0.6f, 0.1f, 0.1f, 0.9f), "Concede the ENTIRE MATCH (not just this round)?");
-            float width = 220f;
-            Rect yesRect = new Rect(Screen.width / 2f - width - 10f, 70f, width, 40f);
-            Rect noRect = new Rect(Screen.width / 2f + 10f, 70f, width, 40f);
-            if (GUI.Button(yesRect, "Yes, concede match"))
-            {
-                ConcedeMatch();
-            }
-            if (GUI.Button(noRect, "Cancel"))
-            {
-                CancelMatchConcede();
-            }
+            ConfirmationBanner.Draw(new Color(0.6f, 0.1f, 0.1f, 0.9f), "Concede the ENTIRE MATCH (not just this round)?",
+                "Yes, concede match", "Cancel", ConcedeMatch, CancelMatchConcede);
             return;
         }
 
@@ -577,9 +593,15 @@ public class GameController : MonoBehaviour
         float width = Mathf.Min(500f, Screen.width - 40f);
         Rect rect = new Rect((Screen.width - width) / 2f, 10f, width, 50f);
 
+        // GUI.Box multiplies its own semi-transparent default skin texture by GUI.color, so the
+        // requested alpha ended up compounded (banner looked far more see-through than the color
+        // asked for). Drawing a plain white texture instead makes the alpha we pass the actual
+        // final alpha.
         Color previousColor = GUI.color;
-        GUI.color = color;
-        GUI.Box(rect, "");
+        Color opaqueBacking = color;
+        opaqueBacking.a = Mathf.Max(color.a, 0.95f);
+        GUI.color = opaqueBacking;
+        GUI.DrawTexture(rect, Texture2D.whiteTexture);
         GUI.color = Color.white;
 
         GUIStyle style = new GUIStyle(GUI.skin.label)
@@ -588,6 +610,7 @@ public class GameController : MonoBehaviour
             fontSize = 16,
             fontStyle = FontStyle.Bold
         };
+        style.normal.textColor = Color.white;
         GUI.Label(rect, message, style);
         GUI.color = previousColor;
     }
@@ -658,6 +681,31 @@ public class GameController : MonoBehaviour
         return effectsBlocked;
     }
 
+    // True while a minion with blockSpells (e.g. Slogturtle) is alive on either side. Symmetric
+    // by design - both players independently compute this from the same synced board state, so
+    // it's enforced purely by gating the local casting UI (CardManager.cs), with no separate
+    // check needed on the receiving side of a network message.
+    public bool SpellsAreBlocked()
+    {
+        foreach (BoardManager.Slot slot in boardManager.friendlySlots)
+        {
+            MinionManager minion = slot.GetConnectedMinion();
+            if (minion != null && minion.GetCardStats().blockSpells)
+            {
+                return true;
+            }
+        }
+        foreach (BoardManager.Slot slot in boardManager.enemySlots)
+        {
+            MinionManager minion = slot.GetConnectedMinion();
+            if (minion != null && minion.GetCardStats().blockSpells)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public IEnumerator CheckBoardEffects()
     {
         while (true)
@@ -691,6 +739,7 @@ public class GameController : MonoBehaviour
 
     public void StartGame()
     {
+        UpdateRoundLabel();
         endTurnButtonObject.SetActive(true);
         turnTimeLeft.SetActive(true);
         concedeObject.SetActive(true);
@@ -1225,6 +1274,17 @@ public class GameController : MonoBehaviour
             gameState.enemyWins += 1;
         }
         scoreObject.GetComponent<TextMeshProUGUI>().text = gameState.friendlyWins.ToString() + ":" + gameState.enemyWins.ToString();
+        UpdateRoundLabel();
+    }
+
+    private void UpdateRoundLabel()
+    {
+        if (roundObject == null)
+        {
+            return;
+        }
+        int round = gameState.friendlyWins + gameState.enemyWins + 1;
+        roundObject.GetComponent<TextMeshProUGUI>().text = "Round " + round + " of 3";
     }
 
     public bool CheckGameEnd()
@@ -1294,7 +1354,13 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void Concede()
+    // Any caller (the Concede button, etc.) routes through here rather than conceding directly -
+    // both the round-concede and match-concede paths now go through a Yes/Cancel confirmation
+    // (see OnGUI) instead of a press-and-hold gesture, so a single click can't end anything by
+    // accident. Which confirmation shows depends on whose turn it is: on your own turn conceding
+    // only costs the current round; on the opponent's turn there's no continuing round for an
+    // in-flight opponent action to race against, so it ends the whole match instead.
+    public void RequestConcedeConfirmation()
     {
         // Free (my turn, idle) or EnemyTurn (their turn, idle) are both fine - only reject
         // while mid-interaction with something else (Hold/Select/ChooseOption).
@@ -1305,16 +1371,26 @@ public class GameController : MonoBehaviour
             return;
         }
 
-        // Any caller (End Turn long-press, a dedicated Concede button, etc.) routes through here,
-        // so the own-turn-vs-opponent's-turn split can't be bypassed by wiring some other button
-        // straight to this method - conceding mid-opponent-turn always needs the match-concede
-        // confirmation instead of the round-concede path below.
-        if (!playerTurn)
+        if (playerTurn)
         {
-            RequestMatchConcedeConfirmation();
-            return;
+            pendingRoundConcedeConfirmation = true;
         }
+        else
+        {
+            pendingMatchConcedeConfirmation = true;
+        }
+    }
 
+    public bool pendingRoundConcedeConfirmation = false;
+
+    public void CancelRoundConcede()
+    {
+        pendingRoundConcedeConfirmation = false;
+    }
+
+    public void ConcedeRound()
+    {
+        pendingRoundConcedeConfirmation = false;
         if (concedeTimes < 3)
         {
             concedeTimes += 1;
@@ -1325,20 +1401,15 @@ public class GameController : MonoBehaviour
         }
     }
 
-    // Conceding on the opponent's turn ends the whole match (not just the round) - there's no
-    // continuing round for an in-flight opponent action to race against, unlike a normal round
-    // concede. Requires confirmation first (see the OnGUI prompt) since the stakes are higher.
-    public bool pendingMatchConcedeConfirmation = false;
-
-    public void RequestMatchConcedeConfirmation()
+    // "Concede match instead" option on the round-concede prompt - lets a player give up the
+    // whole match even on their own turn, not just when conceding mid-opponent-turn forces it.
+    public void ConcedeMatchFromRoundPrompt()
     {
-        bool cursorAllowsConcede = CursorController.cursorState == CursorController.CursorStates.Free ||
-            CursorController.cursorState == CursorController.CursorStates.EnemyTurn;
-        if (cursorAllowsConcede)
-        {
-            pendingMatchConcedeConfirmation = true;
-        }
+        pendingRoundConcedeConfirmation = false;
+        ConcedeMatch();
     }
+
+    public bool pendingMatchConcedeConfirmation = false;
 
     public void CancelMatchConcede()
     {

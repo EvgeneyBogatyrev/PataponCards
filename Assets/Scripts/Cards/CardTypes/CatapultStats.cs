@@ -6,14 +6,14 @@ using UnityEngine;
 public static class CatapultStats
 {
     const int catapultDamage = 3;
-    const int firstCost = 1;
+    const int firstCost = 0;
     const int secondCost = 0;
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 4;
-        stats.description = "<b>Pacifism. Abilities</b>:\n-" + firstCost.ToString() + ": Deal " + catapultDamage.ToString() + " damage to opponent's Hatapon.\n" +
+        stats.power = 2;
+        stats.description = "<b>Pacifism. Abilities</b>:\n-" + firstCost.ToString() + ": Deal damage equal to this unit's power to opponent's Hatapon. Then, destroy this unit.\n" +
                             "-" + secondCost.ToString() + ": Destroy other friendly non-Hatapon units to gain their power.";
         stats.name = "Catapult";
 
@@ -38,14 +38,13 @@ public static class CatapultStats
 public static class Catapult_option1Stats
 {
     const int catapultDamage = 3;
-    const int firstCost = 1;
+    const int firstCost = 0;
     const int secondCost = 0;
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.description = "-" + firstCost.ToString() + ": Deal " + catapultDamage.ToString() + " damage to opponent's Hatapon.";
-        stats.name = "Fire!";
+        stats.description = "-" + firstCost.ToString() + ": Deal damage equal to this unit's power to opponent's Hatapon. Then, destroy this unit.\n";
 
         stats.isSpell = true;
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -62,16 +61,24 @@ public static class Catapult_option1Stats
                 host = friendlySlots[targets[0] - 1].GetConnectedMinion();
             }
 
-            host.LoseLife(firstCost);
+            if (host == null)
+            {
+                gameController.actionIsHappening = false;
+                yield return null;
+            }
+
+            int lifeLoss = host.GetPower();
             
             foreach (BoardManager.Slot slot in enemySlots)
             {
                 MinionManager minion = slot.GetConnectedMinion();
                 if (minion != null && minion.GetCardType() == CardTypes.Hatapon)
                 {
-                    minion.ReceiveDamage(catapultDamage);
+                    minion.ReceiveDamage(lifeLoss);
                 }
             }
+
+            host.LoseLife(lifeLoss);
 
             gameController.actionIsHappening = false;
             yield return null;

@@ -8,7 +8,7 @@ public class KuwagattanStats : MonoBehaviour
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 15;
+        stats.power = 12;
         stats.description = "<b>Hexproof.</b> <b>On attack</b>: Discard your hand.\nThis card cannot be playerd on the first three turns.";
         stats.name = "Kuwagattan";
         stats.runes.Add(Runes.Shield);
