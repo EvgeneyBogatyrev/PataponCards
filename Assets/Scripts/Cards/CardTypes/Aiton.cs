@@ -59,7 +59,7 @@ public static class AitonStats
         stats.numberOfTargets = 2;
         stats.dummyTarget = true;
 
-        stats.imagePath = "fah";
+        stats.imagePath = "aiton";
         stats.artistName = "Official render";        
         return stats;
     }

@@ -11,8 +11,13 @@ public class EndTurnButton : MonoBehaviour
 {
     public GameObject gameObject;
     public UITheme uiTheme;
+    // How much smaller "Opponent's turn" renders relative to "End Turn"'s own authored size -
+    // that string is noticeably longer, so it needs to shrink a bit to fit the same button.
+    public float opponentsTurnFontScale = 0.65f;
     private GameController gameController;
     private SpriteRenderer background;
+    private TextMeshPro label;
+    private float normalFontSize;
 
     private bool mouseOver = false;
 
@@ -20,6 +25,8 @@ public class EndTurnButton : MonoBehaviour
     {
         gameController = GameObject.Find("GameController").GetComponent<GameController>();
         background = GetComponent<SpriteRenderer>();
+        label = gameObject.GetComponent<TextMeshPro>();
+        normalFontSize = label.fontSize;
     }
 
     private void Update()
@@ -30,7 +37,9 @@ public class EndTurnButton : MonoBehaviour
             mouseOver = false;
         }
 
-        gameObject.GetComponent<TextMeshPro>().text = GameController.playerTurn ? "End Turn" : "Opponent's turn";
+        bool opponentsTurn = !GameController.playerTurn;
+        label.text = opponentsTurn ? "Opponent's turn" : "End Turn";
+        label.fontSize = opponentsTurn ? normalFontSize * opponentsTurnFontScale : normalFontSize;
 
         WorldButtonSkin.Apply(background, uiTheme, danger: false, hovered: mouseOver, pressed: mouseOver && Input.GetMouseButton(0));
     }

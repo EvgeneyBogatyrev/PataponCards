@@ -8,8 +8,8 @@ public static class MoribuStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 2;
-        stats.description = "Can move to the closest non-adjacent enemy slot. If it is not empty, destroy enemy unit on it.";
+        stats.power = 4;
+        stats.description = "Can move in 'L' shape to the opponents board. If the slot is occupied by an enemy non-Hatapon unit, destroy it.";
         stats.name = "Moribu";
         //stats.hasHaste = true;
        

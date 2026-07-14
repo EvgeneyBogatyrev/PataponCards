@@ -15,6 +15,10 @@ public class VenomistStats : MonoBehaviour
         stats.runes.Add(Runes.Bow);
         //stats.legendary = true;
 
+        stats.additionalKeywords.Add("Poison");
+
+        stats.relevantCards.Add(CardTypes.Mushroom);
+
         stats.isSpell = true;
         static IEnumerator realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

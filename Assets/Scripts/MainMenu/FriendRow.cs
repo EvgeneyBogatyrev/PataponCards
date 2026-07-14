@@ -29,12 +29,18 @@ public class FriendRow : MonoBehaviour
     public void Setup(string nickname, string primaryLabel, Action onPrimary, string secondaryLabel = null, Action onSecondary = null)
     {
         nicknameText.GetComponent<TextMeshProUGUI>().text = nickname;
+
+        // Deactivate every optional slot up front, then only reactivate what's actually needed.
+        // challengeButtonObject specifically matters here: SetOnline only runs once an async
+        // presence check resolves (a Firebase round-trip later), so without this it would sit
+        // in whatever state the prefab happened to be authored with - visibly "flickering" in
+        // (and shoving Accept/Remove sideways as the Horizontal Layout Group reflows around it)
+        // once SetOnline finally ran a moment later.
+        SetActiveIfPresent(challengeButtonObject, false);
+        SetActiveIfPresent(onlineIndicatorObject, false);
+
         ConfigureButton(primaryButtonObject, primaryButtonLabel, primaryLabel, onPrimary);
         ConfigureButton(secondaryButtonObject, secondaryButtonLabel, secondaryLabel, onSecondary);
-        if (onlineIndicatorObject != null)
-        {
-            onlineIndicatorObject.SetActive(false);
-        }
     }
 
     // Called separately/later than Setup, since presence is fetched with its own async request
@@ -53,7 +59,16 @@ public class FriendRow : MonoBehaviour
             }
         }
 
+        SetActiveIfPresent(challengeButtonObject, false);
         ConfigureButton(challengeButtonObject, challengeButtonLabel, (online && onChallenge != null) ? "Challenge" : null, onChallenge);
+    }
+
+    private static void SetActiveIfPresent(GameObject obj, bool active)
+    {
+        if (obj != null)
+        {
+            obj.SetActive(active);
+        }
     }
 
     private static void ConfigureButton(GameObject buttonObject, GameObject labelObject, string label, Action onClick)

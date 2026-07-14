@@ -371,20 +371,29 @@ public class CollectionControl : MonoBehaviour
     }
 
 
-    // Cards that fit the deck's current runes come first; cards that don't are pushed after them,
-    // grouped by their own rune requirement (same neutral/spear/shield/bow/multiclass grouping
-    // CardGenerator already uses for the name-outline material) so browsing the rest of the
-    // collection isn't a random jumble. Card type order is the tiebreaker within each group.
+    // How many copies of this card the player actually owns - 0 (rather than a
+    // KeyNotFoundException from DeckManager.collection's indexer) for a card never earned/bought,
+    // since Show All Cards can now put those on screen too (see GetBrowsableCards).
+    public int GetOwnedCount(CardTypes type)
+    {
+        return DeckManager.collection.TryGetValue(type, out int owned) ? owned : 0;
+    }
+
+    // Cards that fit the deck's current runes come first; cards that don't fit but are at least
+    // owned come next, grouped by their own rune requirement (same neutral/spear/shield/bow/
+    // multiclass grouping CardGenerator already uses for the name-outline material) so browsing
+    // isn't a random jumble; cards never owned at all are pushed after everything else (only
+    // reachable with Show All Cards on - see GetBrowsableCards). Card type order is the tiebreaker
+    // within each group.
     private List<CardTypes> SortForBrowsing(List<CardTypes> cards)
     {
         List<CardTypes> sorted = new List<CardTypes>(cards);
         sorted.Sort((a, b) =>
         {
-            bool aBlocked = GetPlaceability(a) == CardPlaceability.BlockedByRunes;
-            bool bBlocked = GetPlaceability(b) == CardPlaceability.BlockedByRunes;
-            if (aBlocked != bBlocked)
+            int tierCompare = BrowsingTier(a).CompareTo(BrowsingTier(b));
+            if (tierCompare != 0)
             {
-                return aBlocked ? 1 : -1;
+                return tierCompare;
             }
 
             int runeCompare = RuneCategoryOrder(a).CompareTo(RuneCategoryOrder(b));
@@ -396,6 +405,16 @@ public class CollectionControl : MonoBehaviour
             return ((int)a).CompareTo((int)b);
         });
         return sorted;
+    }
+
+    // 0 = owned and fits current runes, 1 = owned but rune-blocked, 2 = never owned at all.
+    private int BrowsingTier(CardTypes type)
+    {
+        if (GetOwnedCount(type) <= 0)
+        {
+            return 2;
+        }
+        return GetPlaceability(type) == CardPlaceability.BlockedByRunes ? 1 : 0;
     }
 
     // Neutral < Spear < Shield < Bow < multiclass - mirrors CardGenerator.CustomizeCard's
@@ -434,13 +453,20 @@ public class CollectionControl : MonoBehaviour
         return cardList;
     }
 
-    // Sorted browsable set for the current showAllCards state - filtered down to rune-fitting
-    // cards only when it's off (the pre-Phase-3 behavior), or the whole collection when on.
+    // Sorted browsable set for the current showAllCards state - filtered down to owned, rune-
+    // fitting cards only when it's off (the pre-Phase-3 behavior), or every collectable card type
+    // (owned or not - see GetCollectableCards) when on, so Show All Cards genuinely shows the
+    // whole collectable set rather than just the owned subset.
     private List<CardTypes> GetBrowsableCards()
     {
-        List<CardTypes> relevantCards = new List<CardTypes>(DeckManager.collection.Keys);
-        if (!showAllCards)
+        List<CardTypes> relevantCards;
+        if (showAllCards)
         {
+            relevantCards = GetCollectableCards();
+        }
+        else
+        {
+            relevantCards = new List<CardTypes>(DeckManager.collection.Keys);
             relevantCards.RemoveAll(type => GetPlaceability(type) == CardPlaceability.BlockedByRunes);
         }
         return SortForBrowsing(relevantCards);
@@ -463,7 +489,7 @@ public class CollectionControl : MonoBehaviour
             card.SetDisplay();
             card.transform.position = GetGridPosition(index);
             card.transform.localScale = new Vector3(cardScale, cardScale, 1f);
-            card.SetNumberOfCopies(DeckManager.collection[cardTypes[index]]);
+            card.SetNumberOfCopies(GetOwnedCount(cardTypes[index]));
             // Lock icon + rune-blocked overlay refresh every frame on their own (see
             // CardManager's CardState.display case) - no explicit call needed here.
             currentCards.Add(card);
@@ -536,7 +562,7 @@ public class CollectionControl : MonoBehaviour
                 card.SetDisplay();
                 card.transform.position = GetGridPosition(index);
                 card.transform.localScale = new Vector3(cardScale, cardScale, 1f);
-                card.SetNumberOfCopies(DeckManager.collection[newType.Value]);
+                card.SetNumberOfCopies(GetOwnedCount(newType.Value));
                 updatedCards.Add(card);
             }
         }

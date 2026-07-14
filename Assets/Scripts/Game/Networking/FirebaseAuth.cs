@@ -14,7 +14,7 @@ namespace Networking
         private const string SignUpUrl = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=";
         private const string SignInUrl = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=";
         private const string SendOobCodeUrl = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=";
-        public const int MaxNicknameLength = 20;
+        public const int MaxNicknameLength = 10;
 
         // Creates a brand-new email/password account (a fresh uid, distinct from whatever
         // anonymous session was active - some Firebase projects reject the alternative

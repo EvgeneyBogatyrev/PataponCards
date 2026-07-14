@@ -13,6 +13,8 @@ public static class TakeThatShieldStats
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
 
+        stats.additionalKeywords.Add("Lifelink");
+
         stats.nameSize = 4;
 
         stats.isSpell = true;

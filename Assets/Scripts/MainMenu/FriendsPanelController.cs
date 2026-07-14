@@ -41,6 +41,19 @@ public class FriendsPanelController : MonoBehaviour
     private readonly List<GameObject> spawnedRows = new List<GameObject>();
     private bool busy = false;
 
+    // Forces the panel closed every time this controller loads, regardless of whatever active
+    // state got saved in the scene/prefab - this script's own GameObject stays active the whole
+    // time (it has to, to receive the Friends button's click), so relying on panelRoot's saved
+    // Inspector checkbox alone is fragile: it's easy to leave it checked by accident while
+    // editing, and any change made to it while in Play Mode never persists once you stop anyway.
+    private void Awake()
+    {
+        if (panelRoot != null)
+        {
+            panelRoot.SetActive(false);
+        }
+    }
+
     private void OnEnable()
     {
         Refresh();

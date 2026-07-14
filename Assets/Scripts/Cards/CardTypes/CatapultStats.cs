@@ -13,7 +13,7 @@ public static class CatapultStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 2;
-        stats.description = "<b>Pacifism. Abilities</b>:\n-" + firstCost.ToString() + ": Deal damage equal to this unit's power to opponent's Hatapon. Then, destroy this unit.\n" +
+        stats.description = "<b>Pacifism. Abilities</b>:\n-" + firstCost.ToString() + ": Destroy this unit and deal damage equal to its power to the enemy Hatapon.\n" +
                             "-" + secondCost.ToString() + ": Destroy other friendly non-Hatapon units to gain their power.";
         stats.name = "Catapult";
 

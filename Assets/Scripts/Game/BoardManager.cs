@@ -200,6 +200,16 @@ public class BoardManager : MonoBehaviour
         AudioController.PlaySound(card.GetCardStats().onPlaySound);
 
         slot.SetConnectedMinion(newMinion.GetComponent<MinionManager>());
+
+        // "Card played" (creature half - the spell half fires from GameController.ApplyEffect's
+        // CastSpell case instead) + "unit enters" broadcast triggers - unconditional on `record`
+        // so a locally-played creature and an opponent's replayed one both fire identically. A
+        // creature firing both triggers in the same moment is intentional - they answer different
+        // questions ("was any card played" vs "did a unit enter").
+        MinionManager playedMinion = newMinion.GetComponent<MinionManager>();
+        gameController.FireCardPlayedTrigger(card.GetCardType(), false, slot.GetFriendly());
+        gameController.FireUnitEntersTrigger(slot.GetIndex(), card.GetCardType(), slot.GetFriendly(), playedMinion);
+
         if (fromHand && card.GetCardStats().hasAfterPlayEvent)
         {
             int index;

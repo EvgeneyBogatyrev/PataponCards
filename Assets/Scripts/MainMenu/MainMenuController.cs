@@ -93,6 +93,12 @@ public class MainMenuController : MonoBehaviour
                         InfoSaver.onlineBattle = true;
                         InfoSaver.challengeAccepted = true;
                         DeckLoadManager.roomToGo = "Lobby";
+                        outgoingChallengeStatus = null;
+                        // RespondToChallenge only patches status on our node, it never deletes it -
+                        // consume it here now that we've acted on it, or the next time this poll
+                        // runs (e.g. back on MainMenu after the match) it'd see "accepted" again
+                        // and immediately send us right back into another match.
+                        CoroutineRunner.Run(FirebaseChallenge.CancelOutgoingChallenge());
                         SceneManager.LoadScene("DeckSelect");
                     }
                 });
@@ -129,27 +135,30 @@ public class MainMenuController : MonoBehaviour
     // button instead of a Yes/No pair.
     private void DrawWaitingBanner(string message)
     {
-        float width = Mathf.Min(500f, Screen.width - 40f);
-        Rect messageRect = new Rect((Screen.width - width) / 2f, 10f, width, 50f);
+        float scale = ConfirmationBanner.Scale();
+        int fontSize = ConfirmationBanner.ScaledFontSize(16);
+        float width = Mathf.Min(500f * scale, Screen.width - 40f);
+        Rect messageRect = new Rect((Screen.width - width) / 2f, 10f * scale, width, 50f * scale);
 
         Color previousColor = GUI.color;
-        GUI.color = new Color(0.2f, 0.2f, 0.6f, 0.95f);
+        GUI.color = new Color(0.2f, 0.2f, 0.6f, 0.98f);
         GUI.DrawTexture(messageRect, Texture2D.whiteTexture);
         GUI.color = Color.white;
 
         GUIStyle style = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 16,
+            fontSize = fontSize,
             fontStyle = FontStyle.Bold
         };
         style.normal.textColor = Color.white;
         GUI.Label(messageRect, message, style);
         GUI.color = previousColor;
 
-        float buttonWidth = 220f;
-        Rect dismissRect = new Rect((Screen.width - buttonWidth) / 2f, 70f, buttonWidth, 40f);
-        if (GUI.Button(dismissRect, "Dismiss"))
+        float buttonWidth = 220f * scale;
+        float buttonHeight = 40f * scale;
+        Rect dismissRect = new Rect((Screen.width - buttonWidth) / 2f, messageRect.yMax + 10f * scale, buttonWidth, buttonHeight);
+        if (ConfirmationBanner.DrawOpaqueButton(dismissRect, "Dismiss", fontSize, dismissRect.Contains(Event.current.mousePosition)))
         {
             CancelOutgoingChallenge();
         }

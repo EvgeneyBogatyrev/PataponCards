@@ -13,6 +13,14 @@ public class AccountController : MonoBehaviour
 
     private bool busy = false;
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            SignInButton();
+        }
+    }
+
     public void SignInButton()
     {
         if (busy)

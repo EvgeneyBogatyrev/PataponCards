@@ -25,6 +25,20 @@ public class CardManager : MonoBehaviour
     public delegate IEnumerator OnDeathEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null, CardStats thisStats = null);
     public delegate bool CheckSpellTarget(int target = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate bool CheckSpellTargets(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
+
+    // Global broadcast triggers - unlike every delegate above (which only fires for the specific
+    // card instance the effect belongs to), these fire on EVERY minion on the board that has the
+    // matching field set, whenever the named event happens anywhere in the game (see
+    // GameController.FireCardPlayedTrigger/FireUnitEntersTrigger/FireUnitDiesTrigger/
+    // FireCardDrawnTrigger/FireCardDiscardedTrigger). triggeredUnit is always the listening minion
+    // itself (the one whose passive is firing) - the "which unit do I buff?" reference - while
+    // enteredMinion/diedMinion is the (possibly different, possibly the same) minion that caused
+    // the event.
+    public delegate IEnumerator OnCardPlayedTrigger(MinionManager triggeredUnit, CardTypes playedCardType, bool playedIsSpell, bool playedCardFriendly, List<BoardManager.Slot> enemy, List<BoardManager.Slot> friendly);
+    public delegate IEnumerator OnUnitEntersTrigger(MinionManager triggeredUnit, int enteredIndex, CardTypes enteredCardType, bool enteredFriendly, MinionManager enteredMinion, List<BoardManager.Slot> enemy, List<BoardManager.Slot> friendly);
+    public delegate IEnumerator OnUnitDiesTrigger(MinionManager triggeredUnit, int diedIndex, CardTypes diedCardType, bool diedFriendly, MinionManager diedMinion, List<BoardManager.Slot> enemy, List<BoardManager.Slot> friendly);
+    public delegate IEnumerator OnCardDrawnTrigger(MinionManager triggeredUnit, CardTypes cardType, bool cardFriendly, List<BoardManager.Slot> enemy, List<BoardManager.Slot> friendly);
+    public delegate IEnumerator OnCardDiscardedTrigger(MinionManager triggeredUnit, CardTypes cardType, bool cardFriendly, List<BoardManager.Slot> enemy, List<BoardManager.Slot> friendly);
     public class CardStats
     {
         public string name = "default-name";
@@ -92,6 +106,13 @@ public class CardManager : MonoBehaviour
         public string onDeathSound = null;
 
         public int firstTurnToPlay = 0;
+
+        // Global broadcast triggers - see the delegate declarations above CardStats for details.
+        public OnCardPlayedTrigger onCardPlayedTrigger = null;
+        public OnUnitEntersTrigger onUnitEntersTrigger = null;
+        public OnUnitDiesTrigger onUnitDiesTrigger = null;
+        public OnCardDrawnTrigger onCardDrawnTrigger = null;
+        public OnCardDiscardedTrigger onCardDiscardedTrigger = null;
 
         public Sprite GetSprite()
         {
@@ -166,6 +187,12 @@ public class CardManager : MonoBehaviour
                 cardsDrawnByThis = this.cardsDrawnByThis,
                 lifelinkedTo = this.lifelinkedTo,
                 lifelinkMeTo = this.lifelinkMeTo,
+
+                onCardPlayedTrigger = this.onCardPlayedTrigger,
+                onUnitEntersTrigger = this.onUnitEntersTrigger,
+                onUnitDiesTrigger = this.onUnitDiesTrigger,
+                onCardDrawnTrigger = this.onCardDrawnTrigger,
+                onCardDiscardedTrigger = this.onCardDiscardedTrigger,
 
                 connectedCards = new List<CardTypes>()
             };
@@ -255,6 +282,14 @@ public class CardManager : MonoBehaviour
     public GameObject lockObject;
     public List<GameObject> runeObjects;
 
+    // Optional - a full-card gray/grayscale overlay shown only for cards the player doesn't own
+    // at all (see SetPlaceabilityIndicators), which Show All Cards can now put on screen (see
+    // CollectionControl.GetBrowsableCards). Starts deactivated in the prefab; left unwired, this
+    // is simply never toggled - no editor change forced on existing CardManager setups. Kept
+    // separate from backObject's own rune-blocked tint so "not owned" and "owned but rune-
+    // mismatched" stay visually distinguishable from each other, not just from "placeable".
+    public GameObject grayTiltObject;
+
     // Optional - drag the project's single UITheme asset here to color the rune-blocked tint on
     // backObject (see SetPlaceabilityIndicators). Falls back to a hardcoded gray if unassigned.
     public UITheme uiTheme;
@@ -339,6 +374,10 @@ public class CardManager : MonoBehaviour
             numberOfCardsText.GetComponent<TextMeshPro>().text = "1x";
         }
         lockObject.SetActive(false);
+        if (grayTiltObject != null)
+        {
+            grayTiltObject.SetActive(false);
+        }
 
         GameObject collectionObj = GameObject.Find("Collection");
         if (collectionObj != null)
@@ -840,7 +879,8 @@ public class CardManager : MonoBehaviour
                 // player edits runes without any external refresh call.
                 if (collectionControl != null)
                 {
-                    SetPlaceabilityIndicators(collectionControl.GetPlaceability(cardType));
+                    int ownedCopies = DeckManager.collection.TryGetValue(cardType, out int ownedQty) ? ownedQty : 0;
+                    SetPlaceabilityIndicators(collectionControl.GetPlaceability(cardType), owned: ownedCopies > 0);
                 }
                 else
                 {
@@ -1172,16 +1212,23 @@ public class CardManager : MonoBehaviour
         descriptionObject.GetComponent<TextMeshPro>().text = description;
     }
 
-    // Collection/deck-builder grid only. lockObject shows for either blocked reason (copy/deck-
-    // limit or rune mismatch, unchanged from before). For the rune-mismatch case specifically,
-    // retint backObject - the semi-transparent gray backing every card already has (normally used
-    // to dim alreadyPlayed cards in-game, always visible/full-card-sized in the Collection grid)
-    // - instead of a separate overlay object. No new prefab wiring needed, and it avoids the
-    // transparent-art-bleed problem a direct imageObject tint had (tinting a sprite's RGB doesn't
-    // add opacity to its already-transparent pixels, so it never actually masked anything).
-    public void SetPlaceabilityIndicators(CollectionControl.CardPlaceability placeability)
+    // Collection/deck-builder grid only. lockObject shows for any blocked reason (copy/deck-
+    // limit, rune mismatch, or not owned at all). For rune-mismatch specifically, retint
+    // backObject - the semi-transparent gray backing every card already has (normally used to dim
+    // alreadyPlayed cards in-game, always visible/full-card-sized in the Collection grid) -
+    // instead of a separate overlay object; this avoids the transparent-art-bleed problem a direct
+    // imageObject tint had (tinting a sprite's RGB doesn't add opacity to its already-transparent
+    // pixels, so it never actually masked anything). For not-owned specifically, show
+    // grayTiltObject instead - a distinct indicator so "you don't own this at all" doesn't read
+    // the same as "you own it but it doesn't fit your current runes".
+    public void SetPlaceabilityIndicators(CollectionControl.CardPlaceability placeability, bool owned = true)
     {
         lockObject.SetActive(placeability != CollectionControl.CardPlaceability.Placeable);
+
+        if (grayTiltObject != null)
+        {
+            grayTiltObject.SetActive(!owned);
+        }
 
         if (backObject == null)
         {

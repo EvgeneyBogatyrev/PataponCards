@@ -487,7 +487,7 @@ public class MinionManager : MonoBehaviour
                         {
                             MinionManager target = hit.collider.GetComponent<MinionManager>();
 
-                            if (!summoningSickness && GetCardType() == CardTypes.Moribu && !target.GetFriendly() && Mathf.Abs(target.GetIndex() - GetIndex()) == 2)
+                            if (!summoningSickness && GetCardType() == CardTypes.Moribu && !target.GetFriendly() && Mathf.Abs(target.GetIndex() - GetIndex()) == 2 && target.GetCardType() != CardTypes.Hatapon)
                             {
                                 BoardManager.Slot nextSlot = target.GetSlot();
                                 target.DestroyMinion();
@@ -565,7 +565,7 @@ public class MinionManager : MonoBehaviour
                                 }
                             }
 
-                            if (GetCardType() == CardTypes.Moribu && !slotToGo.GetFriendly() && Mathf.Abs(slotToGo.GetIndex() - GetIndex()) == 2)
+                            if (GetCardType() == CardTypes.Moribu && !slotToGo.GetFriendly() && Mathf.Abs(slotToGo.GetIndex() - GetIndex()) == 2 && slotToGo.GetConnectedMinion().GetCardType() != CardTypes.Hatapon)
                             {
                                 MinionManager connectedMinion = slotToGo.GetConnectedMinion();
                                 if (connectedMinion != null)
@@ -975,6 +975,12 @@ public class MinionManager : MonoBehaviour
             yield return null;
         }
         dying = true;
+
+        // "Unit dies" broadcast trigger - fired before the slot below is cleared, so this dying
+        // unit is still discoverable as a listener (e.g. "when I die, gain X") by the board scan
+        // in GameController.FireUnitDiesTrigger, same as any other minion currently on the board.
+        gameController.FireUnitDiesTrigger(GetIndex(), GetCardType(), GetFriendly(), this);
+
         connectedSlot.SetFree(true);
         connectedSlot.SetConnectedMinion(null);
 

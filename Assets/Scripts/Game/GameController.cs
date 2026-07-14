@@ -41,6 +41,11 @@ public class QueueData
         CastSpell,
         DrawCard,
         AfterPlayEffect,
+        OnCardPlayed,
+        OnUnitEnters,
+        OnUnitDies,
+        OnCardDrawn,
+        OnCardDiscarded,
     }
 
     public ActionType actionType;
@@ -63,6 +68,14 @@ public class QueueData
     public List<BoardManager.Slot> enemySlots = null;
     public CardManager.CardStats thisStats = null;
     public int ephemeral = -1;
+
+    // Payload for the 5 global broadcast triggers (OnCardPlayed/OnUnitEnters/OnUnitDies/
+    // OnCardDrawn/OnCardDiscarded) - reuses hostUnit/index/friendlySlots/enemySlots above for the
+    // rest of each delegate's arguments (hostUnit doubles as the listener/triggeredUnit).
+    public CardTypes triggerCardType;
+    public bool triggerIsSpell = false;
+    public bool triggerEntityFriendly = false;
+    public MinionManager triggerMinion = null;
 
     public void ApplyEffect()
     {
@@ -115,6 +128,18 @@ public class QueueData
                     CardManager.CurrentlyResolvingOnPlayCard = hostCard;
                     hostCard.StartCoroutine(thisStats.spell(targets, enemySlots, friendlySlots));
                     CardManager.CurrentlyResolvingOnPlayCard = null;
+
+                    // "Card played" broadcast trigger, spell half only - a hasOnPlaySpell
+                    // creature's on-play effect also routes through this same CastSpell case, but
+                    // that half of "card played" fires separately from BoardManager.PlayCard once
+                    // the creature is actually placed, so it isn't duplicated here.
+                    if (thisStats.isSpell)
+                    {
+                        BoardManager boardManagerForTrigger = GameObject.Find("Board").GetComponent<BoardManager>();
+                        GameController gameControllerForTrigger = GameObject.Find("GameController").GetComponent<GameController>();
+                        bool playedFriendly = friendlySlots == boardManagerForTrigger.friendlySlots;
+                        gameControllerForTrigger.FireCardPlayedTrigger(hostCard.GetCardType(), true, playedFriendly);
+                    }
                 }
                 break;
 
@@ -132,6 +157,27 @@ public class QueueData
             case ActionType.AfterPlayEffect:
                 if (hostCard != null)
                     hostCard.StartCoroutine(hostCard.GetCardStats().afterPlayEvent(index, enemySlots, friendlySlots));
+                break;
+
+            case ActionType.OnCardPlayed:
+                if (hostUnit != null)
+                    hostUnit.StartCoroutine(hostUnit.GetCardStats().onCardPlayedTrigger(hostUnit, triggerCardType, triggerIsSpell, triggerEntityFriendly, enemySlots, friendlySlots));
+                break;
+            case ActionType.OnUnitEnters:
+                if (hostUnit != null)
+                    hostUnit.StartCoroutine(hostUnit.GetCardStats().onUnitEntersTrigger(hostUnit, index, triggerCardType, triggerEntityFriendly, triggerMinion, enemySlots, friendlySlots));
+                break;
+            case ActionType.OnUnitDies:
+                if (hostUnit != null)
+                    hostUnit.StartCoroutine(hostUnit.GetCardStats().onUnitDiesTrigger(hostUnit, index, triggerCardType, triggerEntityFriendly, triggerMinion, enemySlots, friendlySlots));
+                break;
+            case ActionType.OnCardDrawn:
+                if (hostUnit != null)
+                    hostUnit.StartCoroutine(hostUnit.GetCardStats().onCardDrawnTrigger(hostUnit, triggerCardType, triggerEntityFriendly, enemySlots, friendlySlots));
+                break;
+            case ActionType.OnCardDiscarded:
+                if (hostUnit != null)
+                    hostUnit.StartCoroutine(hostUnit.GetCardStats().onCardDiscardedTrigger(hostUnit, triggerCardType, triggerEntityFriendly, enemySlots, friendlySlots));
                 break;
         }
     }
@@ -447,6 +493,11 @@ public class GameController : MonoBehaviour
             return;
         }
 
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            RequestConcedeConfirmation();
+        }
+
         if (InfoSaver.onlineBattle && ServerDataProcesser.instance != null)
         {
             if (opponentNicknameText != null)
@@ -496,30 +547,19 @@ public class GameController : MonoBehaviour
             // This is only our own estimate (their end-of-turn message may lag a little behind
             // it) - clamp at zero rather than counting into negative time.
             enemyTurnSecondsLeft = Mathf.Max(0f, enemyTurnSecondsLeft - Time.deltaTime);
-            string enemyStrTime = FormatTurnTime(enemyTurnSecondsLeft);
-            foreach (Transform child in turnTimeLeft.transform)
-            {
-                child.GetComponent<TextMeshPro>().text = enemyStrTime;
-            }
+            UpdateTurnTimerDisplay(FormatTurnTime(enemyTurnSecondsLeft), enemyTurnSecondsLeft);
         }
         else
         {
             turnSecondsLeft -= Time.deltaTime;
             if (turnSecondsLeft < 0f)
             {
-                foreach (Transform child in turnTimeLeft.transform)
-                {
-                   child.GetComponent<TextMeshPro>().text = "00:00";
-                }
+                UpdateTurnTimerDisplay("00:00", 0f);
                 EndTurn(true);
             }
             else
             {
-                string strTime = FormatTurnTime(turnSecondsLeft);
-                foreach (Transform child in turnTimeLeft.transform)
-                {
-                   child.GetComponent<TextMeshPro>().text = strTime;
-                }
+                UpdateTurnTimerDisplay(FormatTurnTime(turnSecondsLeft), turnSecondsLeft);
             }
         }
     }
@@ -534,6 +574,29 @@ public class GameController : MonoBehaviour
             secondsStr = "0" + secondsStr;
         }
         return "0" + minutes.ToString() + ":" + secondsStr;
+    }
+
+    private static readonly Color turnTimerDangerColor = new Color(0.85f, 0.15f, 0.15f);
+    private const float turnTimerDangerThreshold = 20f;
+    private Color turnTimerDefaultColor;
+    private bool turnTimerDefaultColorCaptured = false;
+
+    // Shared by both the friendly and enemy turn-timer branches in Update() - same text-set loop
+    // both already did, plus a color swap to red once either side's clock is running low.
+    private void UpdateTurnTimerDisplay(string text, float secondsLeft)
+    {
+        bool danger = secondsLeft <= turnTimerDangerThreshold;
+        foreach (Transform child in turnTimeLeft.transform)
+        {
+            TextMeshPro label = child.GetComponent<TextMeshPro>();
+            if (!turnTimerDefaultColorCaptured)
+            {
+                turnTimerDefaultColor = label.color;
+                turnTimerDefaultColorCaptured = true;
+            }
+            label.text = text;
+            label.color = danger ? turnTimerDangerColor : turnTimerDefaultColor;
+        }
     }
 
     // Plain IMGUI overlay - deliberately not scene-authored UI, so it needs no Canvas/TMP
@@ -565,9 +628,12 @@ public class GameController : MonoBehaviour
         if (desyncDetected)
         {
             DrawBanner(new Color(0.6f, 0.1f, 0.1f, 0.9f), "Match halted: " + desyncReason);
-            float width = 220f;
-            Rect buttonRect = new Rect((Screen.width - width) / 2f, 70f, width, 40f);
-            if (GUI.Button(buttonRect, "Return to Main Menu"))
+            float scale = ConfirmationBanner.Scale();
+            int fontSize = ConfirmationBanner.ScaledFontSize(16);
+            float width = 220f * scale;
+            float height = 40f * scale;
+            Rect buttonRect = new Rect((Screen.width - width) / 2f, 70f * scale, width, height);
+            if (ConfirmationBanner.DrawOpaqueButton(buttonRect, "Return to Main Menu", fontSize, buttonRect.Contains(Event.current.mousePosition)))
             {
                 CleanUpOnlineMatch();
                 SceneManager.LoadScene("MainMenu");
@@ -590,8 +656,9 @@ public class GameController : MonoBehaviour
 
     private void DrawBanner(Color color, string message)
     {
-        float width = Mathf.Min(500f, Screen.width - 40f);
-        Rect rect = new Rect((Screen.width - width) / 2f, 10f, width, 50f);
+        float scale = ConfirmationBanner.Scale();
+        float width = Mathf.Min(500f * scale, Screen.width - 40f);
+        Rect rect = new Rect((Screen.width - width) / 2f, 10f * scale, width, 50f * scale);
 
         // GUI.Box multiplies its own semi-transparent default skin texture by GUI.color, so the
         // requested alpha ended up compounded (banner looked far more see-through than the color
@@ -599,7 +666,7 @@ public class GameController : MonoBehaviour
         // final alpha.
         Color previousColor = GUI.color;
         Color opaqueBacking = color;
-        opaqueBacking.a = Mathf.Max(color.a, 0.95f);
+        opaqueBacking.a = Mathf.Max(color.a, 0.98f);
         GUI.color = opaqueBacking;
         GUI.DrawTexture(rect, Texture2D.whiteTexture);
         GUI.color = Color.white;
@@ -607,7 +674,7 @@ public class GameController : MonoBehaviour
         GUIStyle style = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 16,
+            fontSize = ConfirmationBanner.ScaledFontSize(16),
             fontStyle = FontStyle.Bold
         };
         style.normal.textColor = Color.white;
@@ -634,8 +701,79 @@ public class GameController : MonoBehaviour
                 tmpQueue.ApplyEffect();
                 yield return new WaitForSeconds(secondsBetweenAnimations);
             }
-        
+
+
         }
+    }
+
+    // Global broadcast triggers - scan both sides of the board for any minion whose CardStats has
+    // the matching trigger delegate set, and enqueue one QueueData per match (same queue/pacing
+    // mechanism as every other reactive event above), oriented relative to that listening minion
+    // (friendlySlots/enemySlots swapped for an enemy-side listener) so its ability sees the board
+    // from its own controller's perspective, exactly like every other per-instance event already does.
+    private void ScanSideForTrigger(bool listenerFriendly, QueueData.ActionType actionType, System.Func<CardManager.CardStats, bool> hasTrigger, int index, CardTypes cardType, bool isSpell, bool entityFriendly, MinionManager triggerMinion)
+    {
+        List<BoardManager.Slot> listenerSlots = listenerFriendly ? boardManager.friendlySlots : boardManager.enemySlots;
+        foreach (BoardManager.Slot slot in listenerSlots)
+        {
+            MinionManager listener = slot.GetConnectedMinion();
+            if (listener == null || !hasTrigger(listener.GetCardStats()))
+            {
+                continue;
+            }
+
+            QueueData newEvent = new();
+            newEvent.actionType = actionType;
+            newEvent.hostUnit = listener;
+            newEvent.index = index;
+            newEvent.triggerCardType = cardType;
+            newEvent.triggerIsSpell = isSpell;
+            newEvent.triggerEntityFriendly = entityFriendly;
+            newEvent.triggerMinion = triggerMinion;
+            newEvent.friendlySlots = listenerFriendly ? boardManager.friendlySlots : boardManager.enemySlots;
+            newEvent.enemySlots = listenerFriendly ? boardManager.enemySlots : boardManager.friendlySlots;
+            GameController.eventQueue.Insert(0, newEvent);
+        }
+    }
+
+    // Fires whenever ANY card (spell or creature) is played by either player - see
+    // BoardManager.PlayCard (creatures) and the ApplyEffect() CastSpell case (spells).
+    public void FireCardPlayedTrigger(CardTypes playedCardType, bool playedIsSpell, bool playedCardFriendly)
+    {
+        ScanSideForTrigger(true, QueueData.ActionType.OnCardPlayed, stats => stats.onCardPlayedTrigger != null, -1, playedCardType, playedIsSpell, playedCardFriendly, null);
+        ScanSideForTrigger(false, QueueData.ActionType.OnCardPlayed, stats => stats.onCardPlayedTrigger != null, -1, playedCardType, playedIsSpell, playedCardFriendly, null);
+    }
+
+    // Fires whenever ANY unit (minion) enters the board on either side - see BoardManager.PlayCard.
+    public void FireUnitEntersTrigger(int enteredIndex, CardTypes enteredCardType, bool enteredFriendly, MinionManager enteredMinion)
+    {
+        ScanSideForTrigger(true, QueueData.ActionType.OnUnitEnters, stats => stats.onUnitEntersTrigger != null, enteredIndex, enteredCardType, false, enteredFriendly, enteredMinion);
+        ScanSideForTrigger(false, QueueData.ActionType.OnUnitEnters, stats => stats.onUnitEntersTrigger != null, enteredIndex, enteredCardType, false, enteredFriendly, enteredMinion);
+    }
+
+    // Fires whenever ANY unit dies on either side - see MinionManager.Die(), called before the
+    // dying unit's own slot is cleared so it can still be discovered by the board scan too.
+    public void FireUnitDiesTrigger(int diedIndex, CardTypes diedCardType, bool diedFriendly, MinionManager diedMinion)
+    {
+        ScanSideForTrigger(true, QueueData.ActionType.OnUnitDies, stats => stats.onUnitDiesTrigger != null, diedIndex, diedCardType, false, diedFriendly, diedMinion);
+        ScanSideForTrigger(false, QueueData.ActionType.OnUnitDies, stats => stats.onUnitDiesTrigger != null, diedIndex, diedCardType, false, diedFriendly, diedMinion);
+    }
+
+    // Fires on a friendly draw only (see HandManager.AddCardToHandAsync) - never on an opponent
+    // draw, since the real CardTypes of an opponent's drawn card is hidden information not known
+    // client-side.
+    public void FireCardDrawnTrigger(CardTypes cardType, bool cardFriendly)
+    {
+        ScanSideForTrigger(true, QueueData.ActionType.OnCardDrawn, stats => stats.onCardDrawnTrigger != null, -1, cardType, false, cardFriendly, null);
+        ScanSideForTrigger(false, QueueData.ActionType.OnCardDrawn, stats => stats.onCardDrawnTrigger != null, -1, cardType, false, cardFriendly, null);
+    }
+
+    // Fires on a friendly discard (see HandManager.CheckEphemeral/DiscardHand) - never on an
+    // opponent discard, for the same hidden-information reason as FireCardDrawnTrigger.
+    public void FireCardDiscardedTrigger(CardTypes cardType, bool cardFriendly)
+    {
+        ScanSideForTrigger(true, QueueData.ActionType.OnCardDiscarded, stats => stats.onCardDiscardedTrigger != null, -1, cardType, false, cardFriendly, null);
+        ScanSideForTrigger(false, QueueData.ActionType.OnCardDiscarded, stats => stats.onCardDiscardedTrigger != null, -1, cardType, false, cardFriendly, null);
     }
 
     public static bool CanPerformActions()
@@ -995,6 +1133,21 @@ public class GameController : MonoBehaviour
     public void EndTurn(bool friendly)
     {
         GameController.playerTurn = !friendly;
+
+        // Reset the newly-active side's timer here, synchronously - playerTurn just flipped
+        // immediately above, but StartTurn's own reset doesn't run until IenumEndTurn's delayed
+        // coroutine gets there (at least secondsBetweenAnimations later). Without this, Update()
+        // sees the new side's turn already active while its timer is still whatever stale/
+        // negative value a timeout-triggered EndTurn left behind, and instantly calls EndTurn
+        // again before the new turn even really starts.
+        if (playerTurn)
+        {
+            turnSecondsLeft = turnSecondsMax;
+        }
+        else
+        {
+            enemyTurnSecondsLeft = turnSecondsMax;
+        }
 
         if (endTurnRoutine != null)
         {

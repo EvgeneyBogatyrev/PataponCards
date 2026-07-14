@@ -9,6 +9,7 @@ public static class DeveloperAccounts
     private static readonly HashSet<string> Emails = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "evgeneyzim@mail.ru",
+        "nikitapokusaev652@gmail.com"
     };
 
     public static bool IsDeveloper(string email)

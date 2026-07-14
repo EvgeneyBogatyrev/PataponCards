@@ -9,13 +9,13 @@ public class KuwagattanStats : MonoBehaviour
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 12;
-        stats.description = "<b>Hexproof.</b> <b>On attack</b>: Discard your hand.\nThis card cannot be playerd on the first three turns.";
+        stats.description = "This card cannot be playerd on the first three turns.\n<b>On attack</b>: Discard your hand.";
         stats.name = "Kuwagattan";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
 
-        stats.hexproof = true;
+        //stats.hexproof = true;
         stats.firstTurnToPlay = 3;
 
         static IEnumerator OnAttack(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
