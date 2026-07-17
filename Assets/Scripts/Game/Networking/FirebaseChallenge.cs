@@ -158,6 +158,26 @@ namespace Networking
             }
         }
 
+        // Lets both sides of an accepted challenge wait for each other at deck selection instead
+        // of whoever picks first racing straight into the Game scene alone (see LobbyManager.
+        // Start()'s challengeAccepted branch). Keyed under the same matches/{matchId} node
+        // ServerDataProcesser already uses, so it's cleaned up for free by
+        // GameController.CleanUpOnlineMatch()'s existing whole-match delete - no separate
+        // cleanup needed here.
+        private static string DeckSelectReadyPath(int hash) => "matches/" + ServerDataProcesser.MatchId() + "/deckSelectReady/" + hash;
+
+        public static IEnumerator MarkDeckSelectReady()
+        {
+            yield return FirebaseDb.Put(DeckSelectReadyPath(InfoSaver.myHash), true);
+        }
+
+        public static IEnumerator PollOpponentDeckSelectReady(Action<bool> onResult)
+        {
+            JToken token = null;
+            yield return FirebaseDb.Get(DeckSelectReadyPath(InfoSaver.opponentHash), t => token = t);
+            onResult?.Invoke(token != null && token.Type != JTokenType.Null);
+        }
+
         public static IEnumerator GetAvailability(string uid, Action<bool> onResult)
         {
             JToken token = null;

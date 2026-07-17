@@ -33,6 +33,7 @@ public class EndTurnButton : MonoBehaviour
     {
         if (mouseOver && Input.GetMouseButtonUp(0))
         {
+            AudioController.PlaySound("click");
             gameController.EndTurnButton();
             mouseOver = false;
         }

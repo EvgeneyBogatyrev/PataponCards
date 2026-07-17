@@ -21,6 +21,7 @@ public class CollectionButton : MonoBehaviour
     {
         if (mouseOver && Input.GetMouseButtonDown(0))
         {
+            AudioController.PlaySound("click");
             switch (status)
             {
                 case 0:

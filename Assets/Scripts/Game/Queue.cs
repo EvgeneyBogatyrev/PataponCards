@@ -43,6 +43,7 @@ public class QueueProcesser : MonoBehaviour
 
     public void BackButton()
     {
+        AudioController.PlaySound("click");
         matchmakingActive = false;
         StartCoroutine(LeaveQueueAndGoBack());
     }

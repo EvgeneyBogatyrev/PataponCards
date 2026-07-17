@@ -16,32 +16,51 @@ public static class SaveSystem
     private static string AccountFileSuffix => string.IsNullOrEmpty(FirebaseConfig.Uid) ? "guest" : FirebaseConfig.Uid;
     private static string pathDeck => Application.persistentDataPath + "/deck_" + AccountFileSuffix + ".dec";
     private static string pathRunes => Application.persistentDataPath + "/runes_" + AccountFileSuffix + ".run";
+    private static string pathDeckName => Application.persistentDataPath + "/deckname_" + AccountFileSuffix + ".dnm";
     private static string pathCollection => Application.persistentDataPath + "/collection_" + AccountFileSuffix + ".col";
     private static string pathBotStats => Application.persistentDataPath + "/bot_" + AccountFileSuffix + ".bot";
+    private static string pathMatchStats => Application.persistentDataPath + "/matchstats_" + AccountFileSuffix + ".mst";
     public static bool loading = false;
 
+    // Shown for a deck slot that's genuinely empty/untouched (no name ever saved) - see
+    // LoadDeckName/SaveDeckName's fallback and DecksController's empty-slot placeholder. Distinct
+    // from DefaultDeckName below, which is only ever used for the one deck actually seeded for a
+    // new account (see CloudSave.SeedFreshAccount) - once a player renames either, this name is
+    // gone for good, exactly like any other deck name.
+    public const string NewDeckName = "New deck";
+    public const string DefaultDeckName = "Default deck";
+    public const int MaxDeckNameLength = 20;
+
+    // Both of these are a matched pair - GetStarterCollection's first 12 entries are exactly
+    // GetDefaultDeck's card types at the same quantities, so a new player can open the deck
+    // builder and see their starter deck already fully legal, no packs needed. Spear/Spear/Shield
+    // devotion (see the matching rune default in CloudSave.SeedFreshAccount and
+    // CollectionControl.Start). Extras below give a taste of the Bow side and a few other
+    // mechanics without being deck-legal in this specific rune combo.
     public static Dictionary<CardTypes, int> GetStarterCollection()
     {
         Dictionary<CardTypes, int> tmpCollection = new Dictionary<CardTypes, int>();
-        tmpCollection.Add(CardTypes.Yumipon, 2);
-        tmpCollection.Add(CardTypes.Scout, 2);
-        tmpCollection.Add(CardTypes.Tatepon, 2);
-        tmpCollection.Add(CardTypes.Dekapon, 2);
+        tmpCollection.Add(CardTypes.Tatepon, 3);
+        tmpCollection.Add(CardTypes.TargetDummy, 3);
+        tmpCollection.Add(CardTypes.Myamsar, 2);
+        tmpCollection.Add(CardTypes.Yaripon, 2);
         tmpCollection.Add(CardTypes.Kibapon, 2);
+        tmpCollection.Add(CardTypes.Piekron, 1);
+        tmpCollection.Add(CardTypes.Alldemonium, 2);
         tmpCollection.Add(CardTypes.Fang, 2);
+        tmpCollection.Add(CardTypes.FuckingIdiot, 2);
+        tmpCollection.Add(CardTypes.Kacheek, 1);
         tmpCollection.Add(CardTypes.YariponBushwacker, 2);
         tmpCollection.Add(CardTypes.ZigotonTroops, 2);
-        tmpCollection.Add(CardTypes.Kacheek, 2);
-        tmpCollection.Add(CardTypes.Yaripon, 2);
-        tmpCollection.Add(CardTypes.Alldemonium, 2);
-        tmpCollection.Add(CardTypes.HuntingSpirit, 2);
-        tmpCollection.Add(CardTypes.FuckingIdiot, 2);
         // ------------------------------------------
-        
+        // Not deck-legal in this Spear/Spear/Shield build (or simply not included) - single/double
+        // copies so a new player can see a taste of other mechanics/runes to collect toward.
+        tmpCollection.Add(CardTypes.QueenKharma, 1);
         tmpCollection.Add(CardTypes.Motiti, 2);
-        tmpCollection.Add(CardTypes.DeepImpact, 2);
-        tmpCollection.Add(CardTypes.MyamsarHero, 2);
-        tmpCollection.Add(CardTypes.Rantan, 2);
+        tmpCollection.Add(CardTypes.Yumipon, 2);
+        tmpCollection.Add(CardTypes.DeadlyShot, 1);
+        tmpCollection.Add(CardTypes.HealingScepter, 1);
+        tmpCollection.Add(CardTypes.TropicalTailwind, 1);
 
         return tmpCollection;
     }
@@ -49,25 +68,25 @@ public static class SaveSystem
     public static List<CardTypes> GetDefaultDeck()
     {
         return new List<CardTypes>() {
-            CardTypes.Yumipon,
-            CardTypes.Yumipon,
-            CardTypes.Scout,
-            CardTypes.Scout,
             CardTypes.Tatepon,
             CardTypes.Tatepon,
-            CardTypes.Dekapon,
-            CardTypes.Dekapon,
+            CardTypes.Tatepon,
+            CardTypes.TargetDummy,
+            CardTypes.TargetDummy,
+            CardTypes.TargetDummy,
+            CardTypes.Myamsar,
+            CardTypes.Myamsar,
             CardTypes.Yaripon,
             CardTypes.Yaripon,
-            CardTypes.Alldemonium,
-            CardTypes.Alldemonium,
             CardTypes.Kibapon,
             CardTypes.Kibapon,
-            CardTypes.HuntingSpirit,
-            CardTypes.HuntingSpirit,
+            CardTypes.Piekron,
+            CardTypes.Alldemonium,
+            CardTypes.Alldemonium,
             CardTypes.Fang,
             CardTypes.Fang,
-            CardTypes.Kacheek,
+            CardTypes.FuckingIdiot,
+            CardTypes.FuckingIdiot,
             CardTypes.Kacheek,
             CardTypes.YariponBushwacker,
             CardTypes.YariponBushwacker,
@@ -88,7 +107,7 @@ public static class SaveSystem
 
         if (mirrorToCloud)
         {
-            CloudSave.MirrorDeck(index, deck, LoadRunes(index));
+            CloudSave.MirrorDeck(index, deck, LoadRunes(index), LoadDeckName(index));
         }
     }
 
@@ -101,7 +120,70 @@ public static class SaveSystem
     {
         SaveDeck(deck, index, mirrorToCloud:false);
         SaveRunes(runes, index, mirrorToCloud:false);
-        CloudSave.MirrorDeck(index, deck, runes);
+        CloudSave.MirrorDeck(index, deck, runes, LoadDeckName(index));
+    }
+
+    public static void SaveDeckName(string name, int index=0, bool mirrorToCloud=true)
+    {
+        string trimmed = (name ?? "").Trim();
+
+        // Safety net, not the primary gate - DeckNameField already blocks non-Latin keystrokes
+        // as the player types, but this strips anything that slips through some other caller
+        // (e.g. a name pulled down from the cloud) rather than throwing the whole name away.
+        System.Text.StringBuilder latinOnly = new System.Text.StringBuilder();
+        foreach (char c in trimmed)
+        {
+            if (TextValidation.IsLatinChar(c))
+            {
+                latinOnly.Append(c);
+            }
+        }
+        trimmed = latinOnly.ToString();
+
+        if (trimmed.Length > MaxDeckNameLength)
+        {
+            trimmed = trimmed.Substring(0, MaxDeckNameLength);
+        }
+        if (string.IsNullOrEmpty(trimmed))
+        {
+            trimmed = NewDeckName;
+        }
+
+        string newPathDeckName = pathDeckName;
+        if (index != 0) newPathDeckName += index.ToString();
+        BinaryFormatter formatter = new BinaryFormatter();
+        FileStream stream = new FileStream(newPathDeckName, FileMode.Create);
+
+        formatter.Serialize(stream, trimmed);
+        stream.Close();
+
+        if (mirrorToCloud)
+        {
+            CloudSave.MirrorDeck(index, LoadDeck(index), LoadRunes(index), trimmed);
+        }
+    }
+
+    public static string LoadDeckName(int index=0)
+    {
+        string newPathDeckName = pathDeckName;
+        if (index != 0) newPathDeckName += index.ToString();
+        if (File.Exists(newPathDeckName))
+        {
+            try
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                FileStream stream = new FileStream(newPathDeckName, FileMode.Open);
+
+                string name = formatter.Deserialize(stream) as string;
+                stream.Close();
+                return string.IsNullOrEmpty(name) ? NewDeckName : name;
+            }
+            catch
+            {
+                return NewDeckName;
+            }
+        }
+        return NewDeckName;
     }
 
     public static void DeleteDeck(int index, int maxdecks=6)
@@ -110,6 +192,7 @@ public static class SaveSystem
         {
             if (i == 5)
             {
+                SaveDeckName(NewDeckName, i, mirrorToCloud:false);
                 SaveDeckAndRunes(new List<CardTypes>(), new List<Runes>(), i);
                 break;
             }
@@ -117,10 +200,12 @@ public static class SaveSystem
             List<Runes> runes = SaveSystem.LoadRunes(i + 1);
             if (runes.Count == 0)
             {
+                SaveDeckName(NewDeckName, i, mirrorToCloud:false);
                 SaveDeckAndRunes(new List<CardTypes>(), new List<Runes>(), i);
                 break;
             }
 
+            SaveDeckName(LoadDeckName(i + 1), i, mirrorToCloud:false);
             SaveDeckAndRunes(LoadDeck(i + 1), LoadRunes(i + 1), i);
         }
     }
@@ -199,7 +284,7 @@ public static class SaveSystem
 
         if (mirrorToCloud)
         {
-            CloudSave.MirrorDeck(index, LoadDeck(index), runes);
+            CloudSave.MirrorDeck(index, LoadDeck(index), runes, LoadDeckName(index));
         }
     }
 
@@ -317,7 +402,7 @@ public static class SaveSystem
             catch
             {
                 loading = false;
-                return new List<bool>() {false, false, false, false};
+                return new List<bool>() {false, false, false, false, false};
             }
         }
         else
@@ -327,7 +412,44 @@ public static class SaveSystem
         }
     }
 
-    private static List<CardTypes> GetCollectableCards()
+    // Wins/losses tracked against human opponents only (see GameController.RecordMatchStats,
+    // which gates this on InfoSaver.onlineBattle) - bot matches never call this.
+    public static void SaveMatchStats(int wins, int losses, bool mirrorToCloud=true)
+    {
+        BinaryFormatter formatter = new BinaryFormatter();
+        FileStream stream = new FileStream(pathMatchStats, FileMode.Create);
+
+        formatter.Serialize(stream, new List<int>() { wins, losses });
+        stream.Close();
+
+        if (mirrorToCloud)
+        {
+            CloudSave.MirrorMatchStats(wins, losses);
+        }
+    }
+
+    public static (int wins, int losses) LoadMatchStats()
+    {
+        if (File.Exists(pathMatchStats))
+        {
+            try
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                FileStream stream = new FileStream(pathMatchStats, FileMode.Open);
+
+                List<int> stats = formatter.Deserialize(stream) as List<int>;
+                stream.Close();
+                return (stats[0], stats[1]);
+            }
+            catch
+            {
+                return (0, 0);
+            }
+        }
+        return (0, 0);
+    }
+
+    public static List<CardTypes> GetCollectableCards()
     {
         string[] allCards = Enum.GetNames(typeof(CardTypes));
         List<CardTypes> relevantCards = new();
@@ -354,6 +476,7 @@ public static class SaveSystem
             CardTypes.Motiti_option1,
             CardTypes.Motiti_option2,
             CardTypes.MotitiAngry,
+            CardTypes.MotitiCalm,
             CardTypes.Boulder,
             CardTypes.TonKampon_option1,
             CardTypes.TonKampon_option2,

@@ -13,6 +13,8 @@ public static class MahoponStats
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
 
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
+
         stats.power = 2;
         stats.description = "<b>Cycling.\nOn play</b>: Deal " + mahoponTargetDamage.ToString() + " damage to target unit and " + mahoponAoEDamage.ToString() + " damage to all other units.";
         stats.name = "Mahopon";

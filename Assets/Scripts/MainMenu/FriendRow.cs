@@ -89,6 +89,10 @@ public class FriendRow : MonoBehaviour
         }
         Button button = buttonObject.GetComponent<Button>();
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(() => onClick?.Invoke());
+        button.onClick.AddListener(() =>
+        {
+            AudioController.PlaySound("click");
+            onClick?.Invoke();
+        });
     }
 }

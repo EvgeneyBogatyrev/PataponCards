@@ -457,6 +457,7 @@ public class BoardManager : MonoBehaviour
         newCard.transform.position = new Vector3(0f, 10f, 0f);
         newCard.destroyTimer = HandManager.cardDestroyTimer;
 
+        AudioController.PlaySound("fatigue");
         hatapon.LoseLife(amount);
     }
 
@@ -481,6 +482,36 @@ public class BoardManager : MonoBehaviour
         }
         lastDeadOpponent = CardTypes.Hatapon;
         lastDeadYou = CardTypes.Hatapon;
+    }
+
+    // Toggles every currently-connected minion's own Collider on/off - used while a
+    // CardInfoManager popup (the right-click card preview) is open, so its relevant-card repr
+    // icons - which can render at any screen position, not just clear of the board - never lose
+    // a mouse raycast to a minion's much larger BoxCollider sitting at a competing depth. Minions
+    // are already non-interactive while a popup is open (see CursorController.CursorStates.Select
+    // gating throughout MinionManager), so this just removes a stale raycast target rather than
+    // changing any actual gameplay behavior.
+    public void SetAllMinionCollidersEnabled(bool colliderEnabled)
+    {
+        SetSlotColliders(friendlySlots, colliderEnabled);
+        SetSlotColliders(enemySlots, colliderEnabled);
+    }
+
+    private void SetSlotColliders(List<Slot> slots, bool colliderEnabled)
+    {
+        foreach (Slot slot in slots)
+        {
+            MinionManager minion = slot.GetConnectedMinion();
+            if (minion == null)
+            {
+                continue;
+            }
+            Collider minionCollider = minion.GetComponent<Collider>();
+            if (minionCollider != null)
+            {
+                minionCollider.enabled = colliderEnabled;
+            }
+        }
     }
 }
 

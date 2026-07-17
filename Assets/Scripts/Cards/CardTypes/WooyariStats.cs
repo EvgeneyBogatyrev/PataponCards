@@ -13,6 +13,8 @@ public static class WooyariStats
         stats.name = "Wooyari";
         stats.runes.Add(Runes.Spear);
 
+        stats.onPlaySound = "wooyari_hm";
+
         stats.hasOnPlaySpell = true;
 
         stats.additionalRules.Add("If a chosen unit doesn't have <b>Lifelink</b>, this effect does nothing.");

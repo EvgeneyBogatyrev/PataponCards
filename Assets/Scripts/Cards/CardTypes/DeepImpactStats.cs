@@ -122,6 +122,8 @@ public static class HorseriderStats
         stats.name = "Horserider";
         stats.runes.Add(Runes.Spear);
 
+        stats.onPlaySound = "kibapon";
+
         stats.hasHaste = true;
 
         stats.imagePath = "kiba_art";

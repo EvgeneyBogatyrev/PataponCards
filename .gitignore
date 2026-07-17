@@ -70,3 +70,8 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Firebase admin service-account key for Tools/redeem_codes.py - a full admin credential for the
+# Firebase project, never commit it. Keep the actual file wherever you run the script from.
+serviceAccountKey.json
+/Tools/*.json

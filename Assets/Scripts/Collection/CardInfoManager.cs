@@ -17,7 +17,7 @@ public static class CardInfoController
         info.GetComponent<CardInfoManager>().Create(cardType);        
         info.transform.position = new Vector3(info.transform.position.x - 3.26f, 
                                               info.transform.position.y + 1.52f,
-                                              -2f);
+                                              -3f);
               
     }
 
@@ -41,23 +41,23 @@ public static class CardInfoController
             case "On attack":
                 return "<b>On attack</b> effect triggers when you attack with this unit.";
             case "Cycling":
-                return "You can discard cards with <b>Cycling</b> to draw a card. You can cycle once per turn.";
+                return "Right-click on a card with <b>Cycling</b> to discard it and draw a card. You can cycle once per turn.";
             case "Poison":
                 return "<b>Poisoned</b> units receive 1 damage at the start of their controller's turn.";
             case "Devotion deck":
-                return "Your <b>Devotion</b> to a specific class equals to the amount of this class symbols you select during deckbuilding.";
+                return "Your <b>Devotion</b> to a specific class equals to the number of this class symbols you select during deck building.";
             case "Devotion card":
-                return "A card's <b>Devotion</b> to a specific class equals to the amount of this class symbols in the top right corner of the card.";
+                return "A card's <b>Devotion</b> to a specific class equals to the number of this class symbols in the top right corner of the card.";
             case "Pacifism":
-                return "A unit with <b>Pacifism</b> can't attack, move, or deal damage.";
+                return "A unit with <b>Pacifism</b> can not attack, move, or deal damage.";
             case "Abilities":
-                return "A unit with <b>Abilities</b> can atcivate it's ability once per turn instead of attacking. Ability's cost is subtracted from unit's power.";
+                return "A unit with <b>Abilities</b> can atcivate its ability once per turn instead of attacking. Ability's cost is subtracted from this unit's power.";
             case "Lifelink":
-                return "Your Hatapon can't be damaged when you control a unit with <b>Lifelink</b>. This doesn't apply to poison and fatique damage.";
+                return "Your Hatapon can not be damaged when you control a unit with <b>Lifelink</b>. This does not apply to poison and fatigue damage.";
             case "Hexproof":
-                return "A unit with <b>Hexproof</b> can't be targeted by spells and abilities.";
+                return "A unit with <b>Hexproof</b> can not be targeted by spells and abilities.";
             case "Haste":
-                return "A unit with <b>Haste</b> can attack and move as soon as it enters the battlefield from hand.";
+                return "A unit with <b>Haste</b> can attack and move as soon as it enters the battlefield.";
             case "Remove doesn't trigger death":
                 return "Removing a unit from the battlefield without destroying it does not trigget <b>On death</b> effects.";
             default:
@@ -76,6 +76,16 @@ public class CardInfoManager : MonoBehaviour
     public GameObject cardPrefab;
     public GameObject cardReprPrefab;
 
+    // Whatever CursorController.cursorState was right before this popup opened - restored on
+    // close instead of hardcoding Free, since a caller in an active match (see MinionManager's
+    // right-click preview) may have opened this during the opponent's turn (CursorStates.EnemyTurn),
+    // not just the Free/idle state the Collection scene's own caller always opens it from.
+    // Forcing Free unconditionally would wrongly re-enable playing cards mid-opponent-turn once
+    // the popup closes.
+    private CursorController.CursorStates previousCursorState;
+
+    // Only non-null in the Game scene (Collection has no "Board" object) - see Create()/Destroy().
+    private BoardManager boardManager;
 
     private string GetCardTextFromStats(CardManager.CardStats stats)
     {
@@ -134,8 +144,44 @@ public class CardInfoManager : MonoBehaviour
 
     public void Create(CardTypes cardType)
     {
+        // Captured before the caller (CardManager's Collection click handler, or MinionManager's
+        // in-match right-click handler) moves the cursor into Select right after this call returns.
+        previousCursorState = CursorController.cursorState;
+
+        // Board minions have real (fairly large) BoxColliders - disabling them while this popup
+        // is open stops them from winning the mouse raycast over the relevant-card repr icons
+        // below (which can render at any screen position, not necessarily clear of the board).
+        // They're already non-interactive while a popup is open anyway (CursorController.Select
+        // gating throughout MinionManager), so this doesn't change any actual gameplay behavior -
+        // it just removes a stale raycast target. No-op in the Collection scene (no "Board").
+        GameObject boardObject = GameObject.Find("Board");
+        if (boardObject != null)
+        {
+            boardManager = boardObject.GetComponent<BoardManager>();
+            boardManager.SetAllMinionCollidersEnabled(false);
+        }
+
+        // This root object also carries its own BoxCollider (spanning most of the popup's own
+        // footprint) that no script here actually uses - CardInfoManager has no OnMouseX handlers
+        // of its own. An unused collider still blocks raycasts to anything behind/overlapping it
+        // regardless of whether a script reacts to its events, so disable it defensively too.
+        Collider ownCollider = GetComponent<Collider>();
+        if (ownCollider != null)
+        {
+            ownCollider.enabled = false;
+        }
+
         GameObject newCard = Instantiate(cardPrefab, this.gameObject.transform);
         mainCard = newCard.GetComponent<CardManager>();
+        // A fresh instance of the standard Card prefab carries its own full-size BoxCollider
+        // (needed for CardManager's own hover/drag logic elsewhere, but this card is purely a
+        // static hilightOver display here) - disable it so it can't block the mouse raycast to
+        // the relevant-card repr icons sitting nearby in the same popup.
+        Collider mainCardCollider = newCard.GetComponent<Collider>();
+        if (mainCardCollider != null)
+        {
+            mainCardCollider.enabled = false;
+        }
         mainCard.numberOfCardsObject.SetActive(false);
         CardGenerator.CustomizeCard(mainCard, cardType);
         mainCard.SetCardState(CardManager.CardState.hilightOver);
@@ -160,7 +206,11 @@ public class CardInfoManager : MonoBehaviour
             cardReprObj.type = addCardType;
             cardReprObj.SetVisualNumber();
             
-            cardReprObj.gameObject.transform.position = new Vector3(cardReprPosition.transform.position.x, cardReprPosition.transform.position.y - shift * index, 0f);
+            // Z must follow cardReprPosition's own depth (not a hardcoded 0) - harmless in the
+            // Collection scene where nothing else competes for the mouse raycast nearby, but in
+            // the Game scene board minions sit at a more-negative (closer-to-camera) Z, so their
+            // colliders would win over a repr icon stuck at Z=0, silently eating its hover events.
+            cardReprObj.gameObject.transform.position = new Vector3(cardReprPosition.transform.position.x, cardReprPosition.transform.position.y - shift * index, cardReprPosition.transform.position.z);
 
             cardReprObj.index = index;
 
@@ -184,6 +234,10 @@ public class CardInfoManager : MonoBehaviour
 
     public void Destroy()
     {
+        if (boardManager != null)
+        {
+            boardManager.SetAllMinionCollidersEnabled(true);
+        }
         if (mainCard != null)
         {
             Destroy(mainCard.gameObject);
@@ -206,7 +260,7 @@ public class CardInfoManager : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             Destroy();
-            CursorController.cursorState = CursorController.CursorStates.Free;
+            CursorController.cursorState = previousCursorState;
         }
     }
 }

@@ -38,6 +38,16 @@ public class MinionManager : MonoBehaviour
     private Vector3 attackPosition;
 
     private Vector3 desiredPosition;
+    // Tracks the smoothed "true" position separately from transform.position for flying units -
+    // see the flying hover wobble in Update(), which used to add its sine/cosine offset directly
+    // onto transform.position every frame. Since that offset was never scaled by Time.deltaTime,
+    // it was effectively re-added at whatever rate Update() ran, making the unit visibly drift
+    // (not hover in place) at a speed tied to frame rate rather than real time. Keeping the lerp
+    // target separate from the rendered position fixes that - the hover offset is now a pure,
+    // bounded function of elapsed time added on top of a stable anchor, instead of an ever-growing
+    // sum baked into the position it's computed from.
+    private Vector3 smoothedIdlePosition;
+    private bool smoothedIdlePositionInitialized = false;
     private float desiredScale;
     private int power;
     private bool friendly;
@@ -52,6 +62,10 @@ public class MinionManager : MonoBehaviour
     private Arrow arrow = null;
     public float fadeSpeed = 10f;
     public float shrinkSpeed = 3f;
+    // Flying units' idle hover - a small, fixed-amplitude bob computed relative to a stable
+    // anchor (see smoothedIdlePosition), not tied to frame rate or screen resolution.
+    public float FlyingHoverAmplitude = 0.04f;
+    public float FlyingHoverSpeed = 1.5f;
     public bool fading = false;
     public bool dying = false;
     public float startTime = 0f;
@@ -60,6 +74,14 @@ public class MinionManager : MonoBehaviour
     public bool moved = false;
     public ShakeScreen _shakeScreen;
     public bool alreadyShake = false;
+    // Separate from alreadyShake so the attack sound can fire a beat before the shake/visual
+    // contact instead of at the exact same instant - compensates for perceived audio lag.
+    public bool alreadySound = false;
+
+    // Wire the same CardInfoManager prefab CardManager.infoPrefab uses in the Collection scene -
+    // reuses that exact popup (card preview + generated mechanics description) for right-clicking
+    // a unit on the board, see the right-click check at the top of Update().
+    public GameObject infoPrefab;
 
     public float tailwindTimer = 0f;
 
@@ -384,7 +406,25 @@ public class MinionManager : MonoBehaviour
 
     void Update()
     {
-        
+        // Right-click any unit (friendly or enemy, yours or not currently actionable) to open the
+        // same card-preview + mechanics-description popup the Collection scene uses on its cards -
+        // see CardInfoManager. Allowed during CursorStates.EnemyTurn too (a read-only inspection,
+        // harmless on the opponent's turn), but not while already mid-attack/move-selection or
+        // inside another modal (ChooseOption, an already-open preview, etc.) - state == Free and
+        // cursorState == Free/EnemyTurn together mean nothing else is currently happening.
+        bool cursorAllowsPreview = CursorController.cursorState == CursorController.CursorStates.Free ||
+            CursorController.cursorState == CursorController.CursorStates.EnemyTurn;
+        if (state == MinionState.Free && mouseOver && !dying && cursorAllowsPreview && Input.GetMouseButtonDown(1))
+        {
+            if (previewedCard != null)
+            {
+                previewedCard.DestroyCard();
+                previewedCard = null;
+            }
+            CardInfoController.Create(cardType, infoPrefab);
+            CursorController.cursorState = CursorController.CursorStates.Select;
+        }
+
         switch (state)
         {
             case MinionState.Free:
@@ -625,6 +665,10 @@ public class MinionManager : MonoBehaviour
         if (attacking)
         {
             transform.position += (attackPosition - transform.position) * Time.deltaTime * 6f;
+            // Keeps smoothedIdlePosition stale (see below) so the lunge-and-return always resumes
+            // from wherever the unit actually is right now once attacking ends, instead of
+            // snapping back to a value cached from before the attack started.
+            smoothedIdlePositionInitialized = false;
 
             Vector3 diff = (transform.position - attackPosition);
             float length = diff.magnitude;
@@ -632,6 +676,15 @@ public class MinionManager : MonoBehaviour
             if (length < 0.1)
             {
                 attacking = false;
+            }
+
+            // Fires a bit before the shake/contact frame below, not at the exact same instant -
+            // compensates for perceived audio lag so the sound reads as synced with the hit
+            // rather than trailing it.
+            if (length < 0.35 && !alreadySound)
+            {
+                alreadySound = true;
+                AudioController.PlaySound("attack");
             }
 
             if (length < 0.2 && !alreadyShake)
@@ -661,13 +714,30 @@ public class MinionManager : MonoBehaviour
         }
         else if (!onAttackActionProgress)
         {
-            transform.position += (desiredPosition - transform.position) * Time.deltaTime * 6f;
+            if (!smoothedIdlePositionInitialized)
+            {
+                smoothedIdlePosition = transform.position;
+                smoothedIdlePositionInitialized = true;
+            }
+            smoothedIdlePosition += (desiredPosition - smoothedIdlePosition) * Time.deltaTime * 6f;
+
             if (GetCardStats().flying)
             {
-                //transform.localScale = new Vector3()
-                transform.position = new Vector3(transform.position.x + 0.04f * Mathf.Sin(1.5f * (startTime - Time.time)), transform.position.y + 0.025f * Mathf.Cos(1.5f * (startTime - Time.time)), transform.position.z);
-                //transform.rotation = Quaternion.Euler(10f * Mathf.Sin(Time.time), 10f * Mathf.Cos(Time.time), 0f);
+                float hoverX = FlyingHoverAmplitude * Mathf.Sin(FlyingHoverSpeed * (startTime - Time.time));
+                float hoverY = FlyingHoverAmplitude * 0.6f * Mathf.Cos(FlyingHoverSpeed * (startTime - Time.time));
+                transform.position = new Vector3(smoothedIdlePosition.x + hoverX, smoothedIdlePosition.y + hoverY, smoothedIdlePosition.z);
             }
+            else
+            {
+                transform.position = smoothedIdlePosition;
+            }
+        }
+        else
+        {
+            // onAttackActionProgress is true (mid on-attack-event resolution, before the lunge
+            // itself even starts) - transform.position deliberately doesn't move here, but keep
+            // the idle anchor marked stale for the same reason as the attacking branch above.
+            smoothedIdlePositionInitialized = false;
         }
         if (!dying)
         {
@@ -781,6 +851,7 @@ public class MinionManager : MonoBehaviour
             }
             ServerDataProcesser.instance.Move(connectedSlot.GetIndex() + 1, sign * (slotToMove.GetIndex() + 1));
         }
+        AudioController.PlaySound("walk");
         moved = true;
         connectedSlot.SetFree(true);
         connectedSlot.SetConnectedMinion(null);
@@ -796,6 +867,7 @@ public class MinionManager : MonoBehaviour
         {
             ServerDataProcesser.instance.Exchange(connectedSlot.GetIndex() + 1, slotToMove.GetIndex() + 1);
         }
+        AudioController.PlaySound("walk");
 
         MinionManager other = slotToMove.GetConnectedMinion();
 
@@ -808,6 +880,13 @@ public class MinionManager : MonoBehaviour
         this.SetCanAttack(false);
         other.SetAbilityToAttack(false);
         other.SetCanAttack(false);
+
+        // SetCanAttack(false) resets moved=false as an internal side effect (see its own
+        // definition) - an Exchange is itself a form of movement (Robopon's "didn't move"
+        // end-of-turn check relies on this), so this has to be set AFTER the SetCanAttack calls
+        // above, or it gets immediately wiped out by them.
+        this.moved = true;
+        other.moved = true;
     }
 
     public void Attack(MinionManager enemy, bool record = false)
@@ -1151,6 +1230,7 @@ public class MinionManager : MonoBehaviour
         if (_can)
         {
             alreadyShake = false;
+            alreadySound = false;
         }
     }
     public int GetIndex()
@@ -1205,19 +1285,19 @@ public class MinionManager : MonoBehaviour
             
             if (GetFriendly() && connectedSlot.GetIndex() > 1)
             {
-                previewedCard.transform.position = this.transform.position + new Vector3(-4f, 3.5f, -6f);
+                previewedCard.transform.position = this.transform.position + new Vector3(-4f, 4.5f, -6f);
             }
             else if (GetFriendly() && connectedSlot.GetIndex() <= 1)
             {
-                previewedCard.transform.position = this.transform.position + new Vector3(3.5f, 3.5f, -6f);
+                previewedCard.transform.position = this.transform.position + new Vector3(3.5f, 4.5f, -6f);
             }
             else if (!GetFriendly() && connectedSlot.GetIndex() > 1)
             {
-                previewedCard.transform.position = this.transform.position + new Vector3(-4f, -2.5f, -6f);
-            } 
+                previewedCard.transform.position = this.transform.position + new Vector3(-4f, -1.5f, -6f);
+            }
             else
             {
-                previewedCard.transform.position = this.transform.position + new Vector3(3.5f, -2.5f, -6f);
+                previewedCard.transform.position = this.transform.position + new Vector3(3.5f, -1.5f, -6f);
             }
         }
         
@@ -1227,7 +1307,12 @@ public class MinionManager : MonoBehaviour
     private void OnMouseOver()
     {
         mouseOver = true;
-        if (previewedCard == null)
+        // Skip while cursorState is anything other than Free/EnemyTurn (Select, ChooseOption,
+        // Hold, etc.) - most commonly the right-click info popup being open (see Update()) - so
+        // the small hover preview doesn't pop up redundantly alongside/behind another modal.
+        bool cursorAllowsHoverPreview = CursorController.cursorState == CursorController.CursorStates.Free ||
+            CursorController.cursorState == CursorController.CursorStates.EnemyTurn;
+        if (previewedCard == null && cursorAllowsHoverPreview)
         {
             StartCoroutine(CardPreview());
         }

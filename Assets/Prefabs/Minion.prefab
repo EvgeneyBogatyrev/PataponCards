@@ -341,6 +341,7 @@ MonoBehaviour:
   moved: 0
   _shakeScreen: {fileID: 0}
   alreadyShake: 0
+  infoPrefab: {fileID: 5994425831647166798, guid: 19917fc2feadb49ffb5216ba603b713e, type: 3}
   tailwindTimer: 0
 --- !u!65 &3826434527599374660
 BoxCollider:

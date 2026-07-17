@@ -30,10 +30,14 @@ public class LobbyManager : MonoBehaviour
 
         // A friend challenge already negotiated myHash/opponentHash/onlineBattle over Firebase
         // before landing here (via DeckSelect) - skip generating a new random key and showing
-        // the normal Play Online/manual-entry UI, and just go straight into the match.
+        // the normal Play Online/manual-entry UI, and just go straight into the match once both
+        // sides have actually finished picking a deck (see WaitForOpponentDeckSelect) - otherwise
+        // whoever picks first would land in the Game scene alone while the other is still on
+        // DeckSelect.
         if (InfoSaver.challengeAccepted)
         {
             InfoSaver.challengeAccepted = false;
+            yield return WaitForOpponentDeckSelect();
             SceneManager.LoadScene("Game");
             yield break;
         }
@@ -42,8 +46,59 @@ public class LobbyManager : MonoBehaviour
         PrintKey();
     }
 
+    private bool waitingForOpponentDeck = false;
+
+    private IEnumerator WaitForOpponentDeckSelect()
+    {
+        waitingForOpponentDeck = true;
+        yield return FirebaseChallenge.MarkDeckSelectReady();
+
+        bool opponentReady = false;
+        while (!opponentReady)
+        {
+            yield return FirebaseChallenge.PollOpponentDeckSelectReady(ready => opponentReady = ready);
+            if (!opponentReady)
+            {
+                yield return new WaitForSeconds(1f);
+            }
+        }
+        waitingForOpponentDeck = false;
+    }
+
+    // Same plain centered-message look as MainMenuController's DrawWaitingBanner, minus the
+    // Cancel button - there's nothing to cancel back to here, both sides already committed to
+    // this match by accepting the challenge.
+    private void OnGUI()
+    {
+        if (!waitingForOpponentDeck)
+        {
+            return;
+        }
+
+        float scale = ConfirmationBanner.Scale();
+        int fontSize = ConfirmationBanner.ScaledFontSize(16);
+        float width = Mathf.Min(500f * scale, Screen.width - 40f);
+        Rect messageRect = new Rect((Screen.width - width) / 2f, 10f * scale, width, 50f * scale);
+
+        Color previousColor = GUI.color;
+        GUI.color = new Color(0.2f, 0.2f, 0.6f, 0.98f);
+        GUI.DrawTexture(messageRect, Texture2D.whiteTexture);
+        GUI.color = Color.white;
+
+        GUIStyle style = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = fontSize,
+            fontStyle = FontStyle.Bold
+        };
+        style.normal.textColor = Color.white;
+        GUI.Label(messageRect, "Waiting for your opponent to select a deck...", style);
+        GUI.color = previousColor;
+    }
+
     public void PlayGameButton()
     {
+        AudioController.PlaySound("click");
         if (!FirebaseConfig.HasAccount)
         {
             InfoSaver.sceneAfterLogin = "Lobby";
@@ -59,6 +114,7 @@ public class LobbyManager : MonoBehaviour
 
     public void RegenerateButton()
     {
+        AudioController.PlaySound("click");
         InfoSaver.myHash = UnityEngine.Random.Range(0, 99999);
         PrintKey();
     }
@@ -71,6 +127,7 @@ public class LobbyManager : MonoBehaviour
 
     public void PalyYourself()
     {
+        AudioController.PlaySound("click");
         InfoSaver.opponentHash = InfoSaver.myHash;
         InfoSaver.onlineBattle = false;
         SceneManager.LoadScene("Game");
@@ -78,6 +135,7 @@ public class LobbyManager : MonoBehaviour
 
     public void PlayOnline()
     {
+        AudioController.PlaySound("click");
         if (!FirebaseConfig.HasAccount)
         {
             InfoSaver.sceneAfterLogin = "Lobby";
@@ -91,6 +149,7 @@ public class LobbyManager : MonoBehaviour
 
     public void Exit()
     {
+        AudioController.PlaySound("click");
         SceneManager.LoadScene("MainMenu");
     }
 }

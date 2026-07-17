@@ -81,6 +81,7 @@ public class DeckSlotManager : MonoBehaviour
             List<CardTypes> thisDeck = SaveSystem.LoadDeck(this.index);
             if (thisDeck.Count == 24 || DeckLoadManager.roomToGo == "Collection")
             {
+                AudioController.PlaySound("click");
                 DeckLoadManager.deckIndex = this.index;
                 SceneManager.LoadScene(DeckLoadManager.roomToGo);
             }

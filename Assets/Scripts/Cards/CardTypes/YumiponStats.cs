@@ -14,6 +14,7 @@ public static class YumiponStats
         stats.description = "<b>End of turn</b>: Deal " + yumiponDamage.ToString() + " damage to all enemy units.";
         stats.name = "Yumipon";
         stats.runes.Add(Runes.Bow);
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
 
         static IEnumerator YumiponOnAttack(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -119,6 +120,7 @@ public static class YumiponStats
                     }
                     else if (!spear.exhausted)
                     {
+                        AudioController.PlaySound("spear");
                         spear.DestroySelf();
                         spear.GetSlotToGo().GetConnectedMinion().ReceiveDamage(yumiponDamage);
                         spear.exhausted = true;
@@ -133,7 +135,7 @@ public static class YumiponStats
         stats.endTurnEvent = YumiponEndTurn;
         //stats.onAttackEvent = YumiponOnAttack;
 
-        stats.imagePath = "yumipon_hq";
+        stats.imagePath = "yumipon_upd";
         stats.artistName = "Official render";
         return stats;
     }

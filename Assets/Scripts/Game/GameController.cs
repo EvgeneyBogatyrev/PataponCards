@@ -15,7 +15,9 @@ public class InfoSaver
     public static int chests = 0;
     public static bool onlineBattle = true;
     public static int botLevel = 0;
-    public static bool[] botDefeated = new bool[4] { false, false, false, false};
+    // Indexed by botLevel+1 (botLevel ranges -1..3, so this needs 5 slots) - see BotLevelController
+    // and Bot.cs's botLevel==3 case for the newest ("Smart Bot") addition.
+    public static bool[] botDefeated = new bool[5] { false, false, false, false, false };
 
     // Scene to return to once the Account scene finishes a sign-in/sign-up.
     public static string sceneAfterLogin = "Lobby";
@@ -25,6 +27,12 @@ public class InfoSaver
     // to skip its own random hash generation and jump straight to the Game scene instead of
     // showing the normal Play Online/manual-key UI.
     public static bool challengeAccepted = false;
+
+    // Set once by AccountFlow.OnLoginSuccess() right before it loads MainMenu directly (not set
+    // for other sceneAfterLogin destinations, e.g. Lobby) - consumed and cleared by
+    // MainMenuController.Start() so the "just logged in" jingle only plays on that specific
+    // transition, not every time the player later returns to MainMenu from a match/Collection/etc.
+    public static bool justLoggedIn = false;
 }
 
 public class QueueData
@@ -68,6 +76,13 @@ public class QueueData
     public List<BoardManager.Slot> enemySlots = null;
     public CardManager.CardStats thisStats = null;
     public int ephemeral = -1;
+
+    // Set true only when this CastSpell came from clicking an ability's connected-card option
+    // (CardState.asOption, e.g. Kacheek's GiveFang/Nutrition) rather than casting a spell straight
+    // from hand (IenumPlayCard) - both build an identical isSpell=true QueueData otherwise, so
+    // this is the only way ApplyEffect() can tell an ability activation apart from a real hand
+    // cast (see the cast_spell sound gating below).
+    public bool fromAbilityOption = false;
 
     // Payload for the 5 global broadcast triggers (OnCardPlayed/OnUnitEnters/OnUnitDies/
     // OnCardDrawn/OnCardDiscarded) - reuses hostUnit/index/friendlySlots/enemySlots above for the
@@ -135,6 +150,12 @@ public class QueueData
                     // the creature is actually placed, so it isn't duplicated here.
                     if (thisStats.isSpell)
                     {
+                        // Not for ability-option casts (Kacheek's GiveFang/Nutrition, etc.) -
+                        // only a genuine spell cast straight from hand.
+                        if (!fromAbilityOption)
+                        {
+                            AudioController.PlaySound("cast_spell");
+                        }
                         BoardManager boardManagerForTrigger = GameObject.Find("Board").GetComponent<BoardManager>();
                         GameController gameControllerForTrigger = GameObject.Find("GameController").GetComponent<GameController>();
                         bool playedFriendly = friendlySlots == boardManagerForTrigger.friendlySlots;
@@ -457,6 +478,17 @@ public class GameController : MonoBehaviour
     // turnTimeLeft display as our own countdown, whichever is currently relevant.
     private float enemyTurnSecondsLeft = 90f;
 
+    // "Round X starts!" banner (see OnGUI) - purely a transient timer, not persisted state.
+    private float roundStartBannerTimer = 0f;
+    private int roundStartBannerNumber = 1;
+    private const float RoundStartBannerDuration = 2.5f;
+
+    private void ShowRoundStartBanner()
+    {
+        roundStartBannerNumber = gameState.friendlyWins + gameState.enemyWins + 1;
+        roundStartBannerTimer = RoundStartBannerDuration;
+    }
+
     public static List<QueueData> eventQueue = new();
 
     private void Start()
@@ -488,6 +520,11 @@ public class GameController : MonoBehaviour
 
     private void Update()
     {
+        if (roundStartBannerTimer > 0f)
+        {
+            roundStartBannerTimer -= Time.deltaTime;
+        }
+
         if (desyncDetected)
         {
             return;
@@ -617,6 +654,42 @@ public class GameController : MonoBehaviour
         {
             ConfirmationBanner.Draw(new Color(0.6f, 0.1f, 0.1f, 0.9f), "Concede the ENTIRE MATCH (not just this round)?",
                 "Yes, concede match", "Cancel", ConcedeMatch, CancelMatchConcede);
+            return;
+        }
+
+        if (pendingCycleConfirmationCard != null)
+        {
+            bool yesClicked = false;
+            bool noClicked = false;
+            // GUI.Button (inside ConfirmationBanner.Draw) only resolves a click as true on the
+            // MouseUp event - checking Input.GetMouseButtonDown(0) instead (true for the whole
+            // frame the button first went down, across every IMGUI event pass that frame,
+            // including the earlier MouseDown pass where yesClicked/noClicked are still both
+            // false) fired "clicked elsewhere" before Yes ever got a chance to resolve, silently
+            // cancelling every single press. Checking for MouseUp specifically instead lines this
+            // check up with the exact same event pass GUI.Button itself resolves on.
+            bool wasMouseUp = Event.current.type == EventType.MouseUp && Event.current.button == 0;
+            ConfirmationBanner.Draw(new Color(0.15f, 0.3f, 0.5f, 0.9f), "Cycle this card?",
+                "Yes", "No", () => yesClicked = true, () => noClicked = true);
+
+            if (yesClicked)
+            {
+                ConfirmCycle();
+            }
+            else if (noClicked || wasMouseUp)
+            {
+                // Neither button consumed this click (they'd have set yesClicked/noClicked
+                // above) - clicking anywhere else counts as No, same as an explicit Cancel.
+                CancelCycle();
+            }
+            return;
+        }
+
+        // Round-start banner - regardless of online/bot, so not gated behind the
+        // InfoSaver.onlineBattle check below like the connection-status banners are.
+        if (roundStartBannerTimer > 0f)
+        {
+            DrawBanner(new Color(0.15f, 0.35f, 0.55f, 0.92f), "Round " + roundStartBannerNumber + " starts!");
             return;
         }
 
@@ -878,12 +951,14 @@ public class GameController : MonoBehaviour
     public void StartGame()
     {
         UpdateRoundLabel();
+        ShowRoundStartBanner();
         endTurnButtonObject.SetActive(true);
         turnTimeLeft.SetActive(true);
         concedeObject.SetActive(true);
         statsObject.SetActive(true);
         if (InfoSaver.opponentHash <= InfoSaver.myHash)
         {
+            AudioController.PlaySound("start_turn_bell");
             playerTurn = true;
             handManager.SetCanPlayCard(true);
             handManager.SetCanCycleCard(true);
@@ -964,6 +1039,7 @@ public class GameController : MonoBehaviour
         boardManager.DealSuddenDeathDamage(friendly, gameState.GetSuddenDeathDamage(friendly));
         if (friendly)
         {
+            AudioController.PlaySound("start_turn_bell");
             List<MinionManager> order = new List<MinionManager>();
 
             foreach (BoardManager.Slot slot in boardManager.friendlySlots)
@@ -1321,7 +1397,9 @@ public class GameController : MonoBehaviour
                 }
                 else
                 {
-                    if (InfoSaver.botLevel == 2)
+                    // Re-beating the current hardest bot still nets a small consolation chest -
+                    // now level 3 ("Smart Bot") rather than level 2, since it's the new ceiling.
+                    if (InfoSaver.botLevel == 3)
                     {
                         InfoSaver.chests = 1;
                     }
@@ -1354,11 +1432,33 @@ public class GameController : MonoBehaviour
         }
     }
 
+    // Winrate only tracks matches against real players (InfoSaver.onlineBattle) - bot matches
+    // are already tracked separately via InfoSaver.botDefeated and would otherwise flood the
+    // stat with lopsided practice results against an AI.
+    private void RecordMatchStats(bool friendlyVictory)
+    {
+        if (!InfoSaver.onlineBattle)
+        {
+            return;
+        }
+        (int wins, int losses) = SaveSystem.LoadMatchStats();
+        if (friendlyVictory)
+        {
+            wins += 1;
+        }
+        else
+        {
+            losses += 1;
+        }
+        SaveSystem.SaveMatchStats(wins, losses);
+    }
+
     public IEnumerator EndGame(bool friendlyVictory)
     {
         boardManager.ClearBoard();
         yield return new WaitForSeconds(3f);
         SetNumberOfChests(friendlyVictory);
+        RecordMatchStats(friendlyVictory);
         CleanUpOnlineMatch();
         if (InfoSaver.chests > 0)
         {
@@ -1383,6 +1483,7 @@ public class GameController : MonoBehaviour
         {
             yield return new WaitForSeconds(3f);
             SetNumberOfChests(friendlyVictory);
+            RecordMatchStats(friendlyVictory);
             CleanUpOnlineMatch();
             if (InfoSaver.chests > 0)
             {
@@ -1402,6 +1503,7 @@ public class GameController : MonoBehaviour
             
             gameState.Reset(turnsObject, enemyTurnsObject, nextDmgObject, enemyNextDmgObject);
             LogController.instance.ClearLog();
+            ShowRoundStartBanner();
             StartTurn(!friendlyVictory, hataponJustDied:true);
             yield return null;
         }
@@ -1426,18 +1528,37 @@ public class GameController : MonoBehaviour
         {
             gameState.enemyWins += 1;
         }
-        scoreObject.GetComponent<TextMeshProUGUI>().text = gameState.friendlyWins.ToString() + ":" + gameState.enemyWins.ToString();
+        SetHudText(scoreObject, gameState.friendlyWins + ":" + gameState.enemyWins);
         UpdateRoundLabel();
+    }
+
+    // Sets text on a HUD label regardless of whether it's a world-space "physical" TextMeshPro or
+    // a leftover Canvas TextMeshProUGUI - scoreObject/roundObject were recently migrated to the
+    // former to match the rest of the HUD, but this stays crash-safe either way instead of NREing
+    // on scenes that haven't had the component swapped over yet (or aren't wired at all).
+    private static void SetHudText(GameObject obj, string text)
+    {
+        if (obj == null)
+        {
+            return;
+        }
+        TextMeshPro worldText = obj.GetComponent<TextMeshPro>();
+        if (worldText != null)
+        {
+            worldText.text = text;
+            return;
+        }
+        TextMeshProUGUI uiText = obj.GetComponent<TextMeshProUGUI>();
+        if (uiText != null)
+        {
+            uiText.text = text;
+        }
     }
 
     private void UpdateRoundLabel()
     {
-        if (roundObject == null)
-        {
-            return;
-        }
         int round = gameState.friendlyWins + gameState.enemyWins + 1;
-        roundObject.GetComponent<TextMeshProUGUI>().text = "Round " + round + " of 3";
+        SetHudText(roundObject, "Round " + round + " of 3");
     }
 
     public bool CheckGameEnd()
@@ -1532,6 +1653,33 @@ public class GameController : MonoBehaviour
         {
             pendingMatchConcedeConfirmation = true;
         }
+    }
+
+    // "Cycle this card?" confirmation - replaces the old drag-to-bottom-right-corner cycling
+    // gesture (crowded alongside the HUD stats there, error-prone). Right-clicking a cyclable
+    // card in hand (see CardManager.cs's CardState.inHand) routes here instead of resolving
+    // cycling directly, so the confirmation banner and its "click elsewhere = No" behavior live
+    // in one place rather than duplicated per-card.
+    private CardManager pendingCycleConfirmationCard = null;
+
+    public void RequestCycleConfirmation(CardManager card)
+    {
+        pendingCycleConfirmationCard = card;
+    }
+
+    private void ConfirmCycle()
+    {
+        CardManager card = pendingCycleConfirmationCard;
+        pendingCycleConfirmationCard = null;
+        if (card != null)
+        {
+            card.ConfirmCycle();
+        }
+    }
+
+    private void CancelCycle()
+    {
+        pendingCycleConfirmationCard = null;
     }
 
     public bool pendingRoundConcedeConfirmation = false;

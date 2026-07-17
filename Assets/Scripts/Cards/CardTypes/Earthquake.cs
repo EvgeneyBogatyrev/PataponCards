@@ -114,7 +114,7 @@ public static class EarthquakeStats
         stats.checkSpellTarget = CheckTarget;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "DekaponBlow";
+        stats.imagePath = "earthquake_hd";
         return stats;
     }
 }

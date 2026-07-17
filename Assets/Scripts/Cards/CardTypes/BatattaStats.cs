@@ -11,6 +11,8 @@ public static class BabattaStats
         stats.description = "<b>On play</b>: Replace your hand with 'Babatto Swarm' cards";
         stats.name = "Babatto";
 
+        stats.onPlaySound = "babatto";
+
         stats.additionalRules.Add("You replace each card in your hand with the <i>'Babatto Swarm'</i> card. Those cards are a completely new set of cards.");
 
         stats.power = 3;
@@ -83,7 +85,7 @@ public static class BabattaSwarmStats
         stats.spell = FangRealization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "babatto_swarm";
+        stats.imagePath = "babatto_swarm_hq";
         return stats;
     }
 }

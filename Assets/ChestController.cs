@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Linq;
+using TMPro;
 
 public enum ChestType
 {
@@ -25,6 +26,20 @@ public class ChestController : MonoBehaviour
 
     public float xShift = 10f;
     private float designatedX = 0f;
+
+    // Optional - a "chest icon + number" UI text showing how many chests (including this one)
+    // are still left to open. InfoSaver.chests already holds that count fresh every time this
+    // scene loads (Update() decrements it and reloads the scene per chest opened, rather than
+    // this object persisting across chests), so this only needs setting once at Start.
+    public GameObject chestsLeftText;
+
+    private void Start()
+    {
+        if (chestsLeftText != null)
+        {
+            chestsLeftText.GetComponent<TextMeshProUGUI>().text = InfoSaver.chests.ToString();
+        }
+    }
 
     private IEnumerator Bounce()
     {
@@ -91,7 +106,11 @@ public class ChestController : MonoBehaviour
             }
         }
 
-        if (opened && reward != null && !UILocked)
+        // reward.rotationFromPack (CardState.openedFromPack's flip-reveal animation, see
+        // CardManager.Update) only reaches 0 once the card has finished rotating into view -
+        // gating on it stops a quick double press/click (one to open, a second before the reveal
+        // finishes) from collecting the reward and jumping scenes before the player ever sees it.
+        if (opened && reward != null && !UILocked && reward.rotationFromPack <= 0f)
         {
             if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
             {

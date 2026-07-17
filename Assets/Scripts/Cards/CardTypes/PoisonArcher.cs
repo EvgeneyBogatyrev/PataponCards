@@ -13,6 +13,8 @@ public static class PoisonArcherStats
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
 
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
+
         stats.hasOnPlaySpell = true;
 
         stats.additionalKeywords.Add("Poison");

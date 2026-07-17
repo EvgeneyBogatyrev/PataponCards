@@ -58,7 +58,12 @@ public static class ConfirmationBanner
         style.hover.textColor = Color.black;
         style.active.textColor = Color.black;
 
-        return GUI.Button(rect, label, style);
+        bool clicked = GUI.Button(rect, label, style);
+        if (clicked)
+        {
+            AudioController.PlaySound("click");
+        }
+        return clicked;
     }
 
     public static void Draw(Color color, string message, string yesLabel, string noLabel, Action onYes, Action onCancel,

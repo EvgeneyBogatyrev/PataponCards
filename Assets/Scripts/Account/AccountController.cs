@@ -27,6 +27,7 @@ public class AccountController : MonoBehaviour
         {
             return;
         }
+        AudioController.PlaySound("click");
 
         string email = emailField.GetComponent<TMP_InputField>().text.Trim();
         string password = passwordField.GetComponent<TMP_InputField>().text;
@@ -43,6 +44,7 @@ public class AccountController : MonoBehaviour
 
     public void RegisterButton()
     {
+        AudioController.PlaySound("click");
         SceneManager.LoadScene("CreateAccount");
     }
 
@@ -53,6 +55,7 @@ public class AccountController : MonoBehaviour
         {
             return;
         }
+        AudioController.PlaySound("click");
 
         string email = emailField.GetComponent<TMP_InputField>().text.Trim();
         if (string.IsNullOrEmpty(email))
@@ -73,6 +76,7 @@ public class AccountController : MonoBehaviour
 
     public void BackButton()
     {
+        AudioController.PlaySound("click");
         // Login is mandatory everywhere now - there's no unauthenticated screen left to
         // return to, so backing out just quits the app.
         Application.Quit();

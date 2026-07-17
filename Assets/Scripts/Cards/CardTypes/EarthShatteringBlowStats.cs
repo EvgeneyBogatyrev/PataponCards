@@ -89,7 +89,7 @@ public static class EarthShatteringBlowStats
         stats.checkSpellTarget = CheckTarget;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "DekaponBlow";
+        stats.imagePath = "earth-shattering-blow";
         return stats;
     }
 }

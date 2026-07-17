@@ -78,7 +78,7 @@ public static class TraitorBoulderStats
         stats.hasAfterPlayEvent = true;
         stats.afterPlayEvent = OnPlay;
 
-        stats.imagePath = "rock_hq";
+        stats.imagePath = "the_rock";
 
         return stats;
     }

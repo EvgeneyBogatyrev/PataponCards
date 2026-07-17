@@ -20,6 +20,7 @@ public class BackToMenuButton : MonoBehaviour
     {
         if (mouseOver && Input.GetMouseButtonDown(0))
         {
+            AudioController.PlaySound("click");
             SceneManager.LoadScene("MainMenu");
         }
 

@@ -16,6 +16,8 @@ public static class ScoutStats
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
 
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
+
         stats.additionalRules.Add("Damage happens even if you didn't draw a card for any reason.");
 
 

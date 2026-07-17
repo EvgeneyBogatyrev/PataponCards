@@ -11,6 +11,7 @@ public static class MochichiStats
         stats.power = 3;
         stats.description = "<b>Pacifism. Abilities:</b>\n-0: Give Motiti +1 power.\n-0: Transform into Angry Motiti with <b>Haste</b>.";
         stats.name = "Motiti";
+        stats.onPlaySound = "mochichi";
 
         stats.isStatic = true;
         stats.connectedCards = new List<CardTypes>();
@@ -21,7 +22,7 @@ public static class MochichiStats
 
         stats.relevantCards.Add(CardTypes.MotitiAngry);
 
-        stats.imagePath = "motiti_hq";
+        stats.imagePath = "motiti_hq1";
         return stats;
     }
 }
@@ -42,6 +43,7 @@ public static class MochiAccumStats
         stats.isSpell = true;
         static IEnumerator MotitiOpt1Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            AudioController.PlaySound("mochichi");
             MinionManager host;
             if (targets[0] < 0)
             {
@@ -60,7 +62,7 @@ public static class MochiAccumStats
         stats.numberOfTargets = 0;
         stats.damageToHost = motiti1HealthCost;
 
-        stats.imagePath = "motiti_hq";
+        stats.imagePath = "motiti_hq1";
         return stats;
     }
 }
@@ -80,6 +82,7 @@ public static class MochiciCounterStats
         stats.isSpell = true;
         static IEnumerator MotitiOpt2Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            AudioController.PlaySound("mochichi");
             MinionManager host;
             if (targets[0] < 0)
             {
@@ -94,8 +97,17 @@ public static class MochiciCounterStats
             BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
             host.LoseLife(motiti2HealthCost);
-            CardManager newCard = handManager.GenerateCard(CardTypes.MotitiAngry, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
-            newCard.SetPower(host.GetPower());
+            int curPower = host.GetPower();
+            CardManager newCard;
+            if (curPower < 20)
+            {
+                newCard = handManager.GenerateCard(CardTypes.MotitiAngry, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+            }
+            else
+            {
+                newCard = handManager.GenerateCard(CardTypes.MotitiCalm, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+            }
+            newCard.SetPower(curPower);
             BoardManager.Slot slot = host.GetSlot();
             //host.TakePower(host.GetPower());
             host.DestroySelf(unattach:true);
@@ -106,7 +118,7 @@ public static class MochiciCounterStats
         stats.numberOfTargets = 0;
         stats.damageToHost = motiti2HealthCost;
 
-        stats.imagePath = "motiti_angry_hq";
+        stats.imagePath = "angry_motiti_hq2";
         return stats;
     }
 }
@@ -123,7 +135,25 @@ public static class MochichiAngryStats
 
         stats.hasHaste = true;
 
-        stats.imagePath = "motiti_angry_hq";
+        stats.imagePath = "angry_motiti_hq2";
+        return stats;
+    }
+}
+
+
+public static class MochichiCalmStats
+{
+    public static CardManager.CardStats GetStats()
+    {
+        CardManager.CardStats stats = new CardManager.CardStats();
+
+        stats.power = 3;
+        stats.description = "Haste.";
+        stats.name = "Calm Motiti";
+
+        stats.hasHaste = true;
+
+        stats.imagePath = "Calm_motiti_hq";
         return stats;
     }
 }

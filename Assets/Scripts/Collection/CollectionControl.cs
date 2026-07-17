@@ -19,6 +19,12 @@ public class CollectionControl : MonoBehaviour
     public GameObject cardNumberText;
     public List<GameObject> runeObjects;
 
+    // Optional - the physical deck-name text field (see DeckNameField.cs). Only wired so
+    // BackButton can flush an in-progress, not-yet-committed edit before leaving the scene; the
+    // field saves on its own the moment the player commits it (Enter/click away), so nothing else
+    // here needs to read or write the name directly.
+    public DeckNameField deckNameField;
+
     public float xOffset;
     public float yOffset;
     public float cardSpaceX;
@@ -60,6 +66,7 @@ public class CollectionControl : MonoBehaviour
             CardTypes.Motiti_option1,
             CardTypes.Motiti_option2,
             CardTypes.MotitiAngry,
+            CardTypes.MotitiCalm,
             CardTypes.Boulder,
             CardTypes.TonKampon_option1,
             CardTypes.TonKampon_option2,
@@ -135,7 +142,7 @@ public class CollectionControl : MonoBehaviour
         if (DeckManager.runes.Count == 0)
         {
             DeckManager.deck = SaveSystem.GetDefaultDeck();
-            DeckManager.runes = new List<Runes>(){Runes.Spear, Runes.Shield, Runes.Bow};
+            DeckManager.runes = new List<Runes>(){Runes.Spear, Runes.Spear, Runes.Shield};
         }
 
         yield return new WaitForSeconds(0.01f);
@@ -637,6 +644,10 @@ public class CollectionControl : MonoBehaviour
     {
         if (true || DeckManager.deck.Count == DeckManager.minDeckSize)
         {
+            if (deckNameField != null)
+            {
+                deckNameField.CommitIfEditing();
+            }
             SaveSystem.SaveDeckAndRunes(DeckManager.deck, DeckManager.runes, DeckLoadManager.deckIndex);
             SceneManager.LoadScene("MainMenu");
         }

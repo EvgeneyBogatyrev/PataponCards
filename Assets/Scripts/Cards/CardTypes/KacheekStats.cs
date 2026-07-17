@@ -23,6 +23,7 @@ public static class KacheekStats
 
         stats.imagePath = "kacheek_hq";
         stats.onPlaySound = "kacheek";
+        stats.onDeathSound = "kacheek_death";
         stats.artistName = "Official render";
         return stats;
     }
@@ -52,6 +53,11 @@ public static class GiveFangStats
                 host = friendlySlots[targets[0] - 1].GetConnectedMinion();
             }
 
+            if (host.GetPower() > giveFangHealthCost)
+            {
+                AudioController.PlaySound("kacheek_ability");
+            }
+
             host.LoseLife(giveFangHealthCost);
             if (!enemySlots[0].GetFriendly())
             {
@@ -70,7 +76,7 @@ public static class GiveFangStats
         stats.numberOfTargets = 0;
         stats.damageToHost = giveFangHealthCost;
 
-        stats.imagePath = "fang_hq";
+        stats.imagePath = "fang_hq_upd";
         return stats;
     }
 }
@@ -92,6 +98,7 @@ public static class NutritionStats
 
         static IEnumerator NutritionRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            
             MinionManager host;
             if (targets[0] < 0)
             {
@@ -100,6 +107,11 @@ public static class NutritionStats
             else
             {
                 host = friendlySlots[targets[0] - 1].GetConnectedMinion();
+            }
+
+            if (host.GetPower() > nutritionHealthCost)
+            {
+                AudioController.PlaySound("kacheek_ability");
             }
 
             host.LoseLife(nutritionHealthCost);

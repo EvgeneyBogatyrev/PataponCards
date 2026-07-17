@@ -13,6 +13,8 @@ public static class AvengingScoutStats
         stats.runes.Add(Runes.Spear);
 
         stats.additionalKeywords.Add("Devotion deck");
+
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
         
        
         stats.hasOnDeath = true;

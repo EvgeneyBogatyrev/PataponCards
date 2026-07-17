@@ -8,6 +8,7 @@ using Networking;
 public class MainMenuController : MonoBehaviour
 {
     public GameObject nicknameText;
+    public PlayerStatsController playerStatsController;
 
     // Only one of these is ever meaningfully non-null/non-"pending" at a time in practice (you
     // can't have an unanswered incoming challenge and an outgoing one simultaneously in this
@@ -19,6 +20,12 @@ public class MainMenuController : MonoBehaviour
 
     public IEnumerator Start()
     {
+        if (InfoSaver.justLoggedIn)
+        {
+            InfoSaver.justLoggedIn = false;
+            AudioController.PlaySound("game_starts");
+        }
+
         if (nicknameText != null)
         {
             nicknameText.GetComponent<TextMeshProUGUI>().text = PlayerProfile.Nickname;
@@ -49,6 +56,11 @@ public class MainMenuController : MonoBehaviour
         {
             SaveSystem.GrantAllCollectableCards(DeckManager.collection);
             SaveSystem.SaveCollection(DeckManager.collection);
+        }
+
+        if (playerStatsController != null)
+        {
+            playerStatsController.RefreshStats();
         }
 
         StartCoroutine(PollChallenges());
@@ -205,6 +217,7 @@ public class MainMenuController : MonoBehaviour
 
     public void PlayButton()
     {
+        AudioController.PlaySound("click");
         if (SaveSystem.LoadRunes(0).Count > 0)
         {
             CancelOutgoingChallenge();
@@ -215,18 +228,28 @@ public class MainMenuController : MonoBehaviour
 
     public void CollectionButton()
     {
+        AudioController.PlaySound("click");
         CancelOutgoingChallenge();
         DeckLoadManager.roomToGo = "Collection";
         SceneManager.LoadScene("DeckSelect");
     }
 
+    public void EnterCodeButton()
+    {
+        AudioController.PlaySound("click");
+        CancelOutgoingChallenge();
+        SceneManager.LoadScene("RedeemCode");
+    }
+
     public void Patahell()
     {
+        AudioController.PlaySound("click");
         Application.OpenURL("https://discord.gg/4p9RJuhcjx");
     }
 
     public void Exit()
     {
+        AudioController.PlaySound("click");
         CancelOutgoingChallenge();
         Application.Quit();
     }

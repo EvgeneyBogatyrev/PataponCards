@@ -153,10 +153,14 @@ public class CardManager : MonoBehaviour
         {
             CardStats newStats = new()
             {
+                name = this.name,
+                description = this.description,
+                power = this.power,
                 isSpell = this.isSpell,
                 canAttack = this.canAttack,
                 canDealDamage = this.canDealDamage,
                 hasHaste = this.hasHaste,
+                pacifism = this.pacifism,
                 hasShield = this.hasShield,
                 hasGreatshield = this.hasGreatshield,
                 limitedVision = this.limitedVision,
@@ -174,6 +178,7 @@ public class CardManager : MonoBehaviour
                 hasAfterPlayEvent = this.hasAfterPlayEvent,
                 isStatic = this.isStatic,
                 healthCost = this.healthCost,
+                poisoned = this.poisoned,
                 hexproof = this.hexproof,
                 cycling = this.cycling,
                 onCycleEvent = this.onCycleEvent,
@@ -187,6 +192,9 @@ public class CardManager : MonoBehaviour
                 cardsDrawnByThis = this.cardsDrawnByThis,
                 lifelinkedTo = this.lifelinkedTo,
                 lifelinkMeTo = this.lifelinkMeTo,
+                suppressOnPlay = this.suppressOnPlay,
+                artistName = this.artistName,
+                firstTurnToPlay = this.firstTurnToPlay,
 
                 onCardPlayedTrigger = this.onCardPlayedTrigger,
                 onUnitEntersTrigger = this.onUnitEntersTrigger,
@@ -244,6 +252,24 @@ public class CardManager : MonoBehaviour
             newStats.descriptionSize = this.descriptionSize;
             newStats.onPlaySound = this.onPlaySound;
             newStats.onDeathSound = this.onDeathSound;
+
+            newStats.additionalKeywords = new List<string>();
+            foreach (string keyword in this.additionalKeywords)
+            {
+                newStats.additionalKeywords.Add(keyword);
+            }
+
+            newStats.additionalRules = new List<string>();
+            foreach (string rule in this.additionalRules)
+            {
+                newStats.additionalRules.Add(rule);
+            }
+
+            newStats.relevantCards = new List<CardTypes>();
+            foreach (CardTypes ct in this.relevantCards)
+            {
+                newStats.relevantCards.Add(ct);
+            }
 
             return newStats;
         }
@@ -414,21 +440,7 @@ public class CardManager : MonoBehaviour
             }
         }
 
-        if (cardStats.HaveCycling() && handManager.CanCycleCard())
-        {
-            // Check if this card can be cycled
-            float distanceToCycle = Mathf.Abs(transform.position.x - boardManager.cyclingSlot.GetPosition().x);
-            if (minDistance == -1f || minDistance > distanceToCycle || (distanceToCycle < 0.8f * minDistance && transform.position.y < 4f))
-            {
-                closestSlot = boardManager.cyclingSlot;
-            }
-        }
-
-        if (closestSlot == boardManager.cyclingSlot)
-        {
-            closestSlot.Highlight(true);
-        }
-        else if (closestSlot != null && closestSlot.GetFree())
+        if (closestSlot != null && closestSlot.GetFree())
         {
             closestSlot.Highlight(true);
         }
@@ -454,6 +466,15 @@ public class CardManager : MonoBehaviour
         {
             transform.localScale = new Vector3(selectedScale, selectedScale, 1f);
         }
+    }
+
+    // Called back by GameController once the player confirms the "Cycle this card?" prompt (see
+    // RequestCycleConfirmation) - the right-click that opened the prompt happens from CardState.
+    // inHand, so there's no drag/selection state to unwind first, unlike the old drag-to-corner
+    // gesture this replaces.
+    public void ConfirmCycle()
+    {
+        CycleProcedure();
     }
 
     private void CycleProcedure()
@@ -569,9 +590,9 @@ public class CardManager : MonoBehaviour
                     transform.position = Vector3.Lerp(transform.position, new Vector3(positionInHand.x, selectedY, selectedZ), 30f * Time.deltaTime);
                     transform.rotation = Quaternion.Euler(0, 0, 0);
 
-                    if (Input.GetMouseButtonDown(0) && (handManager.CanPlayCard() || (handManager.CanCycleCard() && cardStats.HaveCycling())))
+                    if (Input.GetMouseButtonDown(0) && handManager.CanPlayCard())
                     {
-                        if (cardStats.isSpell && cardStats.numberOfTargets > 0 && !cardStats.HaveCycling())
+                        if (cardStats.isSpell && cardStats.numberOfTargets > 0)
                         {
                             cardState = CardState.selectingTargets;
                         }
@@ -581,6 +602,14 @@ public class CardManager : MonoBehaviour
                         }
                         CursorController.cursorState = CursorController.CursorStates.Select;
                         spellTargets = new List<int>();
+                    }
+
+                    // Right-click a cyclable card to ask "Cycle this card?" instead of the old
+                    // drag-to-bottom-right-corner gesture (crowded, error-prone alongside the HUD
+                    // stats there) - see GameController.RequestCycleConfirmation/OnGUI.
+                    if (Input.GetMouseButtonDown(1) && handManager.CanCycleCard() && cardStats.HaveCycling())
+                    {
+                        gameController.RequestCycleConfirmation(this);
                     }
                 }
                 else
@@ -656,27 +685,18 @@ public class CardManager : MonoBehaviour
                     closestSlot = SelectClosestSlot();
                 }
                 else if (cardStats.isSpell)
-                {    
+                {
 
-                    boardManager.cyclingSlot.Highlight(false);
-                    if (cardStats.HaveCycling() && handManager.CanCycleCard())
-                    {
-                        closestSlot = boardManager.cyclingSlot;
-                        closestSlot.Highlight(true);
-                    }
-
-                    // There's a chance a player can't play a card, but the card has cycling   
                     if (transform.position.y > 2f && !handManager.CanPlayCard())
                     {
                         ReturnToHand();
                     }
                     else if (transform.position.y > 2f && cardStats.numberOfTargets > 0)
                     {
-                        boardManager.cyclingSlot.Highlight(false);
                         cardState = CardState.selectingTargets;
                     }
 
-                    if (cardStats.numberOfTargets == 0 || cardStats.HaveCycling())
+                    if (cardStats.numberOfTargets == 0)
                     {
                         FollowMouse(scale:true);
                     }
@@ -693,16 +713,11 @@ public class CardManager : MonoBehaviour
 
                 if (Input.GetMouseButtonDown(0))
                 {
-                    float distanceToCycle = Mathf.Abs(transform.position.x - boardManager.cyclingSlot.GetPosition().x);
                     if (!cardStats.isSpell && !cardStats.hasOnPlaySpell)
                     {
                         if (closestSlot == null)
                         {
                             ReturnToHand();
-                        }
-                        else if (closestSlot == boardManager.cyclingSlot && handManager.CanCycleCard() && distanceToCycle < 2f)
-                        {
-                            CycleProcedure();
                         }
                         else if (handManager.CanPlayCard())
                         {
@@ -711,13 +726,7 @@ public class CardManager : MonoBehaviour
                     }
                     else if (cardStats.isSpell)
                     {
-                        if (cardStats.HaveCycling() && distanceToCycle < 2f)
-                        {
-                            // Cycling isn't casting - a card that blocks spells (e.g. Slogturtle)
-                            // still allows cycling.
-                            CycleProcedure();
-                        }
-                        else if (gameController.SpellsAreBlocked())
+                        if (gameController.SpellsAreBlocked())
                         {
                             ReturnToHand();
                         }
@@ -735,10 +744,6 @@ public class CardManager : MonoBehaviour
                         if (closestSlot == null)
                         {
                             ReturnToHand();
-                        }
-                        else if (closestSlot == boardManager.cyclingSlot && handManager.CanCycleCard() && distanceToCycle < 2f)
-                        {
-                            CycleProcedure();
                         }
                         else if (handManager.CanPlayCard())
                         {
@@ -970,8 +975,9 @@ public class CardManager : MonoBehaviour
                         newEvent.targets = spellTargets;
                         newEvent.friendlySlots = boardManager.friendlySlots;
                         newEvent.enemySlots = boardManager.enemySlots;
+                        newEvent.fromAbilityOption = true;
                         GameController.eventQueue.Insert(0, newEvent);
-                        
+
                         // Cast spell
                         //StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
                         spellTargets = new List<int>();

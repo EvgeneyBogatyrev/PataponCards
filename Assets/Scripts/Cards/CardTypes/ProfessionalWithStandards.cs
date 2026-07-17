@@ -48,7 +48,7 @@ public static class ProfessionalWithStandards
         //stats.onDeathEvent = ProfessionalWIthStandardsDeathrattle;
         stats.cycling = true;
 
-        stats.imagePath = "questing_beast";
+        stats.imagePath = "questing_beast_hq";
         stats.artistName = "Unused game assets";
         return stats;
     }

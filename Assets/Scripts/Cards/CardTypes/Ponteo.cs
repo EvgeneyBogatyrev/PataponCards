@@ -16,6 +16,8 @@ public static class PonteoStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
+        stats.onPlaySound = "kibapon";
+
         stats.hasOnPlaySpell = true;
         stats.hasHaste = true;
 

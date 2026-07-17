@@ -20,6 +20,7 @@ public class KeepHandButton : MonoBehaviour
     {
         if (mouseOver && Input.GetMouseButtonDown(0))
         {
+            AudioController.PlaySound("click");
             handManager.KeepHandButton();
             //StartCoroutine(Bounce());
         }

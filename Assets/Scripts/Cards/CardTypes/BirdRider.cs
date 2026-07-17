@@ -15,6 +15,8 @@ public static class BirdRiderStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
+
         stats.additionalRules.Add("All copies of <i>'Bird Rider'</i> cards are removed from your library and placed on the battlefield.");
 
         stats.hasAfterPlayEvent = true;

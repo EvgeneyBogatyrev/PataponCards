@@ -20,6 +20,7 @@ public class MulliganButton : MonoBehaviour
     {
         if (mouseOver && Input.GetMouseButtonDown(0))
         {
+            AudioController.PlaySound("click");
             handManager.Mulligan();
             StartCoroutine(Bounce());
         }

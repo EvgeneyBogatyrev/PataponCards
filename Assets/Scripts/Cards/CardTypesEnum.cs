@@ -98,6 +98,7 @@ public enum CardTypes
     Motiti_option1,
     Motiti_option2,
     MotitiAngry,
+    MotitiCalm,
     Nutrition,
     GiveFang,
     Hatapon,
@@ -590,6 +591,10 @@ public static class CardTypeToStats
                 stats = SlogturtleStats.GetStats();
                 break;
 
+            case CardTypes.MotitiCalm:
+                stats = MochichiCalmStats.GetStats();
+                break;
+
             default:
                 break;
         }
@@ -703,6 +708,7 @@ public static class FilterCardTypes
             CardTypes.Motiti_option1,
             CardTypes.Motiti_option2,
             CardTypes.MotitiAngry,
+            CardTypes.MotitiCalm,
             CardTypes.Boulder,
             CardTypes.TonKampon_option1,
             CardTypes.TonKampon_option2,

@@ -13,6 +13,8 @@ public static class CoppenStats
         stats.name = "Coppen";
         stats.runes.Add(Runes.Bow);
 
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
+
         stats.additionalRules.Add("If a space in from of the <i>Coppen</i> is not empty, <i>Coppen</i>'s <b>On play</b> effect does nothing.");
 
         stats.relevantCards.Add(CardTypes.IceWall);

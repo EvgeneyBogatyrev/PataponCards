@@ -76,7 +76,7 @@ public class CardReprManager : MonoBehaviour
     }
 
     private void OnMouseOver()
-    { 
+    {
         if (CursorController.cursorState == CursorController.CursorStates.Free || relevantCard)
         {
             mouseOver = true;
@@ -100,19 +100,26 @@ public class CardReprManager : MonoBehaviour
     {
         if (previewedCard == null)
         {
-            previewedCard = GenerateCard(type).GetComponent<CardManager>();
+            GameObject generated = GenerateCard(type);
+            previewedCard = generated.GetComponent<CardManager>();
             previewedCard.SetCardState(CardManager.CardState.hilightOver);
             float yshift = 3.5f;
             if (index < 4)
             {
-                yshift = -0.5f;
+                yshift = 1.5f;
             }
             float xshift = -4.5f;
             if (relevantCard)
             {
                 xshift = 3.5f;
             }
-            previewedCard.transform.position = this.transform.position + new Vector3(xshift, yshift, -7f);
+            // A small negative Z (just enough to draw in front of/behind neighboring popup
+            // elements for sorting) - NOT a large offset. The previous -7f pushed this world
+            // position 7 units further from whatever camera is active; that happened to still
+            // land just in front of the Collection scene's camera (at Z=-10) but landed a full
+            // unit BEHIND the Game scene's camera (at Z=-8), making the preview invisible
+            // in-game despite being generated and positioned correctly every time.
+            previewedCard.transform.position = this.transform.position + new Vector3(xshift, yshift, -1.5f);
         }
     }
 

@@ -34,6 +34,11 @@ namespace Networking
                 onResult?.Invoke(false, "Nickname must be " + MaxNicknameLength + " characters or fewer.");
                 yield break;
             }
+            if (!TextValidation.IsLatinOnly(nickname.Trim()))
+            {
+                onResult?.Invoke(false, "Nickname can only contain Latin letters, numbers, and basic punctuation.");
+                yield break;
+            }
 
             // Checked before accounts:signUp runs, so a taken nickname never creates an orphaned
             // account the player has to abandon and can't easily delete themselves.

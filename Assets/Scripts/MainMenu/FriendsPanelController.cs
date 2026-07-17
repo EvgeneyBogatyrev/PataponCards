@@ -65,6 +65,7 @@ public class FriendsPanelController : MonoBehaviour
         {
             return;
         }
+        AudioController.PlaySound("click");
         bool nowOpen = !panelRoot.activeSelf;
         panelRoot.SetActive(nowOpen);
         if (nowOpen)
@@ -79,6 +80,7 @@ public class FriendsPanelController : MonoBehaviour
         {
             return;
         }
+        AudioController.PlaySound("click");
         string nickname = addNicknameField.GetComponent<TMP_InputField>().text.Trim();
         SetBusy(true);
         StartCoroutine(FirebaseFriends.SendRequest(nickname, (success, error) =>

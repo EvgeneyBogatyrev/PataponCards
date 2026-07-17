@@ -16,6 +16,8 @@ public static class PyokoriderStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
+        stats.onPlaySound = "kibapon";
+
         static IEnumerator PyokoriderStartTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             friendlySlots[index].GetConnectedMinion().SetPower(pyokoriderStartTurnPower);

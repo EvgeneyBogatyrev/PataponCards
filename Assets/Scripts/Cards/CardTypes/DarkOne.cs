@@ -20,6 +20,8 @@ public static class DarkOneStats
         stats.relevantCards.Add(CardTypes.KibaForm);
         stats.relevantCards.Add(CardTypes.BirdForm);
 
+        stats.onPlaySound = "dark_one";
+
         static IEnumerator Realization(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
@@ -109,6 +111,7 @@ public static class BirdFormStats
         stats.flying = true;
 
         stats.imagePath = "bird_form_hq";
+        stats.onPlaySound = "bird_form";
         return stats;
     }
 }
@@ -127,6 +130,7 @@ public static class KibaFormStats
         stats.runes.Add(Runes.Spear);
         
         stats.imagePath = "kiba_form";
+        stats.onPlaySound = "kiba_form";
         return stats;
     }
 }

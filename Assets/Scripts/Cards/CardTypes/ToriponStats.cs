@@ -15,6 +15,8 @@ public static class ToriponStats
         //stats.runes.Add(Runes.Spear);
         //stats.runes.Add(Runes.Spear);
 
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
+
         stats.flying = true;
 
         stats.imagePath = "toripon_hq";

@@ -36,6 +36,7 @@ public class RuneDropdownManager : MonoBehaviour
     {
         if (mouseOver && Input.GetMouseButtonDown(0) && CursorController.cursorState == CursorController.CursorStates.Free)
         {
+            AudioController.PlaySound("click");
             if (value == Runes.Spear)
             {
                 SetRune(Runes.Shield);

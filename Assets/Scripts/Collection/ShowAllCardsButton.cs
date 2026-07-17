@@ -33,6 +33,7 @@ public class ShowAllCardsButton : MonoBehaviour
     {
         if (mouseOver && Input.GetMouseButtonDown(0))
         {
+            AudioController.PlaySound("click");
             isOn = !isOn;
             collection.SetShowAllCards(isOn);
             UpdateLabel();

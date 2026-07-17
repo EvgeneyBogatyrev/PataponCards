@@ -48,7 +48,7 @@ public static class FangStats
         stats.checkSpellTarget = FangCheckTarget;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "fang_hq";
+        stats.imagePath = "fang_hq_upd";
         stats.artistName = "Official render";
         return stats;
     }

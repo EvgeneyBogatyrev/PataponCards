@@ -15,6 +15,7 @@ public static class HataponStats
         stats.hasHaste = true;
 
         stats.imagePath = "Hatapon";
+        stats.onDeathSound = "hatapon_death";
 
         return stats;
     }

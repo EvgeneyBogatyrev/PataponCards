@@ -23,6 +23,7 @@ public class ConcedeButton : MonoBehaviour
     {
         if (mouseOver && Input.GetMouseButtonDown(0))
         {
+            AudioController.PlaySound("click");
             gameController.RequestConcedeConfirmation();
         }
 

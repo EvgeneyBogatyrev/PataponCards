@@ -14,6 +14,8 @@ public class SparringPartnerStats : MonoBehaviour
         stats.runes.Add(Runes.Shield);
         stats.power = 3;
 
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
+
         stats.nameSize = 4;
 
         stats.hasOnPlaySpell = true;

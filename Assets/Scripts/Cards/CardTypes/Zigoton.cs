@@ -13,6 +13,7 @@ public static class ZigotonStats
         stats.nameSize = 4;
         stats.descriptionSize = 4;
         stats.imagePath = "zigoton";
+        stats.onPlaySound = "zigoton";
         return stats;
     }
 }

@@ -14,12 +14,25 @@ public class CreateAccountController : MonoBehaviour
     private bool busy = false;
     private string pendingNickname;
 
+    private void Start()
+    {
+        // Rejects a non-Latin keystroke the moment it's typed (TMP_InputField's own validation
+        // hook - returning '\0' tells it to ignore the character) rather than only catching it
+        // later when FirebaseAuth.SignUp re-checks the whole nickname on submit.
+        if (nicknameField != null)
+        {
+            nicknameField.GetComponent<TMP_InputField>().onValidateInput +=
+                (string text, int charIndex, char addedChar) => TextValidation.IsLatinChar(addedChar) ? addedChar : '\0';
+        }
+    }
+
     public void SignUpButton()
     {
         if (busy)
         {
             return;
         }
+        AudioController.PlaySound("click");
 
         string email = emailField.GetComponent<TMP_InputField>().text.Trim();
         string password = passwordField.GetComponent<TMP_InputField>().text;
@@ -43,6 +56,7 @@ public class CreateAccountController : MonoBehaviour
 
     public void BackButton()
     {
+        AudioController.PlaySound("click");
         SceneManager.LoadScene("Account");
     }
 

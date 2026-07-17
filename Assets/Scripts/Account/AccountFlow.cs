@@ -20,6 +20,11 @@ public static class AccountFlow
             InfoSaver.botDefeated[i] = botStats[i];
         }
 
+        if (InfoSaver.sceneAfterLogin == "MainMenu")
+        {
+            InfoSaver.justLoggedIn = true;
+        }
+
         SceneManager.LoadScene(InfoSaver.sceneAfterLogin);
     }
 }

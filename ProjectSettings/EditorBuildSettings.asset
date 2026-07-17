@@ -35,4 +35,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/CreateAccount.unity
     guid: 8c7af2a98383ca74e87e89e6e6ede192
+  - enabled: 1
+    path: Assets/Scenes/RedeemCode.unity
+    guid: 5f011488c586bfe478768eb89522ee95
   m_configObjects: {}

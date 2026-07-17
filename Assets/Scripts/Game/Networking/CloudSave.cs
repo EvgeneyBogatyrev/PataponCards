@@ -14,7 +14,7 @@ namespace Networking
 
         private static string PrivatePath => "users/" + FirebaseConfig.Uid + "/private";
 
-        public static void MirrorDeck(int index, List<CardTypes> deck, List<Runes> runes)
+        public static void MirrorDeck(int index, List<CardTypes> deck, List<Runes> runes, string name)
         {
             if (!FirebaseConfig.HasAccount)
             {
@@ -23,7 +23,8 @@ namespace Networking
             JObject body = new JObject
             {
                 ["cards"] = new JArray(deck.ConvertAll(c => (int)c)),
-                ["runes"] = new JArray(runes.ConvertAll(r => (int)r))
+                ["runes"] = new JArray(runes.ConvertAll(r => (int)r)),
+                ["name"] = name
             };
             CoroutineRunner.Run(FirebaseDb.Put(PrivatePath + "/decks/" + index, body));
         }
@@ -51,6 +52,16 @@ namespace Networking
             CoroutineRunner.Run(FirebaseDb.Put(PrivatePath + "/botDefeated", new JArray(stats)));
         }
 
+        public static void MirrorMatchStats(int wins, int losses)
+        {
+            if (!FirebaseConfig.HasAccount)
+            {
+                return;
+            }
+            JObject body = new JObject { ["wins"] = wins, ["losses"] = losses };
+            CoroutineRunner.Run(FirebaseDb.Put(PrivatePath + "/matchStats", body));
+        }
+
         // A brand-new account must start from the same clean slate a fresh install would have -
         // NOT whatever happens to be sitting in local files, which could easily belong to a
         // previously-signed-in user on this same device (downloaded there during their own
@@ -64,14 +75,18 @@ namespace Networking
             // DeleteDeck's own shift-and-clear logic).
             SaveSystem.SaveDeckAndRunes(
                 SaveSystem.GetDefaultDeck(),
-                new List<Runes> { Runes.Spear, Runes.Shield, Runes.Bow },
+                new List<Runes> { Runes.Spear, Runes.Spear, Runes.Shield },
                 0);
+            // Explicitly named, rather than relying on LoadDeckName's missing-file fallback - that
+            // fallback now returns SaveSystem.NewDeckName ("New deck"), which is for a genuinely
+            // untouched slot, not this pre-populated starter deck.
+            SaveSystem.SaveDeckName(SaveSystem.DefaultDeckName, 0, mirrorToCloud:false);
             for (int i = 1; i < MaxDeckSlots; ++i)
             {
                 SaveSystem.SaveDeckAndRunes(new List<CardTypes>(), new List<Runes>(), i);
             }
 
-            SaveSystem.SaveBotStats(new List<bool> { false, false, false, false });
+            SaveSystem.SaveBotStats(new List<bool> { false, false, false, false, false });
             yield return null;
         }
 
@@ -119,6 +134,11 @@ namespace Networking
                     // No need to mirror back to the cloud - this data just came from there.
                     SaveSystem.SaveDeck(deck, entry.Key, mirrorToCloud:false);
                     SaveSystem.SaveRunes(runes, entry.Key, mirrorToCloud:false);
+                    string name = deckEntry["name"]?.Value<string>();
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        SaveSystem.SaveDeckName(name, entry.Key, mirrorToCloud:false);
+                    }
                 }
             }
 
@@ -130,6 +150,13 @@ namespace Networking
                     stats.Add(b.Value<bool>());
                 }
                 SaveSystem.SaveBotStats(stats);
+            }
+
+            if (data["matchStats"] is JObject matchStats)
+            {
+                int wins = matchStats["wins"]?.Value<int>() ?? 0;
+                int losses = matchStats["losses"]?.Value<int>() ?? 0;
+                SaveSystem.SaveMatchStats(wins, losses, mirrorToCloud:false);
             }
         }
 
