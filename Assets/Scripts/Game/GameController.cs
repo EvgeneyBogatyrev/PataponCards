@@ -150,9 +150,11 @@ public class QueueData
                     // the creature is actually placed, so it isn't duplicated here.
                     if (thisStats.isSpell)
                     {
-                        // Not for ability-option casts (Kacheek's GiveFang/Nutrition, etc.) -
-                        // only a genuine spell cast straight from hand.
-                        if (!fromAbilityOption)
+                        // Not for ability-option casts (Kacheek's GiveFang/Nutrition, etc.) - only
+                        // a genuine spell cast straight from hand. Also skipped for any spell that
+                        // opts itself out via hasOwnSound, since its own Realization coroutine
+                        // plays whatever sound(s) it wants instead.
+                        if (!fromAbilityOption && !thisStats.hasOwnSound)
                         {
                             AudioController.PlaySound("cast_spell");
                         }
@@ -1052,6 +1054,8 @@ public class GameController : MonoBehaviour
                     if (minion.GetCardStats().poisoned)
                     {
                         minion.LoseLife(1);
+                        AudioController.PlaySound("poison_dmg");
+                        yield return new WaitForSeconds(0.3f);
                     }
                 }
             }
@@ -1127,6 +1131,8 @@ public class GameController : MonoBehaviour
                     if (minion.GetCardStats().poisoned)
                     {
                         minion.LoseLife(1);
+                        AudioController.PlaySound("poison_dmg");
+                        yield return new WaitForSeconds(0.3f);
                     }
                 }
             }

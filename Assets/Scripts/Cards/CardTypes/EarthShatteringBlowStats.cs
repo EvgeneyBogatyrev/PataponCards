@@ -16,6 +16,8 @@ public static class EarthShatteringBlowStats
 
         stats.runes.Add(Runes.Shield);
 
+        stats.hasOwnSound = true;
+
         stats.descriptionSize = 3;
         stats.nameSize = 3;
 
@@ -37,6 +39,8 @@ public static class EarthShatteringBlowStats
             }
 
             MinionManager targetMinion = targetSlot.GetConnectedMinion();
+
+            AudioController.PlaySound("strike");
 
             bool completed = false;
             foreach (BoardManager.Slot slot in friendlySlots)

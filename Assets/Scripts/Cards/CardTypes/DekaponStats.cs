@@ -16,6 +16,7 @@ public static class DekaponStats
         stats.runes.Add(Runes.Shield);
 
         stats.imagePath = "dekapon_hq";
+        stats.onPlaySound = "dekaton_regular";
         return stats;
     }
 }

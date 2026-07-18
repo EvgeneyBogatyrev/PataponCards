@@ -13,11 +13,14 @@ public static class LightningBoltStats
         stats.name = "Shock";
 
         stats.isSpell = true;
+        stats.hasOwnSound = true;
         static IEnumerator FangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>(); 
             gameController.actionIsHappening = true;
             BoardManager.Slot targetSlot;
+
+            AudioController.PlaySound("Kharma-shock");
 
             int target = targets[0];
             if (target > 0)
@@ -38,7 +41,7 @@ public static class LightningBoltStats
         stats.spell = FangRealization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "lightning_bolt";
+        stats.imagePath = "Shock_hq";
         return stats;
     }
 }

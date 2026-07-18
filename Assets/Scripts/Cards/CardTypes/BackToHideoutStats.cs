@@ -80,7 +80,7 @@ public static class BackToHideoutStats
         stats.spell = Realization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "BackToHideout";
+        stats.imagePath = "Back_to_hideout_hq";
         return stats;
     }
 }

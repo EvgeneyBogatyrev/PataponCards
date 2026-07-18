@@ -78,7 +78,7 @@ public static class TakeThatShieldStats
         stats.checkSpellTarget = TakeThatShieldCheckTarget;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "bacterion_hq";
+        stats.imagePath = "bacterion_shield_hq";
 
         return stats;
     }

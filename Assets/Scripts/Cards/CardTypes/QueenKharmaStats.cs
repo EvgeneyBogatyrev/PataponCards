@@ -24,11 +24,15 @@ public static class QueenKharmaStats
 
         stats.hasOnPlaySpell = true;
 
+        stats.onPlaySound = "Kharma_enters";
+
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>(); 
             gameController.actionIsHappening = true;
+
+            AudioController.PlaySound("Kharma-effect");
 
             if (!enemySlots[0].GetFriendly())
             {
@@ -53,7 +57,7 @@ public static class QueenKharmaStats
         stats.spell = Realization;
         stats.numberOfTargets = 0;
 
-        stats.imagePath = "kharma_hq";
+        stats.imagePath = "queen_kharma_hq";
         return stats;
     }
 }

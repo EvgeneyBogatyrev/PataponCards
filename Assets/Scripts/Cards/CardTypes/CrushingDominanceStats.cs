@@ -11,6 +11,8 @@ public static class BadaDrumStats
         const int threshold = 2;
         stats.description = "Gain control of target non-Hatapon unit your opponent controls with power " + threshold.ToString() + " or less.";
         stats.name = "Zigoton Drum";
+
+        stats.hasOwnSound = true;
         
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Bow);
@@ -21,6 +23,12 @@ public static class BadaDrumStats
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             gameController.actionIsHappening = true;
             BoardManager.Slot targetSlot;
+
+            AudioController.PlaySound("Kharma_drum");
+
+            yield return new WaitForSeconds(0.5f);
+
+            AudioController.PlaySound("pata");
 
             int target = targets[0];
             bool friendly;
@@ -126,7 +134,7 @@ public static class BadaDrumStats
         stats.checkSpellTarget = CheckTarget;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "bada_drum";
+        stats.imagePath = "bada_drum_hq";
         return stats;
     }
 }

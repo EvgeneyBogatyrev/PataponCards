@@ -31,6 +31,7 @@ public static class BaloonStats
             if (connectedMinion != null)
             {
                 connectedMinion.ReceiveDamage(baloonDamage);
+                AudioController.PlaySound("hot_air_baloon");
             }
             gameController.actionIsHappening = false;
             yield return null;

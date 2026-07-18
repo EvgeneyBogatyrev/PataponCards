@@ -61,6 +61,7 @@ public class ChestController : MonoBehaviour
     {
         if (((mouseOver && Input.GetMouseButtonDown(0)) || (Input.GetKeyDown(KeyCode.Space) && transform.position.x - designatedX < 0.5f)) && !opened)
         {
+            AudioController.PlaySound("chest_open");
             opened = true;
             StartCoroutine(Bounce());
             Vector3 cardPosition = new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 5f, this.gameObject.transform.position.z);

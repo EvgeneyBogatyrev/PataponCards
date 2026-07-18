@@ -10,13 +10,13 @@ public static class ScoutStats
 
         stats.power = 1;
         stats.description = "<b>End of turn</b>: Draw a card. Your Hatapon loses 2 life.";
-        stats.name = "Megapon";
-        stats.imagePath = "Megapon";
+        stats.name = "Megaton";
+        stats.imagePath = "Megaton_hq";
         
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
 
-        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
+        stats.onPlaySound = "zigoton_" + UnityEngine.Random.Range(1, 3);
 
         stats.additionalRules.Add("Damage happens even if you didn't draw a card for any reason.");
 
@@ -26,6 +26,8 @@ public static class ScoutStats
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>(); 
             gameController.actionIsHappening = true;
             AnimationManager animationManager = GameObject.Find("GameController").GetComponent<AnimationManager>();
+
+            AudioController.PlaySound("megapon_sound");
 
             int cardsDrawn = 0;
 

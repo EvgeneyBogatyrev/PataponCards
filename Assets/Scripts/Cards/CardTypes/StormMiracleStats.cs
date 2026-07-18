@@ -8,16 +8,19 @@ public class StormMiracleStats : MonoBehaviour
     {
         const int damage = 3;
         CardManager.CardStats stats = new CardManager.CardStats();
-        stats.name = "Storm Miracle";
+        stats.name = "Soragami Sutra";
         stats.description = "Deal " + damage.ToString() + " damage to all units.";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Bow);
         //stats.legendary = true;
 
+        stats.nameSize = 4;
+
         stats.isSpell = true;
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            AudioController.PlaySound("earth_rumble");
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             gameController.actionIsHappening = true;
             foreach (BoardManager.Slot slot in enemySlots)
@@ -43,7 +46,7 @@ public class StormMiracleStats : MonoBehaviour
 
         stats.spell = Realization;
         stats.numberOfTargets = 0;
-        stats.imagePath = "storm_miracle_hq";
+        stats.imagePath = "Soragami_hq";
         return stats;
     }
 }

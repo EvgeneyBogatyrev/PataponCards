@@ -12,8 +12,10 @@ public static class ZigotonStats
         stats.name = "Zigoton Troops";
         stats.nameSize = 4;
         stats.descriptionSize = 4;
-        stats.imagePath = "zigoton";
-        stats.onPlaySound = "zigoton";
+        stats.imagePath = "army";
+        stats.onPlaySound = "zigoton_" + UnityEngine.Random.Range(1, 3);
+
+        stats.artistName = "hoffman";
         return stats;
     }
 }

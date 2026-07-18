@@ -17,6 +17,8 @@ public static class MoribuStats
 
         stats.imagePath = "moribu";
 
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
+
         return stats;
     }
 }

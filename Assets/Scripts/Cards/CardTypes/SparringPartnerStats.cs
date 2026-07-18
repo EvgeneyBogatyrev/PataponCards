@@ -10,11 +10,11 @@ public class SparringPartnerStats : MonoBehaviour
         
         const int gain = 2;
         stats.description = "<b>On play</b>: Target non-Hatapon unit under your control gains +" + gain.ToString() + " power and <b>Lifelink</b>.";
-        stats.name = "Sparring Partner";
+        stats.name = "Bonedeath Defender";
         stats.runes.Add(Runes.Shield);
         stats.power = 3;
 
-        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
+        stats.onPlaySound = "bonedeath";
 
         stats.nameSize = 4;
 
@@ -73,7 +73,7 @@ public class SparringPartnerStats : MonoBehaviour
         stats.checkSpellTarget = CheckTarget;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "sparring_partner";
+        stats.imagePath = "bonedeath_tate_hq";
 
         return stats;
     }

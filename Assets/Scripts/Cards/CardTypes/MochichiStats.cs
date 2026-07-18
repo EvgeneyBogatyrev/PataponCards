@@ -41,6 +41,7 @@ public static class MochiAccumStats
 
         stats.nameSize = 4;
         stats.isSpell = true;
+        stats.hasOwnSound = true;
         static IEnumerator MotitiOpt1Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             AudioController.PlaySound("mochichi");
@@ -80,6 +81,7 @@ public static class MochiciCounterStats
 
         stats.nameSize = 4;
         stats.isSpell = true;
+        stats.hasOwnSound = true;
         static IEnumerator MotitiOpt2Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             AudioController.PlaySound("mochichi");

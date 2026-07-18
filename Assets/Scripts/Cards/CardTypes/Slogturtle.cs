@@ -18,6 +18,7 @@ public static class SlogturtleStats
         stats.runes.Add(Runes.Shield);
 
         stats.imagePath = "slogturtle";
+        stats.onPlaySound = "slogturtle";
         return stats;
     }
 }

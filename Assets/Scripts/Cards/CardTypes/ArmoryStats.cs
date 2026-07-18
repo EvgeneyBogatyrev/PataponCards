@@ -14,6 +14,8 @@ public static class ArmoryStats
 
         stats.descriptionSize = 3;
 
+        stats.onPlaySound = "armory";
+
         stats.runes.Add(Runes.Bow);
         //stats.runes.Add(Runes.Bow);
 

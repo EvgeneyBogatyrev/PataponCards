@@ -16,7 +16,9 @@ public static class GrenburrStats
         stats.fixedPower = grenburrPower;
         stats.runes.Add(Runes.Shield);
 
-        stats.imagePath = "grenburr";
+        stats.onPlaySound = "Grenburr";
+
+        stats.imagePath = "Grenburr_hq";
         return stats;
     }
 }

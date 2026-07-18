@@ -45,6 +45,11 @@ public class CardManager : MonoBehaviour
         public string description = "default-description";
         public int power = 1;
         public bool isSpell = false;
+        // False (default): casting this spell plays the generic "cast_spell" sound. True: that
+        // default is suppressed - the spell's own Realization coroutine is responsible for
+        // playing whatever sound(s) it wants itself (see Kacheek's GiveFang/Nutrition, which
+        // already play "kacheek_ability" on their own).
+        public bool hasOwnSound = false;
         public bool canAttack = true;
         public bool canDealDamage = true;
         public bool hasHaste = false;
@@ -157,6 +162,7 @@ public class CardManager : MonoBehaviour
                 description = this.description,
                 power = this.power,
                 isSpell = this.isSpell,
+                hasOwnSound = this.hasOwnSound,
                 canAttack = this.canAttack,
                 canDealDamage = this.canDealDamage,
                 hasHaste = this.hasHaste,
@@ -479,6 +485,7 @@ public class CardManager : MonoBehaviour
 
     private void CycleProcedure()
     {
+        AudioController.PlaySound("card_shuffle");
         handManager.RemoveCard(GetIndexIHand());
         handManager.SetCanCycleCard(false);
         CursorController.cursorState = CursorController.CursorStates.Free;
@@ -930,6 +937,7 @@ public class CardManager : MonoBehaviour
 
                                 if (DEBUG || !bad)
                                 {
+                                    AudioController.PlaySound("card_shuffle");
                                     DeckManager.AddCard(cardType);
                                     collection.ShowDeck();
                                     CardManager collectionCard = GameObject.Instantiate(cardPrefab).GetComponent<CardManager>();

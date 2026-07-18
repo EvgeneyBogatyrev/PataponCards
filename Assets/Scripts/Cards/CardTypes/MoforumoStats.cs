@@ -17,6 +17,7 @@ public class Moforumo : MonoBehaviour
         stats.hexproof = true;
 
         stats.imagePath = "moforumo";
+        stats.onPlaySound = "dekaton_regular";
         return stats;
     }
 }

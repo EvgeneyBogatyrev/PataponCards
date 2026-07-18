@@ -13,6 +13,8 @@ public class MeteorRainStats : MonoBehaviour
         
         //stats.legendary = true;
 
+        stats.hasOwnSound = true;
+
         stats.isSpell = true;
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -24,6 +26,8 @@ public class MeteorRainStats : MonoBehaviour
                 if (minion != null)
                 {
                     minion.ReceiveDamage(damage);
+                    AudioController.PlaySound("strike");
+                    yield return new WaitForSeconds(0.1f);
                 }
             }
 
@@ -41,7 +45,7 @@ public class MeteorRainStats : MonoBehaviour
 
         stats.spell = Realization;
         stats.numberOfTargets = 0;
-        stats.imagePath = "meteor_rain";
+        stats.imagePath = "Meteor_rain_hq";
         return stats;
     }
 }

@@ -91,7 +91,7 @@ public static class DarkOneStats
 
         stats.startTurnEvent = Realization;
        
-        stats.imagePath = "dark_one_hq";
+        stats.imagePath = "Dark_One_hq";
         return stats;
     }
 }
@@ -110,7 +110,7 @@ public static class BirdFormStats
 
         stats.flying = true;
 
-        stats.imagePath = "bird_form_hq";
+        stats.imagePath = "Bird_form_hq";
         stats.onPlaySound = "bird_form";
         return stats;
     }
@@ -129,7 +129,7 @@ public static class KibaFormStats
         stats.hasHaste = true;
         stats.runes.Add(Runes.Spear);
         
-        stats.imagePath = "kiba_form";
+        stats.imagePath = "Kiba_form_hq";
         stats.onPlaySound = "kiba_form";
         return stats;
     }

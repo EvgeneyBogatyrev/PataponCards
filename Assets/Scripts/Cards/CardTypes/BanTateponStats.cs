@@ -15,6 +15,8 @@ public static class BanTateponStats
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
+
+        stats.onPlaySound = "ban_yaripon";
         
         stats.hasOnPlaySpell = true;
 

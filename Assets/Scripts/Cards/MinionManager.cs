@@ -14,6 +14,11 @@ public class MinionManager : MonoBehaviour
 
     public GameObject imageObject;
     public GameObject powerObject;
+    // Optional - shows "/<realDamage>" next to power, only for the rare card whose actual damage
+    // output (cardStats.fixedPower) differs from its displayed power stat (Guardira, Grenburr) -
+    // hidden for every other card, where fixedPower stays at its -1 "unset" default. Left unwired,
+    // this is simply never shown - no Editor change forced on existing Minion prefab setups.
+    public GameObject realPowerObject;
     public GameObject damageObject;
     public GameObject powerSquare;
     public GameObject heartObject;
@@ -237,6 +242,25 @@ public class MinionManager : MonoBehaviour
     {
         power = p;
         powerObject.GetComponent<TextMeshPro>().text = p.ToString();
+        UpdateRealPowerDisplay();
+    }
+
+    // fixedPower stays -1 for every card except Guardira/Grenburr, whose actual damage output
+    // (see ReceiveDamage/DoAttack's own fixedPower checks) doesn't match their displayed power -
+    // shown here so a player isn't surprised mid-combat by a unit dealing a different amount of
+    // damage than its own power stat implies.
+    private void UpdateRealPowerDisplay()
+    {
+        if (realPowerObject == null)
+        {
+            return;
+        }
+        bool hasFixedPower = cardStats != null && cardStats.fixedPower != -1;
+        realPowerObject.SetActive(hasFixedPower);
+        if (hasFixedPower)
+        {
+            realPowerObject.GetComponent<TextMeshPro>().text = "/" + cardStats.fixedPower.ToString();
+        }
     }
 
     public int GetPower()
@@ -527,7 +551,7 @@ public class MinionManager : MonoBehaviour
                         {
                             MinionManager target = hit.collider.GetComponent<MinionManager>();
 
-                            if (!summoningSickness && GetCardType() == CardTypes.Moribu && !target.GetFriendly() && Mathf.Abs(target.GetIndex() - GetIndex()) == 2 && target.GetCardType() != CardTypes.Hatapon)
+                            if (!summoningSickness && GetCardType() == CardTypes.Moribu && !target.GetFriendly() && Mathf.Abs(target.GetIndex() - GetIndex()) == 2 && (target == null ||target.GetCardType() != CardTypes.Hatapon))
                             {
                                 BoardManager.Slot nextSlot = target.GetSlot();
                                 target.DestroyMinion();
@@ -605,7 +629,7 @@ public class MinionManager : MonoBehaviour
                                 }
                             }
 
-                            if (GetCardType() == CardTypes.Moribu && !slotToGo.GetFriendly() && Mathf.Abs(slotToGo.GetIndex() - GetIndex()) == 2 && slotToGo.GetConnectedMinion().GetCardType() != CardTypes.Hatapon)
+                            if (GetCardType() == CardTypes.Moribu && !slotToGo.GetFriendly() && Mathf.Abs(slotToGo.GetIndex() - GetIndex()) == 2 && (slotToGo.GetConnectedMinion() == null || slotToGo.GetConnectedMinion().GetCardType() != CardTypes.Hatapon))
                             {
                                 MinionManager connectedMinion = slotToGo.GetConnectedMinion();
                                 if (connectedMinion != null)

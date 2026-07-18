@@ -98,6 +98,10 @@ public class LobbyManager : MonoBehaviour
 
     public void PlayGameButton()
     {
+        if (waitingForOpponentDeck)
+        {
+            return;
+        }
         AudioController.PlaySound("click");
         if (!FirebaseConfig.HasAccount)
         {
@@ -114,6 +118,10 @@ public class LobbyManager : MonoBehaviour
 
     public void RegenerateButton()
     {
+        if (waitingForOpponentDeck)
+        {
+            return;
+        }
         AudioController.PlaySound("click");
         InfoSaver.myHash = UnityEngine.Random.Range(0, 99999);
         PrintKey();
@@ -127,6 +135,10 @@ public class LobbyManager : MonoBehaviour
 
     public void PalyYourself()
     {
+        if (waitingForOpponentDeck)
+        {
+            return;
+        }
         AudioController.PlaySound("click");
         InfoSaver.opponentHash = InfoSaver.myHash;
         InfoSaver.onlineBattle = false;
@@ -135,6 +147,10 @@ public class LobbyManager : MonoBehaviour
 
     public void PlayOnline()
     {
+        if (waitingForOpponentDeck)
+        {
+            return;
+        }
         AudioController.PlaySound("click");
         if (!FirebaseConfig.HasAccount)
         {

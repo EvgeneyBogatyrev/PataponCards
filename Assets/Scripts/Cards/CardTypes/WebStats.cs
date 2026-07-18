@@ -19,6 +19,8 @@ public static class WebStats
         stats.hasOnPlaySpell = true;
         stats.hasOnDeath = true;
 
+        stats.onPlaySound = "bent_compas";
+
         static IEnumerator OnPlay(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();

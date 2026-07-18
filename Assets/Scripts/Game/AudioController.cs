@@ -16,6 +16,13 @@ public class AudioController : MonoBehaviour
     public AudioSource audioSource;
     public static AudioSource audioSourceStatic;
 
+    // A second, dedicated AudioSource for looping background sounds (e.g. matchmaking's
+    // waiting_loop) - separate from the one-shot source above, since AudioSource.loop only
+    // applies to .clip/.Play(), not PlayOneShot, and a loop needs its own independent Stop() that
+    // isn't tied to whatever one-shot SFX happen to fire while it's playing. Auto-created here so
+    // no extra Editor wiring is needed.
+    private static AudioSource loopAudioSourceStatic;
+
     void Awake()
     {
         if (instance != null && instance != this)
@@ -25,6 +32,10 @@ public class AudioController : MonoBehaviour
         }
         instance = this;
         DontDestroyOnLoad(gameObject);
+
+        loopAudioSourceStatic = gameObject.AddComponent<AudioSource>();
+        loopAudioSourceStatic.loop = true;
+        loopAudioSourceStatic.playOnAwake = false;
     }
 
     // Per-clip loudness correction, layered on top of whatever normalization the source files
@@ -52,5 +63,26 @@ public class AudioController : MonoBehaviour
             float volumeScale = volumeOverrides.TryGetValue(soundName, out float scale) ? scale : 1f;
             AudioController.audioSourceStatic.PlayOneShot(clip, volumeScale);
         }
+    }
+
+    // Starts (or restarts, if a different clip is already looping) a looping background sound.
+    // Callers are responsible for calling StopLoop() once the situation it's tied to ends (e.g.
+    // matchmaking found a match or was cancelled) - it does NOT stop itself on scene load, since
+    // this object survives every scene via DontDestroyOnLoad.
+    public static void PlayLoop(string soundName)
+    {
+        if (soundName == null)
+        {
+            return;
+        }
+        AudioClip clip = Resources.Load<AudioClip>("Sounds/" + soundName);
+        loopAudioSourceStatic.clip = clip;
+        loopAudioSourceStatic.Play();
+    }
+
+    public static void StopLoop()
+    {
+        loopAudioSourceStatic.Stop();
+        loopAudioSourceStatic.clip = null;
     }
 }

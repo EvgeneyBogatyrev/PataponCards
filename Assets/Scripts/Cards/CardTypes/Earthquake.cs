@@ -18,6 +18,8 @@ public static class EarthquakeStats
         stats.descriptionSize = 4;
         stats.nameSize = 4;
 
+        stats.hasOwnSound = true;
+
         stats.isSpell = true;
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -36,6 +38,8 @@ public static class EarthquakeStats
             }
 
             MinionManager targetMinion = targetSlot.GetConnectedMinion();
+
+            AudioController.PlaySound("strike");
 
             // Moving minions to the left
             foreach (BoardManager.Slot slot in enemySlots)

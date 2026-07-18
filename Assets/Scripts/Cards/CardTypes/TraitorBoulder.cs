@@ -16,6 +16,8 @@ public static class TraitorBoulderStats
         //stats.hasGreatshield = true;
 
         //stats.nameSize = 4;
+
+        stats.onPlaySound = "rock_sound";
        
 
         static IEnumerator OnPlay(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

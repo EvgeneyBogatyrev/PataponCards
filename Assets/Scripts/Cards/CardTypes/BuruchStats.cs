@@ -72,6 +72,7 @@ public static class BuruchStats
         stats.checkSpellTargets = BuruchCheckTargets;
         stats.numberOfTargets = 1;
         stats.imagePath = "buruch_hq";
+        stats.onPlaySound = "dekaton_regular";
 
         return stats;
     }

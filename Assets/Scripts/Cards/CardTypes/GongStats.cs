@@ -16,6 +16,9 @@ public class GongStats : MonoBehaviour
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Shield);
 
+        stats.onPlaySound = "Gong_enters";
+        stats.onDeathSound = "Gong_death";
+
         stats.hexproof = true;
 
         stats.nameSize = 5;
@@ -71,6 +74,7 @@ public class GongStats : MonoBehaviour
         }
         static IEnumerator YumiponOnAttack(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            AudioController.PlaySound("Gong_tornado");
             int thisIndex = targets[0];
             BoardManager.Slot thisSlot;
             if (thisIndex > 0)
@@ -113,6 +117,8 @@ public class GongStats : MonoBehaviour
                     ghost.constantSpeed = true;
                     ghostly.Add(ghost);
                 }
+
+                AudioController.PlaySound("Gong_wind");
 
                 int idx = 0;
                 while (idx < 7)

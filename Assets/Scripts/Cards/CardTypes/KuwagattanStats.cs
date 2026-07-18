@@ -15,6 +15,8 @@ public class KuwagattanStats : MonoBehaviour
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
 
+        stats.onPlaySound = "dekaton_kuw";
+
         //stats.hexproof = true;
         stats.firstTurnToPlay = 3;
 
@@ -23,6 +25,8 @@ public class KuwagattanStats : MonoBehaviour
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             gameController.actionIsHappening = true;
             ShakeScreen _shakeScreen = GameObject.Find("Main Camera").GetComponent<ShakeScreen>();
+
+            AudioController.PlaySound("ground_rumble");
 
             int thisIndex = targets[0];
             BoardManager.Slot thisSlot;

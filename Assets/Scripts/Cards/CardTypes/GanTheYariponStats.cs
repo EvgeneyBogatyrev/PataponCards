@@ -17,6 +17,8 @@ public static class GanTheYariponStats
         stats.additionalKeywords.Add("End of turn");
         stats.additionalRules.Add("<b>End of turn</b> effects are repeated in order they were played.");
 
+        stats.onPlaySound = "gan_yaripon";
+
         stats.hasAfterPlayEvent = true;
         //stats.hasOnPlay = true;
 

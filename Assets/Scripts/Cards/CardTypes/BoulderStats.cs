@@ -14,7 +14,7 @@ public static class BoulderStats
         stats.pacifism = true;
         stats.hasShield = true;
 
-        stats.imagePath = "boulder";
+        stats.imagePath = "Boulder_hq";
         return stats;
     }
 }

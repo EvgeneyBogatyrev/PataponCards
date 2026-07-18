@@ -65,7 +65,7 @@ public static class OfferingToKamiStats
         stats.checkSpellTarget = FangCheckTarget;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "offering";
+        stats.imagePath = "Offering_to_Kami_hq";
         return stats;
     }
 }

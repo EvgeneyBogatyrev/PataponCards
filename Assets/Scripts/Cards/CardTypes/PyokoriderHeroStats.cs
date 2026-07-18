@@ -16,6 +16,8 @@ public static class PyokoriderHeroStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
+        stats.onPlaySound = "kibapon";
+
         stats.nameSize = 4;
 
 
@@ -94,7 +96,7 @@ public static class PyokoriderHeroStats
         }
         stats.endTurnEvent = PyokoriderHeroEndTurn;
 
-        stats.imagePath = "pyokorider_hero";
+        stats.imagePath = "Pyoko_hq";
         stats.artistName = "Official render";
 
         return stats;

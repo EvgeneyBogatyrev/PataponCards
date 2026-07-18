@@ -33,11 +33,20 @@ public class QueueProcesser : MonoBehaviour
         }
     }
 
+    // Safety net - AudioController survives scene loads via DontDestroyOnLoad, so if this scene
+    // is ever left through a path that doesn't already call StopLoop() above, the loop would
+    // otherwise keep playing forever into whatever scene comes next.
+    private void OnDestroy()
+    {
+        AudioController.StopLoop();
+    }
+
     private void Start()
     {
         statusText.GetComponent<TextMeshProUGUI>().text = "Searching for the opponent...";
         hash = UnityEngine.Random.Range(0, 99999);
         InfoSaver.myHash = hash;
+        AudioController.PlayLoop("waiting_loop");
         StartCoroutine(FindMatch());
     }
 
@@ -50,6 +59,7 @@ public class QueueProcesser : MonoBehaviour
 
     private IEnumerator LeaveQueueAndGoBack()
     {
+        AudioController.StopLoop();
         // Best-effort cleanup - don't let a slow/failed delete strand the player here.
         StartCoroutine(FirebaseDb.Delete("queue/" + hash));
         SceneManager.LoadScene("Lobby");
@@ -76,6 +86,7 @@ public class QueueProcesser : MonoBehaviour
                 if (mine != null && mine["matchedWith"] != null)
                 {
                     InfoSaver.opponentHash = mine["matchedWith"].Value<int>();
+                    AudioController.StopLoop();
                     StartCoroutine(FirebaseDb.Delete("queue/" + hash));
                     SceneManager.LoadScene("Game");
                     yield break;
@@ -128,6 +139,7 @@ public class QueueProcesser : MonoBehaviour
         yield return FirebaseDb.Patch("", patch);
 
         InfoSaver.opponentHash = opponentHash;
+        AudioController.StopLoop();
         StartCoroutine(FirebaseDb.Delete("queue/" + hash));
         SceneManager.LoadScene("Game");
     }

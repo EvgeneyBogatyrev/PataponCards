@@ -54,6 +54,7 @@ public class CardReprManager : MonoBehaviour
     {
         if (!relevantCard && mouseOver && Input.GetMouseButtonUp(0))
         {
+            AudioController.PlaySound("card_shuffle");
             numberOfCopies -= 1;
             SetVisualNumber();
             DeckManager.RemoveCard(type);

@@ -18,6 +18,8 @@ public static class BowmunkStats
 
         stats.relevantCards.Add(CardTypes.Boulder);
 
+        stats.onPlaySound = "Bowmunk";
+
 
         static IEnumerator BowmunkEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

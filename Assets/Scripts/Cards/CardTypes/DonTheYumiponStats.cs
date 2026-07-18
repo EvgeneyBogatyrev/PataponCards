@@ -18,6 +18,8 @@ public static class DonTheYumiponStats
         stats.descriptionSize = 3;
         //stats.nameSize = 5;
 
+        stats.onPlaySound = "don_yumipon";
+
         stats.additionalKeywords.Add("Cycling");
         stats.suppressOnPlay = true;
 
@@ -82,6 +84,7 @@ public static class DonTheYumiponStats
                     yield return new WaitForSeconds(0.1f);
                 }
 
+                AudioController.PlaySound("spear");
                 spear.DestroySelf();
 
                 MinionManager connectedMinion = enemySlots[chosenIndex].GetConnectedMinion();

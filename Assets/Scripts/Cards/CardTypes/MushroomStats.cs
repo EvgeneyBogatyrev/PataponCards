@@ -43,7 +43,7 @@ public class MushroomStats : MonoBehaviour
 
         stats.startTurnEvent = StartTurn;
 
-        stats.imagePath = "mushroom";
+        stats.imagePath = "Mushroom_hq";
         return stats;
     }
 }

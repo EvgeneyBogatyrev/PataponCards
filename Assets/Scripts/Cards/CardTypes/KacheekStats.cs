@@ -41,6 +41,7 @@ public static class GiveFangStats
         stats.name = "Drop Fang";
 
         stats.isSpell = true;
+        stats.hasOwnSound = true;
         static IEnumerator GiveFangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             MinionManager host;

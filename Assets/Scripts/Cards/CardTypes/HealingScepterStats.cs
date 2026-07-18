@@ -42,7 +42,7 @@ public static class HealingScepterStats
         stats.spell = Realization;
         stats.numberOfTargets = 0;
 
-        stats.imagePath = "healing_scepter_hq";
+        stats.imagePath = "Healing_Sceptre_hq";
         return stats;
     }
 }

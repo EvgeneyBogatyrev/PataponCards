@@ -52,7 +52,7 @@ public static class WooyariStats
         stats.spell = DestroboRealization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "Wooyari";  
+        stats.imagePath = "Wooyari_hq";  
         stats.artistName = "Official render";      
         return stats;
     }

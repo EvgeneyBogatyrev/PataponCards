@@ -737,9 +737,10 @@ public static class FilterCardTypes
             CardTypes.SleepingDust,
             CardTypes.Megapon,
             CardTypes.SparringPartner,
-            //CardTypes.AvengingScout,
+            CardTypes.AvengingScout,
             //CardTypes.NaturalEnemy,
             CardTypes.Fatique,
+            CardTypes.Mahopon
         };
 
         return reservedList;

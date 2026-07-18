@@ -86,7 +86,7 @@ public static class YariponBushwackerStats
         stats.numberOfTargets = 2;
         stats.dummyTarget = true;
 
-        stats.imagePath = "fah";
+        stats.imagePath = "farmer";
         stats.artistName = "Official render";        
         return stats;
     }

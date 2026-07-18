@@ -12,6 +12,8 @@ public static class ProfessionalWithStandards
         stats.description = "<b>Cycling</b>.\nWhenever you Cycle Questing Beast, your Hatapon loses " + beastDamage.ToString() + " life.";
         stats.name = "Questing beast";
 
+        stats.onPlaySound = "questing_beast";
+
         static void ProfessionalWIthStandardsDeathrattle(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots, CardManager.CardStats thisStats)
         {
             if (friendlySlots[0].GetFriendly())

@@ -29,6 +29,7 @@ public static class TonKamponStats
         stats.pacifism = true;
 
         stats.imagePath = "ton_kampon";
+        stats.onPlaySound = "ton_kampon";
 
         return stats;
     }
@@ -208,7 +209,7 @@ public static class CronoRiggersStats
 
         stats.spell = CronoRiggersRealization;
         
-        stats.imagePath = "oharan_hq";
+        stats.imagePath = "Oharan_hq";
 
         return stats;
     }

@@ -13,6 +13,7 @@ public static class AitonStats
         stats.runes.Add(Runes.Spear);
         stats.nameSize = 4;
         stats.hasOnPlaySpell = true;
+        stats.onPlaySound = "zigoton_" + UnityEngine.Random.Range(1, 3);
 
         // On-play spells resolve BEFORE the card is actually placed on the board (BoardManager.
         // PlayCard runs afterward, once this coroutine finishes) - see BowmunkStats for the same

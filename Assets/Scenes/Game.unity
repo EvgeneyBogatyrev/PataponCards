@@ -1996,8 +1996,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.0581, y: -0.0064}
-  m_SizeDelta: {x: 0.4932, y: 0.3833}
+  m_AnchoredPosition: {x: 0.0474, y: -0.0045}
+  m_SizeDelta: {x: 0.4217, y: 0.387}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &593507354
 MonoBehaviour:
@@ -3290,8 +3290,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.5907, y: -0.0198}
-  m_SizeDelta: {x: 0.4959, y: 0.3745}
+  m_AnchoredPosition: {x: 0.6014, y: -0.0198}
+  m_SizeDelta: {x: 0.4745, y: 0.3745}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &901583659
 MonoBehaviour:
@@ -3440,7 +3440,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tooltipText: The fatigue damage your opponent's Hatapon will take at the begginig
-    of your next turn.
+    of their next turn.
   hoverDelay: 0.6
 --- !u!1 &963194225
 GameObject:
