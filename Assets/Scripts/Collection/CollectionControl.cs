@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using TMPro;
+using Networking;
 
 public class CollectionControl : MonoBehaviour
 {
@@ -649,9 +650,22 @@ public class CollectionControl : MonoBehaviour
             {
                 deckNameField.CommitIfEditing();
             }
-            SaveSystem.SaveDeckAndRunes(DeckManager.deck, DeckManager.runes, DeckLoadManager.deckIndex);
-            SceneManager.LoadScene("MainMenu");
+            StartCoroutine(SaveDeckAndReturnToMenu());
         }
+    }
+
+    // Saves locally, then explicitly waits for the cloud mirror to actually finish uploading
+    // before leaving this scene - MainMenu's Play button can take the player straight to Lobby,
+    // whose Start() immediately pulls from the cloud (DownloadCloudToLocal). If that pull landed
+    // before this edit's own upload had finished, it would silently overwrite the just-saved
+    // local deck file with the stale pre-edit cloud copy - the deck would then look "unsaved"
+    // both in the match just started and back here in Collection afterward.
+    private IEnumerator SaveDeckAndReturnToMenu()
+    {
+        SaveSystem.SaveDeck(DeckManager.deck, DeckLoadManager.deckIndex, mirrorToCloud:false);
+        SaveSystem.SaveRunes(DeckManager.runes, DeckLoadManager.deckIndex, mirrorToCloud:false);
+        yield return CloudSave.MirrorDeckAndWait(DeckLoadManager.deckIndex, DeckManager.deck, DeckManager.runes, SaveSystem.LoadDeckName(DeckLoadManager.deckIndex));
+        SceneManager.LoadScene("MainMenu");
     }
 
     // Click opens a Yes/Cancel confirmation instead of deleting immediately - see

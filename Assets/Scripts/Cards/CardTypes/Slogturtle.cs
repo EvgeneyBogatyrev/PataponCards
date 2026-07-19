@@ -9,7 +9,7 @@ public static class SlogturtleStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 9;
-        stats.description = "<b>Pacifism</b>. <b>Lifelink</b>. Players cannot cast spells.";
+        stats.description = "<b>Pacifism</b>. <b>Lifelink</b>.\nPlayers cannot cast spells.";
         stats.name = "Slogturtle";
         stats.pacifism = true;
         stats.hasShield = true;
@@ -19,6 +19,7 @@ public static class SlogturtleStats
 
         stats.imagePath = "slogturtle";
         stats.onPlaySound = "slogturtle";
+        stats.artistName = "Official render";
         return stats;
     }
 }

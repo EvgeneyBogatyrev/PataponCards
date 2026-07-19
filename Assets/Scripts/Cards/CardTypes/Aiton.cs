@@ -61,7 +61,7 @@ public static class AitonStats
         stats.dummyTarget = true;
 
         stats.imagePath = "aiton";
-        stats.artistName = "Official render";        
+        stats.artistName = "Screenshot from the game";        
         return stats;
     }
 }

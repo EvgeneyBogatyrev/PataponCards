@@ -47,6 +47,23 @@ public class LobbyManager : MonoBehaviour
     }
 
     private bool waitingForOpponentDeck = false;
+    private bool showVersionMismatch = false;
+
+    // Re-checks against Firebase right before actually starting a real match, not just once at
+    // launch - a player who launched successfully and then left the app open for a while never
+    // re-checks on their own, so a stale client could otherwise still matchmake or challenge a
+    // friend hours after a new required version was published.
+    private IEnumerator CheckVersionThen(Action onCurrent)
+    {
+        bool isCurrent = false;
+        yield return VersionGate.IsCurrentVersion(result => isCurrent = result);
+        if (!isCurrent)
+        {
+            showVersionMismatch = true;
+            yield break;
+        }
+        onCurrent?.Invoke();
+    }
 
     private IEnumerator WaitForOpponentDeckSelect()
     {
@@ -70,6 +87,12 @@ public class LobbyManager : MonoBehaviour
     // this match by accepting the challenge.
     private void OnGUI()
     {
+        if (showVersionMismatch)
+        {
+            DrawVersionMismatchBanner();
+            return;
+        }
+
         if (!waitingForOpponentDeck)
         {
             return;
@@ -96,6 +119,39 @@ public class LobbyManager : MonoBehaviour
         GUI.color = previousColor;
     }
 
+    // Same visual technique as the waiting banner above, tinted red for an error/blocked state.
+    private void DrawVersionMismatchBanner()
+    {
+        float scale = ConfirmationBanner.Scale();
+        int fontSize = ConfirmationBanner.ScaledFontSize(16);
+        float width = Mathf.Min(500f * scale, Screen.width - 40f);
+        Rect messageRect = new Rect((Screen.width - width) / 2f, 10f * scale, width, 70f * scale);
+
+        Color previousColor = GUI.color;
+        GUI.color = new Color(0.6f, 0.2f, 0.2f, 0.98f);
+        GUI.DrawTexture(messageRect, Texture2D.whiteTexture);
+        GUI.color = Color.white;
+
+        GUIStyle style = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = fontSize,
+            fontStyle = FontStyle.Bold,
+            wordWrap = true
+        };
+        style.normal.textColor = Color.white;
+        GUI.Label(messageRect, "Your game version is out of date. Please update via the itch.io app, then relaunch.", style);
+        GUI.color = previousColor;
+
+        float buttonWidth = 220f * scale;
+        float buttonHeight = 40f * scale;
+        Rect dismissRect = new Rect((Screen.width - buttonWidth) / 2f, messageRect.yMax + 10f * scale, buttonWidth, buttonHeight);
+        if (ConfirmationBanner.DrawOpaqueButton(dismissRect, "Dismiss", fontSize, dismissRect.Contains(Event.current.mousePosition)))
+        {
+            showVersionMismatch = false;
+        }
+    }
+
     public void PlayGameButton()
     {
         if (waitingForOpponentDeck)
@@ -110,10 +166,13 @@ public class LobbyManager : MonoBehaviour
             return;
         }
 
-        int hash = Int32.Parse(inputField.GetComponent<TMP_InputField>().text);
-        InfoSaver.opponentHash = hash;
-        InfoSaver.onlineBattle = true;
-        SceneManager.LoadScene("Game");
+        StartCoroutine(CheckVersionThen(() =>
+        {
+            int hash = Int32.Parse(inputField.GetComponent<TMP_InputField>().text);
+            InfoSaver.opponentHash = hash;
+            InfoSaver.onlineBattle = true;
+            SceneManager.LoadScene("Game");
+        }));
     }
 
     public void RegenerateButton()
@@ -159,8 +218,11 @@ public class LobbyManager : MonoBehaviour
             return;
         }
 
-        InfoSaver.onlineBattle = true;
-        SceneManager.LoadScene("FindGame");
+        StartCoroutine(CheckVersionThen(() =>
+        {
+            InfoSaver.onlineBattle = true;
+            SceneManager.LoadScene("FindGame");
+        }));
     }
 
     public void Exit()

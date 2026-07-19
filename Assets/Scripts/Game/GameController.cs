@@ -1197,9 +1197,17 @@ public class GameController : MonoBehaviour
             }
             
         }
-        if (!friendly && !hataponJustDied)
+        if (!friendly)
         {
-            ServerDataProcesser.instance.EndTurn();
+            // hataponJustDied only skips the network EndTurn() call (a fresh round doesn't need
+            // one) - the ready-to-attack outline cleanup below is purely local visual state and
+            // must always run whenever it's genuinely not the friendly player's turn, or units
+            // (including a freshly-spawned Hatapon at the start of a new round) are left showing
+            // a stale "ready" highlight through the opponent's entire turn.
+            if (!hataponJustDied)
+            {
+                ServerDataProcesser.instance.EndTurn();
+            }
             foreach (BoardManager.Slot slot in boardManager.friendlySlots)
             {
                 if (!slot.GetFree())
@@ -1207,7 +1215,6 @@ public class GameController : MonoBehaviour
                     slot.GetConnectedMinion().SetAbilityToAttack(false);
                 }
             }
-
         }
         yield return null;
     }

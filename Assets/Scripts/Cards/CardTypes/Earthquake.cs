@@ -119,6 +119,7 @@ public static class EarthquakeStats
         stats.numberOfTargets = 1;
 
         stats.imagePath = "earthquake_hd";
+        stats.artistName = "Official render";
         return stats;
     }
 }

@@ -17,6 +17,7 @@ public static class DekaponStats
 
         stats.imagePath = "dekapon_hq";
         stats.onPlaySound = "dekaton_regular";
+        stats.artistName = "Official render";
         return stats;
     }
 }

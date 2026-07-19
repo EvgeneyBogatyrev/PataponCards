@@ -18,7 +18,7 @@ public static class ScoutStats
 
         stats.onPlaySound = "zigoton_" + UnityEngine.Random.Range(1, 3);
 
-        stats.additionalRules.Add("Damage happens even if you didn't draw a card for any reason.");
+        stats.additionalRules.Add("Damage is dealt even if you didn't draw a card for any reason.");
 
 
         static IEnumerator EndTurn(int thisIndex, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -85,7 +85,7 @@ public static class ScoutStats
             yield return null;
         }
         stats.endTurnEvent = EndTurn;
-        stats.artistName = "Official render";
+        stats.artistName = "Screenshot from the game";
 
         return stats;
     }

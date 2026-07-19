@@ -24,7 +24,7 @@ public static class KacheekStats
         stats.imagePath = "kacheek_hq";
         stats.onPlaySound = "kacheek";
         stats.onDeathSound = "kacheek_death";
-        stats.artistName = "Official render";
+        stats.artistName = "NIKI100";
         return stats;
     }
 }
@@ -77,6 +77,7 @@ public static class GiveFangStats
         stats.numberOfTargets = 0;
         stats.damageToHost = giveFangHealthCost;
 
+        stats.artistName = "Evgeney Bogatyrev";
         stats.imagePath = "fang_hq_upd";
         return stats;
     }
@@ -132,6 +133,7 @@ public static class NutritionStats
         stats.damageToHost = nutritionHealthCost;
 
         stats.imagePath = "nutrition_hq";
+        stats.artistName = "NIKI100";
         return stats;
     }
 }

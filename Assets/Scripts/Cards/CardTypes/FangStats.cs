@@ -49,7 +49,7 @@ public static class FangStats
         stats.numberOfTargets = 1;
 
         stats.imagePath = "fang_hq_upd";
-        stats.artistName = "Official render";
+        stats.artistName = "Evgeney Bogatyrev";
         return stats;
     }
 }

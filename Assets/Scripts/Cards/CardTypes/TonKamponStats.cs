@@ -9,7 +9,7 @@ public static class TonKamponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 9;
-        stats.description = "<b>Pacifism. Abilities</b>:\n-4: Add a random weapon to your hand.\n-5: Double the power of another weakest non-Hatapon unit you controll.";
+        stats.description = "<b>Pacifism. Abilities</b>:\n-4: Add a random weapon to your hand.\n-5: Double the power of the weakest other non-Hatapon unit you control.";
         stats.name = "Ton Kampon";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
@@ -43,7 +43,7 @@ public static class TonKampon_option2Stats
 
         const int TonKamponAlldemoniumHealthCost = 5;
                 
-        stats.description = "-5: Double the power of another weakest non-Hatapon unit you controll.";
+        stats.description = "-5: Double the power of the weakest other non-Hatapon unit you control.";
         stats.name = "Craft an Alloy";
         stats.nameSize = 4;
 
@@ -103,7 +103,7 @@ public static class TonKampon_option1Stats
         CardManager.CardStats stats = new CardManager.CardStats();
         const int TonKamponCronoRiggersHealthCost = 4;
                 
-        stats.description = "-4: Add random weapon to your hand.";
+        stats.description = "-4: Add a random weapon to your hand.";
         stats.name = "Craft a Weapon";
         stats.nameSize = 4;
 
@@ -153,7 +153,7 @@ public static class CronoRiggersStats
         CardManager.CardStats stats = new CardManager.CardStats();
         const int cronoRiggersDamageReduction = 2;
         const int threshold = 8;
-        stats.description = "All units under your controll gain +" + cronoRiggersDamageReduction.ToString() + " power. Then, your strongest non-Hatapon unit attacks the strongest enemy unit.";
+        stats.description = "All units under your control gain +" + cronoRiggersDamageReduction.ToString() + " power. Then, your strongest non-Hatapon unit attacks the strongest enemy unit.";
         stats.name = "Oharan";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
@@ -223,7 +223,7 @@ public static class AlldemoniumStats
         CardManager.CardStats stats = new CardManager.CardStats();
         const int alldemonuimGain = 5;
         const int alldemonuimDamage = 2;
-        stats.description = "Target non-Hatapon character under your controll gains +" + alldemonuimGain.ToString() + " power, but recieves " + alldemonuimDamage.ToString() + " damage at the end of your turn.";
+        stats.description = "Target non-Hatapon unit under your control gains +" + alldemonuimGain.ToString() + " power, but receives " + alldemonuimDamage.ToString() + " damage at the end of your turn.";
         stats.name = "Alldemonium Shield";
         stats.nameSize = 3;
         stats.runes.Add(Runes.Shield);

@@ -9,7 +9,7 @@ public static class KibaponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "<b>Haste</b> (can attack and move as soon as it enters the battlefield).";
+        stats.description = "<b>Haste</b>.";
         stats.name = "Kibapon";
         stats.hasHaste = true;
         //stats.hasShield = true;

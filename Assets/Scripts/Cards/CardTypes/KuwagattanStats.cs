@@ -9,7 +9,7 @@ public class KuwagattanStats : MonoBehaviour
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 12;
-        stats.description = "This card cannot be playerd on the first three turns.\n<b>On attack</b>: Discard your hand.";
+        stats.description = "This card cannot be played on the first three turns.\n<b>On attack</b>: Discard your hand.";
         stats.name = "Kuwagattan";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);

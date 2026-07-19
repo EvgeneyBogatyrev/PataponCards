@@ -16,7 +16,7 @@ public static class BuzzcraveStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
         
-        stats.additionalRules.Add("<i>Buzzcrave</i> can attack any unit on the board unless it's not a legal target for attack. Damage prevention still applies.");
+        //stats.additionalRules.Add("<i>Buzzcrave</i> can attack any unit on the board unless it is not a legal target for an attack. Damage prevention still applies.");
 
         stats.imagePath = "buzzcrave_updated";
         stats.onPlaySound = "buzzcrave_on_play";

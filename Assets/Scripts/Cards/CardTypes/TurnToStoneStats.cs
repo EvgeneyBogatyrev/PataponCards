@@ -13,7 +13,7 @@ public static class TurnToStoneStats
         //stats.runes.Add(Runes.Bow);
         //card.SetNameSize(4);
 
-        stats.additionalRules.Add("Target unit losses all effects but keeps its power.");
+        stats.additionalRules.Add("Target unit loses all effects but keeps its power.");
         stats.additionalRules.Add("This does not apply to aura effects that are given to a unit by other units.");
         stats.additionalRules.Add("Unit does not lose its <b>Devotion</b>, however it loses all negative status effects.");
 

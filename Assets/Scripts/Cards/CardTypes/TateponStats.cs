@@ -8,7 +8,7 @@ public static class TateponStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 4;
-        stats.description = "<b>Lifelink</b> (your Hatapon is immune to attacks and spell damage).";
+        stats.description = "<b>Lifelink</b>.";
         stats.name = "Tatepon";
         stats.runes.Add(Runes.Shield);
         stats.imagePath = "tatepon_upd";
@@ -59,7 +59,7 @@ public static class TateponStats
         //stats.numberOfTargets = 2;
         //stats.dummyTarget = true;
 
-
+        stats.artistName = "Official render";
         return stats;
     }
 }

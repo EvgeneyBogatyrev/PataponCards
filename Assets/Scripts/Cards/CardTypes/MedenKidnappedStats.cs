@@ -15,7 +15,7 @@ public class MedenKidnappedStats : MonoBehaviour
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
 
-        stats.additionalKeywords.Add("Remove doesn't trigger death");
+        stats.additionalKeywords.Add("Removal doesn't trigger death effects");
 
         stats.isSpell = true;
         static IEnumerator realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

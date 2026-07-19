@@ -8,7 +8,7 @@ public static class DeepImpactStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         const int horsePower = 3;
-        stats.description = "Transform target non-Hatapon unit into the Horserider with " + horsePower.ToString() + " and <b>Haste</b>.\nIf it was your unit, draw a card.";
+        stats.description = "Transform target non-Hatapon unit into a Horserider with " + horsePower.ToString() + " power and <b>Haste</b>.\nIf it was your unit, draw a card.";
         stats.name = "Bullgam the Bully";
         stats.nameSize = 4;
         stats.descriptionSize = 3;

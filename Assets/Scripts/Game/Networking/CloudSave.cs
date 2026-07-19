@@ -29,6 +29,27 @@ namespace Networking
             CoroutineRunner.Run(FirebaseDb.Put(PrivatePath + "/decks/" + index, body));
         }
 
+        // Awaitable twin of MirrorDeck, for callers that need to guarantee the cloud copy is
+        // actually written before doing something that could read it right back - MirrorDeck's
+        // fire-and-forget upload can still be in flight when a caller immediately transitions to
+        // a scene that pulls from the cloud (e.g. leaving Collection straight into Lobby, which
+        // calls DownloadCloudToLocal on Start), silently overwriting the just-saved local file
+        // with the stale pre-edit cloud copy.
+        public static IEnumerator MirrorDeckAndWait(int index, List<CardTypes> deck, List<Runes> runes, string name)
+        {
+            if (!FirebaseConfig.HasAccount)
+            {
+                yield break;
+            }
+            JObject body = new JObject
+            {
+                ["cards"] = new JArray(deck.ConvertAll(c => (int)c)),
+                ["runes"] = new JArray(runes.ConvertAll(r => (int)r)),
+                ["name"] = name
+            };
+            yield return FirebaseDb.Put(PrivatePath + "/decks/" + index, body);
+        }
+
         public static void MirrorCollection(Dictionary<CardTypes, int> collection)
         {
             if (!FirebaseConfig.HasAccount)

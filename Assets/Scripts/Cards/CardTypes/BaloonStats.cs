@@ -10,10 +10,12 @@ public static class BaloonStats
         const int baloonDamage = 1;
         stats.power = 2;
         stats.description = "Cannot be attacked by units.\n<b>End of turn</b>: Deal " + baloonDamage.ToString() + " damage to the enemy Hatapon.";
-        stats.name = "Hot Air Ballon";
+        stats.name = "Hot Air Balloon";
         stats.flying = true;
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
+
+        stats.nameSize = 4;
 
         static IEnumerator BaloonEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

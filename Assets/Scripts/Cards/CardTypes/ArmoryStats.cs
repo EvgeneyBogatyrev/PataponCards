@@ -9,7 +9,7 @@ public static class ArmoryStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "<b>Pacifism. Abilities:</b>\n-1: Draw a card, your Hatapon loses 2 life.\n-3: Discard your hand, draw 3 cards.";
+        stats.description = "<b>Pacifism. Abilities:</b>\n-1: Draw a card. Your Hatapon loses 2 life.\n-3: Discard your hand. Draw 3 cards.";
         stats.name = "Armory";
 
         stats.descriptionSize = 3;
@@ -43,7 +43,7 @@ public static class Armory_option1Stats
         const int cost = 1;
         const int damageToHatapon = 2;
                 
-        stats.description = "-1: Draw a card, your Hatapon loses 2 life.";
+        stats.description = "-1: Draw a card. Your Hatapon loses 2 life.";
         stats.name = "Upgrade weapon";
         stats.nameSize = 4;
 
@@ -106,7 +106,7 @@ public static class Armory_option2Stats
 
         stats.nameSize = 4;
                 
-        stats.description = "-3: Discard your hand, draw 3 cards.";
+        stats.description = "-3: Discard your hand. Draw 3 cards.";
         stats.name = "Sell your weapons";
 
         stats.isSpell = true;

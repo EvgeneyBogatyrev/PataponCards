@@ -54,7 +54,7 @@ public static class TrentFireStats
 
         const int selfDamage = 1;
         stats.power = 10;
-        stats.description = "<b>End of turn</b>: Deal " + selfDamage.ToString() + " to itself.";
+        stats.description = "<b>End of turn</b>: Deal " + selfDamage.ToString() + " damage to itself.";
         stats.name = "Treant on Fire";
         //stats.runes.Add(Runes.Shield);
         

@@ -8,7 +8,7 @@ public static class QueenKharmaStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         
-        stats.description = "<b>On play</b>: Add Queen Kharma abilities to your hand.";
+        stats.description = "<b>On play</b>: Add Queen Kharma's abilities to your hand.";
         stats.name = "Queen Kharma";
 
         stats.power = 3;
@@ -58,6 +58,7 @@ public static class QueenKharmaStats
         stats.numberOfTargets = 0;
 
         stats.imagePath = "queen_kharma_hq";
+        stats.artistName = "Official render";
         return stats;
     }
 }

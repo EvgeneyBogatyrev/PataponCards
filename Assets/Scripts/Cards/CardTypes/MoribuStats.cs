@@ -9,7 +9,7 @@ public static class MoribuStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 4;
-        stats.description = "Can move in 'L' shape to the opponents board. If the slot is occupied by an enemy non-Hatapon unit, destroy it.";
+        stats.description = "Can move in an 'L' shape to the opponent's board. If the slot is occupied by an enemy non-Hatapon unit, destroy it.";
         stats.name = "Moribu";
         //stats.hasHaste = true;
        

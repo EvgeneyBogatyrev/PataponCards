@@ -35,7 +35,7 @@ public static class IdiotStats
         stats.startTurnEvent = FuckingIdiotStartTurn;
 
         stats.imagePath = "bent_compass_hq";
-        stats.artistName = "Official render";
+        stats.artistName = "Evgeney Bogatyrev";
         return stats;
     }
 }

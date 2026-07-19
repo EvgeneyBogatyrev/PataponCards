@@ -13,7 +13,7 @@ public static class BackToHideoutStats
         stats.runes.Add(Runes.Bow);
         stats.nameSize = 4;
 
-        stats.additionalKeywords.Add("Remove doesn't trigger death");
+        stats.additionalKeywords.Add("Removal doesn't trigger death effects");
 
         stats.isSpell = true;
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

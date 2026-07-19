@@ -45,21 +45,21 @@ public static class CardInfoController
             case "Poison":
                 return "<b>Poisoned</b> units receive 1 damage at the start of their controller's turn.";
             case "Devotion deck":
-                return "Your <b>Devotion</b> to a specific class equals to the number of this class symbols you select during deck building.";
+                return "Your <b>Devotion</b> to a specific class equals the number of this class's symbols you select during deck building.";
             case "Devotion card":
-                return "A card's <b>Devotion</b> to a specific class equals to the number of this class symbols in the top right corner of the card.";
+                return "A card's <b>Devotion</b> to a specific class equals the number of this class's symbols in the top right corner of the card.";
             case "Pacifism":
-                return "A unit with <b>Pacifism</b> can not attack, move, or deal damage.";
+                return "A unit with <b>Pacifism</b> cannot attack, move, or deal damage.";
             case "Abilities":
-                return "A unit with <b>Abilities</b> can atcivate its ability once per turn instead of attacking. Ability's cost is subtracted from this unit's power.";
+                return "A unit with <b>Abilities</b> can activate its ability once per turn instead of attacking. The ability's cost is subtracted from this unit's power.";
             case "Lifelink":
-                return "Your Hatapon can not be damaged when you control a unit with <b>Lifelink</b>. This does not apply to poison and fatigue damage.";
+                return "Your Hatapon cannot be damaged when you control a unit with <b>Lifelink</b>. This does not apply to poison and fatigue damage.";
             case "Hexproof":
-                return "A unit with <b>Hexproof</b> can not be targeted by spells and abilities.";
+                return "A unit with <b>Hexproof</b> cannot be targeted by spells and abilities.";
             case "Haste":
                 return "A unit with <b>Haste</b> can attack and move as soon as it enters the battlefield.";
-            case "Remove doesn't trigger death":
-                return "Removing a unit from the battlefield without destroying it does not trigget <b>On death</b> effects.";
+            case "Removal doesn't trigger death effects":
+                return "Removing a unit from the battlefield without destroying it does not trigger <b>On death</b> effects.";
             default:
                 return "no translation needed";
         }

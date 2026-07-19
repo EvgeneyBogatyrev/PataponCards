@@ -12,8 +12,8 @@ public static class AlossonStats
         const int alossonMax = 14;
         stats.power = 2;
         stats.description = "<b>On play:</b> Deal " + alossonDamage.ToString() + 
-                            " damage to all units. If at least of them dies, " +
-                            "repeat the process (Up to " + alossonMax.ToString() + " times).";
+                            " damage to all units. If at least one of them dies, " +
+                            "repeat the process, up to " + alossonMax.ToString() + " times.";
         stats.name = "Alosson";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);

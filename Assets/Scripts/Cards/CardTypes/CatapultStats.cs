@@ -44,7 +44,7 @@ public static class Catapult_option1Stats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.description = "-" + firstCost.ToString() + ": Deal damage equal to this unit's power to opponent's Hatapon. Then, destroy this unit.\n";
+        stats.description = "-" + firstCost.ToString() + ": Deal damage equal to this unit's power to the opponent's Hatapon. Then, destroy this unit.\n";
 
         stats.isSpell = true;
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

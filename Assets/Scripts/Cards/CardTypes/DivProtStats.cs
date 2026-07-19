@@ -99,6 +99,7 @@ public static class TokenTateponStats
 
         //stats.isSpell = true;
         stats.imagePath = "tatepon_upd";
+        stats.artistName = "Official render";
         return stats;
     }
 }

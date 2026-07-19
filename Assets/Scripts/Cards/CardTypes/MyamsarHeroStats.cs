@@ -17,7 +17,7 @@ public static class MyamsarHeroStats
         stats.onPlaySound = "Myamsar";
 
         //stats.descriptionSize = 3;
-        stats.additionalRules.Add("If attacked unit is destroyed during the resolution of Myamsar's <b>On attack</b> effect, Myamsar won't receive any damage.");
+        stats.additionalRules.Add("If the attacked unit is destroyed during the resolution of Myamsar's <b>On attack</b> effect, Myamsar won't receive any damage.");
         stats.additionalRules.Add("Myamsar's On attack effect can destroy enemy Hatapon.");
 
         static IEnumerator OnAttack(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

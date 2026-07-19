@@ -15,6 +15,7 @@ public static class BoulderStats
         stats.hasShield = true;
 
         stats.imagePath = "Boulder_hq";
+        stats.artistName = "Screenshot from the game";
         return stats;
     }
 }

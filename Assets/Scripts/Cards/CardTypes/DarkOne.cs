@@ -9,7 +9,7 @@ public static class DarkOneStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 3;
-        stats.description = "<b>Start of turn</b>: Discard the top card of your library. If it is a spell, transform into Kiba form. Otherwise, transform into Bird form.";
+        stats.description = "<b>Start of turn</b>: Discard the top card of your library. If it is a spell, transform this unit into <i>Kiba form</i>. Otherwise, transform it into <i>Bird form</i>.";
         stats.name = "The Dark One";
 
         stats.descriptionSize = 3;

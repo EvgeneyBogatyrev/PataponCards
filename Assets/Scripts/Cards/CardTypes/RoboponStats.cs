@@ -34,6 +34,7 @@ public static class RoboponStats
         stats.endTurnEvent = RoboponEndTurn;
 
         stats.imagePath = "robopon";
+        stats.artistName = "Official render";
         return stats;
     }
 }

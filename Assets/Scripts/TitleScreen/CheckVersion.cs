@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 using System.Collections;
-using Newtonsoft.Json.Linq;
 using Networking;
 
 // Distribution goes through the itch.io app now, but its own "update available" nag is only a
@@ -20,8 +19,6 @@ using Networking;
 // on. Firebase rule needed: "config": { "requiredVersion": { ".read": "auth != null" } }.
 public class CheckVersionModule : MonoBehaviour
 {
-    private const string RequiredVersionPath = "config/requiredVersion";
-
     public GameObject textbox;
     public GameObject button;
     public GameObject buttonExit;
@@ -37,22 +34,10 @@ public class CheckVersionModule : MonoBehaviour
 
     private IEnumerator CheckVersionAndProceed()
     {
-        string requiredVersion = null;
-        bool readFailed = false;
-        yield return FirebaseDb.Get(RequiredVersionPath, token =>
-        {
-            if (token == null)
-            {
-                readFailed = true;
-                return;
-            }
-            requiredVersion = token.Value<string>();
-        });
+        bool isCurrent = false;
+        yield return VersionGate.IsCurrentVersion(result => isCurrent = result);
 
-        // Fail OPEN on a network hiccup or an unset value (e.g. this is a fresh Firebase project
-        // that hasn't had requiredVersion configured yet) rather than locking everyone out over a
-        // transient read failure - but fail CLOSED the moment we get a real answer that differs.
-        if (readFailed || string.IsNullOrEmpty(requiredVersion) || requiredVersion == Application.version)
+        if (isCurrent)
         {
             StartCoroutine(GoToAccount());
             yield break;

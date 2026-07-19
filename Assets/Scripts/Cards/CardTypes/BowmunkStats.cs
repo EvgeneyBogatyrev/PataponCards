@@ -95,7 +95,7 @@ public static class BowmunkStats
         stats.dummyTarget = true;
 
         stats.imagePath = "bowmunk_hq";
-        stats.artistName = "Official render";
+        stats.artistName = "Screenshot from the game";
         return stats;
     }
 }

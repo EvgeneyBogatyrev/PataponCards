@@ -8,7 +8,7 @@ public static class SleepingDustStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.description = "Return target non-Hatapon, non-Kharma unit to its contoller's hand.";
+        stats.description = "Return target non-Hatapon, non-Kharma unit to its controller's hand.";
         stats.name = "Sleeping Dust";
         
         stats.nameSize = 4;

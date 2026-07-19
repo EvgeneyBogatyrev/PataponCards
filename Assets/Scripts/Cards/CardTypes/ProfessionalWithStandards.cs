@@ -9,8 +9,8 @@ public static class ProfessionalWithStandards
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 3;
-        stats.description = "<b>Cycling</b>.\nWhenever you Cycle Questing Beast, your Hatapon loses " + beastDamage.ToString() + " life.";
-        stats.name = "Questing beast";
+        stats.description = "<b>Cycling</b>.\nWhenever you <b>cycle</b> Questing Beast, your Hatapon loses " + beastDamage.ToString() + " life.";
+        stats.name = "Questing Beast";
 
         stats.onPlaySound = "questing_beast";
 

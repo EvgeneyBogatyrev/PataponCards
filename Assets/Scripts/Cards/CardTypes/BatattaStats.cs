@@ -8,7 +8,7 @@ public static class BabattaStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.description = "<b>On play</b>: Replace your hand with 'Babatto Swarm' cards";
+        stats.description = "<b>On play</b>: Replace your hand with 'Babatto Swarm' cards.";
         stats.name = "Babatto";
 
         stats.onPlaySound = "babatto";

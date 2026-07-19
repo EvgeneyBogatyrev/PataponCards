@@ -53,7 +53,7 @@ public static class WooyariStats
         stats.numberOfTargets = 1;
 
         stats.imagePath = "Wooyari_hq";  
-        stats.artistName = "Official render";      
+        stats.artistName = "Screenshot from the game";      
         return stats;
     }
 }

@@ -8,7 +8,7 @@ public static class BuruchStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 9;
-        stats.description = "<b>On play</b>: Destroy target non-Hatapon friendly unit.";
+        stats.description = "<b>On play</b>: Destroy target friendly non-Hatapon unit.";
         stats.name = "Buruch";
         stats.runes.Add(Runes.Shield);
 

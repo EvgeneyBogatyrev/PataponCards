@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -224,12 +225,29 @@ public class FriendsPanelController : MonoBehaviour
         {
             return;
         }
+        StartCoroutine(CheckVersionThenChallenge(friendUid, friendNickname));
+    }
+
+    // Re-checks against Firebase right before actually sending the challenge - a player who
+    // launched successfully and then left the app open never re-checks on their own, so a stale
+    // client could otherwise still challenge a friend hours after a new required version was
+    // published.
+    private IEnumerator CheckVersionThenChallenge(string friendUid, string friendNickname)
+    {
+        bool isCurrent = false;
+        yield return VersionGate.IsCurrentVersion(result => isCurrent = result);
+        if (!isCurrent)
+        {
+            ShowStatus("Your game version is out of date. Please update via the itch.io app, then relaunch.");
+            yield break;
+        }
+
         SetBusy(true);
-        StartCoroutine(FirebaseChallenge.SendChallenge(friendUid, friendNickname, (success, error) =>
+        yield return FirebaseChallenge.SendChallenge(friendUid, friendNickname, (success, error) =>
         {
             SetBusy(false);
             ShowStatus(success ? "Challenge sent to " + friendNickname + "." : error);
-        }));
+        });
     }
 
     private void RemoveFriend(string friendUid)

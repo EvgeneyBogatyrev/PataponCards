@@ -16,7 +16,7 @@ public static class MyamsarStats
 
         stats.onPlaySound = "rapappa";
 
-        stats.additionalRules.Add("If a copy would be summoned with 0 or less power, it is not summoned instead.");
+        stats.additionalRules.Add("If a copy would be summoned with 0 or less power, it is not summoned.");
 
 
         static IEnumerator MyamsarEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
