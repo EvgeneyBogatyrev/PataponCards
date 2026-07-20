@@ -32,7 +32,42 @@ public class Bot
         {
             return;
         }
-        if (botLevel == 2)
+        if (botLevel == 3)
+        {
+            // "Smart Bot" - a midrange curve of vanilla stat-sticks and simple triggered-ability
+            // creatures (no on-play targeting, so it stays compatible with GetNextMove's
+            // single-target PlayCard message - see ChooseCardToPlaySmart for why this level, and
+            // only this level, actually reasons about which of these to play rather than picking
+            // randomly).
+            botDeck = new List<CardTypes>()
+            {
+                CardTypes.Kuwagattan,
+                CardTypes.Kuwagattan,
+                CardTypes.Guardira,
+                CardTypes.Guardira,
+                CardTypes.Dekapon,
+                CardTypes.Dekapon,
+                CardTypes.ZigotonTroops,
+                CardTypes.ZigotonTroops,
+                CardTypes.ZigotonTroops,
+                CardTypes.Moforumo,
+                CardTypes.Moforumo,
+                CardTypes.GongTheHawkeye,
+                CardTypes.GongTheHawkeye,
+                CardTypes.GongTheHawkeye,
+                CardTypes.Tatepon,
+                CardTypes.Tatepon,
+                CardTypes.Tatepon,
+                CardTypes.PanThePakapon,
+                CardTypes.MyamsarHero,
+                CardTypes.MyamsarHero,
+                CardTypes.MyamsarHero,
+                CardTypes.Yaripon,
+                CardTypes.Yaripon,
+                CardTypes.TraitorBoulder,
+            };
+        }
+        else if (botLevel == 2)
         {
             botDeck = new List<CardTypes>()
             {
@@ -136,6 +171,47 @@ public class Bot
             }
         }
         return false;
+    }
+
+    // "Don't overextend" check - if the bot already has enough unblocked power positioned to
+    // threaten the enemy Hatapon directly, and nothing forces it to deal with something else
+    // first (a Lifelink unit blocks all Hatapon damage regardless of how much power is
+    // threatening it, so that always has to be dealt with before Hatapon damage matters at all),
+    // there's no benefit to developing more board - it just attacks with what it already has each
+    // turn instead of dumping its whole hand for no reason.
+    private bool HasEnoughAttackersForHatapon(List<BoardManager.Slot> playerSlots, List<BoardManager.Slot> botSlots)
+    {
+        if (CheckLifelink(playerSlots))
+        {
+            return false;
+        }
+
+        BoardManager.Slot hataponSlot = FindSlotWithCard(playerSlots, CardTypes.Hatapon);
+        if (hataponSlot == null)
+        {
+            return false;
+        }
+
+        int hataponLife = hataponSlot.GetConnectedMinion().GetPower();
+        int threateningPower = 0;
+        foreach (BoardManager.Slot slot in botSlots)
+        {
+            if (slot.GetFree())
+            {
+                continue;
+            }
+            MinionManager minion = slot.GetConnectedMinion();
+            if (!minion.GetCardStats().canDealDamage || minion.GetCardStats().isStatic)
+            {
+                continue;
+            }
+            if (Mathf.Abs(slot.GetIndex() - hataponSlot.GetIndex()) <= 1)
+            {
+                threateningPower += minion.GetPower();
+            }
+        }
+
+        return threateningPower >= hataponLife;
     }
 
     private BoardManager.Slot FindSlotWithCard(List<BoardManager.Slot> slots, CardTypes type)
@@ -498,7 +574,8 @@ public class Bot
         }
 
         // Play card
-        if (!cardPlayed && handManager.GetNumberOfOpponentsCards() > 0 && botHand.Count > 0)
+        if (!cardPlayed && handManager.GetNumberOfOpponentsCards() > 0 && botHand.Count > 0
+            && !HasEnoughAttackersForHatapon(playerSlots, botSlots))
         {
             List<BoardManager.Slot> freeSlots = new List<BoardManager.Slot>();
             foreach (BoardManager.Slot slot in botSlots)
@@ -509,9 +586,22 @@ public class Bot
                 }
             }
 
-            if (freeSlots.Count > 0)
+            // Mirrors CardManager.PlayCard's own firstTurnToPlay gate for the human player
+            // (cards like Kuwagattan/Dekapon are unplayable before their own set turn number) -
+            // the bot's move-picking never went through that method (it's server/message-driven,
+            // not the local click-to-play flow), so nothing was stopping it from dropping a
+            // turn-3-only bomb on turn 1 until now.
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            int botTurnNumber = gameController.gameState.enemyTurnNumber;
+            List<CardTypes> playableHand = botHand.FindAll(card => CardTypeToStats.GetCardStats(card).firstTurnToPlay < botTurnNumber);
+
+            if (freeSlots.Count > 0 && playableHand.Count > 0)
             {
-                CardTypes plyedCard = botHand[UnityEngine.Random.Range(0, botHand.Count)];
+                // Levels below 3 just grab a random card from hand - only Smart Bot (level 3)
+                // actually weighs which one is worth playing (see ChooseCardToPlaySmart).
+                CardTypes plyedCard = botLevel >= 3
+                    ? ChooseCardToPlaySmart(playableHand)
+                    : playableHand[UnityEngine.Random.Range(0, playableHand.Count)];
                 BoardManager.Slot slotToPlay = RateSlotsToPlayCard(playerSlots, botSlots, freeSlots, plyedCard);//freeSlots[UnityEngine.Random.Range(0, freeSlots.Count)];
                 botHand.Remove(plyedCard);
                 BotMove playCardMove = new BotMove();
@@ -527,6 +617,52 @@ public class Bot
         move.endTurn = true;
         botActive = false;
         return move;
+    }
+
+    // Smart Bot's (botLevel 3) card-selection heuristic - the one piece every other bot level
+    // leaves to UnityEngine.Random, which is the main reason they read as "random" rather than
+    // "not very good." This deliberately doesn't look ahead or plan multi-turn combos (that's the
+    // "not perfect, no complex strategy" half of the brief) - it just greedily values each card in
+    // hand right now and plays the best-looking one, the same way a beginner human player would
+    // eyeball their hand rather than calculate.
+    private CardTypes ChooseCardToPlaySmart(List<CardTypes> hand)
+    {
+        CardTypes bestCard = hand[0];
+        float bestScore = float.MinValue;
+        foreach (CardTypes card in hand)
+        {
+            float score = ScoreCardForPlay(card);
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestCard = card;
+            }
+        }
+        return bestCard;
+    }
+
+    private float ScoreCardForPlay(CardTypes card)
+    {
+        CardManager.CardStats stats = CardTypeToStats.GetCardStats(card);
+        float score = stats.power;
+
+        if (stats.hasShield) score += 2f;
+        if (stats.hasGreatshield) score += 3f;
+        if (stats.hasHaste) score += 1.5f;
+        if (stats.flying) score += 1.5f;
+        if (stats.hexproof) score += 1.5f;
+        if (stats.hasOnDeath) score += 1f;
+        if (stats.onAttackEvent != null) score += 1.5f;
+        if (stats.endTurnEvent != null || stats.startTurnEvent != null) score += 1f;
+        if (stats.pacifism) score -= 3f;
+        if (!stats.canAttack) score -= 2f;
+
+        // Small jitter so cards that score identically don't always resolve in the exact same
+        // order every time - keeps ties from feeling robotic without making the overall choice
+        // actually random.
+        score += UnityEngine.Random.Range(-0.05f, 0.05f);
+
+        return score;
     }
 
     private CardTypes DrawCard()

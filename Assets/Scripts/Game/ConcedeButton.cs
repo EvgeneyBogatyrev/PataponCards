@@ -1,41 +1,35 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+// Sole concede entry point (round or match, GameController.RequestConcedeConfirmation picks
+// which based on whose turn it is). A click just opens the Yes/Cancel confirmation banner - no
+// hold-and-grow gesture, no instant concede.
 public class ConcedeButton : MonoBehaviour
 {
+    public UITheme uiTheme;
     private GameController gameController;
-    
+    private SpriteRenderer background;
+
     private bool mouseOver = false;
 
-    private void Start() 
+    private void Start()
     {
         gameController = GameObject.Find("GameController").GetComponent<GameController>();
+        background = GetComponent<SpriteRenderer>();
     }
-    private void Update() 
+
+    private void Update()
     {
         if (mouseOver && Input.GetMouseButtonDown(0))
         {
-            gameController.Concede();
-            StartCoroutine(Bounce());
+            AudioController.PlaySound("click");
+            gameController.RequestConcedeConfirmation();
         }
+
+        WorldButtonSkin.Apply(background, uiTheme, danger: true, hovered: mouseOver, pressed: mouseOver && Input.GetMouseButton(0));
     }
 
-    private IEnumerator Bounce()
-    {
-        //float startTime = Time.time;
-        //while (Time.time - startTime < 1.5f)
-        //{
-        //    float scale = 1f + Mathf.PingPong((Time.time - startTime) * 250f * Time.deltaTime, 1.5f - 1f);
-        //    transform.localScale = new Vector3(scale, scale, 1f);
-        //    yield return new WaitForSeconds(0.005f);
-        //}
-        //transform.localScale = new Vector3(1f, 1f, 1f);
-        yield return null;
-    }
-
-    
     private void OnMouseOver()
     {
         mouseOver = true;
@@ -44,7 +38,4 @@ public class ConcedeButton : MonoBehaviour
     {
         mouseOver = false;
     }
-    
-    
-
 }

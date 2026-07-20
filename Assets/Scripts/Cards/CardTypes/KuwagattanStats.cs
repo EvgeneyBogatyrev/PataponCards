@@ -8,14 +8,16 @@ public class KuwagattanStats : MonoBehaviour
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 15;
-        stats.description = "<b>Hexproof.</b> <b>On attack</b>: Discard your hand.\nThis card cannot be playerd on the first three turns.";
+        stats.power = 12;
+        stats.description = "This card cannot be played on the first three turns.\n<b>On attack</b>: Discard your hand.";
         stats.name = "Kuwagattan";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
 
-        stats.hexproof = true;
+        stats.onPlaySound = "dekaton_kuw";
+
+        //stats.hexproof = true;
         stats.firstTurnToPlay = 3;
 
         static IEnumerator OnAttack(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -23,6 +25,8 @@ public class KuwagattanStats : MonoBehaviour
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             gameController.actionIsHappening = true;
             ShakeScreen _shakeScreen = GameObject.Find("Main Camera").GetComponent<ShakeScreen>();
+
+            AudioController.PlaySound("ground_rumble");
 
             int thisIndex = targets[0];
             BoardManager.Slot thisSlot;

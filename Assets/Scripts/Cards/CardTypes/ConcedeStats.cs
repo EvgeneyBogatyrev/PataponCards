@@ -34,7 +34,7 @@ public static class ConcedeStats
         stats.spell = ConcedeRealization;
         stats.numberOfTargets = 0;
 
-        stats.imagePath = "Hatapon";
+        stats.imagePath = "Hatapon_hq";
 
         return stats;
     }

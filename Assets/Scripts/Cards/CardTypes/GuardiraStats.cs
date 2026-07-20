@@ -11,7 +11,7 @@ public static class GuardiraStats
         const int guardiraPower = 1;
 
         stats.power = 8;
-        stats.description = "<b>Lifelink</b>.\nAlways deals " + guardiraPower.ToString() + " damage regardless of its power.";
+        stats.description = "<b>Lifelink</b>.\nAlways deals " + guardiraPower.ToString() + " damage regardless of his power.";
         stats.name = "Guardira";
         stats.fixedPower = guardiraPower;
         stats.runes.Add(Runes.Shield);
@@ -19,7 +19,9 @@ public static class GuardiraStats
         stats.hasShield = true;
         //stats.hasOnPlay = true;
 
-        stats.additionalRules.Add("Damage prevention effects are still applyed when <i>Guardira's</i> damage is calculated.");
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
+
+        stats.additionalRules.Add("Damage prevention effects are still applied when <i>Guardira's</i> damage is calculated.");
 
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

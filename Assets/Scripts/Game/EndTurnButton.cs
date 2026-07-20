@@ -4,80 +4,47 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+// Ends your turn on click - that's it. Conceding (round or match, with confirmation) lives
+// entirely on ConcedeButton.cs now, not here - a single click can't mean two different things,
+// and the old press-and-hold-to-concede gesture is gone in favor of click + confirmation dialog.
 public class EndTurnButton : MonoBehaviour
 {
     public GameObject gameObject;
+    public UITheme uiTheme;
+    // How much smaller "Opponent's turn" renders relative to "End Turn"'s own authored size -
+    // that string is noticeably longer, so it needs to shrink a bit to fit the same button.
+    public float opponentsTurnFontScale = 0.65f;
     private GameController gameController;
-    
-    private bool mouseOver = false;
-    private float concedeTimer = 0f;
-    private float concedeTimerMax = 3f;
-    private bool concedeMode = false;
-    private float startScaleX;
-    private float startScaleY;
+    private SpriteRenderer background;
+    private TextMeshPro label;
+    private float normalFontSize;
 
-    private void Start() 
+    private bool mouseOver = false;
+
+    private void Start()
     {
-        startScaleX = transform.localScale.x;
-        startScaleY = transform.localScale.y;
         gameController = GameObject.Find("GameController").GetComponent<GameController>();
+        background = GetComponent<SpriteRenderer>();
+        label = gameObject.GetComponent<TextMeshPro>();
+        normalFontSize = label.fontSize;
     }
-    private void Update() 
+
+    private void Update()
     {
-        if (mouseOver && Input.GetMouseButtonUp(0) && !concedeMode)
+        if (mouseOver && Input.GetMouseButtonUp(0))
         {
+            AudioController.PlaySound("click");
             gameController.EndTurnButton();
             mouseOver = false;
-            //StartCoroutine(Bounce());
         }
 
-        if (mouseOver && Input.GetMouseButton(0))
-        {
-            concedeTimer += Time.deltaTime;
-            if (concedeTimer >= concedeTimerMax)
-            {
-                gameController.Concede();
-                concedeTimer = 0f;
-            }
-            if (concedeTimer > 0.5f)
-            {
-                concedeMode = true;
-            }
-        }
-        else
-        {
-            concedeTimer = 0f;
-            concedeMode = false;
-            transform.localScale = new Vector3(startScaleX, startScaleY, 1f);
-        }
+        bool opponentsTurn = !GameController.playerTurn;
+        label.text = opponentsTurn ? "Opponent's turn" : "End Turn";
+        label.fontSize = opponentsTurn ? normalFontSize * opponentsTurnFontScale : normalFontSize;
 
-        if (concedeMode)
-        {
-            gameObject.GetComponent<TextMeshPro>().text = "CONCEDE";
-            float scale = 1f + concedeTimer / concedeTimerMax * 0.5f;
-            transform.localScale = new Vector3(startScaleX * scale, startScaleY * scale, 1f);
-        }
-        else
-        {
-            gameObject.GetComponent<TextMeshPro>().text = "End Turn";
-        }
-        
+        WorldButtonSkin.Apply(background, uiTheme, danger: false, hovered: mouseOver, pressed: mouseOver && Input.GetMouseButton(0));
     }
 
-    private IEnumerator Bounce()
-    {
-        //float startTime = Time.time;
-        //while (Time.time - startTime < 1.5f)
-        //{
-        //    float scale = 1f + Mathf.PingPong((Time.time - startTime) * 250f * Time.deltaTime, 1.5f - 1f);
-        //    transform.localScale = new Vector3(scale, scale, 1f);
-        //    yield return new WaitForSeconds(0.005f);
-        //}
-        //transform.localScale = new Vector3(1f, 1f, 1f);
-        yield return null;
-    }
-
-    
     private void OnMouseOver()
     {
         mouseOver = true;
@@ -86,7 +53,4 @@ public class EndTurnButton : MonoBehaviour
     {
         mouseOver = false;
     }
-    
-    
-
 }

@@ -8,7 +8,7 @@ public static class DeepImpactStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         const int horsePower = 3;
-        stats.description = "Transform target non-Hatapon unit into the Horserider with " + horsePower.ToString() + " and <b>Haste</b>.\nIf it was your unit, draw a card.";
+        stats.description = "Transform target non-Hatapon unit into a Horserider with " + horsePower.ToString() + " power and <b>Haste</b>.\nIf it was your unit, draw a card.";
         stats.name = "Bullgam the Bully";
         stats.nameSize = 4;
         stats.descriptionSize = 3;
@@ -60,15 +60,19 @@ public static class DeepImpactStats
             targetSlot.GetConnectedMinion().DestroySelf(unattach:true);
             boardManager.PlayCard(newCard, new Vector3(0f, 0f, 0f), slot, destroy: true, record: false);
 
-            if (!opp && target > 0)
+            // Target sign is always relative to the caster (target > 0 = caster's own unit),
+            // regardless of which client is processing this - so "caster drew a card" is always
+            // target > 0; only which hand (mine or the opponent's) receiving it depends on opp.
+            if (target > 0)
             {
-                //HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.DrawCard();
-            }
-            else if (opp && target < 0)
-            {
-                //HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
-                handManager.DrawCardOpponent();
+                if (!opp)
+                {
+                    handManager.DrawCard();
+                }
+                else
+                {
+                    handManager.DrawCardOpponent();
+                }
             }
             
             gameController.actionIsHappening = false;
@@ -117,6 +121,8 @@ public static class HorseriderStats
         stats.description = "<b>Haste</b>.";
         stats.name = "Horserider";
         stats.runes.Add(Runes.Spear);
+
+        stats.onPlaySound = "kibapon";
 
         stats.hasHaste = true;
 

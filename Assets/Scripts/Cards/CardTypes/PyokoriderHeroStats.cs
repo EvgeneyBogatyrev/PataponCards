@@ -16,6 +16,8 @@ public static class PyokoriderHeroStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
+        stats.onPlaySound = "kibapon";
+
         stats.nameSize = 4;
 
 
@@ -24,6 +26,9 @@ public static class PyokoriderHeroStats
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             gameController.actionIsHappening = true;
             MinionManager thisMinion = friendlySlots[index].GetConnectedMinion();
+
+            AudioController.PlaySound("pyokorider_hm");
+            yield return new WaitForSeconds(1f);
 
             MinionManager connectedMinion = null;
             foreach (BoardManager.Slot slot in enemySlots)
@@ -86,14 +91,13 @@ public static class PyokoriderHeroStats
                 }
                 gameController.actionIsHappening = false;
             }
-            //GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
-            //gameController.actionIsHappening = false;
+            gameController.actionIsHappening = false;
             yield return null;
         }
         stats.endTurnEvent = PyokoriderHeroEndTurn;
 
-        stats.imagePath = "pyokorider_hero";
-        stats.artistName = "Official render";
+        stats.imagePath = "Pyoko_hq";
+        stats.artistName = "Screenshot from the game";
 
         return stats;
     }

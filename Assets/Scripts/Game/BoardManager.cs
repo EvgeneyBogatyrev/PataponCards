@@ -99,6 +99,7 @@ public class BoardManager : MonoBehaviour
         public void SetConnectedMinion(MinionManager min)
         {
             connectedMinion = min;
+            SetFree(min == null);
         }
     }
 
@@ -199,6 +200,16 @@ public class BoardManager : MonoBehaviour
         AudioController.PlaySound(card.GetCardStats().onPlaySound);
 
         slot.SetConnectedMinion(newMinion.GetComponent<MinionManager>());
+
+        // "Card played" (creature half - the spell half fires from GameController.ApplyEffect's
+        // CastSpell case instead) + "unit enters" broadcast triggers - unconditional on `record`
+        // so a locally-played creature and an opponent's replayed one both fire identically. A
+        // creature firing both triggers in the same moment is intentional - they answer different
+        // questions ("was any card played" vs "did a unit enter").
+        MinionManager playedMinion = newMinion.GetComponent<MinionManager>();
+        gameController.FireCardPlayedTrigger(card.GetCardType(), false, slot.GetFriendly());
+        gameController.FireUnitEntersTrigger(slot.GetIndex(), card.GetCardType(), slot.GetFriendly(), playedMinion);
+
         if (fromHand && card.GetCardStats().hasAfterPlayEvent)
         {
             int index;
@@ -446,6 +457,7 @@ public class BoardManager : MonoBehaviour
         newCard.transform.position = new Vector3(0f, 10f, 0f);
         newCard.destroyTimer = HandManager.cardDestroyTimer;
 
+        AudioController.PlaySound("fatigue");
         hatapon.LoseLife(amount);
     }
 
@@ -470,6 +482,36 @@ public class BoardManager : MonoBehaviour
         }
         lastDeadOpponent = CardTypes.Hatapon;
         lastDeadYou = CardTypes.Hatapon;
+    }
+
+    // Toggles every currently-connected minion's own Collider on/off - used while a
+    // CardInfoManager popup (the right-click card preview) is open, so its relevant-card repr
+    // icons - which can render at any screen position, not just clear of the board - never lose
+    // a mouse raycast to a minion's much larger BoxCollider sitting at a competing depth. Minions
+    // are already non-interactive while a popup is open (see CursorController.CursorStates.Select
+    // gating throughout MinionManager), so this just removes a stale raycast target rather than
+    // changing any actual gameplay behavior.
+    public void SetAllMinionCollidersEnabled(bool colliderEnabled)
+    {
+        SetSlotColliders(friendlySlots, colliderEnabled);
+        SetSlotColliders(enemySlots, colliderEnabled);
+    }
+
+    private void SetSlotColliders(List<Slot> slots, bool colliderEnabled)
+    {
+        foreach (Slot slot in slots)
+        {
+            MinionManager minion = slot.GetConnectedMinion();
+            if (minion == null)
+            {
+                continue;
+            }
+            Collider minionCollider = minion.GetComponent<Collider>();
+            if (minionCollider != null)
+            {
+                minionCollider.enabled = colliderEnabled;
+            }
+        }
     }
 }
 

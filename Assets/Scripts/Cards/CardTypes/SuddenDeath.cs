@@ -9,7 +9,7 @@ public static class FatiqueStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.description = "<i>After ten turns both Hatapons start to take damage at the start of the turn.</i>";
-        stats.name = "Fatique!";
+        stats.name = "Fatigue!";
 
         //stats.nameSize = 4;
 

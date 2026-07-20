@@ -7,7 +7,7 @@ public static class WebStats
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-        const int gain = 3;
+        const int gain = 2;
         stats.power = 1;
         stats.description = "<b>Pacifism.\nOn play</b>: Give all friendly units +" + gain.ToString() + " power.\n<b>On death</b>: Draw a card.";
         stats.name = "Wep";
@@ -18,6 +18,8 @@ public static class WebStats
 
         stats.hasOnPlaySpell = true;
         stats.hasOnDeath = true;
+
+        stats.onPlaySound = "bent_compas";
 
         static IEnumerator OnPlay(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

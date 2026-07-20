@@ -10,11 +10,13 @@ public static class PyokoriderStats
 
         const int pyokoriderStartTurnPower = 2;
 
-        stats.power = 6;
+        stats.power = 5;
         stats.description = "<b>Haste.\nOn attack</b>: Reduce this unit's power by 1 (can't be below 1).";
         stats.name = "Ladodon";
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
+
+        stats.onPlaySound = "kibapon";
 
         static IEnumerator PyokoriderStartTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {

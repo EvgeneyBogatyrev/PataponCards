@@ -8,9 +8,8 @@ public static class BuruchStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 9;
-        stats.description = "<b>On play</b>: Destroy target friendly unit.";
+        stats.description = "<b>On play</b>: Destroy target friendly non-Hatapon unit.";
         stats.name = "Buruch";
-        stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Shield);
 
 
@@ -43,9 +42,13 @@ public static class BuruchStats
             yield return null;               
         }
 
-        static bool BuruchCheckTarget(int _target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
+        static bool BuruchCheckTarget(int target, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
-            if (_target < 0)
+            if (target < 0)
+            {
+                return false;
+            }
+            if (friendlySlots[target - 1].GetConnectedMinion().GetCardType() == CardTypes.Hatapon)
             {
                 return false;
             }
@@ -69,6 +72,7 @@ public static class BuruchStats
         stats.checkSpellTargets = BuruchCheckTargets;
         stats.numberOfTargets = 1;
         stats.imagePath = "buruch_hq";
+        stats.onPlaySound = "dekaton_regular";
 
         return stats;
     }

@@ -14,6 +14,8 @@ public static class IdiotStats
         stats.name = "Bent Compass";
         stats.pacifism = true;
 
+        stats.onPlaySound = "bent_compas";
+
         static IEnumerator FuckingIdiotStartTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             if (!enemySlots[0].GetFriendly())
@@ -32,8 +34,8 @@ public static class IdiotStats
 
         stats.startTurnEvent = FuckingIdiotStartTurn;
 
-        stats.imagePath = "bent_compass";
-        stats.artistName = "Official render";
+        stats.imagePath = "bent_compass_hq";
+        stats.artistName = "Evgeney Bogatyrev";
         return stats;
     }
 }

@@ -1,49 +1,27 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class CollectionButton : MonoBehaviour
 {
+    public UITheme uiTheme;
     private CollectionControl collection;
-    
+    private SpriteRenderer background;
+
     public bool mouseOver = false;
 
     public int status = -1;
 
-    private float holdTime = 0f;
-    private float holdTimeMax = 1.5f;
-
-    private float startScaleX;
-    private float startScaleY;
-
-    private void Start() 
+    private void Start()
     {
         collection = GameObject.Find("Collection").GetComponent<CollectionControl>();
-        startScaleX = transform.localScale.x;
-        startScaleY = transform.localScale.y;
+        background = GetComponent<SpriteRenderer>();
     }
-    private void Update() 
+    private void Update()
     {
-        if (status == 3 && mouseOver && Input.GetMouseButton(0))
-        {
-            holdTime += Time.deltaTime;
-            float scale = 1f + holdTime / holdTimeMax * 0.5f;
-            transform.localScale = new Vector3(startScaleX * scale, startScaleY * scale, 1f);
-           
-            if (holdTime > holdTimeMax) 
-            {
-                collection.DeleteButton();
-            }
-        }
-        else
-        {
-            holdTime = 0f;
-            transform.localScale = new Vector3(startScaleX, startScaleY, 1f);
-        }
-
         if (mouseOver && Input.GetMouseButtonDown(0))
         {
+            AudioController.PlaySound("click");
             switch (status)
             {
                 case 0:
@@ -57,27 +35,22 @@ public class CollectionButton : MonoBehaviour
                 case 2:
                     collection.BackButton();
                     break;
-                
+
+                case 3:
+                    // Delete-deck - opens a Yes/Cancel confirmation instead of deleting on the
+                    // spot (used to require a press-and-hold instead).
+                    collection.RequestDeckDeleteConfirmation();
+                    break;
+
                 default:
                     break;
             }
         }
+
+        // status 3 is the delete-deck button - skin it as a danger action.
+        WorldButtonSkin.Apply(background, uiTheme, danger: status == 3, hovered: mouseOver, pressed: mouseOver && Input.GetMouseButton(0));
     }
 
-    private IEnumerator Bounce()
-    {
-        //float startTime = Time.time;
-        //while (Time.time - startTime < 1.5f)
-        //{
-        //    float scale = 1f + Mathf.PingPong((Time.time - startTime) * 250f * Time.deltaTime, 1.5f - 1f);
-        //    transform.localScale = new Vector3(scale, scale, 1f);
-        //    yield return new WaitForSeconds(0.005f);
-        //}
-        //transform.localScale = new Vector3(1f, 1f, 1f);
-        yield return null;
-    }
-
-    
     private void OnMouseOver()
     {
         mouseOver = true;
@@ -86,7 +59,4 @@ public class CollectionButton : MonoBehaviour
     {
         mouseOver = false;
     }
-    
-    
-
 }

@@ -9,11 +9,15 @@ public class VenomistStats : MonoBehaviour
         CardManager.CardStats stats = new CardManager.CardStats();
         const int aoeDamage = 2;
         stats.name = "Venomist";
-        stats.description = "Deal " + aoeDamage.ToString() + " damage to all units. Summon a poisonous Mushroom on place of every one who died.";
+        stats.description = "Deal " + aoeDamage.ToString() + " damage to all non-Hatapon units. Summon a poisonous Mushroom in place of each unit that died.";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
         //stats.legendary = true;
+
+        stats.additionalKeywords.Add("Poison");
+
+        stats.relevantCards.Add(CardTypes.Mushroom);
 
         stats.isSpell = true;
         static IEnumerator realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

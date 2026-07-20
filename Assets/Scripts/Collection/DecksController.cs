@@ -38,14 +38,14 @@ public class DecksController : MonoBehaviour
                 if (DeckLoadManager.roomToGo == "Collection")
                 {
                     GameObject _deckSlot = Instantiate(deckSlotPrefab, new Vector3(curX, curY, 0f), Quaternion.identity);
-                    _deckSlot.GetComponent<DeckSlotManager>().Customize(null, i, "New Deck");
+                    _deckSlot.GetComponent<DeckSlotManager>().Customize(null, i, SaveSystem.NewDeckName);
                     _deckSlot.GetComponent<DeckSlotManager>().deckCountObject.SetActive(false);
                 }
                 break;
             }
             
             GameObject deckSlot = Instantiate(deckSlotPrefab, new Vector3(curX, curY, 0f), Quaternion.identity);
-            deckSlot.GetComponent<DeckSlotManager>().Customize(runes, i);
+            deckSlot.GetComponent<DeckSlotManager>().Customize(runes, i, SaveSystem.LoadDeckName(i));
             
             curX += shiftX;
             //curY += shiftY;

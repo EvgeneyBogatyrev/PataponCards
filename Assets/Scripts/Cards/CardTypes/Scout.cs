@@ -8,15 +8,17 @@ public static class ScoutStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 2;
-        stats.description = "<b>End of turn</b>: Draw a card. Your Hatapon loses 1 life.";
-        stats.name = "Megapon";
-        stats.imagePath = "Megapon";
+        stats.power = 1;
+        stats.description = "<b>End of turn</b>: Draw a card. Your Hatapon loses 2 life.";
+        stats.name = "Megaton";
+        stats.imagePath = "Megaton_hq";
         
         stats.runes.Add(Runes.Bow);
-        //stats.runes.Add(Runes.Bow);
+        stats.runes.Add(Runes.Bow);
 
-        stats.additionalRules.Add("Damage happens even if you didn't draw a card for any reason.");
+        stats.onPlaySound = "zigoton_" + UnityEngine.Random.Range(1, 3);
+
+        stats.additionalRules.Add("Damage is dealt even if you didn't draw a card for any reason.");
 
 
         static IEnumerator EndTurn(int thisIndex, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -24,6 +26,8 @@ public static class ScoutStats
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>(); 
             gameController.actionIsHappening = true;
             AnimationManager animationManager = GameObject.Find("GameController").GetComponent<AnimationManager>();
+
+            AudioController.PlaySound("megapon_sound");
 
             int cardsDrawn = 0;
 
@@ -72,7 +76,7 @@ public static class ScoutStats
                     }
 
                     soundMain.DestroySelf();
-                    minion_.DealDamageToThis(1);
+                    minion_.DealDamageToThis(2);
                     break;
                 }
             }
@@ -81,7 +85,7 @@ public static class ScoutStats
             yield return null;
         }
         stats.endTurnEvent = EndTurn;
-        stats.artistName = "Official render";
+        stats.artistName = "Screenshot from the game";
 
         return stats;
     }

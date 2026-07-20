@@ -16,6 +16,8 @@ public static class TraitorBoulderStats
         //stats.hasGreatshield = true;
 
         //stats.nameSize = 4;
+
+        stats.onPlaySound = "rock_sound";
        
 
         static IEnumerator OnPlay(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -78,7 +80,7 @@ public static class TraitorBoulderStats
         stats.hasAfterPlayEvent = true;
         stats.afterPlayEvent = OnPlay;
 
-        stats.imagePath = "rock_hq";
+        stats.imagePath = "the_rock";
 
         return stats;
     }

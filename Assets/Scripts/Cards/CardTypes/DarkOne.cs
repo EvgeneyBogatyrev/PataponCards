@@ -8,8 +8,8 @@ public static class DarkOneStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 2;
-        stats.description = "<b>Start of turn</b>: Discard the top card of your library. If it's a spell, transform into Kiba form. Otherwise, transform into Bird form.";
+        stats.power = 3;
+        stats.description = "<b>Start of turn</b>: Discard the top card of your library. If it is a spell, transform this unit into <i>Kiba form</i>. Otherwise, transform it into <i>Bird form</i>.";
         stats.name = "The Dark One";
 
         stats.descriptionSize = 3;
@@ -19,6 +19,8 @@ public static class DarkOneStats
 
         stats.relevantCards.Add(CardTypes.KibaForm);
         stats.relevantCards.Add(CardTypes.BirdForm);
+
+        stats.onPlaySound = "dark_one";
 
         static IEnumerator Realization(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -89,7 +91,7 @@ public static class DarkOneStats
 
         stats.startTurnEvent = Realization;
        
-        stats.imagePath = "dark_one_hq";
+        stats.imagePath = "Dark_One_hq";
         return stats;
     }
 }
@@ -102,15 +104,14 @@ public static class BirdFormStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 4;
-        stats.description = "Can't be attacked by units.";
+        stats.description = "Cannot be attacked by units.";
         stats.name = "Bird Form";
         stats.runes.Add(Runes.Spear);
-        //stats.runes.Add(Runes.Spear);
-        //stats.runes.Add(Runes.Spear);
 
         stats.flying = true;
 
-        stats.imagePath = "bird_form_hq";
+        stats.imagePath = "Bird_form_hq";
+        stats.onPlaySound = "bird_form";
         return stats;
     }
 }
@@ -128,7 +129,8 @@ public static class KibaFormStats
         stats.hasHaste = true;
         stats.runes.Add(Runes.Spear);
         
-        stats.imagePath = "kiba_form";
+        stats.imagePath = "Kiba_form_hq";
+        stats.onPlaySound = "kiba_form";
         return stats;
     }
 }

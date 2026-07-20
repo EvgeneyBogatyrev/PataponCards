@@ -6,16 +6,25 @@ using UnityEngine.SceneManagement;
 
 public class BackToMenuButton : MonoBehaviour
 {
-       
+    public UITheme uiTheme;
+    private SpriteRenderer background;
+
     private bool mouseOver = false;
 
+    private void Start()
+    {
+        background = GetComponent<SpriteRenderer>();
+    }
 
-    private void Update() 
+    private void Update()
     {
         if (mouseOver && Input.GetMouseButtonDown(0))
         {
+            AudioController.PlaySound("click");
             SceneManager.LoadScene("MainMenu");
         }
+
+        WorldButtonSkin.Apply(background, uiTheme, danger: false, hovered: mouseOver, pressed: mouseOver && Input.GetMouseButton(0));
     }
 
 

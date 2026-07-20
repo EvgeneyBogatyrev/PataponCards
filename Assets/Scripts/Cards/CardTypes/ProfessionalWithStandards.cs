@@ -9,8 +9,10 @@ public static class ProfessionalWithStandards
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         stats.power = 3;
-        stats.description = "<b>Cycling</b>.\nWhenever you Cycle Questing Beast, your Hatapon loses " + beastDamage.ToString() + " life.";
-        stats.name = "Questing beast";
+        stats.description = "<b>Cycling</b>.\nWhenever you <b>cycle</b> Questing Beast, your Hatapon loses " + beastDamage.ToString() + " life.";
+        stats.name = "Questing Beast";
+
+        stats.onPlaySound = "questing_beast";
 
         static void ProfessionalWIthStandardsDeathrattle(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots, CardManager.CardStats thisStats)
         {
@@ -48,7 +50,7 @@ public static class ProfessionalWithStandards
         //stats.onDeathEvent = ProfessionalWIthStandardsDeathrattle;
         stats.cycling = true;
 
-        stats.imagePath = "questing_beast";
+        stats.imagePath = "questing_beast_hq";
         stats.artistName = "Unused game assets";
         return stats;
     }

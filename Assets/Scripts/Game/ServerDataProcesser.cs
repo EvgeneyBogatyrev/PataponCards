@@ -4,21 +4,20 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.Linq;
 using System;
+using Newtonsoft.Json.Linq;
+using Networking;
 
 
 public class ServerDataProcesser : MonoBehaviour
 {
     public static ServerDataProcesser instance;
-    
-    private string BASE_URL = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSduAm0qxm9BoCbLBGjvCsHXgT303MOgX04oVumEYn-sNaPMEQ/formResponse";
-    private string GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwHlf0DxUjBKb3blzMbawD3Yn1FfPp9unN8Ho5LGb_DQoc1YcvwhhHaS9hM1FLhMYxk/exec";
 
     private BoardManager boardManager;
 
     public int messageId = 0;
     public List<MessageFromServer> doneActions = new List<MessageFromServer>();
     public List<MessageFromServer> messagesFromServer;
-    public float secondsBetweenServerUpdates = 5f;
+    public float secondsBetweenServerUpdates = 1.5f;
     public Bot bot = null;
     
     private void Awake() 
@@ -35,11 +34,62 @@ public class ServerDataProcesser : MonoBehaviour
         } 
     }
 
-    private void Start() 
+    private void Start()
     {
         bot = new Bot();
         bot.botLevel = InfoSaver.botLevel;
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
+        if (InfoSaver.onlineBattle)
+        {
+            StartCoroutine(RegisterInMatch());
+            StartCoroutine(FetchOpponentNickname());
+        }
+    }
+
+    // "Opponent" until FetchOpponentNickname resolves - shown as a placeholder in the meantime.
+    public string OpponentNickname = "Opponent";
+
+    private IEnumerator FetchOpponentNickname()
+    {
+        while (true)
+        {
+            JToken token = null;
+            yield return FirebaseDb.Get("matches/" + MatchId() + "/nicknames/" + InfoSaver.opponentHash, t => token = t);
+            if (token != null && token.Type != JTokenType.Null)
+            {
+                OpponentNickname = token.ToString();
+                yield break;
+            }
+            yield return new WaitForSeconds(2f);
+        }
+    }
+
+    // Matches are keyed by the two players' hashes so both sides land on the same path
+    // without needing a server-assigned id.
+    public static string MatchId()
+    {
+        int a = Mathf.Min(InfoSaver.myHash, InfoSaver.opponentHash);
+        int b = Mathf.Max(InfoSaver.myHash, InfoSaver.opponentHash);
+        return a + "_" + b;
+    }
+
+    private bool matchRegistered = false;
+
+    // True whenever we can see a later opponent action but are still missing an earlier one -
+    // used by GameController to show a "waiting for opponent" banner and to pause the
+    // AFK-victory timer instead of misprocessing out-of-order actions.
+    public bool HasUnresolvedGap { get; private set; }
+
+    // Registers our uid under the match so security rules can scope read/write access to it.
+    // Post() waits on matchRegistered so no action can race ahead of this write.
+    private IEnumerator RegisterInMatch()
+    {
+        yield return FirebaseDb.EnsureSignedIn();
+        yield return FirebaseDb.Put("matches/" + MatchId() + "/players/" + FirebaseConfig.Uid, true);
+        // Keyed by matchmaking hash (not uid) so the opponent can look it up without needing to
+        // resolve our Firebase identity - they already know our hash from matchmaking.
+        yield return FirebaseDb.Put("matches/" + MatchId() + "/nicknames/" + InfoSaver.myHash, PlayerProfile.Nickname);
+        matchRegistered = true;
     }
 
     public void PlayCard(CardManager card, BoardManager.Slot slot)
@@ -146,30 +196,42 @@ public class ServerDataProcesser : MonoBehaviour
         StartCoroutine(Post("1", "ping", UnityEngine.Random.Range(0, 99999).ToString(), ""));
     }
 
+    // Conceding on the opponent's turn ends the whole match immediately (not just the round) -
+    // there's no "next round" left afterward, so there's nothing for an in-flight opponent
+    // action to race against.
+    public void ConcedeMatch()
+    {
+        StartCoroutine(Post("1", "concede match", "", ""));
+    }
+
     IEnumerator Post(string key, string action, string cardIdx, string targets)
     {
         if (!InfoSaver.onlineBattle)
         {
+            yield break;
+        }
+
+        if (GameObject.Find("GameController").GetComponent<GameController>().desyncDetected)
+        {
+            yield break;
+        }
+
+        while (!matchRegistered)
+        {
             yield return null;
         }
-        WWWForm form = new WWWForm();
-        form.AddField("entry.107701670", "$" + InfoSaver.myHash.ToString() + "@" + messageId.ToString() + "$");
-        form.AddField("entry.967178439", "$" + action + "$");
-        form.AddField("entry.1929307381", "$" + cardIdx + "$");
-        form.AddField("entry.790727074", "$" + targets + "$");
+
+        JObject payload = new JObject
+        {
+            ["hash"] = InfoSaver.myHash,
+            ["index"] = messageId,
+            ["action"] = action,
+            ["cardIdx"] = cardIdx,
+            ["targets"] = targets
+        };
         messageId += 1;
 
-        using (UnityWebRequest www = UnityWebRequest.Post(BASE_URL, form))
-        {
-            yield return www.SendWebRequest();
-
-            if (www.result != UnityWebRequest.Result.Success)
-            {
-                Debug.Log(www.error);
-            }
-        }
-
-        yield return new WaitForSeconds(1);  
+        yield return FirebaseDb.Post("matches/" + MatchId() + "/actions", payload);
     }
 
     public IEnumerator ProcessMessages(List<MessageFromServer> messages)
@@ -194,8 +256,8 @@ public class ServerDataProcesser : MonoBehaviour
                 }
                 else
                 {
-                    if (messageIndex < messages.Count() - 1 && 
-                        messages[messageIndex + 1].cardIndex == messages[messageIndex].cardIndex && 
+                    if (messageIndex < messages.Count() - 1 &&
+                        messages[messageIndex + 1].cardIndex == messages[messageIndex].cardIndex &&
                         messages[messageIndex + 1].action == MessageFromServer.Action.PlayCard)
                     {
                         MessageFromServer newMessage = new MessageFromServer
@@ -210,8 +272,14 @@ public class ServerDataProcesser : MonoBehaviour
                         };
 
                         processedMessages.Add(newMessage);
+                        // Only skip the next raw message when we actually consumed it as this
+                        // card's paired PlayCard - otherwise leave messageIndex alone.
+                        messageIndex += 1;
                     }
-                    messageIndex += 1;
+                    // else: this CastSpell's paired PlayCard hasn't arrived in this batch yet.
+                    // Leave it unprocessed (not added to doneActions) so the whole pair gets
+                    // retried together on a later poll once the companion shows up - do not
+                    // add it standalone and do not skip whatever message follows it.
                 }
 
                 _newCard.DestroyCard();
@@ -242,6 +310,84 @@ public class ServerDataProcesser : MonoBehaviour
             
             CardTypes spellType;
             gameController.ReceivePing();
+
+            if (message.action == MessageFromServer.Action.CastOnPlayCard)
+            {
+                // Contains a yield (waits for the board to be clear), which C# does not allow
+                // inside a try/catch - the contiguous-ordering gate in ObtainData() is the
+                // primary defense against this case ever running against inconsistent state.
+                if (newCard != null)
+                {
+                    if (newCard.arrowList != null)
+                    {
+                        foreach (Arrow arrow in newCard.arrowList)
+                        {
+                            arrow.DestroyArrow();
+                        }
+                        newCard.arrowList = null;
+                    }
+                }
+                handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
+                boardManager.battlecryTrigger = true;
+                spellType = message.cardIndex;
+                boardManager.playedCardsOpponent.Add(spellType);
+                LogController.instance.AddPlayCardToLog(spellType, message.targets, false);
+                newCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                if (newCard.GetCardStats().dummyTarget)
+                {
+                    newCard.spellTargets = message.targets.GetRange(1, message.targets.Count - 1);
+                }
+                else
+                {
+                    newCard.spellTargets = message.targets;
+                }
+                HandManager.DestroyDisplayedCards();
+                newCard.SetCardState(CardManager.CardState.opponentPlayed);
+                newCard.transform.position = new Vector3(0f, 10f, 0f);
+                newCard.destroyTimer = HandManager.cardDestroyTimer;
+
+                QueueData _newEvent = new();
+                _newEvent.actionType = QueueData.ActionType.CastSpell;
+                _newEvent.thisStats = newCard.GetCardStats();
+                _newEvent.hostCard = newCard;
+                _newEvent.targets = message.targets;
+                _newEvent.friendlySlots = boardManager.enemySlots;
+                _newEvent.enemySlots = boardManager.friendlySlots;
+                GameController.eventQueue.Insert(0, _newEvent);
+                // Cast spell
+                //StartCoroutine(newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots));
+
+                if (message.creatureTarget > 0)
+                {
+                    message.creatureTarget -= 1;
+                    fromSlot = boardManager.enemySlots[message.creatureTarget];
+                }
+                else
+                {
+                    message.creatureTarget = (-1 * message.creatureTarget) - 1;
+                    fromSlot = boardManager.friendlySlots[message.creatureTarget];
+                }
+
+                CardManager playedCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+                playedCard.transform.position = fromSlot.GetPosition();
+                playedCard.SetCardState(CardManager.CardState.alreadyPlayed);
+                while (!GameController.CanPerformActions())
+                {
+                    yield return new WaitForSeconds(0.3f);
+                }
+
+                boardManager.PlayCard(newCard, fromSlot.GetPosition(), fromSlot, destroy: false, record: false);
+                playedCard.DestroyCard();
+
+                boardManager.battlecryTrigger = false;
+
+                doneActions.Add(message);
+                yield return new WaitForSeconds(2f);
+                continue;
+            }
+
+            try
+            {
             switch (message.action)
             {
                 case MessageFromServer.Action.EndTurn:
@@ -336,7 +482,12 @@ public class ServerDataProcesser : MonoBehaviour
                         toMinion =boardManager.friendlySlots[to - 1].GetConnectedMinion();
                     }
                     fromMinion.Attack(toMinion);
-                    fromMinion.SetCanAttack(false);
+                    // Not SetCanAttack(false) - that resets attacked/moved as a side effect,
+                    // which would silently erase the attacked=true this same Attack() call just
+                    // set (e.g. breaking Robopon's "didn't attack this turn" end-of-turn check
+                    // on the receiving client only). The local attack flow in MinionManager.cs
+                    // uses SetAbilityToAttack(false) for exactly this reason - match it here.
+                    fromMinion.SetAbilityToAttack(false);
                     break;
                 case MessageFromServer.Action.CastSpell:
                     if (newCard != null)
@@ -383,76 +534,6 @@ public class ServerDataProcesser : MonoBehaviour
                         newCard.transform.position = boardManager.enemySlots[message.targets[0] - 1].GetPosition();
                         newCard.transform.localScale = new Vector3(0.2f, 0.2f, 1f);
                     }
-                    break;
-
-                case MessageFromServer.Action.CastOnPlayCard:
-                    if (newCard != null)
-                    {
-                        if (newCard.arrowList != null)
-                        {
-                            foreach (Arrow arrow in newCard.arrowList)
-                            {
-                                arrow.DestroyArrow();
-                            }
-                            newCard.arrowList = null;
-                        }
-                    }
-                    handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
-                    boardManager.battlecryTrigger = true;
-                    spellType = message.cardIndex;
-                    boardManager.playedCardsOpponent.Add(spellType);
-                    LogController.instance.AddPlayCardToLog(spellType, message.targets, false);
-                    newCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
-                    if (newCard.GetCardStats().dummyTarget)
-                    {
-                        newCard.spellTargets = message.targets.GetRange(1, message.targets.Count - 1);
-                    }
-                    else
-                    {
-                        newCard.spellTargets = message.targets;
-                    }
-                    HandManager.DestroyDisplayedCards();
-                    newCard.SetCardState(CardManager.CardState.opponentPlayed);
-                    newCard.transform.position = new Vector3(0f, 10f, 0f);
-                    newCard.destroyTimer = HandManager.cardDestroyTimer;
-
-                    QueueData _newEvent = new();
-                    _newEvent.actionType = QueueData.ActionType.CastSpell;
-                    _newEvent.thisStats = newCard.GetCardStats();
-                    _newEvent.hostCard = newCard;
-                    _newEvent.targets = message.targets;
-                    _newEvent.friendlySlots = boardManager.enemySlots;
-                    _newEvent.enemySlots = boardManager.friendlySlots;
-                    GameController.eventQueue.Insert(0, _newEvent);
-                    // Cast spell
-                    //StartCoroutine(newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots));
-
-                    if (message.creatureTarget > 0)
-                    {
-                        message.creatureTarget -= 1;
-                        fromSlot = boardManager.enemySlots[message.creatureTarget];
-                    }
-                    else
-                    {
-                        message.creatureTarget = (-1 * message.creatureTarget) - 1;
-                        fromSlot = boardManager.friendlySlots[message.creatureTarget];
-                    }
-
-                    CardManager playedCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
-                    playedCard.transform.position = fromSlot.GetPosition();
-                    playedCard.SetCardState(CardManager.CardState.alreadyPlayed);
-                    while (!GameController.CanPerformActions())
-                    {
-                        yield return new WaitForSeconds(0.3f);
-                    }
-                    
-                    boardManager.PlayCard(newCard, fromSlot.GetPosition(), fromSlot, destroy: false, record: false);
-                    playedCard.DestroyCard();
-
-                    
-
-                    boardManager.battlecryTrigger = false;
-                    
                     break;
 
                 case MessageFromServer.Action.NumberOfCards:
@@ -569,10 +650,23 @@ public class ServerDataProcesser : MonoBehaviour
 
                 case MessageFromServer.Action.Ping:
                     break;
+
+                case MessageFromServer.Action.ConcedeMatch:
+                    // The opponent conceded the whole match (they triggered this on their own
+                    // turn's opposite side, i.e. during ours) - we win outright, no more rounds.
+                    gameController.StartCoroutine(gameController.EndGame(true));
+                    break;
+            }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError("Desync while processing opponent action " + message.action + " (index " + message.index + "): " + ex);
+                gameController.HaltForDesync("A move from your opponent could not be applied (" + message.action + "). The match has been halted.");
+                yield break;
             }
 
             doneActions.Add(message);
-            yield return new WaitForSeconds(2f); 
+            yield return new WaitForSeconds(2f);
             /*
             if (message.action == MessageFromServer.Action.PlayCard ||
                     message.action == MessageFromServer.Action.CastSpell ||
@@ -593,18 +687,22 @@ public class ServerDataProcesser : MonoBehaviour
         GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
         while (true)
         {
-            if (!gameController.NeedToSync())
+            if (gameController.desyncDetected)
             {
-                if (GameController.playerTurn)
-                {
-                    yield return new WaitForSeconds(secondsBetweenServerUpdates);
-                    continue;
-                }
-                else if (!GameController.CanPerformActions())
-                {
-                    yield return new WaitForSeconds(secondsBetweenServerUpdates);
-                    continue;
-                }
+                yield return new WaitForSeconds(1f);
+                continue;
+            }
+
+            // Deliberately does NOT skip fetching just because it's our own turn: the opponent
+            // is now allowed to concede on any turn (not just theirs), and skipping fetches
+            // during our turn would leave that concede unprocessed until our turn ends - by
+            // which point our own further actions and their concede could land out of order
+            // next round. CanPerformActions() still paces fetching while an animation/event is
+            // actively resolving.
+            if (!gameController.NeedToSync() && !GameController.CanPerformActions())
+            {
+                yield return new WaitForSeconds(secondsBetweenServerUpdates);
+                continue;
             }
 
             if (!InfoSaver.onlineBattle)
@@ -659,76 +757,93 @@ public class ServerDataProcesser : MonoBehaviour
 
                 list.Add(_m);
 
-                StartCoroutine(ServerDataProcesser.instance.ProcessMessages(list));
+                // Awaited, not fire-and-forget: a slow-to-resolve action (e.g. a spell whose
+                // effect chains into a minion death and a round transition) must fully finish
+                // applying before we look at the board again, or a second overlapping
+                // ProcessMessages call could double-apply it.
+                yield return ServerDataProcesser.instance.ProcessMessages(list);
                 yield return new WaitForSeconds(secondsBetweenServerUpdates / 3f);
                 continue;
             }
 
             Debug.Log("Start obtaining....");
-            UnityWebRequest www = UnityWebRequest.Get(GOOGLE_API_URL);
-            yield return www.SendWebRequest();
+            JToken snapshot = null;
+            yield return FirebaseDb.Get("matches/" + MatchId() + "/actions", token => snapshot = token);
             Debug.Log("Finished obtaining!");
 
             messagesFromServer = new List<MessageFromServer>();
-            MessageFromServer currentMessage = new MessageFromServer();
 
-            string[] batches = www.downloadHandler.text.Split('$');
-            int iterIndex = 0;
-            int batchIndex = 0;
-            int curHash = 0;
-            foreach (string s in batches)
+            if (snapshot is JObject actions)
             {
-                if (iterIndex == 0)
+                foreach (JProperty entryProp in actions.Properties())
                 {
-                    iterIndex = 1;
-                }
-                else
-                {
-                    iterIndex = 0;
-                    if (batchIndex == 0)
+                    JToken entry = entryProp.Value;
+                    int curHash = entry["hash"]?.Value<int>() ?? 0;
+                    if (curHash != boardManager.opponentHash)
                     {
-                        currentMessage = new MessageFromServer();
-                        string[] words = s.Split('@');
-                        curHash = Int32.Parse(words[0]);
-                        currentMessage.hash = curHash;
-                        currentMessage.index = Int32.Parse(words[1]);
+                        continue;
                     }
-                    else if (batchIndex == 1)
+
+                    MessageFromServer currentMessage = new MessageFromServer();
+                    currentMessage.hash = curHash;
+                    currentMessage.index = entry["index"]?.Value<int>() ?? 0;
+                    currentMessage.action = currentMessage.GetAction(entry["action"]?.Value<string>() ?? "");
+
+                    if (currentMessage.action != MessageFromServer.Action.EndTurn && currentMessage.action != MessageFromServer.Action.Attack && currentMessage.action != MessageFromServer.Action.Move && currentMessage.action != MessageFromServer.Action.Exchange && currentMessage.action != MessageFromServer.Action.NumberOfCards && currentMessage.action != MessageFromServer.Action.SendDeck && currentMessage.action != MessageFromServer.Action.ConcedeMatch)
                     {
-                        if (curHash == boardManager.opponentHash)
+                        currentMessage.cardIndex = (CardTypes)Int32.Parse(entry["cardIdx"]?.Value<string>() ?? "0");
+                    }
+
+                    List<int> targets = new List<int>();
+                    string targetsString = entry["targets"]?.Value<string>() ?? "";
+                    if (targetsString != "")
+                    {
+                        foreach (string num in targetsString.Split(','))
                         {
-                            currentMessage.action = currentMessage.GetAction(s);
+                            targets.Add(Int32.Parse(num));
                         }
                     }
-                    else if (batchIndex == 2)
-                    {
-                        if (curHash == boardManager.opponentHash && currentMessage.action != MessageFromServer.Action.EndTurn && currentMessage.action != MessageFromServer.Action.Attack && currentMessage.action != MessageFromServer.Action.Move && currentMessage.action != MessageFromServer.Action.Exchange && currentMessage.action != MessageFromServer.Action.NumberOfCards && currentMessage.action != MessageFromServer.Action.SendDeck)
-                        {
-                            currentMessage.cardIndex = (CardTypes)Int32.Parse(s);
-                        }
-                    }
-                    else if (batchIndex == 3)
-                    {
-                        if (curHash == boardManager.opponentHash)
-                        {
-                            List<int> targets = new List<int>();
-                            if (s != "")
-                            {
-                                string[] numbers = s.Split(',');
-                                foreach (string num in numbers)
-                                {
-                                    targets.Add(Int32.Parse(num));
-                                }
-                            }
-                            currentMessage.targets = targets;
-                            messagesFromServer.Add(currentMessage);
-                        }
-                        batchIndex = -1;
-                    }
-                    batchIndex += 1;
+                    currentMessage.targets = targets;
+                    messagesFromServer.Add(currentMessage);
                 }
             }
-            StartCoroutine(ServerDataProcesser.instance.ProcessMessages(messagesFromServer));
+
+            // Only hand over a contiguous run starting at the next expected index - a later
+            // action arriving before an earlier one (send retried, briefly out of order, etc.)
+            // must wait rather than be applied against board state that assumes the missing
+            // action already happened. Nothing is discarded: the full collection is re-fetched
+            // every cycle, so a gap that later fills in gets caught up in one shot.
+            // A merged CastOnPlayCard message only records its *first* raw message's index in
+            // .index - the paired PlayCard's raw index lives in .additionalIndex. Both must
+            // count as "done", or the paired PlayCard's raw index looks unprocessed forever and
+            // gets re-fed into ProcessMessages on a later poll as if it were a fresh message.
+            int nextExpectedIndex = doneActions.Count == 0
+                ? 0
+                : doneActions.Max(m => Math.Max(m.index, m.additionalIndex)) + 1;
+            messagesFromServer = messagesFromServer.OrderBy(m => m.index).ToList();
+            List<MessageFromServer> readyToProcess = new List<MessageFromServer>();
+            int expected = nextExpectedIndex;
+            foreach (MessageFromServer m in messagesFromServer)
+            {
+                if (m.index < expected)
+                {
+                    continue;
+                }
+                if (m.index != expected)
+                {
+                    break;
+                }
+                readyToProcess.Add(m);
+                expected++;
+            }
+            HasUnresolvedGap = messagesFromServer.Any(m => m.index >= expected);
+
+            // Awaited, not fire-and-forget - see comment in the bot-move branch above. Without
+            // this, a fast local round transition (e.g. a self-targeted spell killing your own
+            // Hatapon and immediately starting the next round) can post a follow-up action
+            // before we've finished applying the slower-to-resolve message that preceded it,
+            // spawning a second overlapping ProcessMessages call that double-applies it.
+            yield return ServerDataProcesser.instance.ProcessMessages(readyToProcess);
             yield return new WaitForSeconds(secondsBetweenServerUpdates);
         }
     }

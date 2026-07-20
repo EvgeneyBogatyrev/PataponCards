@@ -109,7 +109,7 @@ public class DeadlyShotStats : MonoBehaviour
         stats.spell = realization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "deadly_shot";
+        stats.imagePath = "deadly_shot_hq";
         stats.artistName = "Official render";
         return stats;
     }

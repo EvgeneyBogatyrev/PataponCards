@@ -15,6 +15,8 @@ public static class DestroboStats
 
         stats.additionalKeywords.Add("Devotion card");
 
+        stats.onPlaySound = "destrobo_hm";
+
         stats.hasOnPlaySpell = true;
 
         static IEnumerator DestroboRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)

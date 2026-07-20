@@ -14,7 +14,9 @@ public static class MyamsarStats
         stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Spear);
 
-        stats.additionalRules.Add("If a copy would be summoned with 0 or less power, it is not summoned instead.");
+        stats.onPlaySound = "rapappa";
+
+        stats.additionalRules.Add("If a copy would be summoned with 0 or less power, it is not summoned.");
 
 
         static IEnumerator MyamsarEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -22,6 +24,17 @@ public static class MyamsarStats
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             gameController.actionIsHappening = true;
             MinionManager thisOne = friendlySlots[index].GetConnectedMinion();
+
+            // A same-frame-batched end-of-turn effect from another card (e.g. Alldemonium's
+            // recurring damage) may have already killed this unit before its own end-of-turn
+            // event gets its turn to run (queued events for the same minion process in a fixed
+            // order, not necessarily this one first) - if so, there's nothing to summon a copy
+            // of, and no error should follow from it just having died normally.
+            if (thisOne == null)
+            {
+                gameController.actionIsHappening = false;
+                yield break;
+            }
 
             BoardManager.Slot targetSlot = null;
             foreach (BoardManager.Slot slot in friendlySlots)
@@ -33,13 +46,8 @@ public static class MyamsarStats
                 }
             }
 
-            if (targetSlot == null)
+            if (targetSlot != null)
             {
-                //yield return null;
-            }
-            else
-            {
-
                 HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
                 BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
 
@@ -58,7 +66,7 @@ public static class MyamsarStats
         }
         stats.endTurnEvent = MyamsarEndTurn;
 
-        stats.imagePath = "rapatta_hq";
+        stats.imagePath = "rapappa_HQ";
         return stats;
     }
 }

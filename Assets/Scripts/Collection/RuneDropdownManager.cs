@@ -6,8 +6,9 @@ using UnityEngine.UI;
 public class RuneDropdownManager : MonoBehaviour
 {
     public Runes value = Runes.Spear;
+    public UITheme uiTheme;
     private CollectionControl collection;
-    
+
     private bool mouseOver = false;
 
     private void Start() {
@@ -35,6 +36,7 @@ public class RuneDropdownManager : MonoBehaviour
     {
         if (mouseOver && Input.GetMouseButtonDown(0) && CursorController.cursorState == CursorController.CursorStates.Free)
         {
+            AudioController.PlaySound("click");
             if (value == Runes.Spear)
             {
                 SetRune(Runes.Shield);
@@ -49,7 +51,14 @@ public class RuneDropdownManager : MonoBehaviour
             }
             collection.UpdateRunes();
             StartCoroutine(Bounce());
-            
+
+        }
+
+        // Icon art carries the sprite already (rune identity) - a rounded background sprite
+        // would hide it, so just brighten it slightly on hover instead of swapping sprites.
+        if (uiTheme != null)
+        {
+            GetComponent<SpriteRenderer>().color = mouseOver ? Color.Lerp(Color.white, uiTheme.primaryHover, 0.35f) : Color.white;
         }
     }
 

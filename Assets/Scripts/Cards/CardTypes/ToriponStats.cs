@@ -12,12 +12,14 @@ public static class ToriponStats
         stats.description = "Can't be attacked by units.";
         stats.name = "Toripon";
         stats.runes.Add(Runes.Spear);
-        stats.runes.Add(Runes.Spear);
         //stats.runes.Add(Runes.Spear);
+        //stats.runes.Add(Runes.Spear);
+
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
 
         stats.flying = true;
 
-        stats.imagePath = "toripon_hq";
+        stats.imagePath = "Toripon_hq";
         stats.artistName = "Official render";
         return stats;
     }

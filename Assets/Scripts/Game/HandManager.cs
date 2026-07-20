@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class HandManager : MonoBehaviour
 {
@@ -8,6 +9,18 @@ public class HandManager : MonoBehaviour
 
     public GameObject mulliganButtonObject;
     public GameObject keepHandButtonObject;
+
+    // Optional - shown only during mulligan, telling the player whether they go first or second
+    // this match. Wire the parent object (e.g. "TurnOrder", a sibling of Mulligan/KeepHand/Concede
+    // under MulliganButtons) here, not its Text child directly - matches GameController.turnTimeLeft's
+    // pattern of a container whose world-space TextMeshPro children get the text set on them, so an
+    // outline/shadow duplicate child (if one gets added later) is picked up for free. Left unwired,
+    // it's simply never shown - no editor change forced on existing Game scene setups. Turn order
+    // is already fully determined by InfoSaver.myHash/opponentHash at this point (set back in
+    // Lobby, well before this scene loads) even though GameController.StartGame() - which is what
+    // actually flips GameController.playerTurn - only runs once mulligan ends, so this uses the
+    // exact same comparison ahead of time.
+    public GameObject turnOrderObject;
 
     public float cardSpace;
     private int cardMulligan = 7;
@@ -37,13 +50,24 @@ public class HandManager : MonoBehaviour
         drawStartPosition = GameObject.Find("DrawFromDeck").transform.position;
         DeckManager.CopyDeck();
 
+        if (turnOrderObject != null)
+        {
+            bool goesFirst = InfoSaver.opponentHash <= InfoSaver.myHash;
+            string turnOrderMessage = goesFirst ? "You go first" : "You go second";
+            foreach (Transform child in turnOrderObject.transform)
+            {
+                child.GetComponent<TextMeshPro>().text = turnOrderMessage;
+            }
+            turnOrderObject.SetActive(true);
+        }
+
         for (int i = 0; i < 7; ++i)
         {
             DrawCard();
         }
 
         SetNumberOfOpponentsCards(7);
-        
+
     }
 
     public CardManager SetNumberOfOpponentsCards(int number, bool returnCard=false, int ephemeral=-1)
@@ -94,6 +118,7 @@ public class HandManager : MonoBehaviour
 
     public void CheckEphemeral()
     {
+        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
         CardManager[] cards = new CardManager[hand.Count];
         hand.CopyTo(cards);
         int index = -1;
@@ -108,12 +133,13 @@ public class HandManager : MonoBehaviour
             }
             if (card.GetCardStats().ephemeral == 0)
             {
+                gameController.FireCardDiscardedTrigger(card.GetCardType(), cardFriendly: true);
                 hand[index - removed].DestroyCard();
                 RemoveCard(index - removed);
                 removed += 1;
             }
             card.GetCardStats().ephemeral = eph - 1;
-            
+
         }
         UpdateHandPosition();
         ServerDataProcesser.instance.Discard(removed);
@@ -123,6 +149,7 @@ public class HandManager : MonoBehaviour
     {
         if (friendly)
         {
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             CardManager[] cards = new CardManager[hand.Count];
             hand.CopyTo(cards);
             int index = -1;
@@ -130,14 +157,18 @@ public class HandManager : MonoBehaviour
             foreach (CardManager card in cards)
             {
                 index += 1;
+                gameController.FireCardDiscardedTrigger(card.GetCardType(), cardFriendly: true);
                 hand[index - removed].DestroyCard();
                 RemoveCard(index - removed);
-                removed += 1;            
+                removed += 1;
             }
             UpdateHandPosition();
         }
         else
         {
+            // Opponent's hand cards are hidden information (face-down Fang placeholders, real
+            // type never known client-side) - no real CardTypes to report, so this trigger
+            // deliberately never fires for an opponent-side discard.
             SetNumberOfOpponentsCards(0);
         }
     }
@@ -218,6 +249,10 @@ public class HandManager : MonoBehaviour
         UpdateHandPosition();
         keepHandButtonObject.SetActive(false);
         mulliganButtonObject.SetActive(false);
+        if (turnOrderObject != null)
+        {
+            turnOrderObject.SetActive(false);
+        }
 
         // Play Hatapons
         GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
@@ -292,6 +327,11 @@ public class HandManager : MonoBehaviour
             CardManager newCard = GenerateCard(card, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
             hand.Add(newCard);
             UpdateHandPosition();
+
+            // "Card drawn" broadcast trigger - friendly draws only. The opponent's real drawn
+            // CardTypes is hidden information never known client-side (their hand is face-down
+            // Fang placeholders - see DrawCardOpponent), so this never fires for one.
+            gameController.FireCardDrawnTrigger(card, cardFriendly: true);
 
             newCard.transform.position = drawStartPosition;
             newCard.SetCardState(CardManager.CardState.Drawing);

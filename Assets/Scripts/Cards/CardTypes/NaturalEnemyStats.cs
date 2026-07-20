@@ -63,7 +63,7 @@ public static class NaturalEnemyStats
         stats.checkSpellTarget = CheckTarget;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "natural_enemy";
+        stats.imagePath = "natural_enemy_hq";
         return stats;
     }
 }

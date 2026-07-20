@@ -7,16 +7,19 @@ public static class PiekronStats
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-        const int yariponDamage = 2;
+        const int yariponDamage = 1;
 
         stats.power = 3;
         stats.description = "<b>Lifelink.\nEnd of turn</b>: Deal " + yariponDamage.ToString() + " damage to an enemy unit next to it.";
         stats.name = "Piekron";
-        stats.imagePath = "piekron";
+        stats.imagePath = "piekron_hq";
         stats.hasShield = true;
 
         stats.runes.Add(Runes.Spear);
+        stats.runes.Add(Runes.Spear);
         stats.runes.Add(Runes.Shield);
+
+        stats.onPlaySound = "piekron_hm";
 
         static IEnumerator YariponEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -41,6 +44,7 @@ public static class PiekronStats
                     yield return new WaitForSeconds(0.1f);
                 }
 
+                AudioController.PlaySound("spear");
                 spear.DestroySelf();
 
                 
@@ -50,7 +54,7 @@ public static class PiekronStats
             yield return null;
         }
         stats.endTurnEvent = YariponEndTurn;
-        stats.artistName = "Official render";
+        stats.artistName = "Screenshot from the game";
 
         return stats;
     }

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using TMPro;
+using Networking;
 
 public class CollectionControl : MonoBehaviour
 {
@@ -18,6 +19,12 @@ public class CollectionControl : MonoBehaviour
     public GameObject cardReprSmallest;
     public GameObject cardNumberText;
     public List<GameObject> runeObjects;
+
+    // Optional - the physical deck-name text field (see DeckNameField.cs). Only wired so
+    // BackButton can flush an in-progress, not-yet-committed edit before leaving the scene; the
+    // field saves on its own the moment the player commits it (Enter/click away), so nothing else
+    // here needs to read or write the name directly.
+    public DeckNameField deckNameField;
 
     public float xOffset;
     public float yOffset;
@@ -35,6 +42,11 @@ public class CollectionControl : MonoBehaviour
 
     private List<CardManager> currentCards;
     private int currentPage;
+
+    // Off by default: only cards that fit the deck's current runes are shown (the pre-Phase-3
+    // behavior). Wire a UGUI Toggle's OnValueChanged(bool) to SetShowAllCards to let players see
+    // the whole collection (rune-blocked cards included, tinted/locked) instead.
+    private bool showAllCards = false;
 
     private List<GameObject> cardList;
     private int cardShowLimit = 10;
@@ -55,6 +67,7 @@ public class CollectionControl : MonoBehaviour
             CardTypes.Motiti_option1,
             CardTypes.Motiti_option2,
             CardTypes.MotitiAngry,
+            CardTypes.MotitiCalm,
             CardTypes.Boulder,
             CardTypes.TonKampon_option1,
             CardTypes.TonKampon_option2,
@@ -69,10 +82,10 @@ public class CollectionControl : MonoBehaviour
             CardTypes.Horserider,
             CardTypes.TokenTatepon,
             CardTypes.SpeedBoost,
-            CardTypes.Moribu,
-            CardTypes.Grenburr,
+            //CardTypes.Moribu,
+            //CardTypes.Grenburr,
             CardTypes.Wondabarappa,
-            CardTypes.Venomist,
+            //CardTypes.Venomist,
             CardTypes.KibaForm,
             CardTypes.BirdForm,
             CardTypes.Catapult_option1,
@@ -82,33 +95,44 @@ public class CollectionControl : MonoBehaviour
             CardTypes.MeteorRain,
             CardTypes.SleepingDust,
             CardTypes.Megapon,
-            CardTypes.SparringPartner,
+            //CardTypes.SparringPartner,
             CardTypes.AvengingScout,
-            CardTypes.NaturalEnemy,
+            //CardTypes.NaturalEnemy,
             CardTypes.Fatique,
+            CardTypes.Mahopon
         };
 
         return reservedList;
     }
 
-    private List<CardTypes> FilterRunes(List<CardTypes> startList, List<Runes> runes)
-    {
-        List<CardTypes> newList = new();
+    // Why a card can't be added to the deck currently being edited - drives CardManager's lock
+    // icon (either reason) and gray backObject tint (BlockedByRunes only) instead of hiding the
+    // card outright, so the player can see their whole collection and understand why it's unusable.
+    public enum CardPlaceability { Placeable, BlockedByRunes, BlockedByLimit }
 
-        foreach (CardTypes type in startList)
+    public CardPlaceability GetPlaceability(CardTypes type)
+    {
+        CardManager.CardStats stats = CardTypeToStats.GetCardStats(type);
+        if (!DEBUG && (bowDevotion < stats.GetDevotion(Runes.Bow)
+            || shieldDevotion < stats.GetDevotion(Runes.Shield)
+            || spearDevotion < stats.GetDevotion(Runes.Spear)
+        ))
         {
-            CardManager.CardStats stats = CardTypeToStats.GetCardStats(type);
-            if (!DEBUG && (bowDevotion < stats.GetDevotion(Runes.Bow)
-                || shieldDevotion < stats.GetDevotion(Runes.Shield)
-                || spearDevotion < stats.GetDevotion(Runes.Spear)
-            ))
-            {
-                continue;
-            }
-            newList.Add(type);
+            return CardPlaceability.BlockedByRunes;
         }
 
-        return newList;
+        if (!DeckManager.CheckCardNumber(type))
+        {
+            return CardPlaceability.BlockedByLimit;
+        }
+
+        int owned = DeckManager.collection.TryGetValue(type, out int ownedCount) ? ownedCount : 0;
+        if (DeckManager.GetCardQty(type) >= owned)
+        {
+            return CardPlaceability.BlockedByLimit;
+        }
+
+        return CardPlaceability.Placeable;
     }
 
     private IEnumerator Start()
@@ -120,7 +144,7 @@ public class CollectionControl : MonoBehaviour
         if (DeckManager.runes.Count == 0)
         {
             DeckManager.deck = SaveSystem.GetDefaultDeck();
-            DeckManager.runes = new List<Runes>(){Runes.Spear, Runes.Shield, Runes.Bow};
+            DeckManager.runes = new List<Runes>(){Runes.Spear, Runes.Spear, Runes.Shield};
         }
 
         yield return new WaitForSeconds(0.01f);
@@ -300,16 +324,12 @@ public class CollectionControl : MonoBehaviour
 
         //SaveSystem.SaveRunes(DeckManager.runes);
         ShowDeck();
-        foreach (CardManager card in currentCards)
-        {
-            Destroy(card.gameObject);
-        }
-        currentCards = new List<CardManager>();
-        //st = new List<GameObject>();
-        List<CardTypes> cardTypes = GetPage(0);
-        currentPage = 0;
-        ShowCards(cardTypes);
-        CheckButtons(currentPage);
+
+        // A rune change reshuffles the whole sort order (fits-current-runes-first), so unlike
+        // toggling Show All Cards (see SetShowAllCards) this is a full rebuild back to page 0
+        // rather than an in-place diff - the "same page" concept doesn't really apply when the
+        // ordering itself just changed.
+        RebuildFromPage(0);
     }
 
     private List<CardTypes> GetCollectableCards()
@@ -330,11 +350,7 @@ public class CollectionControl : MonoBehaviour
 
     public bool CheckPage(int pageNumber)
     {
-        //List<CardTypes> relevantCards = GetCollectableCards();
-        List<CardTypes> relevantCards = new List<CardTypes>(DeckManager.collection.Keys);
-        relevantCards = FilterRunes(relevantCards, DeckManager.runes);
-
-        var namesCount = relevantCards.Count;//Enum.GetNames(typeof(CardTypes)).Length - GetForbiddenCards().Count;
+        var namesCount = GetBrowsableCards().Count;
         if (pageNumber < 0)
         {
             return false;
@@ -364,18 +380,81 @@ public class CollectionControl : MonoBehaviour
     }
 
 
+    // How many copies of this card the player actually owns - 0 (rather than a
+    // KeyNotFoundException from DeckManager.collection's indexer) for a card never earned/bought,
+    // since Show All Cards can now put those on screen too (see GetBrowsableCards).
+    public int GetOwnedCount(CardTypes type)
+    {
+        return DeckManager.collection.TryGetValue(type, out int owned) ? owned : 0;
+    }
+
+    // Cards that fit the deck's current runes come first; cards that don't fit but are at least
+    // owned come next, grouped by their own rune requirement (same neutral/spear/shield/bow/
+    // multiclass grouping CardGenerator already uses for the name-outline material) so browsing
+    // isn't a random jumble; cards never owned at all are pushed after everything else (only
+    // reachable with Show All Cards on - see GetBrowsableCards). Card type order is the tiebreaker
+    // within each group.
+    private List<CardTypes> SortForBrowsing(List<CardTypes> cards)
+    {
+        List<CardTypes> sorted = new List<CardTypes>(cards);
+        sorted.Sort((a, b) =>
+        {
+            int tierCompare = BrowsingTier(a).CompareTo(BrowsingTier(b));
+            if (tierCompare != 0)
+            {
+                return tierCompare;
+            }
+
+            int runeCompare = RuneCategoryOrder(a).CompareTo(RuneCategoryOrder(b));
+            if (runeCompare != 0)
+            {
+                return runeCompare;
+            }
+
+            return ((int)a).CompareTo((int)b);
+        });
+        return sorted;
+    }
+
+    // 0 = owned and fits current runes, 1 = owned but rune-blocked, 2 = never owned at all.
+    private int BrowsingTier(CardTypes type)
+    {
+        if (GetOwnedCount(type) <= 0)
+        {
+            return 2;
+        }
+        return GetPlaceability(type) == CardPlaceability.BlockedByRunes ? 1 : 0;
+    }
+
+    // Neutral < Spear < Shield < Bow < multiclass - mirrors CardGenerator.CustomizeCard's
+    // neutral/spear/shield/bow/multiclass material selection.
+    private int RuneCategoryOrder(CardTypes type)
+    {
+        CardManager.CardStats stats = CardTypeToStats.GetCardStats(type);
+        int spearCount = 0, shieldCount = 0, bowCount = 0;
+        foreach (Runes rune in stats.runes)
+        {
+            if (rune == Runes.Spear) spearCount++;
+            else if (rune == Runes.Shield) shieldCount++;
+            else if (rune == Runes.Bow) bowCount++;
+        }
+
+        if (spearCount == 0 && shieldCount == 0 && bowCount == 0) return 0; // neutral
+        if (spearCount > 0 && shieldCount == 0 && bowCount == 0) return 1; // spear
+        if (spearCount == 0 && shieldCount > 0 && bowCount == 0) return 2; // shield
+        if (spearCount == 0 && shieldCount == 0 && bowCount > 0) return 3; // bow
+        return 4; // multiclass
+    }
+
     public List<CardTypes> GetPage(int pageNumber)
     {
-        //List<CardTypes> relevantCards = GetCollectableCards();
-        List<CardTypes> relevantCards = new List<CardTypes>(DeckManager.collection.Keys);
-        relevantCards.Sort((x, y) => ((int)x).CompareTo((int)y));
-        relevantCards = FilterRunes(relevantCards, DeckManager.runes);
+        List<CardTypes> relevantCards = GetBrowsableCards();
         int namesCount = relevantCards.Count;
 
         List<CardTypes> cardList = new List<CardTypes>();
         int startNumber = pageNumber * rows * columns;
         int end = rows * columns;
-        
+
         for (int i = 0; i < end && startNumber + i < namesCount; ++i)
         {
             cardList.Add(relevantCards[startNumber + i]);
@@ -383,27 +462,122 @@ public class CollectionControl : MonoBehaviour
         return cardList;
     }
 
+    // Sorted browsable set for the current showAllCards state - filtered down to owned, rune-
+    // fitting cards only when it's off (the pre-Phase-3 behavior), or every collectable card type
+    // (owned or not - see GetCollectableCards) when on, so Show All Cards genuinely shows the
+    // whole collectable set rather than just the owned subset.
+    private List<CardTypes> GetBrowsableCards()
+    {
+        List<CardTypes> relevantCards;
+        if (showAllCards)
+        {
+            relevantCards = GetCollectableCards();
+        }
+        else
+        {
+            relevantCards = new List<CardTypes>(DeckManager.collection.Keys);
+            relevantCards.RemoveAll(type => GetPlaceability(type) == CardPlaceability.BlockedByRunes);
+        }
+        return SortForBrowsing(relevantCards);
+    }
+
+    private Vector3 GetGridPosition(int index)
+    {
+        int i = index / columns;
+        int j = index % columns;
+        return new Vector3(xOffset + j * cardSpaceX, yOffset + (rows - i - 1) * cardSpaceY, 0f);
+    }
+
     public void ShowCards(List<CardTypes> cardTypes)
     {
-        for (int i = 0; i < rows; ++i)
+        int slotCount = Mathf.Min(cardTypes.Count, rows * columns);
+        for (int index = 0; index < slotCount; ++index)
         {
-            for (int j = 0; j < columns; ++j)
-            {
-                int index = i * columns + j;
-                if (index >= cardTypes.Count)
-                {
-                    break;
-                }
+            GameObject cardObject = GenerateCard(cardTypes[index]);
+            CardManager card = cardObject.GetComponent<CardManager>();
+            card.SetDisplay();
+            card.transform.position = GetGridPosition(index);
+            card.transform.localScale = new Vector3(cardScale, cardScale, 1f);
+            card.SetNumberOfCopies(GetOwnedCount(cardTypes[index]));
+            // Lock icon + rune-blocked overlay refresh every frame on their own (see
+            // CardManager's CardState.display case) - no explicit call needed here.
+            currentCards.Add(card);
+        }
+    }
 
-                GameObject cardObject = GenerateCard(cardTypes[index]);
+    // Wire a UGUI Toggle's OnValueChanged(bool) to this. Deliberately does not destroy/regenerate
+    // the whole page (see RefreshVisibleCardsInPlace) - only the cards whose visibility actually
+    // changes are added or removed. currentPage is kept as-is unless unchecking made it fall past
+    // the new last page, in which case it's clamped down to that last page (never up - checking
+    // never needs to move off the current page, only unchecking can shrink past it).
+    public void SetShowAllCards(bool _value)
+    {
+        Debug.Log("SetShowAllCards called: current=" + showAllCards + " new=" + _value
+            + " collectionCount=" + (DeckManager.collection != null ? DeckManager.collection.Count.ToString() : "null(collection)"));
+        if (showAllCards == _value)
+        {
+            return;
+        }
+        showAllCards = _value;
+
+        Debug.Log("SetShowAllCards: browsableCount(filtered=" + (!showAllCards) + ")=" + GetBrowsableCards().Count
+            + " currentPage=" + currentPage);
+
+        int lastValidPage = GetLastValidPage();
+        if (currentPage > lastValidPage)
+        {
+            currentPage = lastValidPage;
+        }
+
+        RefreshVisibleCardsInPlace();
+    }
+
+    private int GetLastValidPage()
+    {
+        int count = GetBrowsableCards().Count;
+        if (count == 0)
+        {
+            return 0;
+        }
+        return (count - 1) / (rows * columns);
+    }
+
+    private void RefreshVisibleCardsInPlace()
+    {
+        List<CardTypes> newTypes = GetPage(currentPage);
+        int slotCount = Mathf.Max(currentCards.Count, newTypes.Count);
+        List<CardManager> updatedCards = new List<CardManager>();
+
+        for (int index = 0; index < slotCount; ++index)
+        {
+            CardManager existing = index < currentCards.Count ? currentCards[index] : null;
+            CardTypes? newType = index < newTypes.Count ? newTypes[index] : (CardTypes?)null;
+
+            if (existing != null && newType.HasValue && existing.GetCardType() == newType.Value)
+            {
+                updatedCards.Add(existing);
+                continue;
+            }
+
+            if (existing != null)
+            {
+                Destroy(existing.gameObject);
+            }
+
+            if (newType.HasValue)
+            {
+                GameObject cardObject = GenerateCard(newType.Value);
                 CardManager card = cardObject.GetComponent<CardManager>();
                 card.SetDisplay();
-                card.transform.position = new Vector3(xOffset + j * cardSpaceX, yOffset + (rows - i - 1) * cardSpaceY, 0f);
+                card.transform.position = GetGridPosition(index);
                 card.transform.localScale = new Vector3(cardScale, cardScale, 1f);
-                card.SetNumberOfCopies(DeckManager.collection[cardTypes[index]]);
-                currentCards.Add(card);
+                card.SetNumberOfCopies(GetOwnedCount(newType.Value));
+                updatedCards.Add(card);
             }
         }
+
+        currentCards = updatedCards;
+        CheckButtons(currentPage);
     }
 
     public GameObject GenerateCard(CardTypes cardType)
@@ -414,18 +588,27 @@ public class CollectionControl : MonoBehaviour
         return newCard;
     }
 
+    // Full destroy-and-regenerate, resetting to a specific page - used whenever the page's
+    // content/ordering genuinely needs a fresh start (navigating pages, a rune change reshuffling
+    // sort order). Contrast with RefreshVisibleCardsInPlace, which only adds/removes what changed
+    // without moving currentPage (used by the Show All Cards toggle).
+    private void RebuildFromPage(int pageNumber)
+    {
+        foreach (CardManager card in currentCards)
+        {
+            Destroy(card.gameObject);
+        }
+        currentCards = new List<CardManager>();
+        currentPage = pageNumber;
+        ShowCards(GetPage(currentPage));
+        CheckButtons(currentPage);
+    }
+
     public void LoadNextPage()
     {
         if (CheckPage(currentPage + 1))
         {
-            currentPage += 1;
-            foreach (CardManager card in currentCards)
-            {
-                Destroy(card.gameObject);
-            }
-            currentCards = new List<CardManager>();
-            ShowCards(GetPage(currentPage));
-            CheckButtons(currentPage + 0);
+            RebuildFromPage(currentPage + 1);
         }
     }
 
@@ -455,14 +638,7 @@ public class CollectionControl : MonoBehaviour
     {
         if (CheckPage(currentPage - 1))
         {
-            currentPage -= 1;
-            foreach (CardManager card in currentCards)
-            {
-                Destroy(card.gameObject);
-            }
-            currentCards = new List<CardManager>();
-            ShowCards(GetPage(currentPage));
-            CheckButtons(currentPage + 0);
+            RebuildFromPage(currentPage - 1);
         }
     }
 
@@ -470,16 +646,56 @@ public class CollectionControl : MonoBehaviour
     {
         if (true || DeckManager.deck.Count == DeckManager.minDeckSize)
         {
-            SaveSystem.SaveRunes(DeckManager.runes, DeckLoadManager.deckIndex);
-            SaveSystem.SaveDeck(DeckManager.deck, DeckLoadManager.deckIndex);
-            SceneManager.LoadScene("MainMenu");
+            if (deckNameField != null)
+            {
+                deckNameField.CommitIfEditing();
+            }
+            StartCoroutine(SaveDeckAndReturnToMenu());
         }
+    }
+
+    // Saves locally, then explicitly waits for the cloud mirror to actually finish uploading
+    // before leaving this scene - MainMenu's Play button can take the player straight to Lobby,
+    // whose Start() immediately pulls from the cloud (DownloadCloudToLocal). If that pull landed
+    // before this edit's own upload had finished, it would silently overwrite the just-saved
+    // local deck file with the stale pre-edit cloud copy - the deck would then look "unsaved"
+    // both in the match just started and back here in Collection afterward.
+    private IEnumerator SaveDeckAndReturnToMenu()
+    {
+        SaveSystem.SaveDeck(DeckManager.deck, DeckLoadManager.deckIndex, mirrorToCloud:false);
+        SaveSystem.SaveRunes(DeckManager.runes, DeckLoadManager.deckIndex, mirrorToCloud:false);
+        yield return CloudSave.MirrorDeckAndWait(DeckLoadManager.deckIndex, DeckManager.deck, DeckManager.runes, SaveSystem.LoadDeckName(DeckLoadManager.deckIndex));
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    // Click opens a Yes/Cancel confirmation instead of deleting immediately - see
+    // CollectionButton.cs (status 3), which used to require a press-and-hold instead.
+    public bool pendingDeckDeleteConfirmation = false;
+
+    public void RequestDeckDeleteConfirmation()
+    {
+        pendingDeckDeleteConfirmation = true;
+    }
+
+    public void CancelDeckDelete()
+    {
+        pendingDeckDeleteConfirmation = false;
     }
 
     public void DeleteButton()
     {
+        pendingDeckDeleteConfirmation = false;
         SaveSystem.DeleteDeck(DeckLoadManager.deckIndex);
         SceneManager.LoadScene("MainMenu");
+    }
+
+    private void OnGUI()
+    {
+        if (pendingDeckDeleteConfirmation)
+        {
+            ConfirmationBanner.Draw(new Color(0.6f, 0.1f, 0.1f, 0.9f), "Delete this deck? This can't be undone.",
+                "Yes, delete deck", "Cancel", DeleteButton, CancelDeckDelete);
+        }
     }
 
     public void ShowDeck()
@@ -556,6 +772,7 @@ public class CollectionControl : MonoBehaviour
                 cardReprObj.numberOfCopies = 1;
                 cardReprObj.SetVisualNumber();
                 cardReprObj.index = index;
+                cardReprObj.SetRowIndex(index);
                 index += 1;
 
                 curPosY -= deckCardSpace;

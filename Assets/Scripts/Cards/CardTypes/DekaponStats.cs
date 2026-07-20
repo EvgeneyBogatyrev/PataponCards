@@ -9,13 +9,15 @@ public static class DekaponStats
         CardManager.CardStats stats = new CardManager.CardStats();
 
         stats.power = 8;
-        stats.description = "This card cannot be played on the first three turns.";
+        stats.description = "This card cannot be played on the first two turns.";
         stats.name = "Dekapon";
         //stats.limitedVision = true;
-        stats.firstTurnToPlay = 3;
+        stats.firstTurnToPlay = 2;
         stats.runes.Add(Runes.Shield);
 
         stats.imagePath = "dekapon_hq";
+        stats.onPlaySound = "dekaton_regular";
+        stats.artistName = "Official render";
         return stats;
     }
 }

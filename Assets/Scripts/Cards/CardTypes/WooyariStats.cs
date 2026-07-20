@@ -13,6 +13,8 @@ public static class WooyariStats
         stats.name = "Wooyari";
         stats.runes.Add(Runes.Spear);
 
+        stats.onPlaySound = "wooyari_hm";
+
         stats.hasOnPlaySpell = true;
 
         stats.additionalRules.Add("If a chosen unit doesn't have <b>Lifelink</b>, this effect does nothing.");
@@ -50,8 +52,8 @@ public static class WooyariStats
         stats.spell = DestroboRealization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "Wooyari";  
-        stats.artistName = "Official render";      
+        stats.imagePath = "Wooyari_hq";  
+        stats.artistName = "Screenshot from the game";      
         return stats;
     }
 }

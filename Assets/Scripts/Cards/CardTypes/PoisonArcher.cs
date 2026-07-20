@@ -8,10 +8,12 @@ public static class PoisonArcherStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
         
-        stats.description = "<b>On play: Poison</b> target unit.\n<b>On attack: Poison</b> attack target.";
+        stats.description = "<b>On play: Poison</b> target unit.\n<b>On attack: Poison</b> the attack target.";
         stats.name = "Poison Archer";
         stats.runes.Add(Runes.Bow);
         stats.runes.Add(Runes.Bow);
+
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
 
         stats.hasOnPlaySpell = true;
 
@@ -137,7 +139,7 @@ public static class PoisonArcherStats
         stats.spell = OnPlay;
         stats.onAttackEvent = onAttack;
         stats.numberOfTargets = 1;
-        stats.power = 3;
+        stats.power = 2;
 
         stats.imagePath = "poison_archer_hq";
         stats.artistName = "Official render";

@@ -85,7 +85,10 @@ public enum CardTypes
     StormMiracle,
     BadaDrum,
     QueenKharma,
-    //------------------------  
+    Earthquake,
+    Aiton,
+    Slogturtle,
+    //------------------------
     SpeedBoost,
     Moribu,
     Grenburr,
@@ -95,6 +98,7 @@ public enum CardTypes
     Motiti_option1,
     Motiti_option2,
     MotitiAngry,
+    MotitiCalm,
     Nutrition,
     GiveFang,
     Hatapon,
@@ -575,6 +579,22 @@ public static class CardTypeToStats
                 stats = FatiqueStats.GetStats();
                 break;
 
+            case CardTypes.Earthquake:
+                stats = EarthquakeStats.GetStats();
+                break;
+
+            case CardTypes.Aiton:
+                stats = AitonStats.GetStats();
+                break;
+
+            case CardTypes.Slogturtle:
+                stats = SlogturtleStats.GetStats();
+                break;
+
+            case CardTypes.MotitiCalm:
+                stats = MochichiCalmStats.GetStats();
+                break;
+
             default:
                 break;
         }
@@ -688,6 +708,7 @@ public static class FilterCardTypes
             CardTypes.Motiti_option1,
             CardTypes.Motiti_option2,
             CardTypes.MotitiAngry,
+            CardTypes.MotitiCalm,
             CardTypes.Boulder,
             CardTypes.TonKampon_option1,
             CardTypes.TonKampon_option2,
@@ -702,10 +723,10 @@ public static class FilterCardTypes
             CardTypes.Horserider,
             CardTypes.TokenTatepon,
             CardTypes.SpeedBoost,
-            CardTypes.Moribu,
-            CardTypes.Grenburr,
+            //CardTypes.Moribu,
+            //CardTypes.Grenburr,
             CardTypes.Wondabarappa,
-            CardTypes.Venomist,
+            //CardTypes.Venomist,
             CardTypes.KibaForm,
             CardTypes.BirdForm,
             CardTypes.Catapult_option1,
@@ -717,8 +738,9 @@ public static class FilterCardTypes
             CardTypes.Megapon,
             CardTypes.SparringPartner,
             CardTypes.AvengingScout,
-            CardTypes.NaturalEnemy,
+            //CardTypes.NaturalEnemy,
             CardTypes.Fatique,
+            CardTypes.Mahopon
         };
 
         return reservedList;

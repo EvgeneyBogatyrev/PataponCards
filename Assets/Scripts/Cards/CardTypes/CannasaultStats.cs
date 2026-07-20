@@ -8,13 +8,15 @@ public class CannasaultStats : MonoBehaviour
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.power = 4;
-        stats.description = "<b>Haste</b>.\n<b>On attack</b>: Gain \"End turn and start turn effects can't trigger\" until the start of your next turn.";
+        stats.power = 5;
+        stats.description = "<b>On attack</b>: Gain \"End-of-turn and start-of-turn effects cannot trigger\" until the start of your next turn.";
         stats.name = "Cannasault";
         stats.runes.Add(Runes.Shield);
         stats.runes.Add(Runes.Spear);
 
-        stats.additionalRules.Add("When <i>Cannasault</i> dies or is removed from the battlefield some other way, its effect is immediately nullified.");
+        stats.onPlaySound = "Cannasault";
+
+        stats.additionalRules.Add("When <i>Cannasault</i> dies or is removed from the battlefield in any other way, its effect is immediately nullified.");
 
         static IEnumerator OnAttack(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -67,10 +69,10 @@ public class CannasaultStats : MonoBehaviour
         stats.startTurnEvent = StartTurn;
 
         stats.descriptionSize = 3;
-        stats.hasHaste = true;
+        //stats.hasHaste = true;
 
-        stats.imagePath = "cannasault";
-        stats.artistName = "Official render";
+        stats.imagePath = "cannasault_hq";
+        stats.artistName = "Screenshot from the game";
         return stats;
     }
 }

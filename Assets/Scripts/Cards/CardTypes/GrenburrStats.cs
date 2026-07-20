@@ -11,12 +11,14 @@ public static class GrenburrStats
         const int grenburrPower = 6;
 
         stats.power = 3;
-        stats.description = "Always deals " + grenburrPower.ToString() + " damage regardless of its power.";
+        stats.description = "Always deals " + grenburrPower.ToString() + " damage regardless of his power.";
         stats.name = "Grenburr";
         stats.fixedPower = grenburrPower;
         stats.runes.Add(Runes.Shield);
 
-        stats.imagePath = "grenburr";
+        stats.onPlaySound = "Grenburr";
+
+        stats.imagePath = "Grenburr_hq";
         return stats;
     }
 }

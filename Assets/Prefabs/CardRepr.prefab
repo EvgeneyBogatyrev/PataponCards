@@ -143,7 +143,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0a723f2e0fd224f49890a4a0b47eba44, type: 2}
+  - {fileID: 2100000, guid: 32fb8912714789c488efb054c4da2396, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -239,7 +239,9 @@ MonoBehaviour:
   type: 0
   numberOfCopiesObject: {fileID: 7383323273392899475}
   numberOfCopies: 0
+  relevantCard: 0
   collectionObject: {fileID: 0}
+  uiTheme: {fileID: 11400000, guid: 1079f9e4c0505b2499b933743137d146, type: 2}
   previewedCard: {fileID: 0}
   cardPrefab: {fileID: 5994425831647166798, guid: 64be9f69a2d598c4ea6a3e37aeb0a698, type: 3}
   index: 0

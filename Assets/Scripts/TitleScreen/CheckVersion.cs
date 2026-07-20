@@ -1,93 +1,94 @@
-using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.Net;
-using System.IO;
-using System.ComponentModel;
 using TMPro;
 using System.Collections;
+using Networking;
 
+// Distribution goes through the itch.io app now, but its own "update available" nag is only a
+// suggestion - it never stops a player from launching a stale install (or one downloaded outside
+// the app entirely). That's fine for a single-player game, but this one's online multiplayer is
+// deterministic lockstep: both clients independently replay the same action stream with no
+// server-side authority to correct divergence (see GameController's desync-halt safeguard, which
+// only detects a mismatch after it's already happened mid-match). A client running different
+// card logic than its opponent can silently corrupt a match instead of just missing a feature.
+//
+// So this hard-gates login on an EXACT match against config/requiredVersion in Firebase - not
+// just "new enough", since even a newer untested build could disagree with everyone else still on
+// the current release. Update that Firebase value by hand (Realtime Database console) to the
+// Player Settings > Version string every time you push a build via butler that everyone must be
+// on. Firebase rule needed: "config": { "requiredVersion": { ".read": "auth != null" } }.
 public class CheckVersionModule : MonoBehaviour
 {
-    public static string version = "0.1.10";
-    public static bool isAndroid = true;
-    private static string versionURL = "https://drive.google.com/uc?export=download&id=1ZQlz7Hmznk7C3k86EeZOC-ze4vnhegXc";
-    private static string updateLinkAndroid = "https://drive.google.com/file/d/1kLOOJkdYZliRuFSI3tz49I33RoRP044t/view?usp=sharing";
-    private static string updateLinkWindows = "https://drive.google.com/file/d/1Li4SWGsv-LirtbKLJ50_n2pc9HNHyQWc/view?usp=sharing";
-    private string rootPath;
     public GameObject textbox;
     public GameObject button;
     public GameObject buttonExit;
-    
-    private void Start() {
-        button.SetActive(false);
-        //buttonExit.SetActive(false);
-        rootPath = Directory.GetCurrentDirectory();
-        textbox.GetComponent<TextMeshProUGUI>().text = "Loading...";
-        StartCoroutine("CheckVersion");
+    public string itchPageUrl = "https://evgeney-bogatyrev.itch.io/patapon-card-game";
+
+    private void Start()
+    {
+        if (button != null) button.SetActive(false);
+        if (buttonExit != null) buttonExit.SetActive(false);
+        SetText("Checking for updates...");
+        StartCoroutine(CheckVersionAndProceed());
     }
 
-    public IEnumerator CheckVersion()
+    private IEnumerator CheckVersionAndProceed()
     {
-        yield return new WaitForSeconds(2f);
-        WebClient client = new WebClient();
-        //client.DownloadFileCompleted += new AsyncCompletedEventHandler(DownloadGameCompletedCallback);
-        //client.DownloadFileAsync(new Uri(versionURL), Path.Combine(rootPath, "version.txt"));
-        string onlineVersion = client.DownloadString(new Uri(versionURL));
-        if (version == onlineVersion)
+        bool isCurrent = false;
+        yield return VersionGate.IsCurrentVersion(result => isCurrent = result);
+
+        if (isCurrent)
         {
-            textbox.GetComponent<TextMeshProUGUI>().text = "Welcome back!";
-            yield return new WaitForSeconds(1f);
-            SceneManager.LoadScene("MainMenu");
+            StartCoroutine(GoToAccount());
+            yield break;
         }
-        else
+
+        ShowUpdateRequired();
+    }
+
+    private IEnumerator GoToAccount()
+    {
+        SetText("Loading...");
+        yield return new WaitForSeconds(1f);
+        // Login is mandatory - Account always runs first and hands off to MainMenu once
+        // signed in (see AccountController.OnAuthResult).
+        InfoSaver.sceneAfterLogin = "MainMenu";
+        SceneManager.LoadScene("Account");
+    }
+
+    private void ShowUpdateRequired()
+    {
+        SetText("A new version is required to play. Please update via the itch.io app, then relaunch.");
+        if (button != null)
         {
-            textbox.GetComponent<TextMeshProUGUI>().text = "Please, update the game to continue:";
             button.SetActive(true);
-            buttonExit.SetActive(true);
-        }
-        
-    }
-
-    private void DownloadGameCompletedCallback(object sender, AsyncCompletedEventArgs e)
-    {
-        try
-        {
-            string onlineVersion = File.ReadAllText(Path.Combine(rootPath, "version.txt"));
-            if (version == onlineVersion)
+            TextMeshProUGUI buttonLabel = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (buttonLabel != null)
             {
-                textbox.GetComponent<TextMeshProUGUI>().text = "Your version is up-to-date!";
-                SceneManager.LoadScene("MainMenu");
-            }
-            else
-            {
-                textbox.GetComponent<TextMeshProUGUI>().text = "There is a newer version of the game.";
-                button.SetActive(true);
-                buttonExit.SetActive(true);
+                buttonLabel.text = "Open itch.io Page";
             }
         }
-        catch (Exception ex)
-        {
-            textbox.GetComponent<TextMeshProUGUI>().text = "Something went wrong!\nTry reinstalling the game:";
-            button.SetActive(true);
-            buttonExit.SetActive(true);
-        }
+        if (buttonExit != null) buttonExit.SetActive(true);
     }
 
+    private void SetText(string text)
+    {
+        if (textbox != null) textbox.GetComponent<TextMeshProUGUI>().text = text;
+    }
+
+    // Named to match the scene's existing Button.OnClick() persistent binding on "button" (left
+    // over from the old Google-Drive flow, where this opened the download page the same way) -
+    // Unity silently drops a persistent call whose target method no longer exists, so renaming
+    // this would silently break the click with no visible error, in both Editor and builds.
     public void Download()
     {
-        if (isAndroid)
-        {
-            Application.OpenURL(updateLinkAndroid);
-        }
-        else
-        {
-            Application.OpenURL(updateLinkWindows);
-        }
+        AudioController.PlaySound("click");
+        Application.OpenURL(itchPageUrl);
     }
 
     public void ExitButton()
     {
+        AudioController.PlaySound("click");
         Application.Quit();
     }
 }

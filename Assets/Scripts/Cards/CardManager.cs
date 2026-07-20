@@ -25,12 +25,31 @@ public class CardManager : MonoBehaviour
     public delegate IEnumerator OnDeathEvent(int index = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null, CardStats thisStats = null);
     public delegate bool CheckSpellTarget(int target = 0, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
     public delegate bool CheckSpellTargets(List<int> targets = null, List<BoardManager.Slot> enemy = null, List<BoardManager.Slot> friendly = null);
+
+    // Global broadcast triggers - unlike every delegate above (which only fires for the specific
+    // card instance the effect belongs to), these fire on EVERY minion on the board that has the
+    // matching field set, whenever the named event happens anywhere in the game (see
+    // GameController.FireCardPlayedTrigger/FireUnitEntersTrigger/FireUnitDiesTrigger/
+    // FireCardDrawnTrigger/FireCardDiscardedTrigger). triggeredUnit is always the listening minion
+    // itself (the one whose passive is firing) - the "which unit do I buff?" reference - while
+    // enteredMinion/diedMinion is the (possibly different, possibly the same) minion that caused
+    // the event.
+    public delegate IEnumerator OnCardPlayedTrigger(MinionManager triggeredUnit, CardTypes playedCardType, bool playedIsSpell, bool playedCardFriendly, List<BoardManager.Slot> enemy, List<BoardManager.Slot> friendly);
+    public delegate IEnumerator OnUnitEntersTrigger(MinionManager triggeredUnit, int enteredIndex, CardTypes enteredCardType, bool enteredFriendly, MinionManager enteredMinion, List<BoardManager.Slot> enemy, List<BoardManager.Slot> friendly);
+    public delegate IEnumerator OnUnitDiesTrigger(MinionManager triggeredUnit, int diedIndex, CardTypes diedCardType, bool diedFriendly, MinionManager diedMinion, List<BoardManager.Slot> enemy, List<BoardManager.Slot> friendly);
+    public delegate IEnumerator OnCardDrawnTrigger(MinionManager triggeredUnit, CardTypes cardType, bool cardFriendly, List<BoardManager.Slot> enemy, List<BoardManager.Slot> friendly);
+    public delegate IEnumerator OnCardDiscardedTrigger(MinionManager triggeredUnit, CardTypes cardType, bool cardFriendly, List<BoardManager.Slot> enemy, List<BoardManager.Slot> friendly);
     public class CardStats
     {
         public string name = "default-name";
         public string description = "default-description";
         public int power = 1;
         public bool isSpell = false;
+        // False (default): casting this spell plays the generic "cast_spell" sound. True: that
+        // default is suppressed - the spell's own Realization coroutine is responsible for
+        // playing whatever sound(s) it wants itself (see Kacheek's GiveFang/Nutrition, which
+        // already play "kacheek_ability" on their own).
+        public bool hasOwnSound = false;
         public bool canAttack = true;
         public bool canDealDamage = true;
         public bool hasHaste = false;
@@ -74,6 +93,10 @@ public class CardManager : MonoBehaviour
         public bool hexproof = false;
         public bool cycling = false;
         public bool blockEffects = false;
+        // While a minion with this is alive on either side, GameController.SpellsAreBlocked()
+        // returns true and neither player can cast spells (cycling and hasOnPlaySpell minions
+        // are unaffected - see Slogturtle).
+        public bool blockSpells = false;
         public int ephemeral = -1;
         public bool giveCyclingToCardsInHand = false;
         public int cardsDrawnByThis = 0;
@@ -88,6 +111,13 @@ public class CardManager : MonoBehaviour
         public string onDeathSound = null;
 
         public int firstTurnToPlay = 0;
+
+        // Global broadcast triggers - see the delegate declarations above CardStats for details.
+        public OnCardPlayedTrigger onCardPlayedTrigger = null;
+        public OnUnitEntersTrigger onUnitEntersTrigger = null;
+        public OnUnitDiesTrigger onUnitDiesTrigger = null;
+        public OnCardDrawnTrigger onCardDrawnTrigger = null;
+        public OnCardDiscardedTrigger onCardDiscardedTrigger = null;
 
         public Sprite GetSprite()
         {
@@ -128,10 +158,15 @@ public class CardManager : MonoBehaviour
         {
             CardStats newStats = new()
             {
+                name = this.name,
+                description = this.description,
+                power = this.power,
                 isSpell = this.isSpell,
+                hasOwnSound = this.hasOwnSound,
                 canAttack = this.canAttack,
                 canDealDamage = this.canDealDamage,
                 hasHaste = this.hasHaste,
+                pacifism = this.pacifism,
                 hasShield = this.hasShield,
                 hasGreatshield = this.hasGreatshield,
                 limitedVision = this.limitedVision,
@@ -149,18 +184,29 @@ public class CardManager : MonoBehaviour
                 hasAfterPlayEvent = this.hasAfterPlayEvent,
                 isStatic = this.isStatic,
                 healthCost = this.healthCost,
+                poisoned = this.poisoned,
                 hexproof = this.hexproof,
                 cycling = this.cycling,
                 onCycleEvent = this.onCycleEvent,
                 onCycleOtherEvent = this.onCycleOtherEvent,
                 onAttackEvent = this.onAttackEvent,
                 blockEffects = this.blockEffects,
+                blockSpells = this.blockSpells,
                 ephemeral = this.ephemeral,
                 onDamageEvent = this.onDamageEvent,
                 giveCyclingToCardsInHand = this.giveCyclingToCardsInHand,
                 cardsDrawnByThis = this.cardsDrawnByThis,
                 lifelinkedTo = this.lifelinkedTo,
                 lifelinkMeTo = this.lifelinkMeTo,
+                suppressOnPlay = this.suppressOnPlay,
+                artistName = this.artistName,
+                firstTurnToPlay = this.firstTurnToPlay,
+
+                onCardPlayedTrigger = this.onCardPlayedTrigger,
+                onUnitEntersTrigger = this.onUnitEntersTrigger,
+                onUnitDiesTrigger = this.onUnitDiesTrigger,
+                onCardDrawnTrigger = this.onCardDrawnTrigger,
+                onCardDiscardedTrigger = this.onCardDiscardedTrigger,
 
                 connectedCards = new List<CardTypes>()
             };
@@ -213,6 +259,24 @@ public class CardManager : MonoBehaviour
             newStats.onPlaySound = this.onPlaySound;
             newStats.onDeathSound = this.onDeathSound;
 
+            newStats.additionalKeywords = new List<string>();
+            foreach (string keyword in this.additionalKeywords)
+            {
+                newStats.additionalKeywords.Add(keyword);
+            }
+
+            newStats.additionalRules = new List<string>();
+            foreach (string rule in this.additionalRules)
+            {
+                newStats.additionalRules.Add(rule);
+            }
+
+            newStats.relevantCards = new List<CardTypes>();
+            foreach (CardTypes ct in this.relevantCards)
+            {
+                newStats.relevantCards.Add(ct);
+            }
+
             return newStats;
         }
     }
@@ -250,6 +314,21 @@ public class CardManager : MonoBehaviour
     public GameObject lockObject;
     public List<GameObject> runeObjects;
 
+    // Optional - a full-card gray/grayscale overlay shown only for cards the player doesn't own
+    // at all (see SetPlaceabilityIndicators), which Show All Cards can now put on screen (see
+    // CollectionControl.GetBrowsableCards). Starts deactivated in the prefab; left unwired, this
+    // is simply never toggled - no editor change forced on existing CardManager setups. Kept
+    // separate from backObject's own rune-blocked tint so "not owned" and "owned but rune-
+    // mismatched" stay visually distinguishable from each other, not just from "placeable".
+    public GameObject grayTiltObject;
+
+    // Optional - drag the project's single UITheme asset here to color the rune-blocked tint on
+    // backObject (see SetPlaceabilityIndicators). Falls back to a hardcoded gray if unassigned.
+    public UITheme uiTheme;
+    private CollectionControl collectionControl;
+    private Color backObjectDefaultColor;
+    private bool backObjectDefaultColorCaptured = false;
+
     public Material spearMaterial;
     public Material shieldMaterial;
     public Material bowMaterial;
@@ -276,6 +355,17 @@ public class CardManager : MonoBehaviour
     public List<int> spellTargets;
     private BoardManager.Slot slotToPlay;
     private float curRotation;
+
+    // Set/cleared by GameController.QueueData.ApplyEffect() around a hasOnPlaySpell card's spell
+    // coroutine - lets that ability optionally redirect where its own card ends up (see Aiton)
+    // before BoardManager.PlayCard actually places it, without changing the stats.spell delegate
+    // signature every other card already relies on. Most abilities never touch this.
+    public static CardManager CurrentlyResolvingOnPlayCard = null;
+
+    public void SetSlotToPlay(BoardManager.Slot slot)
+    {
+        slotToPlay = slot;
+    }
     
     private BoardManager boardManager;
     private HandManager handManager;
@@ -316,6 +406,16 @@ public class CardManager : MonoBehaviour
             numberOfCardsText.GetComponent<TextMeshPro>().text = "1x";
         }
         lockObject.SetActive(false);
+        if (grayTiltObject != null)
+        {
+            grayTiltObject.SetActive(false);
+        }
+
+        GameObject collectionObj = GameObject.Find("Collection");
+        if (collectionObj != null)
+        {
+            collectionControl = collectionObj.GetComponent<CollectionControl>();
+        }
     }
 
     private BoardManager.Slot SelectClosestSlot()
@@ -346,21 +446,7 @@ public class CardManager : MonoBehaviour
             }
         }
 
-        if (cardStats.HaveCycling() && handManager.CanCycleCard())
-        {
-            // Check if this card can be cycled
-            float distanceToCycle = Mathf.Abs(transform.position.x - boardManager.cyclingSlot.GetPosition().x);
-            if (minDistance == -1f || minDistance > distanceToCycle || (distanceToCycle < 0.8f * minDistance && transform.position.y < 4f))
-            {
-                closestSlot = boardManager.cyclingSlot;
-            }
-        }
-
-        if (closestSlot == boardManager.cyclingSlot)
-        {
-            closestSlot.Highlight(true);
-        }
-        else if (closestSlot != null && closestSlot.GetFree())
+        if (closestSlot != null && closestSlot.GetFree())
         {
             closestSlot.Highlight(true);
         }
@@ -388,8 +474,18 @@ public class CardManager : MonoBehaviour
         }
     }
 
+    // Called back by GameController once the player confirms the "Cycle this card?" prompt (see
+    // RequestCycleConfirmation) - the right-click that opened the prompt happens from CardState.
+    // inHand, so there's no drag/selection state to unwind first, unlike the old drag-to-corner
+    // gesture this replaces.
+    public void ConfirmCycle()
+    {
+        CycleProcedure();
+    }
+
     private void CycleProcedure()
     {
+        AudioController.PlaySound("card_shuffle");
         handManager.RemoveCard(GetIndexIHand());
         handManager.SetCanCycleCard(false);
         CursorController.cursorState = CursorController.CursorStates.Free;
@@ -501,9 +597,9 @@ public class CardManager : MonoBehaviour
                     transform.position = Vector3.Lerp(transform.position, new Vector3(positionInHand.x, selectedY, selectedZ), 30f * Time.deltaTime);
                     transform.rotation = Quaternion.Euler(0, 0, 0);
 
-                    if (Input.GetMouseButtonDown(0) && (handManager.CanPlayCard() || (handManager.CanCycleCard() && cardStats.HaveCycling())))
+                    if (Input.GetMouseButtonDown(0) && handManager.CanPlayCard())
                     {
-                        if (cardStats.isSpell && cardStats.numberOfTargets > 0 && !cardStats.HaveCycling())
+                        if (cardStats.isSpell && cardStats.numberOfTargets > 0)
                         {
                             cardState = CardState.selectingTargets;
                         }
@@ -513,6 +609,14 @@ public class CardManager : MonoBehaviour
                         }
                         CursorController.cursorState = CursorController.CursorStates.Select;
                         spellTargets = new List<int>();
+                    }
+
+                    // Right-click a cyclable card to ask "Cycle this card?" instead of the old
+                    // drag-to-bottom-right-corner gesture (crowded, error-prone alongside the HUD
+                    // stats there) - see GameController.RequestCycleConfirmation/OnGUI.
+                    if (Input.GetMouseButtonDown(1) && handManager.CanCycleCard() && cardStats.HaveCycling())
+                    {
+                        gameController.RequestCycleConfirmation(this);
                     }
                 }
                 else
@@ -588,27 +692,18 @@ public class CardManager : MonoBehaviour
                     closestSlot = SelectClosestSlot();
                 }
                 else if (cardStats.isSpell)
-                {    
+                {
 
-                    boardManager.cyclingSlot.Highlight(false);
-                    if (cardStats.HaveCycling() && handManager.CanCycleCard())
-                    {
-                        closestSlot = boardManager.cyclingSlot;
-                        closestSlot.Highlight(true);
-                    }
-
-                    // There's a chance a player can't play a card, but the card has cycling   
                     if (transform.position.y > 2f && !handManager.CanPlayCard())
                     {
                         ReturnToHand();
                     }
                     else if (transform.position.y > 2f && cardStats.numberOfTargets > 0)
                     {
-                        boardManager.cyclingSlot.Highlight(false);
                         cardState = CardState.selectingTargets;
                     }
 
-                    if (cardStats.numberOfTargets == 0 || cardStats.HaveCycling())
+                    if (cardStats.numberOfTargets == 0)
                     {
                         FollowMouse(scale:true);
                     }
@@ -625,16 +720,11 @@ public class CardManager : MonoBehaviour
 
                 if (Input.GetMouseButtonDown(0))
                 {
-                    float distanceToCycle = Mathf.Abs(transform.position.x - boardManager.cyclingSlot.GetPosition().x);
                     if (!cardStats.isSpell && !cardStats.hasOnPlaySpell)
                     {
                         if (closestSlot == null)
                         {
                             ReturnToHand();
-                        }
-                        else if (closestSlot == boardManager.cyclingSlot && handManager.CanCycleCard() && distanceToCycle < 2f)
-                        {
-                            CycleProcedure();
                         }
                         else if (handManager.CanPlayCard())
                         {
@@ -643,9 +733,9 @@ public class CardManager : MonoBehaviour
                     }
                     else if (cardStats.isSpell)
                     {
-                        if (cardStats.HaveCycling() && distanceToCycle < 2f)
+                        if (gameController.SpellsAreBlocked())
                         {
-                            CycleProcedure();
+                            ReturnToHand();
                         }
                         else if (cardStats.numberOfTargets == 0 && transform.position.y > 2f)
                         {
@@ -661,10 +751,6 @@ public class CardManager : MonoBehaviour
                         if (closestSlot == null)
                         {
                             ReturnToHand();
-                        }
-                        else if (closestSlot == boardManager.cyclingSlot && handManager.CanCycleCard() && distanceToCycle < 2f)
-                        {
-                            CycleProcedure();
                         }
                         else if (handManager.CanPlayCard())
                         {
@@ -728,7 +814,13 @@ public class CardManager : MonoBehaviour
 
                 if (spellTargets.Count >= cardStats.numberOfTargets)
                 {
-                    if (cardStats.checkSpellTargets(spellTargets, boardManager.enemySlots, boardManager.friendlySlots))
+                    // isSpell only, not hasOnPlaySpell - a card that blocks spells (e.g.
+                    // Slogturtle) doesn't stop minions with on-play triggers from being played.
+                    if (cardStats.isSpell && gameController.SpellsAreBlocked())
+                    {
+                        ReturnToHand();
+                    }
+                    else if (cardStats.checkSpellTargets(spellTargets, boardManager.enemySlots, boardManager.friendlySlots))
                     {
                         PlayCard(closestSlot:slotToPlay, spell:true);
                     }
@@ -792,18 +884,24 @@ public class CardManager : MonoBehaviour
                 break;
 
             case CardState.display:
-                int limitInDeck = DeckManager.collection[cardType];
-                if (limitInDeck > 3)
+                // lockObject now reflects BOTH reasons a card can't be added (copy/deck-limit,
+                // same as before, and rune mismatch) - backObject additionally tints gray for the
+                // rune-mismatch case specifically, so the two reasons stay visually distinguishable.
+                // Recomputed every frame this card is on display, so it stays correct as the
+                // player edits runes without any external refresh call.
+                if (collectionControl != null)
                 {
-                    limitInDeck = 3;
-                }
-                if (DeckManager.GetCardQty(this.cardType) < limitInDeck)
-                {
-                    lockObject.SetActive(false);
+                    int ownedCopies = DeckManager.collection.TryGetValue(cardType, out int ownedQty) ? ownedQty : 0;
+                    SetPlaceabilityIndicators(collectionControl.GetPlaceability(cardType), owned: ownedCopies > 0);
                 }
                 else
                 {
-                    lockObject.SetActive(true);
+                    int limitInDeck = DeckManager.collection[cardType];
+                    if (limitInDeck > 3)
+                    {
+                        limitInDeck = 3;
+                    }
+                    lockObject.SetActive(DeckManager.GetCardQty(this.cardType) >= limitInDeck);
                 }
                 Scene scene = SceneManager.GetActiveScene();
                 if (scene.name == "Collection")
@@ -835,42 +933,11 @@ public class CardManager : MonoBehaviour
                             if (DeckManager.CheckCardNumber(cardType) && DeckManager.GetDeckSize() + 1 <= DeckManager.minDeckSize)
                             {
                                 CollectionControl collection = GameObject.Find("Collection").GetComponent<CollectionControl>();
-                                
-                                int tmpSpear = collection.spearDevotion;
-                                int tmpShield = collection.shieldDevotion;
-                                int tmpBow = collection.bowDevotion;
+                                bool bad = collection.GetPlaceability(cardType) != CollectionControl.CardPlaceability.Placeable;
 
-                                bool bad = false;
-                                if (DeckManager.GetCardQty(cardType) >= DeckManager.collection[cardType])
-                                {
-                                    bad = true;
-                                }
-
-
-                                foreach (Runes rune in cardStats.runes)
-                                {
-                                    if (rune == Runes.Spear)
-                                    {
-                                        tmpSpear--;
-                                    }
-                                    else if (rune == Runes.Shield)
-                                    {
-                                        tmpShield--;
-                                    }
-                                    else if (rune == Runes.Bow)
-                                    {
-                                        tmpBow--;
-                                    }
-
-                                    if (tmpBow < 0 || tmpShield < 0 || tmpSpear < 0)
-                                    {
-                                        bad = true;
-                                        break;
-                                    }
-                                }
-                                
                                 if (DEBUG || !bad)
                                 {
+                                    AudioController.PlaySound("card_shuffle");
                                     DeckManager.AddCard(cardType);
                                     collection.ShowDeck();
                                     CardManager collectionCard = GameObject.Instantiate(cardPrefab).GetComponent<CardManager>();
@@ -916,8 +983,9 @@ public class CardManager : MonoBehaviour
                         newEvent.targets = spellTargets;
                         newEvent.friendlySlots = boardManager.friendlySlots;
                         newEvent.enemySlots = boardManager.enemySlots;
+                        newEvent.fromAbilityOption = true;
                         GameController.eventQueue.Insert(0, newEvent);
-                        
+
                         // Cast spell
                         //StartCoroutine(cardStats.spell(spellTargets, boardManager.enemySlots, boardManager.friendlySlots));
                         spellTargets = new List<int>();
@@ -1034,6 +1102,20 @@ public class CardManager : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
+        // Arrow instances create their own independent GameObjects (arrow head + trail balls)
+        // at the scene root rather than as children of this card, so destroying the card alone
+        // never cleans them up - every destruction path must do it here, since not every caller
+        // of DestroyCard() remembers to clear arrowList itself first.
+        if (arrowList != null)
+        {
+            foreach (Arrow arrow in arrowList)
+            {
+                arrow.DestroyArrow();
+            }
+            curArrow = null;
+            arrowList = null;
+        }
+
         Destroy(gameObject);
 
         yield return null;
@@ -1142,6 +1224,43 @@ public class CardManager : MonoBehaviour
     {
         cardDescription = description;
         descriptionObject.GetComponent<TextMeshPro>().text = description;
+    }
+
+    // Collection/deck-builder grid only. lockObject shows for any blocked reason (copy/deck-
+    // limit, rune mismatch, or not owned at all). For rune-mismatch specifically, retint
+    // backObject - the semi-transparent gray backing every card already has (normally used to dim
+    // alreadyPlayed cards in-game, always visible/full-card-sized in the Collection grid) -
+    // instead of a separate overlay object; this avoids the transparent-art-bleed problem a direct
+    // imageObject tint had (tinting a sprite's RGB doesn't add opacity to its already-transparent
+    // pixels, so it never actually masked anything). For not-owned specifically, show
+    // grayTiltObject instead - a distinct indicator so "you don't own this at all" doesn't read
+    // the same as "you own it but it doesn't fit your current runes".
+    public void SetPlaceabilityIndicators(CollectionControl.CardPlaceability placeability, bool owned = true)
+    {
+        lockObject.SetActive(placeability != CollectionControl.CardPlaceability.Placeable);
+
+        if (grayTiltObject != null)
+        {
+            grayTiltObject.SetActive(!owned);
+        }
+
+        if (backObject == null)
+        {
+            return;
+        }
+        SpriteRenderer backRenderer = backObject.GetComponent<SpriteRenderer>();
+        if (backRenderer == null)
+        {
+            return;
+        }
+        if (!backObjectDefaultColorCaptured)
+        {
+            backObjectDefaultColor = backRenderer.color;
+            backObjectDefaultColorCaptured = true;
+        }
+        backRenderer.color = placeability == CollectionControl.CardPlaceability.BlockedByRunes
+            ? (uiTheme != null ? uiTheme.cardBlockedByRunes : new Color(0.2f, 0.2f, 0.2f, 0.85f))
+            : backObjectDefaultColor;
     }
     public void SetPositionInHand(Vector3 newPosition)
     {

@@ -12,7 +12,7 @@ public class MushroomStats : MonoBehaviour
         stats.power = 4;
         stats.description = "<b>Start of turn</b>: <b>Poison</b> the adjacent units, then deal " + selfDamage.ToString() + " damage to itself.";
         stats.name = "Mushroom";
-        stats.runes.Add(Runes.Bow);
+        //stats.runes.Add(Runes.Bow);
         stats.canAttack = false;
         stats.canDealDamage = false;
         stats.limitedVision = true;
@@ -43,7 +43,7 @@ public class MushroomStats : MonoBehaviour
 
         stats.startTurnEvent = StartTurn;
 
-        stats.imagePath = "mushroom";
+        stats.imagePath = "Mushroom_hq";
         return stats;
     }
 }

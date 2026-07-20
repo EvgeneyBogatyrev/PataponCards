@@ -16,6 +16,8 @@ public static class PanThePakaponStats
         //stats.descriptionSize = 3;
         stats.nameSize = 5;
 
+        stats.onPlaySound = "pan_pakapon";
+
         stats.giveCyclingToCardsInHand = true;
 
         stats.additionalKeywords.Add("Cycling");

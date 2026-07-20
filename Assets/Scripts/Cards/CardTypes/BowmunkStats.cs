@@ -18,6 +18,8 @@ public static class BowmunkStats
 
         stats.relevantCards.Add(CardTypes.Boulder);
 
+        stats.onPlaySound = "Bowmunk";
+
 
         static IEnumerator BowmunkEndTurn(int index, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
@@ -93,7 +95,7 @@ public static class BowmunkStats
         stats.dummyTarget = true;
 
         stats.imagePath = "bowmunk_hq";
-        stats.artistName = "Official render";
+        stats.artistName = "Screenshot from the game";
         return stats;
     }
 }

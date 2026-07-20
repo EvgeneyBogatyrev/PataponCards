@@ -19,6 +19,8 @@ public class RantanStats : MonoBehaviour
         
         stats.hasOnPlaySpell = true;
 
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
+
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             // Restore Health

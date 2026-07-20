@@ -23,7 +23,8 @@ public static class KacheekStats
 
         stats.imagePath = "kacheek_hq";
         stats.onPlaySound = "kacheek";
-        stats.artistName = "Official render";
+        stats.onDeathSound = "kacheek_death";
+        stats.artistName = "NIKI100";
         return stats;
     }
 }
@@ -40,6 +41,7 @@ public static class GiveFangStats
         stats.name = "Drop Fang";
 
         stats.isSpell = true;
+        stats.hasOwnSound = true;
         static IEnumerator GiveFangRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
             MinionManager host;
@@ -50,6 +52,11 @@ public static class GiveFangStats
             else
             {
                 host = friendlySlots[targets[0] - 1].GetConnectedMinion();
+            }
+
+            if (host.GetPower() > giveFangHealthCost)
+            {
+                AudioController.PlaySound("kacheek_ability");
             }
 
             host.LoseLife(giveFangHealthCost);
@@ -70,7 +77,8 @@ public static class GiveFangStats
         stats.numberOfTargets = 0;
         stats.damageToHost = giveFangHealthCost;
 
-        stats.imagePath = "fang_hq";
+        stats.artistName = "Evgeney Bogatyrev";
+        stats.imagePath = "fang_hq_upd";
         return stats;
     }
 }
@@ -92,6 +100,7 @@ public static class NutritionStats
 
         static IEnumerator NutritionRealization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
         {
+            
             MinionManager host;
             if (targets[0] < 0)
             {
@@ -100,6 +109,11 @@ public static class NutritionStats
             else
             {
                 host = friendlySlots[targets[0] - 1].GetConnectedMinion();
+            }
+
+            if (host.GetPower() > nutritionHealthCost)
+            {
+                AudioController.PlaySound("kacheek_ability");
             }
 
             host.LoseLife(nutritionHealthCost);
@@ -119,6 +133,7 @@ public static class NutritionStats
         stats.damageToHost = nutritionHealthCost;
 
         stats.imagePath = "nutrition_hq";
+        stats.artistName = "NIKI100";
         return stats;
     }
 }

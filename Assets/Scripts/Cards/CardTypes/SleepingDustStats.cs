@@ -8,10 +8,12 @@ public static class SleepingDustStats
     {
         CardManager.CardStats stats = new CardManager.CardStats();
 
-        stats.description = "Return target non-Hatapon, non-Kharma unit to its contoller's hand.";
+        stats.description = "Return target non-Hatapon, non-Kharma unit to its controller's hand.";
         stats.name = "Sleeping Dust";
         
         stats.nameSize = 4;
+
+        stats.hasOwnSound = true;
 
         stats.isSpell = true;
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -21,6 +23,8 @@ public static class SleepingDustStats
             HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
             
             BoardManager.Slot targetSlot;
+
+            AudioController.PlaySound("Kharma_dust");
 
             int target = targets[0];
             if (target > 0)
@@ -79,7 +83,7 @@ public static class SleepingDustStats
         stats.spell = Realization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "sleeping_dust";
+        stats.imagePath = "Sleeping_dust_hq";
         return stats;
     }
 }

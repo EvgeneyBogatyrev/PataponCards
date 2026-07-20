@@ -10,7 +10,7 @@ public static class HuntingSpiritStats
 
         const int drawAmount = 3;
         
-        stats.description = "Draw " + drawAmount.ToString() + " cards. At the end of your next turn they will be discarded.";
+        stats.description = "Draw " + drawAmount.ToString() + " cards. At the end of your next turn, they will be discarded.";
         stats.name = "Hunting Spirit";
 
         //stats.nameSize = 4;

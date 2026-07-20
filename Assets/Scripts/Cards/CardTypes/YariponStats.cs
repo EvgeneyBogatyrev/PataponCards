@@ -9,10 +9,12 @@ public static class YariponStats
         CardManager.CardStats stats = new CardManager.CardStats();
         const int yariponDamage = 2;
 
-        stats.power = 3;
+        stats.power = 2;
         stats.description = "<b>End of turn</b>: Deal " + yariponDamage.ToString() + " damage to an enemy unit next to it.";
         stats.name = "Yaripon";
-        stats.imagePath = "yaripon";
+        stats.imagePath = "yaripon_hq";
+
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
         
         stats.runes.Add(Runes.Spear);
 
@@ -39,6 +41,7 @@ public static class YariponStats
                     yield return new WaitForSeconds(0.1f);
                 }
 
+                AudioController.PlaySound("spear");
                 spear.DestroySelf();
 
                 

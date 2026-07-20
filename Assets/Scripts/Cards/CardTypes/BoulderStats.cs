@@ -13,9 +13,9 @@ public static class BoulderStats
         stats.name = "The Boulder";
         stats.pacifism = true;
         stats.hasShield = true;
-        stats.runes.Add(Runes.Shield);
 
-        stats.imagePath = "boulder";
+        stats.imagePath = "Boulder_hq";
+        stats.artistName = "Screenshot from the game";
         return stats;
     }
 }

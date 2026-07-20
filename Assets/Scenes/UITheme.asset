@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a86c3c39e45bf14e8bc860038378d00, type: 3}
+  m_Name: UITheme
+  m_EditorClassIdentifier: 
+  background: {r: 0.10902458, g: 0.11190594, b: 0.13207549, a: 1}
+  surface: {r: 0.6476949, g: 0.6698113, b: 0.653725, a: 1}
+  primary: {r: 0.86, g: 0.71, b: 0.3, a: 1}
+  primaryHover: {r: 0.93, g: 0.79, b: 0.4, a: 1}
+  primaryPressed: {r: 0.74, g: 0.59, b: 0.2, a: 1}
+  danger: {r: 0.75, g: 0.2, b: 0.2, a: 1}
+  dangerHover: {r: 0.85, g: 0.28, b: 0.28, a: 1}
+  textPrimary: {r: 0.96, g: 0.96, b: 0.96, a: 1}
+  textMuted: {r: 0.7, g: 0.7, b: 0.74, a: 1}
+  inputFieldBackground: {r: 0.97, g: 0.95, b: 0.9, a: 1}
+  textOnLight: {r: 0, g: 0, b: 0, a: 1}
+  textOnLightMuted: {r: 0.5, g: 0.46, b: 0.4, a: 1}
+  spear: {r: 0.72, g: 0.2, b: 0.2, a: 1}
+  shield: {r: 0.22, g: 0.45, b: 0.75, a: 1}
+  bow: {r: 0.25, g: 0.65, b: 0.35, a: 1}
+  neutral: {r: 0.55, g: 0.55, b: 0.55, a: 1}
+  cardBlockedByRunes: {r: 0.45, g: 0.45, b: 0.45, a: 1}
+  cornerRadiusPx: 18
+  spriteSizePx: 128
+  spriteBorderPx: 24
+  font: {fileID: 0}
+  buttonNormal: {fileID: 21300000, guid: aa9590b140b80eb4aa6db284c60e9edf, type: 3}
+  buttonHover: {fileID: 21300000, guid: cdf487c4d426f5c448cbdeb8f52a4fb1, type: 3}
+  buttonPressed: {fileID: 21300000, guid: 0a02ade9a18085e459138a3c145f4926, type: 3}
+  buttonDanger: {fileID: 21300000, guid: 93a08bad7235aa840bbd046c9b2118e7, type: 3}
+  panel: {fileID: 21300000, guid: 7453b47d1c24f0e489665d9f4d8c1296, type: 3}
+  inputField: {fileID: 21300000, guid: a7997b0faaacf354a8d283b2ddb60efb, type: 3}
+  cardSlot: {fileID: 21300000, guid: 15d31fd142f41734390c06aaedff59d1, type: 3}

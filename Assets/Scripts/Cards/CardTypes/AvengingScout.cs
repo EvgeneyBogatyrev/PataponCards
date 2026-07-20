@@ -7,12 +7,14 @@ public static class AvengingScoutStats
     public static CardManager.CardStats GetStats()
     {
         CardManager.CardStats stats = new CardManager.CardStats();
-        stats.power = 4;
-        stats.description = "<b>On death:</b> Deal X damage to the strongest enemy unit, where X is your <b>Devotion to Spear</b>.";
+        stats.power = 2;
+        stats.description = "<b>On death:</b> Deal X + 2 damage to the strongest enemy unit, where X is your <b>Devotion to Spear</b>.";
         stats.name = "Avenging Scout";
         stats.runes.Add(Runes.Spear);
 
         stats.additionalKeywords.Add("Devotion deck");
+
+        stats.onPlaySound = "patapon_sound_" + UnityEngine.Random.Range(1, 5);
         
        
         stats.hasOnDeath = true;
@@ -37,7 +39,7 @@ public static class AvengingScoutStats
             {
                 bool enemy = enemySlots[1].GetFriendly();
                 int devotion = DeckManager.GetDeckDevotion(Runes.Spear, enemy);
-                selectedMinion.ReceiveDamage(devotion);
+                selectedMinion.ReceiveDamage(devotion + 2);
             }
             gameController.actionIsHappening = false;
             yield return null;

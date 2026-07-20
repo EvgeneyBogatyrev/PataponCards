@@ -13,7 +13,7 @@ public static class BackToHideoutStats
         stats.runes.Add(Runes.Bow);
         stats.nameSize = 4;
 
-        stats.additionalKeywords.Add("Remove doesn't trigger death");
+        stats.additionalKeywords.Add("Removal doesn't trigger death effects");
 
         stats.isSpell = true;
         static IEnumerator Realization(List<int> targets, List<BoardManager.Slot> enemySlots, List<BoardManager.Slot> friendlySlots)
@@ -80,7 +80,7 @@ public static class BackToHideoutStats
         stats.spell = Realization;
         stats.numberOfTargets = 1;
 
-        stats.imagePath = "BackToHideout";
+        stats.imagePath = "Back_to_hideout_hq";
         return stats;
     }
 }
