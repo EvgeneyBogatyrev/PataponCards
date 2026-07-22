@@ -33,6 +33,14 @@ public class InfoSaver
     // MainMenuController.Start() so the "just logged in" jingle only plays on that specific
     // transition, not every time the player later returns to MainMenu from a match/Collection/etc.
     public static bool justLoggedIn = false;
+
+    // Set by FriendsPanelController.SpectateFriend() right before loading the Game scene directly
+    // (no DeckSelect/Lobby/mulligan - a spectator has no deck of their own to pick). While true,
+    // myHash/opponentHash are repurposed to mean "the spectated friend" / "their opponent" rather
+    // than "me" / "my opponent" - see HandManager, ServerDataProcesser, GameController for the
+    // spectator-specific branches this gates. Reset to false in GameController.EndGame() so a
+    // later normal match never inherits it.
+    public static bool isSpectator = false;
 }
 
 public class QueueData
@@ -436,6 +444,12 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private GameObject opponentNicknameText;
 
+    // Captured once at Start() so the turn highlight below has a real color to revert to
+    // instead of hardcoding white over whatever these labels were actually authored with.
+    private Color myNicknameDefaultColor;
+    private Color opponentNicknameDefaultColor;
+    private static readonly Color TurnHighlightColor = new Color(0.3f, 0.85f, 0.35f);
+
 
     public GameState gameState = new GameState();
 
@@ -504,11 +518,19 @@ public class GameController : MonoBehaviour
 
         if (myNicknameText != null)
         {
-            myNicknameText.GetComponent<TextMeshProUGUI>().text = PlayerProfile.Nickname;
+            // A spectator has no identity of their own on the "friendly" side - it's the
+            // spectated friend's name that belongs here, not the viewer's own account. Shown as
+            // a placeholder ("Player") until ServerDataProcesser.FetchFriendlyNickname resolves
+            // it, the same pattern opponentNicknameText already uses below.
+            TextMeshProUGUI myLabel = myNicknameText.GetComponent<TextMeshProUGUI>();
+            myLabel.text = InfoSaver.isSpectator ? ServerDataProcesser.instance.FriendlyNickname : PlayerProfile.Nickname;
+            myNicknameDefaultColor = myLabel.color;
         }
         if (opponentNicknameText != null)
         {
-            opponentNicknameText.GetComponent<TextMeshProUGUI>().text = InfoSaver.onlineBattle ? "Opponent" : "Bot";
+            TextMeshProUGUI opponentLabel = opponentNicknameText.GetComponent<TextMeshProUGUI>();
+            opponentLabel.text = InfoSaver.onlineBattle ? "Opponent" : "Bot";
+            opponentNicknameDefaultColor = opponentLabel.color;
         }
 
         StartCoroutine(QueueProcess());
@@ -537,8 +559,26 @@ public class GameController : MonoBehaviour
             RequestConcedeConfirmation();
         }
 
+        // Highlights whichever side's turn it currently is - applies in every in-game mode
+        // (bot matches, real 2-player matches, and spectating alike), not just online battles,
+        // so it sits outside the InfoSaver.onlineBattle block below.
+        if (myNicknameText != null && opponentNicknameText != null)
+        {
+            myNicknameText.GetComponent<TextMeshProUGUI>().color = playerTurn ? TurnHighlightColor : myNicknameDefaultColor;
+            opponentNicknameText.GetComponent<TextMeshProUGUI>().color = playerTurn ? opponentNicknameDefaultColor : TurnHighlightColor;
+        }
+
         if (InfoSaver.onlineBattle && ServerDataProcesser.instance != null)
         {
+            if (myNicknameText != null && InfoSaver.isSpectator)
+            {
+                TextMeshProUGUI myNicknameLabel = myNicknameText.GetComponent<TextMeshProUGUI>();
+                if (myNicknameLabel.text != ServerDataProcesser.instance.FriendlyNickname)
+                {
+                    myNicknameLabel.text = ServerDataProcesser.instance.FriendlyNickname;
+                }
+            }
+
             if (opponentNicknameText != null)
             {
                 TextMeshProUGUI opponentNicknameLabel = opponentNicknameText.GetComponent<TextMeshProUGUI>();
@@ -773,7 +813,26 @@ public class GameController : MonoBehaviour
             {
                 QueueData tmpQueue = GameController.eventQueue[0];
                 GameController.eventQueue.RemoveAt(0);
-                tmpQueue.ApplyEffect();
+                // ApplyEffect() runs a card's own effect coroutine - StartCoroutine() executes
+                // that coroutine's synchronous prefix (everything before its first yield)
+                // inline, right here, so an exception anywhere in that prefix (a bad index, a
+                // missing component on a freshly-instantiated animation object, etc.) would
+                // otherwise propagate straight out of this call and kill QueueProcess() itself.
+                // Since this coroutine is what drains eventQueue for every reactive trigger in
+                // the game, that silently freezes the whole match for this client alone - no
+                // error banner, no further effects, turns never advance - previously seen with
+                // Gong the Hawkeye's on-attack tornado on one specific client. Catching here
+                // converts that into the same visible, diagnosable halt already used for a
+                // desynced opponent action, instead of a silent hang.
+                try
+                {
+                    tmpQueue.ApplyEffect();
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError("Effect failed while processing queued action " + tmpQueue.actionType + ": " + ex);
+                    HaltForDesync("An effect could not be applied (" + tmpQueue.actionType + "). The match has been halted.");
+                }
                 yield return new WaitForSeconds(secondsBetweenAnimations);
             }
 
@@ -952,11 +1011,27 @@ public class GameController : MonoBehaviour
 
     public void StartGame()
     {
+        // Lets a friend's FriendsPanelController offer a Spectate button while this match is
+        // live - not for the spectator's own client (isSpectator), which would otherwise
+        // publish the spectated friend's hashes as if they were this viewer's own match.
+        if (InfoSaver.onlineBattle && !InfoSaver.isSpectator)
+        {
+            PresenceHeartbeat.SetInMatch(InfoSaver.myHash, InfoSaver.opponentHash);
+        }
+
         UpdateRoundLabel();
         ShowRoundStartBanner();
-        endTurnButtonObject.SetActive(true);
+        // A spectator can't end a turn or concede on anyone's behalf - EndTurnButton/
+        // ConcedeButton also independently disable themselves in their own Start() as a second
+        // line of defense (their click handling doesn't check CursorController.cursorState at
+        // all), but gating the activation here too avoids relying on Start() ordering between
+        // this call (made synchronously from HandManager.Start()) and theirs.
+        if (!InfoSaver.isSpectator)
+        {
+            endTurnButtonObject.SetActive(true);
+            concedeObject.SetActive(true);
+        }
         turnTimeLeft.SetActive(true);
-        concedeObject.SetActive(true);
         statsObject.SetActive(true);
         if (InfoSaver.opponentHash <= InfoSaver.myHash)
         {
@@ -1442,6 +1517,10 @@ public class GameController : MonoBehaviour
         {
             // Best-effort cleanup - don't let a slow/failed delete strand the player here.
             StartCoroutine(FirebaseDb.Delete("matches/" + ServerDataProcesser.MatchId()));
+            // Only a real participant ever reaches here (a spectator's EndGame skips this call
+            // entirely), so this always correctly clears THIS player's own presence, never the
+            // spectated friend's.
+            PresenceHeartbeat.SetInMatch(null, null);
         }
     }
 
@@ -1470,6 +1549,17 @@ public class GameController : MonoBehaviour
     {
         boardManager.ClearBoard();
         yield return new WaitForSeconds(3f);
+        if (InfoSaver.isSpectator)
+        {
+            // A spectator gets none of this - no chests/stats (those belong to a real
+            // participant's own account), and CleanUpOnlineMatch() must never run here either,
+            // since it deletes the real match's Firebase record; that's the two actual players'
+            // job when THEIR clients end the game, not a spectator's. Reset the flag so a later
+            // normal match this client plays doesn't incorrectly inherit spectator mode.
+            InfoSaver.isSpectator = false;
+            SceneManager.LoadScene("MainMenu");
+            yield break;
+        }
         SetNumberOfChests(friendlyVictory);
         RecordMatchStats(friendlyVictory);
         CleanUpOnlineMatch();
@@ -1495,6 +1585,13 @@ public class GameController : MonoBehaviour
         if (CheckGameEnd())
         {
             yield return new WaitForSeconds(3f);
+            if (InfoSaver.isSpectator)
+            {
+                // See the matching branch in EndGame() - same reasoning applies here.
+                InfoSaver.isSpectator = false;
+                SceneManager.LoadScene("MainMenu");
+                yield break;
+            }
             SetNumberOfChests(friendlyVictory);
             RecordMatchStats(friendlyVictory);
             CleanUpOnlineMatch();

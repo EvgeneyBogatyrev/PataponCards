@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 using Networking;
 
@@ -158,7 +159,19 @@ public class FriendsPanelController : MonoBehaviour
                 string friendNickname = entry.Nickname;
                 row.Setup(entry.Nickname, "Remove", () => RemoveFriend(friendUid));
                 StartCoroutine(FirebaseFriends.GetPresence(friendUid, online =>
-                    row.SetOnline(online, () => ChallengeFriend(friendUid, friendNickname))));
+                {
+                    if (!online)
+                    {
+                        row.SetOnline(false, () => ChallengeFriend(friendUid, friendNickname));
+                        return;
+                    }
+                    StartCoroutine(FirebaseFriends.GetMatchInfo(friendUid, (theirHash, opponentHash) =>
+                    {
+                        bool inMatch = theirHash.HasValue;
+                        row.SetOnline(true, () => ChallengeFriend(friendUid, friendNickname), inMatch,
+                            inMatch ? () => SpectateFriend(friendUid, theirHash.Value, opponentHash) : null);
+                    }));
+                }));
             }
             else if (entry.Status == "pending_received")
             {
@@ -248,6 +261,24 @@ public class FriendsPanelController : MonoBehaviour
             SetBusy(false);
             ShowStatus(success ? "Challenge sent to " + friendNickname + "." : error);
         });
+    }
+
+    // No version/busy gate, unlike ChallengeFriend - spectating doesn't write anything to
+    // Firebase (no challenge record, no match state), it just loads the Game scene as a
+    // passive observer, so there's nothing here that a stale client version could corrupt.
+    private void SpectateFriend(string friendUid, int theirHash, int? opponentHash)
+    {
+        if (!opponentHash.HasValue)
+        {
+            // Their presence still says inMatchHash but the opponent side hasn't been
+            // written yet (or already cleared) - nothing coherent to spectate right now.
+            return;
+        }
+        InfoSaver.isSpectator = true;
+        InfoSaver.myHash = theirHash;
+        InfoSaver.opponentHash = opponentHash.Value;
+        InfoSaver.onlineBattle = true;
+        SceneManager.LoadScene("Game");
     }
 
     private void RemoveFriend(string friendUid)

@@ -353,6 +353,14 @@ public class CardManager : MonoBehaviour
     private int indexInHand = 0;
     private bool mouseOver = false;
     public List<int> spellTargets;
+    // Set by ServerDataProcesser.ProcessMessages() alongside spellTargets, for this specific
+    // remote-display card only - lets CardState.opponentPlayed's targeting-arrow code resolve
+    // spellTargets' +/- convention (positive = whoever cast this spell's own side) against the
+    // correct physical slot list. Defaults false (the traditional "always an opponent's cast"
+    // assumption, correct for a real 2-player match's only remote side) - true only for a
+    // spectator viewing the spectated friend's own cast, where "their own side" is our
+    // friendlySlots rather than enemySlots.
+    public bool spellTargetsFromFriendlySide = false;
     private BoardManager.Slot slotToPlay;
     private float curRotation;
 
@@ -1017,16 +1025,21 @@ public class CardManager : MonoBehaviour
                 if (arrowList == null)
                 {
                     arrowList = new List<Arrow>();
+                    // See spellTargetsFromFriendlySide's declaration - which physical slot list
+                    // represents "the caster's own side" depends on who actually cast this,
+                    // not a fixed assumption.
+                    List<BoardManager.Slot> casterOwnSlots = spellTargetsFromFriendlySide ? boardManager.friendlySlots : boardManager.enemySlots;
+                    List<BoardManager.Slot> casterOtherSlots = spellTargetsFromFriendlySide ? boardManager.enemySlots : boardManager.friendlySlots;
                     foreach (int target in spellTargets)
                     {
                         BoardManager.Slot targetSlot;
                         if (target < 0)
                         {
-                            targetSlot = boardManager.friendlySlots[-target - 1];
+                            targetSlot = casterOtherSlots[-target - 1];
                         }
                         else
                         {
-                            targetSlot = boardManager.enemySlots[target - 1];
+                            targetSlot = casterOwnSlots[target - 1];
                         }
 
                         arrowList.Add(new Arrow(transform.position, targetSlot.GetPosition()));

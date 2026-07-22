@@ -47,7 +47,10 @@ public class FriendRow : MonoBehaviour
     // per accepted friend rather than being part of the main friends-list read. onChallenge is
     // only meaningful for accepted rows - passing null (the default) keeps the Challenge button
     // hidden regardless of online state, same as leaving challengeButtonObject unwired.
-    public void SetOnline(bool online, Action onChallenge = null)
+    // inMatch/onSpectate swap this same slot to "Spectate" instead of "Challenge" while the
+    // friend is in a real online match - the two are mutually exclusive (a friend who's in a
+    // match isn't challengeable anyway), so there's only ever one button here at a time.
+    public void SetOnline(bool online, Action onChallenge = null, bool inMatch = false, Action onSpectate = null)
     {
         if (onlineIndicatorObject != null)
         {
@@ -60,7 +63,14 @@ public class FriendRow : MonoBehaviour
         }
 
         SetActiveIfPresent(challengeButtonObject, false);
-        ConfigureButton(challengeButtonObject, challengeButtonLabel, (online && onChallenge != null) ? "Challenge" : null, onChallenge);
+        if (online && inMatch && onSpectate != null)
+        {
+            ConfigureButton(challengeButtonObject, challengeButtonLabel, "Spectate", onSpectate);
+        }
+        else
+        {
+            ConfigureButton(challengeButtonObject, challengeButtonLabel, (online && onChallenge != null) ? "Challenge" : null, onChallenge);
+        }
     }
 
     private static void SetActiveIfPresent(GameObject obj, bool active)

@@ -155,5 +155,34 @@ namespace Networking
             bool online = FirebaseConfig.NowUnixSeconds() - lastSeen <= PresenceHeartbeat.StaleAfterSeconds;
             onResult?.Invoke(online);
         }
+
+        // Reads whether a friend is currently in a real online match (see
+        // PresenceHeartbeat.SetInMatch) - both hashes null if they aren't, or if their presence
+        // is stale (same staleness window as GetPresence, so a crashed/quit client whose
+        // inMatchHash never got cleared doesn't show a phantom Spectate button forever).
+        public static IEnumerator GetMatchInfo(string uid, Action<int?, int?> onResult)
+        {
+            JToken presence = null;
+            yield return FirebaseDb.Get("users/" + uid + "/presence", token => presence = token);
+
+            if (!(presence is JObject presenceObj))
+            {
+                onResult?.Invoke(null, null);
+                yield break;
+            }
+
+            double lastSeen = presenceObj["lastSeen"]?.Value<double>() ?? 0;
+            bool fresh = FirebaseConfig.NowUnixSeconds() - lastSeen <= PresenceHeartbeat.StaleAfterSeconds;
+
+            JToken hashToken = presenceObj["inMatchHash"];
+            JToken opponentHashToken = presenceObj["inMatchOpponentHash"];
+            if (!fresh || hashToken == null || hashToken.Type == JTokenType.Null)
+            {
+                onResult?.Invoke(null, null);
+                yield break;
+            }
+
+            onResult?.Invoke(hashToken.Value<int>(), opponentHashToken?.Value<int>());
+        }
     }
 }

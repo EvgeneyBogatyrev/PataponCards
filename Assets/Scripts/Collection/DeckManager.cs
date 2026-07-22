@@ -46,6 +46,35 @@ public class DeckManager : MonoBehaviour
 
     }
 
+    // Spectator-only counterpart to ReceiveOpponentsDeck. A spectator has no local deck
+    // simulation for EITHER real player (see HandManager.Start()'s isSpectator branch, which
+    // skips CopyDeck() entirely - playDeck starts out just an empty placeholder), so unlike a
+    // normal 2-player client - which always knows its own deck locally and only ever needs
+    // SendDeck for the opponent's - a spectator has to source the spectated friend's own deck
+    // from their SendDeck message too, decoding it into playDeck/runes instead of opponentsDeck/
+    // opponentRunes so GameController.UpdateDecks() shows a real count. Reflects the friend's
+    // remaining deck at the moment mulligan ended (when SendDeck fires) - it doesn't keep
+    // decrementing as they draw further during the match, the same known limitation as other
+    // deck-content-dependent effects for spectators.
+    public static void ReceiveFriendlyDeckForSpectator(List<int> encodedDeck)
+    {
+        int counter = 0;
+        playDeck = new();
+        runes = new();
+        foreach (int hash in encodedDeck)
+        {
+            if (counter < 3)
+            {
+                runes.Add((Runes)hash);
+            }
+            else
+            {
+                playDeck.Add((CardTypes)hash);
+            }
+            counter++;
+        }
+    }
+
     public static int GetDeckDevotion(Runes runeType, bool opponent=false)
     {
         List<Runes> curDeck;

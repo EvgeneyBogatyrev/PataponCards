@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Newtonsoft.Json.Linq;
+using Networking;
 
 public class HandManager : MonoBehaviour
 {
@@ -43,11 +45,62 @@ public class HandManager : MonoBehaviour
 
     public static bool mulliganing = true;
 
+    private static void SetActiveIfPresent(GameObject obj, bool active)
+    {
+        if (obj != null)
+        {
+            obj.SetActive(active);
+        }
+    }
+
     void Start()
     {
         mulliganing = true;
         boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
         drawStartPosition = GameObject.Find("DrawFromDeck").transform.position;
+
+        if (InfoSaver.isSpectator)
+        {
+            // A spectator has no deck/mulligan of their own - the board's starting state
+            // (both Hatapons placed) is set up identically and purely locally by both real
+            // clients before their first network action ever gets posted, so this client must
+            // replicate that same baseline before ServerDataProcesser's catch-up starts
+            // replaying the real match's actions from index 0. hand/opponentHand then both
+            // start at the same 7-card baseline the real clients had right after their own
+            // mulligan ended - subsequent replay (NumberOfCards/PlayCard/etc. messages)
+            // corrects counts as it catches up to the live match state. The friendly `hand`
+            // list itself is then handed off entirely to PollSpectatedHand() - it's the only
+            // source of truth for what's actually in the spectated friend's hand, since we
+            // have no deck/RNG of our own to derive it from.
+            mulliganing = false;
+            SetActiveIfPresent(turnOrderObject, false);
+            SetActiveIfPresent(mulliganButtonObject, false);
+            SetActiveIfPresent(keepHandButtonObject, false);
+            // Skipping DeckManager.CopyDeck() below means playDeck is never assigned for a
+            // spectator - left null (or worse, stale from whatever scene was visited earlier
+            // this session), GameController.UpdateDecks()/GetPlayDeckSize() NullReferenceException
+            // the moment a round transition runs IenumStartTurn(), which permanently kills that
+            // coroutine mid-setup (playerTurn/SetCanPlayCard/gameState.Increment never run),
+            // desyncing all subsequent turn tracking even though the hand poll and board replay
+            // keep working fine on their own. A spectator never actually draws from playDeck
+            // locally (hand comes entirely from PollSpectatedHand), so its contents don't matter
+            // - it only needs to exist.
+            DeckManager.deck = DeckManager.deck ?? new List<CardTypes>();
+            DeckManager.playDeck = new List<CardTypes>();
+            // Same call the real local player's own KeepHandButton() makes at the same point in
+            // the flow - needed for far more than turn-order bookkeeping: it's what starts
+            // ServerDataProcesser.ObtainData() in the first place, without which nothing here
+            // would ever receive a single message. Deliberately NOT SendDeck/SendCardNumber -
+            // those would POST fake actions into the real match's action log under the
+            // spectated friend's hash, corrupting it for the two actual players.
+            GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+            gameController.StartGame();
+            PlayHatapons();
+            SetNumberOfOpponentsCards(7);
+            StartCoroutine(PollSpectatedHand());
+            return;
+        }
+
         DeckManager.CopyDeck();
 
         if (turnOrderObject != null)
@@ -327,6 +380,7 @@ public class HandManager : MonoBehaviour
             CardManager newCard = GenerateCard(card, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
             hand.Add(newCard);
             UpdateHandPosition();
+            PublishHandToSpectators();
 
             // "Card drawn" broadcast trigger - friendly draws only. The opponent's real drawn
             // CardTypes is hidden information never known client-side (their hand is face-down
@@ -349,6 +403,113 @@ public class HandManager : MonoBehaviour
         CardIsDrawing = false;
         gameController.actionIsHappening = false;
         yield return null;
+    }
+
+    // Publishes this player's current hand so a friend watching via Spectate mode can see it
+    // live - a spectator has no way to derive hand contents locally (they come from this
+    // client's own RNG deck shuffle/draws, never otherwise transmitted over the network). Only
+    // meaningful for a real online match; a no-op for bot matches (not spectate-able) and for a
+    // spectator's own client (which never mutates a real hand of its own to publish).
+    private void PublishHandToSpectators()
+    {
+        if (!InfoSaver.onlineBattle || InfoSaver.isSpectator)
+        {
+            return;
+        }
+        List<int> cardTypes = new List<int>();
+        foreach (CardManager card in hand)
+        {
+            cardTypes.Add((int)card.GetCardType());
+        }
+        CoroutineRunner.Run(FirebaseDb.Put("matches/" + ServerDataProcesser.MatchId() + "/hands/" + InfoSaver.myHash, new JArray(cardTypes)));
+    }
+
+    // Polls the spectated friend's live-published hand (see PublishHandToSpectators, written
+    // by their own real client) and keeps `hand` in sync - this is the ONLY source of truth
+    // for a spectator's friendly-side hand, since its real contents can never be derived
+    // locally (no deck/RNG of our own to replay it from). Reuses ServerDataProcesser's own
+    // polling cadence so a card doesn't visibly lag far behind the board action that caused it.
+    private IEnumerator PollSpectatedHand()
+    {
+        while (true)
+        {
+            JToken snapshot = null;
+            yield return FirebaseDb.Get("matches/" + ServerDataProcesser.MatchId() + "/hands/" + InfoSaver.myHash, token => snapshot = token);
+
+            List<CardTypes> published = new List<CardTypes>();
+            if (snapshot is JArray array)
+            {
+                foreach (JToken entry in array)
+                {
+                    published.Add((CardTypes)entry.Value<int>());
+                }
+            }
+            ReconcileHand(published);
+
+            yield return new WaitForSeconds(ServerDataProcesser.instance.secondsBetweenServerUpdates);
+        }
+    }
+
+    // Rebuilds `hand` to match the freshly-polled published list whenever it actually differs.
+    // A card that ConsumeSpectatedHandCard already pulled out for a play/cycle animation
+    // moments earlier is normally already gone from `hand` locally by the time the next poll
+    // lands, so this is mostly a safety net (catching genuine new draws/mulligan swaps) rather
+    // than the primary removal path - that's why it's a full rebuild-on-mismatch rather than a
+    // diff/patch, simplicity over minimizing churn since mismatches should be rare.
+    private void ReconcileHand(List<CardTypes> published)
+    {
+        bool changed = published.Count != hand.Count;
+        if (!changed)
+        {
+            for (int i = 0; i < hand.Count; ++i)
+            {
+                if (hand[i].GetCardType() != published[i])
+                {
+                    changed = true;
+                    break;
+                }
+            }
+        }
+        if (!changed)
+        {
+            return;
+        }
+
+        foreach (CardManager card in hand)
+        {
+            card.DestroyCard();
+            Destroy(card.gameObject);
+        }
+        hand = new List<CardManager>();
+        foreach (CardTypes type in published)
+        {
+            CardManager newCard = GenerateCard(type, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
+            newCard.SetCardState(CardManager.CardState.inHand);
+            hand.Add(newCard);
+        }
+        UpdateHandPosition();
+    }
+
+    // Spectator-mode helper: removes and returns one real card of the given type from the
+    // spectated friend's visible hand, mirroring what SetNumberOfOpponentsCards(returnCard:
+    // true) does for the hidden opponent hand - lets ServerDataProcesser visually reuse/morph
+    // the actual hand card into the one flying onto the board, same as the opponent side
+    // already does with its revealed placeholder. Returns null on the rare timing race where
+    // the next poll hasn't landed yet - callers already handle a null origin by spawning a
+    // fresh card of the same type instead, so the visual result is identical either way.
+    public CardManager ConsumeSpectatedHandCard(CardTypes type)
+    {
+        for (int i = 0; i < hand.Count; ++i)
+        {
+            if (hand[i].GetCardType() == type)
+            {
+                CardManager card = hand[i];
+                hand.RemoveAt(i);
+                UpdateHandPosition();
+                return card;
+            }
+        }
+        return null;
     }
 
     public GameObject GenerateCard(CardTypes cardType, CardManager origin=null)
@@ -438,15 +599,22 @@ public class HandManager : MonoBehaviour
     {
         hand.RemoveAt(index);
         UpdateHandPosition();
+        PublishHandToSpectators();
     }
     public bool CanPlayCard()
     {
-        return canPlayCard;
+        // A spectator's canPlayCard still gets flipped true/false by turn-order logic in
+        // GameController.StartGame()/StartTurn()/EndTurn() same as a real player's would (it
+        // has to, so those methods don't need spectator-specific branches of their own) - this
+        // is the one place that actually needs to veto it, since CardManager's hand-hover check
+        // treats CursorStates.EnemyTurn as an allowed state alongside Free (see CursorController
+        // for why locking cursorState alone isn't enough to fully block this path).
+        return canPlayCard && !InfoSaver.isSpectator;
     }
 
      public bool CanCycleCard()
     {
-        return canCycleCard;
+        return canCycleCard && !InfoSaver.isSpectator;
     }
 
     public void SetCanPlayCard(bool _can)

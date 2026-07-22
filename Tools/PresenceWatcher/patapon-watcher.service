@@ -1,0 +1,16 @@
+[Unit]
+Description=Patapon Cards presence watcher
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=REPLACE_WITH_YOUR_LINUX_USERNAME
+WorkingDirectory=/home/REPLACE_WITH_YOUR_LINUX_USERNAME/patapon-watcher
+EnvironmentFile=/home/REPLACE_WITH_YOUR_LINUX_USERNAME/patapon-watcher/.env
+ExecStart=/home/REPLACE_WITH_YOUR_LINUX_USERNAME/patapon-watcher/venv/bin/python presence_watcher.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

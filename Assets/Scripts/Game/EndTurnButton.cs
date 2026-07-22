@@ -23,6 +23,16 @@ public class EndTurnButton : MonoBehaviour
 
     private void Start()
     {
+        // A spectator can't act on anything, and this button's own click handling never checks
+        // CursorController.cursorState (it just reads mouse-over/click state directly in
+        // Update()), so it has to be disabled explicitly rather than relying on the cursor lock
+        // that covers most other interactivity.
+        if (InfoSaver.isSpectator)
+        {
+            this.gameObject.SetActive(false);
+            return;
+        }
+
         gameController = GameObject.Find("GameController").GetComponent<GameController>();
         background = GetComponent<SpriteRenderer>();
         label = gameObject.GetComponent<TextMeshPro>();

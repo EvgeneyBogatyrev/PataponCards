@@ -19,6 +19,14 @@ public class ServerDataProcesser : MonoBehaviour
     public List<MessageFromServer> messagesFromServer;
     public float secondsBetweenServerUpdates = 1.5f;
     public Bot bot = null;
+
+    // Spectator-only: true once a full fetch has produced zero newly-processed messages AND
+    // HasUnresolvedGap is false, i.e. we've genuinely reached the live tail of the match, not
+    // just paused mid-pair waiting for a CastSpell's companion PlayCard. While false, ObtainData
+    // skips its own pacing delay and ProcessMessages skips its per-message delay, so a
+    // mid-match join fetches/replays the whole action history back-to-back instead of once
+    // every ~1.5s with a 2s gap per action.
+    private bool spectatorCatchUpDone = false;
     
     private void Awake() 
     { 
@@ -43,6 +51,10 @@ public class ServerDataProcesser : MonoBehaviour
         {
             StartCoroutine(RegisterInMatch());
             StartCoroutine(FetchOpponentNickname());
+            if (InfoSaver.isSpectator)
+            {
+                StartCoroutine(FetchFriendlyNickname());
+            }
         }
     }
 
@@ -58,6 +70,28 @@ public class ServerDataProcesser : MonoBehaviour
             if (token != null && token.Type != JTokenType.Null)
             {
                 OpponentNickname = token.ToString();
+                yield break;
+            }
+            yield return new WaitForSeconds(2f);
+        }
+    }
+
+    // Spectator-only: the spectated friend's own nickname. A real participant never needs this
+    // (their own nickname is already known locally via PlayerProfile.Nickname), but a spectator
+    // has no local identity of their own on the "friendly" side - InfoSaver.myHash means the
+    // spectated friend, not the viewer - so it has to be fetched the same way OpponentNickname
+    // already is, just keyed by myHash instead of opponentHash.
+    public string FriendlyNickname = "Player";
+
+    private IEnumerator FetchFriendlyNickname()
+    {
+        while (true)
+        {
+            JToken token = null;
+            yield return FirebaseDb.Get("matches/" + MatchId() + "/nicknames/" + InfoSaver.myHash, t => token = t);
+            if (token != null && token.Type != JTokenType.Null)
+            {
+                FriendlyNickname = token.ToString();
                 yield break;
             }
             yield return new WaitForSeconds(2f);
@@ -86,9 +120,17 @@ public class ServerDataProcesser : MonoBehaviour
     {
         yield return FirebaseDb.EnsureSignedIn();
         yield return FirebaseDb.Put("matches/" + MatchId() + "/players/" + FirebaseConfig.Uid, true);
-        // Keyed by matchmaking hash (not uid) so the opponent can look it up without needing to
-        // resolve our Firebase identity - they already know our hash from matchmaking.
-        yield return FirebaseDb.Put("matches/" + MatchId() + "/nicknames/" + InfoSaver.myHash, PlayerProfile.Nickname);
+        // A spectator must never publish into a real match's nickname slot - that key is
+        // InfoSaver.myHash, which for a spectator means the SPECTATED FRIEND's hash, not their
+        // own. Writing here would silently replace the real player's displayed nickname (shown
+        // to their actual opponent) with the spectator's own.
+        if (!InfoSaver.isSpectator)
+        {
+            // Keyed by matchmaking hash (not uid) so the opponent can look it up without
+            // needing to resolve our Firebase identity - they already know our hash from
+            // matchmaking.
+            yield return FirebaseDb.Put("matches/" + MatchId() + "/nicknames/" + InfoSaver.myHash, PlayerProfile.Nickname);
+        }
         matchRegistered = true;
     }
 
@@ -234,7 +276,7 @@ public class ServerDataProcesser : MonoBehaviour
         yield return FirebaseDb.Post("matches/" + MatchId() + "/actions", payload);
     }
 
-    public IEnumerator ProcessMessages(List<MessageFromServer> messages)
+    public IEnumerator ProcessMessages(List<MessageFromServer> messages, bool noDelay = false)
     {
         messages = messages.OrderBy(x => x.index).ToList();
         List<MessageFromServer> processedMessages = new List<MessageFromServer>();
@@ -258,6 +300,7 @@ public class ServerDataProcesser : MonoBehaviour
                 {
                     if (messageIndex < messages.Count() - 1 &&
                         messages[messageIndex + 1].cardIndex == messages[messageIndex].cardIndex &&
+                        messages[messageIndex + 1].hash == messages[messageIndex].hash &&
                         messages[messageIndex + 1].action == MessageFromServer.Action.PlayCard)
                     {
                         MessageFromServer newMessage = new MessageFromServer
@@ -286,13 +329,25 @@ public class ServerDataProcesser : MonoBehaviour
             }
         }
 
-        CardManager newCard = null;
+        // Spectator mode routes BOTH real players' actions through this same pipeline (a
+        // spectator has no local/instant side of its own), so "the opponent's" card needs to
+        // become "whichever side didn't post this particular message" - tracked separately per
+        // side (index 0 = friendly/spectated side, 1 = enemy side) so an arrow-cleanup on one
+        // side's in-flight card can never stomp the other side's. In normal 2-player play,
+        // ObtainData() only ever hands us opponent-hash messages, so index 0 is simply unused.
+        CardManager[] lastGeneratedCard = new CardManager[2];
         foreach (MessageFromServer message in processedMessages)
         {
             bool found = false;
             foreach (MessageFromServer doneMessage in doneActions)
             {
-                if (doneMessage.index == message.index) 
+                // Must match on hash too, not just index - each real player's own message
+                // index counter starts at 0 and increments independently, so in spectator mode
+                // (the only time doneActions ever holds more than one sender) the friend's
+                // message #5 and the opponent's message #5 are unrelated actions that happen to
+                // share a number. Comparing index alone would mark the opponent's #5 as "already
+                // processed" the moment the friend's #5 lands, silently dropping it forever.
+                if (doneMessage.index == message.index && doneMessage.hash == message.hash)
                 {
                     found = true;
                     break;
@@ -301,15 +356,28 @@ public class ServerDataProcesser : MonoBehaviour
             if (found)
             {
                 continue;
-            } 
-            
+            }
+
             HandManager handManager = GameObject.Find("Hand").GetComponent<HandManager>();
             BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
             GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
             BoardManager.Slot fromSlot, toSlot;
-            
+
             CardTypes spellType;
             gameController.ReceivePing();
+
+            // Whether THIS message was posted by the spectated friend's client (repurposed as
+            // "friendly" - see InfoSaver.isSpectator) rather than their opponent. Always false
+            // outside spectator mode, since ObtainData() never hands us our own hash's messages
+            // otherwise - so sideSlots/otherSlots/sidePlayedList below reduce to exactly
+            // enemySlots/friendlySlots/playedCardsOpponent (the original hardcoded values) for
+            // a normal 2-player match, unchanged.
+            bool isFriendlySide = InfoSaver.isSpectator && message.hash == InfoSaver.myHash;
+            int sideIdx = isFriendlySide ? 0 : 1;
+            List<BoardManager.Slot> sideSlots = isFriendlySide ? boardManager.friendlySlots : boardManager.enemySlots;
+            List<BoardManager.Slot> otherSlots = isFriendlySide ? boardManager.enemySlots : boardManager.friendlySlots;
+            List<CardTypes> sidePlayedList = isFriendlySide ? boardManager.playedCards : boardManager.playedCardsOpponent;
+            CardManager newCard = lastGeneratedCard[sideIdx];
 
             if (message.action == MessageFromServer.Action.CastOnPlayCard)
             {
@@ -327,11 +395,18 @@ public class ServerDataProcesser : MonoBehaviour
                         newCard.arrowList = null;
                     }
                 }
-                handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
-                boardManager.battlecryTrigger = true;
                 spellType = message.cardIndex;
-                boardManager.playedCardsOpponent.Add(spellType);
-                LogController.instance.AddPlayCardToLog(spellType, message.targets, false);
+                ConsumeSideHandCard(handManager, isFriendlySide, spellType, reuse: false);
+                boardManager.battlecryTrigger = true;
+                sidePlayedList.Add(spellType);
+                // Log.cs's ResolveTargets indexes straight into board.friendlySlots/enemySlots by
+                // the sign of each target - "friendly" here has to mean "resolve this message's
+                // targets as belonging to the friendly/spectated side", i.e. isFriendlySide, not
+                // hardcoded false. Passing the wrong value here doesn't just mislabel the log
+                // entry, it makes ResolveTargets look in the WRONG slot list entirely, which
+                // throws (GetConnectedMinion() null -> NullReferenceException on GetCardType())
+                // the moment that slot happens to be empty.
+                LogController.instance.AddPlayCardToLog(spellType, message.targets, isFriendlySide);
                 newCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
                 if (newCard.GetCardStats().dummyTarget)
                 {
@@ -341,6 +416,7 @@ public class ServerDataProcesser : MonoBehaviour
                 {
                     newCard.spellTargets = message.targets;
                 }
+                newCard.spellTargetsFromFriendlySide = isFriendlySide;
                 HandManager.DestroyDisplayedCards();
                 newCard.SetCardState(CardManager.CardState.opponentPlayed);
                 newCard.transform.position = new Vector3(0f, 10f, 0f);
@@ -351,8 +427,8 @@ public class ServerDataProcesser : MonoBehaviour
                 _newEvent.thisStats = newCard.GetCardStats();
                 _newEvent.hostCard = newCard;
                 _newEvent.targets = message.targets;
-                _newEvent.friendlySlots = boardManager.enemySlots;
-                _newEvent.enemySlots = boardManager.friendlySlots;
+                _newEvent.friendlySlots = sideSlots;
+                _newEvent.enemySlots = otherSlots;
                 GameController.eventQueue.Insert(0, _newEvent);
                 // Cast spell
                 //StartCoroutine(newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots));
@@ -360,12 +436,12 @@ public class ServerDataProcesser : MonoBehaviour
                 if (message.creatureTarget > 0)
                 {
                     message.creatureTarget -= 1;
-                    fromSlot = boardManager.enemySlots[message.creatureTarget];
+                    fromSlot = sideSlots[message.creatureTarget];
                 }
                 else
                 {
                     message.creatureTarget = (-1 * message.creatureTarget) - 1;
-                    fromSlot = boardManager.friendlySlots[message.creatureTarget];
+                    fromSlot = otherSlots[message.creatureTarget];
                 }
 
                 CardManager playedCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
@@ -382,7 +458,11 @@ public class ServerDataProcesser : MonoBehaviour
                 boardManager.battlecryTrigger = false;
 
                 doneActions.Add(message);
-                yield return new WaitForSeconds(2f);
+                lastGeneratedCard[sideIdx] = newCard;
+                if (!noDelay)
+                {
+                    yield return new WaitForSeconds(2f);
+                }
                 continue;
             }
 
@@ -391,7 +471,7 @@ public class ServerDataProcesser : MonoBehaviour
             switch (message.action)
             {
                 case MessageFromServer.Action.EndTurn:
-                    gameController.EndTurn(false);
+                    gameController.EndTurn(isFriendlySide);
                     //gameController.StartTurn(true);
                     break;
                 case MessageFromServer.Action.PlayCard:
@@ -406,23 +486,23 @@ public class ServerDataProcesser : MonoBehaviour
                             newCard.arrowList = null;
                         }
                     }
-                    newCard = handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1, returnCard:true);
                     CardTypes type = message.cardIndex;
-                    boardManager.playedCardsOpponent.Add(type);
-                    LogController.instance.AddPlayCardToLog(type, null, false);
+                    newCard = ConsumeSideHandCard(handManager, isFriendlySide, type, reuse: true);
+                    sidePlayedList.Add(type);
+                    LogController.instance.AddPlayCardToLog(type, null, isFriendlySide);
                     int target = message.targets[0];
                     BoardManager.Slot targetSlot;
                     if (target > 0)
                     {
                         target -= 1;
-                        targetSlot = boardManager.enemySlots[target];
+                        targetSlot = sideSlots[target];
                     }
                     else
                     {
                         target = (-1 * target) - 1;
-                        targetSlot = boardManager.friendlySlots[target];
+                        targetSlot = otherSlots[target];
                     }
-                    
+
                     newCard = handManager.GenerateCard(type, newCard).GetComponent<CardManager>();
                     boardManager.PlayCard(newCard, new Vector3(0f, 10f, 0f), targetSlot, destroy: false, record: false);
                     HandManager.DestroyDisplayedCards();
@@ -433,15 +513,15 @@ public class ServerDataProcesser : MonoBehaviour
                     break;
 
                 case MessageFromServer.Action.Move:
-                    fromSlot = boardManager.enemySlots[message.targets[0] - 1];
-                    
+                    fromSlot = sideSlots[message.targets[0] - 1];
+
                     if (message.targets[1] > 0)
                     {
-                        toSlot = boardManager.enemySlots[message.targets[1] - 1];
+                        toSlot = sideSlots[message.targets[1] - 1];
                     }
                     else
                     {
-                        toSlot = boardManager.friendlySlots[-message.targets[1] - 1];
+                        toSlot = otherSlots[-message.targets[1] - 1];
                         MinionManager connectedMinion = toSlot.GetConnectedMinion();
                         if (connectedMinion != null)
                         {
@@ -453,8 +533,8 @@ public class ServerDataProcesser : MonoBehaviour
                     break;
 
                case MessageFromServer.Action.Exchange:
-                    fromSlot = boardManager.enemySlots[message.targets[0] - 1];
-                    toSlot = boardManager.enemySlots[message.targets[1] - 1];
+                    fromSlot = sideSlots[message.targets[0] - 1];
+                    toSlot = sideSlots[message.targets[1] - 1];
 
                     fromSlot.GetConnectedMinion().Exchange(toSlot);
                     break;
@@ -462,24 +542,36 @@ public class ServerDataProcesser : MonoBehaviour
                 case MessageFromServer.Action.Attack:
                     int from = message.targets[0] * (-1);
                     int to = message.targets[1] * (-1);
-                    LogController.instance.AddAttackToLog(from, to, false);
+                    // AddAttackToLog resolves both ends internally always as if reading from the
+                    // ORIGINAL POSTER's own perspective (Log.cs's ResolveTargets is called with a
+                    // hardcoded/forced "true" there, unlike AddPlayCardToLog) - that's exactly
+                    // what from/to already are for a normal opponent message (the *(-1) above
+                    // undoes the poster's own sign convention back into that shape), so it's
+                    // never needed a friendly-aware fix before now. For a friendly-side
+                    // (spectated) message the physical slot lists are swapped relative to that
+                    // fixed assumption - sideSlots below resolves them correctly by hash, but
+                    // AddAttackToLog has no such awareness, so undo one more negation here
+                    // specifically for the log call to keep it pointed at the right side.
+                    int logFrom = isFriendlySide ? -from : from;
+                    int logTo = isFriendlySide ? -to : to;
+                    LogController.instance.AddAttackToLog(logFrom, logTo, isFriendlySide);
                     MinionManager fromMinion, toMinion;
                     if (from < 0)
                     {
-                        fromMinion = boardManager.enemySlots[from * (-1) - 1].GetConnectedMinion();
+                        fromMinion = sideSlots[from * (-1) - 1].GetConnectedMinion();
                     }
                     else
                     {
-                        fromMinion = boardManager.friendlySlots[from - 1].GetConnectedMinion();
+                        fromMinion = otherSlots[from - 1].GetConnectedMinion();
                     }
 
                     if (to < 0)
                     {
-                        toMinion = boardManager.enemySlots[to * (-1) - 1].GetConnectedMinion();
+                        toMinion = sideSlots[to * (-1) - 1].GetConnectedMinion();
                     }
                     else
                     {
-                        toMinion =boardManager.friendlySlots[to - 1].GetConnectedMinion();
+                        toMinion = otherSlots[to - 1].GetConnectedMinion();
                     }
                     fromMinion.Attack(toMinion);
                     // Not SetCanAttack(false) - that resets attacked/moved as a side effect,
@@ -503,25 +595,26 @@ public class ServerDataProcesser : MonoBehaviour
                     }
 
                     spellType = message.cardIndex;
-                    boardManager.playedCardsOpponent.Add(spellType);
-                    LogController.instance.AddPlayCardToLog(spellType, message.targets, false);
+                    sidePlayedList.Add(spellType);
+                    LogController.instance.AddPlayCardToLog(spellType, message.targets, isFriendlySide);
                     newCard = handManager.GenerateCard(spellType, new Vector3(-10f, -10f, 1f)).GetComponent<CardManager>();
-                    
+
                     if (newCard.GetCardStats().damageToHost == -1 && newCard.GetCardType() != CardTypes.Concede)
                     {
-                        handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1);
+                        ConsumeSideHandCard(handManager, isFriendlySide, spellType, reuse: false);
                     }
-                    
+
                     newCard.arrowList = null;
                     newCard.spellTargets = message.targets;
+                    newCard.spellTargetsFromFriendlySide = isFriendlySide;
                     // Cast spell
                     QueueData newEvent = new();
                     newEvent.actionType = QueueData.ActionType.CastSpell;
                     newEvent.thisStats = newCard.GetCardStats();
                     newEvent.hostCard = newCard;
                     newEvent.targets = newCard.spellTargets;
-                    newEvent.friendlySlots = boardManager.enemySlots;
-                    newEvent.enemySlots = boardManager.friendlySlots;
+                    newEvent.friendlySlots = sideSlots;
+                    newEvent.enemySlots = otherSlots;
                     GameController.eventQueue.Insert(0, newEvent);
                     //StartCoroutine(newCard.GetCardStats().spell(message.targets, boardManager.friendlySlots, boardManager.enemySlots));
                     HandManager.DestroyDisplayedCards();
@@ -531,14 +624,16 @@ public class ServerDataProcesser : MonoBehaviour
 
                     if (newCard.GetCardStats().damageToHost != -1)
                     {
-                        newCard.transform.position = boardManager.enemySlots[message.targets[0] - 1].GetPosition();
+                        newCard.transform.position = sideSlots[message.targets[0] - 1].GetPosition();
                         newCard.transform.localScale = new Vector3(0.2f, 0.2f, 1f);
                     }
                     break;
 
                 case MessageFromServer.Action.NumberOfCards:
-                    
-                    if (message.targets[0] != handManager.GetNumberOfOpponentsCards())
+                    // Friendly-side (spectated) hand count is never derived from this message -
+                    // HandManager.PollSpectatedHand() is the sole source of truth for it, kept
+                    // live via the friend's own client publishing its real hand on every change.
+                    if (!isFriendlySide && message.targets[0] != handManager.GetNumberOfOpponentsCards())
                     {
                         handManager.SetNumberOfOpponentsCards(message.targets[0]);
                         /*
@@ -570,10 +665,10 @@ public class ServerDataProcesser : MonoBehaviour
                             newCard.arrowList = null;
                         }
                     }
-                    newCard = handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1, returnCard:true);
                     CardTypes cycleType = message.cardIndex;
-                    
-                    LogController.instance.AddCycleToLog(cycleType, false);
+                    newCard = ConsumeSideHandCard(handManager, isFriendlySide, cycleType, reuse: true);
+
+                    LogController.instance.AddCycleToLog(cycleType, isFriendlySide);
 
                     newCard = handManager.GenerateCard(cycleType, newCard).GetComponent<CardManager>();
                     newCard.SetName("Cycling: " + newCard.GetName());
@@ -589,8 +684,8 @@ public class ServerDataProcesser : MonoBehaviour
                         __newEvent.actionType = QueueData.ActionType.OnCycle;
                         __newEvent.hostCard = newCard;
 
-                        __newEvent.friendlySlots = boardManager.enemySlots;
-                        __newEvent.enemySlots = boardManager.friendlySlots;
+                        __newEvent.friendlySlots = sideSlots;
+                        __newEvent.enemySlots = otherSlots;
 
                         GameController.eventQueue.Insert(0, __newEvent);
                         // On cycle
@@ -599,7 +694,7 @@ public class ServerDataProcesser : MonoBehaviour
 
                     //BoardManager boardManager = GameObject.Find("Board").GetComponent<BoardManager>();
                     int idx = 0;
-                    foreach (BoardManager.Slot slot in boardManager.enemySlots)
+                    foreach (BoardManager.Slot slot in sideSlots)
                     {
                         MinionManager minion = slot.GetConnectedMinion();
                         if (minion != null)
@@ -637,15 +732,38 @@ public class ServerDataProcesser : MonoBehaviour
                         idx += 1;
                     }
 
-                    handManager.DrawCardOpponent();
+                    if (!isFriendlySide)
+                    {
+                        handManager.DrawCardOpponent();
+                    }
                     break;
 
                 case MessageFromServer.Action.Discard:
-                    handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - (int)message.cardIndex);
+                    // Friendly-side (spectated) hand already reflects the discard via
+                    // HandManager.PollSpectatedHand() once the friend's own client publishes
+                    // its post-discard hand - nothing to do here for that side.
+                    if (!isFriendlySide)
+                    {
+                        handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - (int)message.cardIndex);
+                    }
                     break;
 
                 case MessageFromServer.Action.SendDeck:
-                    DeckManager.ReceiveOpponentsDeck(message.targets);
+                    // Spectator mode has no local deck simulation for either real player (a
+                    // spectator never runs DeckManager.CopyDeck() - see HandManager.Start()), so
+                    // deck-content-dependent effects mid-match (mill, deck reveal, etc.) remain a
+                    // known limitation - but each side's SendDeck (fired once, right after their
+                    // own mulligan ends) at least gives an accurate starting count/content for
+                    // GameController.UpdateDecks() to show, via ReceiveFriendlyDeckForSpectator
+                    // for the spectated friend's own side.
+                    if (isFriendlySide)
+                    {
+                        DeckManager.ReceiveFriendlyDeckForSpectator(message.targets);
+                    }
+                    else
+                    {
+                        DeckManager.ReceiveOpponentsDeck(message.targets);
+                    }
                     break;
 
                 case MessageFromServer.Action.Ping:
@@ -654,6 +772,9 @@ public class ServerDataProcesser : MonoBehaviour
                 case MessageFromServer.Action.ConcedeMatch:
                     // The opponent conceded the whole match (they triggered this on their own
                     // turn's opposite side, i.e. during ours) - we win outright, no more rounds.
+                    // For a spectator, EndGame() short-circuits to MainMenu regardless of this
+                    // flag (see GameController.EndGame's isSpectator branch), so it's harmless
+                    // that "true" doesn't actually mean "the friendly side won" here.
                     gameController.StartCoroutine(gameController.EndGame(true));
                     break;
             }
@@ -666,20 +787,49 @@ public class ServerDataProcesser : MonoBehaviour
             }
 
             doneActions.Add(message);
-            yield return new WaitForSeconds(2f);
+            lastGeneratedCard[sideIdx] = newCard;
+            if (!noDelay)
+            {
+                yield return new WaitForSeconds(2f);
+            }
             /*
             if (message.action == MessageFromServer.Action.PlayCard ||
                     message.action == MessageFromServer.Action.CastSpell ||
                         message.action == MessageFromServer.Action.CastOnPlayCard)
             {
-                yield return new WaitForSeconds(2f); 
+                yield return new WaitForSeconds(2f);
             }
             else
             {
-                yield return new WaitForSeconds(0.5f); 
+                yield return new WaitForSeconds(0.5f);
             }
             */
         }
+    }
+
+    // Spectator-mode hand-consumption helper shared by PlayCard/CastSpell/CastOnPlayCard/Cycle.
+    // For the enemy side this is exactly the pre-existing SetNumberOfOpponentsCards behavior
+    // (decrement the hidden placeholder hand, optionally handing back a card object to
+    // reuse/morph into the revealed type). For the friendly (spectated) side, `hand` already
+    // holds the real card - HandManager.ConsumeSpectatedHandCard removes it directly; when the
+    // caller isn't going to reuse the returned object (reuse:false), it must be explicitly
+    // destroyed here since ConsumeSpectatedHandCard only unlists it, unlike
+    // SetNumberOfOpponentsCards which destroys internally when returnCard isn't requested.
+    private CardManager ConsumeSideHandCard(HandManager handManager, bool isFriendlySide, CardTypes type, bool reuse)
+    {
+        if (!isFriendlySide)
+        {
+            return handManager.SetNumberOfOpponentsCards(handManager.GetNumberOfOpponentsCards() - 1, returnCard: reuse);
+        }
+
+        CardManager consumed = handManager.ConsumeSpectatedHandCard(type);
+        if (!reuse && consumed != null)
+        {
+            consumed.DestroyCard();
+            Destroy(consumed.gameObject);
+            return null;
+        }
+        return consumed;
     }
 
     public IEnumerator ObtainData()
@@ -779,7 +929,13 @@ public class ServerDataProcesser : MonoBehaviour
                 {
                     JToken entry = entryProp.Value;
                     int curHash = entry["hash"]?.Value<int>() ?? 0;
-                    if (curHash != boardManager.opponentHash)
+                    // A spectator has no local/instant side of its own, so BOTH real players'
+                    // actions have to arrive over the network here - see ProcessMessages'
+                    // isFriendlySide handling. A real participant still only ever fetches their
+                    // opponent's, exactly as before (their own actions are applied instantly/
+                    // synchronously when performed, never fetched back).
+                    bool wanted = curHash == boardManager.opponentHash || (InfoSaver.isSpectator && curHash == InfoSaver.myHash);
+                    if (!wanted)
                     {
                         continue;
                     }
@@ -817,33 +973,70 @@ public class ServerDataProcesser : MonoBehaviour
             // .index - the paired PlayCard's raw index lives in .additionalIndex. Both must
             // count as "done", or the paired PlayCard's raw index looks unprocessed forever and
             // gets re-fed into ProcessMessages on a later poll as if it were a fresh message.
-            int nextExpectedIndex = doneActions.Count == 0
-                ? 0
-                : doneActions.Max(m => Math.Max(m.index, m.additionalIndex)) + 1;
+            // Computed PER SENDER HASH, not as one shared counter: each real player's own
+            // messageId starts at 0 and increments independently, so in spectator mode (the
+            // only time more than one hash shows up here) the two senders' index numbers
+            // overlap in value and are not one combined sequence - a normal 2-player match only
+            // ever has a single sender here, so this reduces to exactly the previous behavior.
             messagesFromServer = messagesFromServer.OrderBy(m => m.index).ToList();
             List<MessageFromServer> readyToProcess = new List<MessageFromServer>();
-            int expected = nextExpectedIndex;
-            foreach (MessageFromServer m in messagesFromServer)
+            bool anyGap = false;
+            foreach (int hash in messagesFromServer.Select(m => m.hash).Distinct())
             {
-                if (m.index < expected)
+                List<MessageFromServer> forHash = messagesFromServer.Where(m => m.hash == hash).ToList();
+                List<MessageFromServer> doneForHash = doneActions.Where(m => m.hash == hash).ToList();
+                int expected = doneForHash.Count == 0
+                    ? 0
+                    : doneForHash.Max(m => Math.Max(m.index, m.additionalIndex)) + 1;
+                foreach (MessageFromServer m in forHash)
                 {
-                    continue;
+                    if (m.index < expected)
+                    {
+                        continue;
+                    }
+                    if (m.index != expected)
+                    {
+                        break;
+                    }
+                    readyToProcess.Add(m);
+                    expected++;
                 }
-                if (m.index != expected)
+                if (forHash.Any(m => m.index >= expected))
                 {
-                    break;
+                    anyGap = true;
                 }
-                readyToProcess.Add(m);
-                expected++;
             }
-            HasUnresolvedGap = messagesFromServer.Any(m => m.index >= expected);
+            readyToProcess = readyToProcess.OrderBy(m => m.index).ToList();
+            HasUnresolvedGap = anyGap;
+
+            // Spectator catch-up: while behind (mid-match join, or briefly after any gap), skip
+            // both this method's own inter-poll delay and ProcessMessages' per-message delay so
+            // the whole match history is fetched/replayed back-to-back instead of once every
+            // ~1.5s with a 2s gap per action. See spectatorCatchUpDone's declaration for exactly
+            // when catch-up is considered finished. Always false for a real participant, so
+            // this has no effect on normal 2-player pacing.
+            bool wasCatchingUp = InfoSaver.isSpectator && !spectatorCatchUpDone;
 
             // Awaited, not fire-and-forget - see comment in the bot-move branch above. Without
             // this, a fast local round transition (e.g. a self-targeted spell killing your own
             // Hatapon and immediately starting the next round) can post a follow-up action
             // before we've finished applying the slower-to-resolve message that preceded it,
             // spawning a second overlapping ProcessMessages call that double-applies it.
-            yield return ServerDataProcesser.instance.ProcessMessages(readyToProcess);
+            yield return ServerDataProcesser.instance.ProcessMessages(readyToProcess, noDelay: wasCatchingUp);
+
+            if (wasCatchingUp && readyToProcess.Count == 0 && !HasUnresolvedGap)
+            {
+                // A full fetch produced nothing new to apply and there's no message we're still
+                // waiting on (e.g. a CastSpell's paired PlayCard) - we've genuinely reached the
+                // live tail of the match, not just paused mid-pair. Resume normal pacing.
+                spectatorCatchUpDone = true;
+            }
+
+            if (wasCatchingUp && !spectatorCatchUpDone)
+            {
+                continue;
+            }
+
             yield return new WaitForSeconds(secondsBetweenServerUpdates);
         }
     }
